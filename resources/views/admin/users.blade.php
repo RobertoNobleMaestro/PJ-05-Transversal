@@ -28,6 +28,6 @@
                 @endforeach
             </tbody>
         </table>
-        <button class="btn btn-primary">Añadir Usuario</button>
+        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Añadir Usuario</a>
     </div>
 @endsection
