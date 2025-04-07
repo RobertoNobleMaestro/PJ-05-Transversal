@@ -11,7 +11,11 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
 // Rutas del login
-Route::get('/login' , [AuthController::class, 'login'])->name('login');
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'login')->name('login');
+    Route::post('/login', 'loginProcess')->name('login.post');
+});
+
 
 
 Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
