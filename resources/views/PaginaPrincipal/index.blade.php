@@ -9,7 +9,7 @@
 <body>
 
   <!-- Navbar -->
-  @include('PaginaPrincipal.navbar')
+  @include('layouts.navbar')
 
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
@@ -57,29 +57,33 @@
       </div>
       <div class="col-md-6 text-center">
         <!-- Ejemplo de imágenes a la derecha -->
-        <img src="https://via.placeholder.com/350x200/4f2b90/FFFFFF?text=Auto+1" class="img-fluid mb-2" alt="Auto 1">
-        <img src="https://via.placeholder.com/350x200/4f2b90/FFFFFF?text=Auto+2" class="img-fluid" alt="Auto 2">
+        <img src="{{ asset('img/coches.png') }}" class="img-fluid mb-2" alt="Auto 1">
       </div>
     </div>
   </div>
-
+ 
+  
+  
   <!-- Sección de estadísticas -->
   <div class="container stats-section">
     <div class="row text-center">
       <div class="col-6 col-md-3">
         <div class="stat-box">
+          <i class="fas fa-user-group"></i>
           <h3>8</h3>
           <p>Usuarios registrados</p>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="stat-box">
+          <i class="fas fa-car"></i>
           <h3>100.000</h3>
           <p>Vehículos registrados</p>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="stat-box">
+          <i class="fas fa-star"></i>
           <h3>4.8</h3>
           <p>Valoración de la web</p>
         </div>
