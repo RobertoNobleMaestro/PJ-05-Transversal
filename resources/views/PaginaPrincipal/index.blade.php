@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
   <title>Carflow - Alquiler de vehículos</title>
 </head>
@@ -60,42 +61,40 @@
         <img src="{{ asset('img/coches.png') }}" class="img-fluid mb-2" alt="Auto 1">
       </div>
     </div>
-  </div>
- 
-  
+  </div> 
   
   <!-- Sección de estadísticas -->
-  <div class="container stats-section">
-    <div class="row text-center">
-      <div class="col-6 col-md-3">
+  <div class="container-fluid stats-section">
+    <div class="row no-gutters text-center">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <i class="fas fa-user-group"></i>
-          <h3>8</h3>
-          <p>Usuarios registrados</p>
+          <i class="fas fa-users"></i>
+          <div class="stat-content">
+            <h3>8</h3>
+            <p>Usuarios registrados</p>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
           <i class="fas fa-car"></i>
-          <h3>100.000</h3>
-          <p>Vehículos registrados</p>
+          <div class="stat-content">
+            <h3>100.000</h3>
+            <p>Vehículos registrados</p>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
           <i class="fas fa-star"></i>
-          <h3>4.8</h3>
-          <p>Valoración de la web</p>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-box">
-          <h3>★ ★ ★ ★ ☆</h3>
-          <p>Opiniones</p>
+          <div class="stat-content">
+            <h3>4.8</h3>
+            <p>Valoración de la web</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </div>    
 
   <!-- Sección de Top 10 vehículos -->
   <div class="container vehicles-section">
