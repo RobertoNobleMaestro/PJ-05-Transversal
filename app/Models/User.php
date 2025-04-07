@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    protected $primaryKey = 'id_usuario';
 
     /**
      * The attributes that are mass assignable.
@@ -18,8 +18,14 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nombre',
         'email',
+        'DNI',
+        'fecha_nacimiento',
+        'foto_perfil',
+        'direccion',
+        'licencia_conducir',
+        'id_roles',
         'password',
     ];
 
@@ -34,15 +40,43 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'fecha_nacimiento' => 'date',
+    ];
+
+    /**
+     * Get the rol associated with the user.
+     */
+    public function rol()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Role::class, 'id_roles', 'id_roles');
+    }
+
+    /**
+     * Get the reservas associated with the user.
+     */
+    public function reservas()
+    {
+        return $this->hasMany(Reserva::class, 'id_usuario', 'id_usuario');
+    }
+
+    /**
+     * Get the valoraciones associated with the user.
+     */
+    public function valoraciones()
+    {
+        return $this->hasMany(Valoracion::class, 'id_usuario', 'id_usuario');
+    }
+
+    /**
+     * Get the pagos associated with the user.
+     */
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class, 'id_usuario', 'id_usuario');
     }
 }
