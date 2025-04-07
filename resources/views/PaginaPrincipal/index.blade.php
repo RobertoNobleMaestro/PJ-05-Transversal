@@ -28,19 +28,20 @@
         <form class="filter-form">
           <div class="form-group">
             <label>Tipo de vehículo:</label><br>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipoVehiculo" id="coches" value="coches" checked>
-              <label class="form-check-label" for="coches">Coches</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipoVehiculo" id="motos" value="motos">
-              <label class="form-check-label" for="motos">Motos</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipoVehiculo" id="furgonetas" value="furgonetas">
-              <label class="form-check-label" for="furgonetas">Furgonetas</label>
-            </div>
-          </div>
+            @foreach ($tipos as $index => $tipo)
+              <div class="form-check form-check-inline">
+                <input 
+                  class="form-check-input" 
+                  type="radio" 
+                  name="tipoVehiculo" 
+                  id="tipo_{{ $tipo->id }}" 
+                  value="{{ $tipo->nombre }}" 
+                  {{ $index === 0 ? 'checked' : '' }}
+                >
+                <label class="form-check-label" for="tipo_{{ $tipo->id }}">{{ $tipo->nombre }}</label>
+              </div>
+            @endforeach
+          </div>          
 
           <div class="form-row">
             <div class="form-group col-md-6">
