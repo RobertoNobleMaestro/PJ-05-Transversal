@@ -1,0 +1,86 @@
+/* Fuentes y reset básico */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Navbar personalizado */
+.navbar-custom {
+  background-color: #4f2b90; /* Cambia el color si lo deseas */
+}
+
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+  color: #fff;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #ddd;
+}
+
+/* Breadcrumb / ruta de navegación */
+.breadcrumb-container {
+  background-color: #f8f9fa;
+  padding: 0.5rem 1rem;
+}
+
+/* Sección principal (hero) */
+.hero-section {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hero-section h1 {
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.filter-form {
+  margin-top: 1rem;
+}
+
+/* Stats */
+.stats-section {
+  margin-bottom: 2rem;
+}
+
+.stats-section .stat-box {
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  padding: 1.5rem 1rem;
+  margin: 0.5rem;
+}
+
+.stat-box h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4f2b90;
+}
+
+.stat-box p {
+  margin: 0;
+  color: #333;
+}
+
+/* Sección de Top 10 */
+.vehicles-section {
+  margin-bottom: 2rem;
+}
+
+.vehicles-section h2 {
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.card img {
+  height: 180px;
+  object-fit: cover;
+}
+
+/* Footer */
+footer {
+  background-color: #f8f9fa;
+  padding: 1rem 0;
+}
