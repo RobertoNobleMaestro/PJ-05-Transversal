@@ -1,77 +1,125 @@
-/* Fuentes y reset básico */
+/* ===== Reset básico ===== */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
+  background-color: #f5f5f5;
 }
 
-/* Navbar personalizado */
+/* ===== Navbar personalizada ===== */
 .navbar-custom {
-  background-color: #4f2b90; /* Cambia el color si lo deseas */
+  background-color: #fff;
+  padding: 1rem 0;
+  border-bottom: 2px solid #e5e5e5;
 }
 
-.navbar-custom .navbar-brand,
+.navbar-custom .navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #000;
+}
+
+.navbar-custom .navbar-brand::before {
+  content: url('/images/logo.png'); /* Ajusta la ruta al logo */
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
 .navbar-custom .nav-link {
   color: #fff;
+  background-color: #e100ff;
+  border-radius: 5px;
+  padding: 6px 12px;
+  margin-left: 10px;
+  font-weight: 500;
 }
 
 .navbar-custom .nav-link:hover {
-  color: #ddd;
+  background-color: #c000d6;
+  color: #fff;
 }
 
-/* Breadcrumb / ruta de navegación */
+/* ===== Breadcrumb ===== */
 .breadcrumb-container {
-  background-color: #f8f9fa;
-  padding: 0.5rem 1rem;
+  background-color: #f1f1f1;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
 }
 
-/* Sección principal (hero) */
+/* ===== Hero Section ===== */
 .hero-section {
-  margin-top: 1rem;
-  margin-bottom: 2rem;
+  background-color: #fff;
+  padding: 2rem 0;
 }
 
 .hero-section h1 {
   font-weight: bold;
+  font-size: 1.8rem;
   margin-bottom: 1.5rem;
 }
 
 .filter-form {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
-/* Stats */
+.filter-form input,
+.filter-form select {
+  border-radius: 6px;
+}
+
+/* ===== Stats ===== */
 .stats-section {
-  margin-bottom: 2rem;
+  background-color: #fff;
+  padding: 2rem 0;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.stats-section .stat-box {
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  padding: 1.5rem 1rem;
-  margin: 0.5rem;
+.stat-box {
+  padding: 1.2rem;
+  text-align: center;
 }
 
 .stat-box h3 {
-  margin: 0;
   font-size: 2rem;
   font-weight: bold;
-  color: #4f2b90;
+  color: #000;
 }
 
 .stat-box p {
-  margin: 0;
-  color: #333;
+  font-size: 0.9rem;
+  color: #444;
+  margin-top: 0.3rem;
 }
 
-/* Sección de Top 10 */
+.stat-box i {
+  font-size: 1.6rem;
+  color: #000;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* ===== Vehículos más solicitados ===== */
 .vehicles-section {
-  margin-bottom: 2rem;
+  background-color: #f5f5f5;
+  padding: 2rem 0;
 }
 
 .vehicles-section h2 {
   font-weight: bold;
-  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .card img {
@@ -79,8 +127,67 @@ body {
   object-fit: cover;
 }
 
-/* Footer */
+.card-body {
+  padding: 1rem;
+}
+
+.card-body .card-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.card-body .card-text {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Iconos debajo de cada tarjeta */
+.card-icons {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  color: #555;
+  padding: 0.5rem 1rem 1rem 1rem;
+}
+
+/* Botón de “Ver más vehículos” */
+.btn-ver-mas {
+  background-color: #e100ff;
+  color: white;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  margin-bottom: 1rem;
+}
+
+.btn-ver-mas:hover {
+  background-color: #c000d6;
+  color: white;
+}
+
+/* Flecha lateral */
+.arrow-right {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  background-color: #e100ff;
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+/* ===== Footer ===== */
 footer {
-  background-color: #f8f9fa;
+  background-color: #fff;
   padding: 1rem 0;
+  border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+  color: #666;
 }
