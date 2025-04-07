@@ -70,7 +70,7 @@
         <div class="stat-box">
           <i class="fas fa-users"></i>
           <div class="stat-content">
-            <h3>8</h3>
+            <h3>{{ $usuariosClientes }}</h3>
             <p>Usuarios registrados</p>
           </div>
         </div>
@@ -79,7 +79,7 @@
         <div class="stat-box">
           <i class="fas fa-car"></i>
           <div class="stat-content">
-            <h3>100.000</h3>
+            <h3>{{ number_format($vehiculos, 0, ',', '.') }}</h3>
             <p>Vehículos registrados</p>
           </div>
         </div>
@@ -88,7 +88,7 @@
         <div class="stat-box">
           <i class="fas fa-star"></i>
           <div class="stat-content">
-            <h3>4.8</h3>
+            <h3>{{ $valoracionMedia }}</h3>
             <p>Valoración de la web</p>
           </div>
         </div>

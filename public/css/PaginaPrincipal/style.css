@@ -47,7 +47,7 @@ body {
 
 /* ===== Hero Section ===== */
 .hero-section {
-  padding: 2rem 0;
+  padding-bottom: 2rem;
 }
 
 .hero-section h1 {

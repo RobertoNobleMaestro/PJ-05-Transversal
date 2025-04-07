@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'direccion' => 'Calle Gestor 2',
             'foto_perfil' => null,
             'licencia_conducir' => 'B',
-            'id_roles' => 2,
+            'id_roles' => 3,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
                 'direccion' => "Calle Cliente $i",
                 'foto_perfil' => null,
                 'licencia_conducir' => 'B',
-                'id_roles' => 3, // Rol de cliente
+                'id_roles' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
