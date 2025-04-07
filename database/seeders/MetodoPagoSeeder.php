@@ -12,15 +12,11 @@ class MetodoPagoSeeder extends Seeder
         DB::table('metodos_de_pago')->insert([
             [
                 'nombre' => 'Tarjeta de Crédito',
-                'id_pago' => null,
-            ],
-            [
-                'nombre' => 'PayPal',
-                'id_pago' => null,
+                'id_pago' => 1,
             ],
             [
                 'nombre' => 'Transferencia Bancaria',
-                'id_pago' => null,
+                'id_pago' => 2,
             ],
         ]);
     }

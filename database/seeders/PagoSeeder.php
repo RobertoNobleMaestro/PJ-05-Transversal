@@ -17,8 +17,8 @@ class PagoSeeder extends Seeder
                 'monto_pagado' => 150.00,
                 'total_precio' => 150.00,
                 'moneda' => 'EUR',
-                'id_usuario' => 2,
-                'id_reservas' => 1,
+                'id_usuario' => 2, // Usuario Regular
+                'id_reservas' => 1, // Primera reserva
             ],
             [
                 'estado_pago' => 'completado',
@@ -27,8 +27,8 @@ class PagoSeeder extends Seeder
                 'monto_pagado' => 90.00,
                 'total_precio' => 90.00,
                 'moneda' => 'EUR',
-                'id_usuario' => 2,
-                'id_reservas' => 2,
+                'id_usuario' => 2, // Usuario Regular
+                'id_reservas' => 2, // Segunda reserva
             ],
         ]);
     }
