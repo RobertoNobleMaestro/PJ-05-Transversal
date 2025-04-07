@@ -1,0 +1,204 @@
+/* ===== Reset básico ===== */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ECECEC;
+}
+
+/* ===== Navbar personalizada ===== */
+.navbar-custom {
+  background-color: #fff;
+  padding: 1rem 0;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.navbar-custom .navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #000;
+}
+
+.navbar-custom .navbar-brand::before {
+  content: url('/images/logo.png'); /* Ajusta la ruta al logo */
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.navbar-custom .nav-link {
+  color: #fff;
+  background-color: #e100ff;
+  border-radius: 5px;
+  padding: 6px 12px;
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+.navbar-custom .nav-link:hover {
+  background-color: #c000d6;
+  color: #fff;
+}
+
+/* ===== Breadcrumb ===== */
+.breadcrumb-container {
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+/* ===== Hero Section ===== */
+.hero-section {
+  padding: 2rem 0;
+}
+
+.hero-section h1 {
+  font-weight: bold;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-form {
+  margin-top: 1.5rem;
+}
+
+.filter-form input,
+.filter-form select {
+  border-radius: 6px;
+}
+
+/* ===== Stats (Full Width) ===== */
+.stats-section {
+  background-color: #fff;
+  padding: 2rem 0;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stats-section .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.stats-section .col-6,
+.stats-section .col-md-3 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.stat-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  gap: 1rem;
+  text-align: left;
+}
+
+.stat-box i {
+  font-size: 2.5rem;
+  color: #000;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #000;
+  margin: 0;
+}
+
+.stat-content p {
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0.2rem 0 0 0;
+}
+
+/* ===== Vehículos más solicitados ===== */
+.vehicles-section {
+  padding: 2rem 0;
+}
+
+.vehicles-section h2 {
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+  height: 180px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-body .card-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.card-body .card-text {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Iconos debajo de cada tarjeta */
+.card-icons {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  color: #555;
+  padding: 0.5rem 1rem 1rem 1rem;
+}
+
+/* Botón de “Ver más vehículos” */
+.btn-ver-mas {
+  background-color: #e100ff;
+  color: white;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  margin-bottom: 1rem;
+}
+
+.btn-ver-mas:hover {
+  background-color: #c000d6;
+  color: white;
+}
+
+/* Flecha lateral */
+.arrow-right {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  background-color: #e100ff;
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+/* ===== Footer ===== */
+footer {
+  background-color: #fff;
+  padding: 1rem 0;
+  border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+  color: #666;
+}

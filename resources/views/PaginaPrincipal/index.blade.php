@@ -2,115 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Carflow - Alquiler de vehículos</title>
-  <!-- Enlace a Bootstrap (versión 4.x o 5.x) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-  
-  <!-- Estilos personalizados -->
-  <style>
-    /* Fuentes y reset básico */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Navbar personalizado */
-    .navbar-custom {
-      background-color: #4f2b90; /* Cambia el color si lo deseas */
-    }
-    .navbar-custom .navbar-brand,
-    .navbar-custom .nav-link {
-      color: #fff;
-    }
-    .navbar-custom .nav-link:hover {
-      color: #ddd;
-    }
-
-    /* Breadcrumb / ruta de navegación */
-    .breadcrumb-container {
-      background-color: #f8f9fa;
-      padding: 0.5rem 1rem;
-    }
-
-    /* Sección principal (hero) */
-    .hero-section {
-      margin-top: 1rem;
-      margin-bottom: 2rem;
-    }
-    .hero-section h1 {
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-    }
-    .filter-form {
-      margin-top: 1rem;
-    }
-
-    /* Stats */
-    .stats-section {
-      margin-bottom: 2rem;
-    }
-    .stats-section .stat-box {
-      background-color: #f8f9fa;
-      border-radius: 5px;
-      padding: 1.5rem 1rem;
-      margin: 0.5rem;
-    }
-    .stat-box h3 {
-      margin: 0;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #4f2b90;
-    }
-    .stat-box p {
-      margin: 0;
-      color: #333;
-    }
-
-    /* Sección de Top 10 */
-    .vehicles-section {
-      margin-bottom: 2rem;
-    }
-    .vehicles-section h2 {
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-    }
-    .card img {
-      height: 180px;
-      object-fit: cover;
-    }
-
-    /* Footer */
-    footer {
-      background-color: #f8f9fa;
-      padding: 1rem 0;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
+  <title>Carflow - Alquiler de vehículos</title>
 </head>
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-custom">
-    <div class="container">
-      <a class="navbar-brand" href="#">CARFLOW</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" 
-              aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon" style="color:#fff;">&#9776;</span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Iniciar Sesión</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Registrarme</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  @include('layouts.navbar')
 
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
@@ -158,41 +58,43 @@
       </div>
       <div class="col-md-6 text-center">
         <!-- Ejemplo de imágenes a la derecha -->
-        <img src="https://via.placeholder.com/350x200/4f2b90/FFFFFF?text=Auto+1" class="img-fluid mb-2" alt="Auto 1">
-        <img src="https://via.placeholder.com/350x200/4f2b90/FFFFFF?text=Auto+2" class="img-fluid" alt="Auto 2">
+        <img src="{{ asset('img/coches.png') }}" class="img-fluid mb-2" alt="Auto 1">
       </div>
     </div>
-  </div>
-
+  </div> 
+  
   <!-- Sección de estadísticas -->
-  <div class="container stats-section">
-    <div class="row text-center">
-      <div class="col-6 col-md-3">
+  <div class="container-fluid stats-section">
+    <div class="row no-gutters text-center">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <h3>8</h3>
-          <p>Usuarios registrados</p>
+          <i class="fas fa-users"></i>
+          <div class="stat-content">
+            <h3>8</h3>
+            <p>Usuarios registrados</p>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <h3>100.000</h3>
-          <p>Vehículos registrados</p>
+          <i class="fas fa-car"></i>
+          <div class="stat-content">
+            <h3>100.000</h3>
+            <p>Vehículos registrados</p>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <h3>4.8</h3>
-          <p>Valoración de la web</p>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-box">
-          <h3>★ ★ ★ ★ ☆</h3>
-          <p>Opiniones</p>
+          <i class="fas fa-star"></i>
+          <div class="stat-content">
+            <h3>4.8</h3>
+            <p>Valoración de la web</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </div>    
 
   <!-- Sección de Top 10 vehículos -->
   <div class="container vehicles-section">

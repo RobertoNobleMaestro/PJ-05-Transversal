@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('email')->unique();
             $table->string('DNI')->unique();
+            $table->string('telefono');
+            $table->string('password');
             $table->date('fecha_nacimiento');
             $table->string('foto_perfil')->nullable();
             $table->string('direccion');
@@ -24,6 +26,7 @@ return new class extends Migration
             $table->foreign('id_roles')->references('id_roles')->on('roles');
             $table->timestamps();
         });
+
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
