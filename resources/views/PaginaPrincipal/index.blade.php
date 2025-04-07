@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
   <title>Carflow - Alquiler de vehículos</title>
 </head>
@@ -28,20 +29,20 @@
         <form class="filter-form">
           <div class="form-group">
             <label>Tipo de vehículo:</label><br>
-            @foreach ($tipos as $index => $tipo)
-              <div class="form-check form-check-inline">
-                <input 
-                  class="form-check-input" 
-                  type="radio" 
-                  name="tipoVehiculo" 
-                  id="tipo_{{ $tipo->id }}" 
-                  value="{{ $tipo->nombre }}" 
-                  {{ $index === 0 ? 'checked' : '' }}
-                >
-                <label class="form-check-label" for="tipo_{{ $tipo->id }}">{{ $tipo->nombre }}</label>
-              </div>
-            @endforeach
-          </div>          
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+              @foreach ($tipos as $index => $tipo)
+                <label class="btn btn-outline-primary {{ $index === 0 ? 'active' : '' }}">
+                  <input 
+                    type="radio" 
+                    name="tipoVehiculo" 
+                    value="{{ $tipo->nombre }}" 
+                    autocomplete="off" 
+                    {{ $index === 0 ? 'checked' : '' }}>
+                  {{ $tipo->nombre }}
+                </label>
+              @endforeach
+            </div>
+          </div>               
 
           <div class="form-row">
             <div class="form-group col-md-6">

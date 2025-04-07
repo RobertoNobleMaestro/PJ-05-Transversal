@@ -202,3 +202,13 @@ footer {
   font-size: 0.9rem;
   color: #666;
 }
+
+.btn-group-toggle .btn.active {
+  background-color: #e100ff;
+  color: #fff;
+  border-color: #e100ff;
+}
+
+.btn-group-toggle .btn {
+  font-weight: 500;
+}
