@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Valoracion;
+use App\Models\VehiculosReservas;
 
 class Vehiculo extends Model
 {
@@ -40,11 +42,24 @@ class Vehiculo extends Model
 
     public function caracteristicas()
     {
-        return $this->hasMany(Caracteristica::class, 'id_vehiculos', 'id_vehiculos');
+        return $this->hasOne(Caracteristica::class, 'id_vehiculos', 'id_vehiculos');
     }
 
     public function reservas()
     {
         return $this->belongsToMany(Reserva::class, 'vehiculos_reservas', 'id_vehiculos', 'id_reservas');
     }
+
+    public function valoraciones()
+    {
+        return $this->hasManyThrough(
+            Valoracion::class,              // Modelo final
+            VehiculosReservas::class,       // Modelo intermedio
+            'id_vehiculos',                 // FK en VehiculosReservas que apunta a este modelo (Vehiculo)
+            'id_reservas',                  // FK en Valoracion que apunta a Reservas
+            'id_vehiculos',                 // Local Key en este modelo (Vehiculo)
+            'id_reservas'                   // Local Key en VehiculosReservas que apunta a Valoraciones
+        );
+    }
+
 }

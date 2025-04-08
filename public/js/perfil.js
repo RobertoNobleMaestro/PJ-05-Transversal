@@ -175,7 +175,6 @@ document.getElementById('btnCapturarFoto').addEventListener('click', function ()
             Swal.fire('¡Foto actualizada!', data.message, 'success');
 
             const user = data.user;
-            debugger
 
             // Ocultar cámara
             document.getElementById('camaraContainer').style.display = 'none';
