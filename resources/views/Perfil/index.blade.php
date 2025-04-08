@@ -11,8 +11,8 @@
 
     <title>Perfil</title>
 </head>
- 
 <body>
+@include('layouts.navbar')
 <div class="container mt-4">
   <a href="{{ asset('home') }}" class="btn-volver">
     <i class="fas fa-arrow-left me-2"></i> Volver
