@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('asdASD123'),
                 'fecha_nacimiento' => '1995-01-01',
                 'direccion' => "Calle Cliente $i",
-                'foto_perfil' => null,
+                'foto_perfil' => '/leon.png',
                 'licencia_conducir' => 'B',
                 'id_roles' => 2,
                 'created_at' => now(),

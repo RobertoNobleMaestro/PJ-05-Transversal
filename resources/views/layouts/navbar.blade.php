@@ -25,11 +25,8 @@
           <!-- Foto de perfil (link al perfil) -->
           <li class="nav-item d-flex align-items-center">
             <a class="nav-link d-flex align-items-center" href="">
-              <img src="{{ asset('img/' . Auth::user()->foto_perfil) }}"
-                   alt="Foto de perfil"
-                   class="rounded-circle"
-                   style="width: 35px; height: 35px; object-fit: cover;">
               <span class="ms-2">Perfil</span>
+              <img src="{{ asset('img/' . Auth::user()->foto_perfil) }}" alt="Foto de perfil" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
             </a>
           </li>
         @endauth
