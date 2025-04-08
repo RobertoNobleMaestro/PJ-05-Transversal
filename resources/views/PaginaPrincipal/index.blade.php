@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <title>Carflow - Alquiler de vehículos</title>
+  <!-- Enlace a Bootstrap (versión 4.x o 5.x) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -110,9 +112,9 @@
             <h5 class="card-title">Coche 1</h5>
             <p class="card-text">80.000 km | 20.000 €</p>
             <div class="text-end">
-              <a href="{{ url('/vehiculo/detalle_vehiculo/1') }}" class="btn btn-sm btn-outline-primary">
+              <a href="{{ route('vehiculo.detalle', ['id' => 1]) }}" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-shopping-cart"></i> Añadir
-              </a>
+              </a>              
             </div>
           </div>
         </div>        

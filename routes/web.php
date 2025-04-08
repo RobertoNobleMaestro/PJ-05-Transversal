@@ -27,3 +27,9 @@ Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users'
 Route::get('/admin', function () {
     return view('admin.index');
 })->name('admin.index');
+
+use App\Http\Controllers\VehiculoController;
+
+Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
+
+// Route::get('/vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
