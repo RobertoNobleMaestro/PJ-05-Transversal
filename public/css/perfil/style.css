@@ -1,0 +1,218 @@
+body {
+    background: linear-gradient(to right, #f5f5f5, #e8e8f3);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .perfil-box {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    margin-top: 2rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .perfil-box::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 6px;
+    width: 100%;
+    background: linear-gradient(to right, #a100ff, #6f42c1);
+  }
+
+  .foto-perfil {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #dcdcdc;
+    border: 4px solid #e100ff;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .foto-perfil:hover {
+    transform: scale(1.08);
+  }
+
+  .info-perfil {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .info-perfil h5 {
+    font-weight: 700;
+    font-size: 1.7rem;
+    color: #2d2d2d;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .info-perfil p {
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+    color: #444;
+  }
+
+  .row {
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+  }
+  .row-dashed{
+    border-bottom: 1px dashed #ddd;
+  }
+  .row:last-of-type {
+    border-bottom: none;
+  }
+
+  .btn-editar {
+    background: linear-gradient(to right, #6f42c1, #9b59b6);
+    color: white !important;
+    border-radius: 15px;
+    padding: 12px 26px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border: none;
+    align-self: center;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+  }
+
+  .btn-editar:hover {
+    background: linear-gradient(to right, #5a2b97, #8e44ad);
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .btn-editar:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.4);
+  }
+
+  .favoritos-section {
+  background-color: #ffffff;
+  padding: 2rem 1rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.titulo-favoritos {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #6f42c1;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.linea-favoritos {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, #6f42c1, #e100ff);
+  margin: 0 auto;
+  width: 60%;
+}
+
+.card {
+  border: none;
+  border-radius: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  height: 160px;
+  object-fit: cover;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  background-color: #f0f0f0;
+}
+
+.card-body {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.card-body p {
+  margin-bottom: 4px;
+}
+
+.card-body .fas {
+  color: #e100ff;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.card-body .fas:hover {
+  color: #e100ff;
+}
+
+
+.btn-volver {
+  display: inline-block;
+  background: linear-gradient(to right, #6f42c1, #e100ff);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.btn-volver:hover {
+  background: linear-gradient(to right, #5a2b97, #c400e3);
+  transform: scale(1.05);
+  color: white;
+}
+
+.btn-volver i {
+  margin-right: 6px;
+}
+  /* Responsive tweaks */
+  @media (max-width: 767px) {
+    .perfil-box {
+      padding: 1.5rem;
+    }
+
+    .foto-perfil {
+      width: 120px;
+      height: 120px;
+    }
+
+    .info-perfil h5 {
+      font-size: 1.5rem;
+    }
+
+    .info-perfil p {
+      font-size: 0.95rem;
+    }
+
+    .btn-editar {
+      font-size: 1rem;
+      padding: 10px 20px;
+    }
+    /* Responsive tweaks */
+  .card-img-top {
+    height: 130px;
+  }
+
+  .titulo-favoritos {
+    font-size: 1.4rem;
+  }
+}
