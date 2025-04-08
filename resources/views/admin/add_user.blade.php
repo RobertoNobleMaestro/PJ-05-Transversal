@@ -20,8 +20,8 @@
             <input type="password" class="form-control" id="password" name="password" required>
         </div>
         <div class="mb-3">
-            <label for="dni" class="form-label">DNI</label>
-            <input type="text" class="form-control" id="dni" name="dni" required>
+            <label for="DNI" class="form-label">DNI</label>
+            <input type="text" class="form-control" id="DNI" name="DNI" required>
         </div>
         <div class="mb-3">
             <label for="telefono" class="form-label">Teléfono</label>
@@ -50,3 +50,77 @@
     </form>
 </div>
 @endsection
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateField(input);
+        });
+    });
+
+    function validateField(input) {
+        let errorMessage = '';
+        const value = input.value.trim();
+        
+        if (input.name === 'email') {
+            if (!validateEmail(value)) {
+                errorMessage = 'Por favor, ingrese un email válido.';
+            }
+        } else if (input.name === 'dni') {
+            if (!/^\d{8}[A-Z]$/.test(value)) {
+                errorMessage = 'El formato del DNI es inválido. Debe terminar con una letra mayúscula.';
+            } else if (!validateDNI(value)) {
+                errorMessage = 'El DNI es inválido. La letra no coincide.';
+            }
+        } else if (input.name === 'password') {
+            if (value.length < 8) {
+                errorMessage = 'La contraseña debe tener al menos 8 caracteres.';
+            }
+        } else if (input.name === 'telefono') {
+            if (!/^\d{9}$/.test(value)) {
+                errorMessage = 'El teléfono debe contener exactamente 9 números.';
+            }
+        } else if (input.name === 'direccion') {
+            if (value.length < 5) {
+                errorMessage = 'La dirección debe tener al menos 5 caracteres.';
+            }
+        } else if (input.required && value === '') {
+            errorMessage = 'Este campo es obligatorio.';
+        }
+        
+        const errorElement = input.nextElementSibling;
+        if (errorElement && errorElement.classList.contains('error-message')) {
+            errorElement.textContent = errorMessage;
+        } else if (errorMessage) {
+            const span = document.createElement('span');
+            span.classList.add('error-message');
+            span.style.color = 'red';
+            span.textContent = errorMessage;
+            input.parentNode.insertBefore(span, input.nextSibling);
+        }
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    function validateDNI(dni) {
+        const re = /^\d{8}[A-Z]$/;
+        if (!re.test(dni)) {
+            return false;
+        }
+        
+        const number = parseInt(dni.slice(0, 8), 10);
+        const letter = dni.charAt(8);
+        const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
+        const calculatedLetter = letters[number % 23];
+        
+        return calculatedLetter === letter;
+    }
+});
+</script>

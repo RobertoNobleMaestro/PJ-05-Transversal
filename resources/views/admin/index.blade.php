@@ -64,10 +64,26 @@
         .large-box:hover .large-box-text {
             opacity: 1;
         }
+        @media (max-width: 768px) {
+            .large-box {
+                width: 80%;
+                height: 50vh;
+            }
+            .admin-container h1 {
+                font-size: 2rem;
+            }
+            .admin-container p {
+                font-size: 1rem;
+            }
+            .admin-container nav ul li {
+                display: block;
+                margin-bottom: 10px;
+            }
+        }
     </style>
     <div class="admin-container">
         <h1>Bienvenido, Administrador</h1>
-        <p>Usuario: admin@carflow.com</p>
+        <p>Usuario: {{ Auth::user()->email }}</p>
         <div class="large-box" onclick="window.location='{{ route('admin.users') }}'">
             <span class="large-box-text">CRUD de usuarios</span>
         </div>

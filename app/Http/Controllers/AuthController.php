@@ -64,4 +64,17 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    
+    /**
+     * Cierra la sesión del usuario
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/home');
+    }
 }
