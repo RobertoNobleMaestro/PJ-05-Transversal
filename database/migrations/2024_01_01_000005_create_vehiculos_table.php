@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -18,7 +17,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('id_tipo');
             $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
             $table->foreign('id_tipo')->references('id_tipo')->on('tipo');
-            $table->timestamps();
+            $table->timestamps(); 
         });
     }
 
