@@ -18,7 +18,7 @@
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
     <div class="container">
-      <small>Inicio &gt; Alquiler coches &gt; </small>
+      <small>Inicio &gt; Alquiler coches &gt; <span id="breadcrumb-tipo">Coche</span></small>
     </div>
   </div>
 
@@ -33,17 +33,17 @@
             <label>Tipo de vehículo:</label><br>
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
               @foreach ($tipos as $index => $tipo)
-                <label class="btn btn-outline-primary {{ $index === 0 ? 'active' : '' }}">
+                <label class="btn {{ $index === 0 ? 'active' : '' }}">
                   <input 
                     type="radio" 
                     name="tipoVehiculo" 
                     value="{{ $tipo->nombre }}" 
                     autocomplete="off" 
                     {{ $index === 0 ? 'checked' : '' }}>
-                  {{ $tipo->nombre }}
+                  {{ strtoupper($tipo->nombre) }}
                 </label>
               @endforeach
-            </div>
+            </div>            
           </div>               
 
           <div class="form-row">
@@ -212,13 +212,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container text-center">
-      <p class="m-0">Carflow &copy; 2025</p>
-    </div>
-  </footer>
-
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -265,6 +258,26 @@
       })
       .catch(error => console.error('Error al cargar los datos:', error));
   });
-  </script>
-  
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const breadcrumbTipo = document.getElementById('breadcrumb-tipo');
+
+    // Inicializa con el tipo seleccionado por defecto
+    const tipoInicial = document.querySelector('input[name="tipoVehiculo"]:checked');
+    if (tipoInicial && breadcrumbTipo) {
+      breadcrumbTipo.textContent = tipoInicial.value;
+    }
+
+    // Actualiza cuando se cambia el tipo
+    document.addEventListener('change', function(e) {
+      if (e.target.name === 'tipoVehiculo') {
+        const tipoSeleccionado = e.target.value;
+        if (breadcrumbTipo) {
+          breadcrumbTipo.textContent = tipoSeleccionado;
+        }
+      }
+    });
+  });
+</script>
 </html>
