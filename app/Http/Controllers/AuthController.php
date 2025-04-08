@@ -64,4 +64,13 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function logout(){
+        if(Auth::check()){
+            Auth::logout();
+            return redirect()->route('login')->with('success', 'Sesión cerrada correctamente');
+        }
+
+        return redirect()->route('login');
+    }
 }
