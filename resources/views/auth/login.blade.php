@@ -8,16 +8,18 @@
     <div class="container-izquierda">
         <!--contenido con los inputs de email y contraseña -->
         <h2 class="login"> Iniciar Sesión </h2>
-        <form action="{{route('login.post')}}" method="POST">
+        <form action="{{route('login.post')}}" method="POST" id="loginForm">
             @csrf
             <label for="email">Email</label><br>
             <input type="text" name="email" id="email" placeholder="usuario@gmail.com">
+            <span class="error_message" id="error_email"></span>
             <br>
             <label for="pwd">Contraseña</label><br>
             <input type="password" name="pwd" id="pwd">
+            <span class="error_message" id="error_pwd"></span>
             <br>
             <br>
-            <button type="button" id="login"> Iniciar Sesión </button><br>
+            <button type="submit" id="login" disabled>Iniciar Sesión</button><br>
             <a href="" class=""> Registrarse </a>
         </form>
     </div>

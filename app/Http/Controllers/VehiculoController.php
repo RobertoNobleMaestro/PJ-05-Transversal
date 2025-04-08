@@ -9,10 +9,11 @@ class VehiculoController extends Controller
 {
     public function detalle($id)
     {
-        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas'])->findOrFail($id);
-        
+        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones'])->findOrFail($id);
+    
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo
         ]);
     }
+    
 }

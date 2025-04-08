@@ -18,6 +18,8 @@ class VehiculoSeeder extends Seeder
                 'seguro_incluido' => true,
                 'id_lugar' => 1,
                 'id_tipo' => 1, // Coche
+                'created_at' => now(),  // Establece la fecha actual para 'created_at'
+                'updated_at' => now(),  // Establece la fecha actual para 'updated_at'
             ],
             [
                 'marca' => 'Honda',
@@ -27,6 +29,8 @@ class VehiculoSeeder extends Seeder
                 'seguro_incluido' => true,
                 'id_lugar' => 2,
                 'id_tipo' => 2, // Moto
+                'created_at' => now(),  // Establece la fecha actual para 'created_at'
+                'updated_at' => now(),  // Establece la fecha actual para 'updated_at'
             ],
             [
                 'marca' => 'Mercedes',
@@ -36,6 +40,8 @@ class VehiculoSeeder extends Seeder
                 'seguro_incluido' => true,
                 'id_lugar' => 3,
                 'id_tipo' => 3, // Furgoneta
+                'created_at' => now(),  // Establece la fecha actual para 'created_at'
+                'updated_at' => now(),  // Establece la fecha actual para 'updated_at'
             ],
         ]);
     }

@@ -9,23 +9,20 @@
         @auth
           <!-- Cerrar sesión -->
           <li class="nav-item">
-            <a class="nav-link" href="">
-              <i class="fas fa-sign-out-alt me-1"></i>
+            <a class="nav-link" href="{{ route('logout') }}">
+              <i class="fas fa-sign-out-alt"></i>
             </a>
-            <form id="logout-form" action="" method="POST" style="display: none;">
-              @csrf
-            </form>
           </li>
           <!-- Carrito -->
           <li class="nav-item">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="{{ route('carrito') }}">
               <i class="fas fa-shopping-cart me-1"></i>
             </a>
           </li>
           <!-- Foto de perfil (link al perfil) -->
           <li class="nav-item">
             <a class="nav-link" href="{{ url('/perfil/' . Auth::user()->id_usuario) }}">
-              <img src="{{ asset(Auth::user()->foto_perfil ? 'img/' . Auth::user()->foto_perfil : 'img/default.png') }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;" alt="Perfil">
+              <img id="navbar-profile-img" src="{{ asset(Auth::user()->foto_perfil ? 'img/' . Auth::user()->foto_perfil : 'img/default.png') }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;" alt="Perfil">
             </a>
           </li>
         @endauth
