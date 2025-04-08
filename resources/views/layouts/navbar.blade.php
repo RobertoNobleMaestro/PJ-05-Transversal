@@ -9,13 +9,10 @@
         @auth
           <!-- Cerrar sesión -->
           <li class="nav-item">
-            <a class="nav-link" href="">
-              <i class="fas fa-sign-out-alt me-1"></i>
+            <a class="nav-link" href="{{ route('logout') }}">
+              <i class="fas fa-sign-out-alt"></i>
             </a>
-            <form id="logout-form" action="" method="POST" style="display: none;">
-              @csrf
-            </form>
-          </li>
+          </li>          
           <!-- Carrito -->
           <li class="nav-item">
             <a class="nav-link" href="">
