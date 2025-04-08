@@ -13,7 +13,7 @@ Route::redirect('/', '/home');
 Route::get('/ver-carrito', [CarritoController::class, 'index'])->middleware('auth');
 Route::get('/carrito', function () {
     return view('carrito.index');
-})->middleware('auth');
+})->middleware('auth')->name('carrito');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home-stats', [\App\Http\Controllers\HomeController::class, 'stats']);
