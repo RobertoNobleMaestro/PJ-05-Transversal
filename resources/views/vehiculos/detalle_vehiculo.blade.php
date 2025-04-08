@@ -100,26 +100,29 @@
     <h4 class="mt-5">VALORACIONES</h4>
 
     @if ($vehiculo->valoraciones->count())
-        @foreach ($vehiculo->valoraciones as $valoracion)
-            <div class="valoracion mb-4">
-                <p>
-                    <strong><i class="fas fa-user-circle"></i> {{ $valoracion->usuario->name }}</strong>
-                    {{-- <small class="text-muted">{{ $valoracion->created_at->format('d M Y') }}</small> --}}
-                </p>
-                {{-- <p>
-                    @for ($i = 0; $i < $valoracion->calificacion; $i++)
-                        <i class="fas fa-star"></i>
-                    @endfor
-                    @for ($i = $valoracion->calificacion; $i < 5; $i++)
-                        <i class="far fa-star"></i>
-                    @endfor
-                </p> --}}
-                <p>{{ $valoracion->comentario }}</p>
-            </div>
-        @endforeach
-    @else
-        <p class="text-muted">Este vehículo aún no tiene valoraciones.</p>
-    @endif
+    @foreach ($vehiculo->valoraciones as $valoracion)
+        <div class="valoracion mb-4">
+            <p>
+                <strong><i class="fas fa-user-circle"></i>{{ $valoracion->usuario->foto_perfil }} {{ $valoracion->usuario->nombre }}</strong>
+                {{-- <small class="text-muted">{{ $valoracion->created_at->format('d/m/Y H:i') }}</small> --}}
+            </p>
+
+            <p>
+                @for ($i = 0; $i < $valoracion->valoracion; $i++) 
+                    <i class="fas fa-star"></i>
+                @endfor
+                @for ($i = $valoracion->valoracion; $i < 5; $i++)
+                    <i class="far fa-star"></i>
+                @endfor
+            </p>
+
+            <p>{{ $valoracion->comentario }}</p>
+        </div>
+    @endforeach
+@else
+    <p class="text-muted">Este vehículo aún no tiene valoraciones.</p>
+@endif
+
 </div>
 
 <footer>
