@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/Vehiculos/styles.css') }}">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
 
@@ -68,30 +68,16 @@
 
     <hr>
 
-    <!-- Valoraciones -->
+    <!-- Valoraciones con Fetch API -->
     <h4 class="mt-5">VALORACIONES</h4>
-
-    @if ($vehiculo->valoraciones->count())
-        @foreach ($vehiculo->valoraciones as $valoracion)
-            <div class="valoracion mb-4">
-                <p>
-                    <img id="navbar-profile-img" src="{{ asset(Auth::user()->foto_perfil ? 'img/' . Auth::user()->foto_perfil : 'img/default.png') }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;" alt="Perfil">
-                    <strong>{{ $valoracion->usuario->nombre }}</strong>
-                </p>
-                <p>
-                    @for ($i = 0; $i < $valoracion->valoracion; $i++) 
-                        <i class="fas fa-star"></i>
-                    @endfor
-                    @for ($i = $valoracion->valoracion; $i < 5; $i++)
-                        <i class="far fa-star"></i>
-                    @endfor
-                </p>
-                <p>{{ $valoracion->comentario }}</p>
+    <div id="valoraciones-container">
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Cargando valoraciones...</span>
             </div>
-        @endforeach
-    @else
-        <p class="text-muted">Este vehículo aún no tiene valoraciones.</p>
-    @endif
+            <p>Cargando valoraciones...</p>
+        </div>
+    </div>
 </div>
 
 <footer>
@@ -100,5 +86,14 @@
     </div>
 </footer>
 
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/vehiculos.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        iniciarDetalleVehiculo({{ $vehiculo->id_vehiculos }});
+    });
+</script>
 </body>
 </html>
