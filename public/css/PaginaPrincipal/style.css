@@ -13,18 +13,6 @@ body {
   border-bottom: 2px solid #e5e5e5;
 }
 
-.navbar-custom .navbar-brand {
-  font-weight: bold;
-  font-size: 1.5rem;
-  color: #000;
-}
-
-.navbar-custom .navbar-brand::before {
-  content: url('/images/logo.png'); /* Ajusta la ruta al logo */
-  margin-right: 0.5rem;
-  vertical-align: middle;
-}
-
 .navbar-custom .nav-link {
   color: #fff;
   background-color: #e100ff;
@@ -65,6 +53,47 @@ body {
   border-radius: 6px;
 }
 
+/* ===== Botones de tipo de vehículo estilo personalizado ===== */
+.btn-group-toggle {
+  background-color: #d9d9d9;
+  border-radius: 12px;
+  padding: 5px;
+  display: inline-flex;
+}
+
+.btn-group-toggle .btn {
+  border: none;
+  background-color: transparent;
+  color: #000;
+  font-weight: 500;
+  padding: 4px 18px;
+  border-radius: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  box-shadow: none;
+}
+
+.btn-group-toggle .btn:hover {
+  background-color: #5a21cb;
+}
+
+.btn-group-toggle .btn.active {
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #fff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+}
+
+.btn-outline-primary.active,
+.btn-outline-primary:active,
+.btn-outline-primary:focus,
+.btn-outline-primary:hover,
+.btn-outline-primary:checked {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
 /* ===== Stats (Full Width) ===== */
 .stats-section {
   background-color: #fff;
@@ -76,12 +105,6 @@ body {
 .stats-section .row {
   margin-left: 0;
   margin-right: 0;
-}
-
-.stats-section .col-6,
-.stats-section .col-md-3 {
-  padding-left: 0;
-  padding-right: 0;
 }
 
 .stat-box {
@@ -152,48 +175,6 @@ body {
   color: #333;
 }
 
-/* Iconos debajo de cada tarjeta */
-.card-icons {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1.2rem;
-  color: #555;
-  padding: 0.5rem 1rem 1rem 1rem;
-}
-
-/* Botón de “Ver más vehículos” */
-.btn-ver-mas {
-  background-color: #e100ff;
-  color: white;
-  border-radius: 5px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  padding: 6px 14px;
-  margin-bottom: 1rem;
-}
-
-.btn-ver-mas:hover {
-  background-color: #c000d6;
-  color: white;
-}
-
-/* Flecha lateral */
-.arrow-right {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  background-color: #e100ff;
-  color: #fff;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transform: translateY(-50%);
-}
-
 /* ===== Footer ===== */
 footer {
   background-color: #fff;
@@ -201,14 +182,4 @@ footer {
   border-top: 1px solid #ddd;
   font-size: 0.9rem;
   color: #666;
-}
-
-.btn-group-toggle .btn.active {
-  background-color: #e100ff;
-  color: #fff;
-  border-color: #e100ff;
-}
-
-.btn-group-toggle .btn {
-  font-weight: 500;
 }
