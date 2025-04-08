@@ -109,8 +109,13 @@
           <div class="card-body">
             <h5 class="card-title">Coche 1</h5>
             <p class="card-text">80.000 km | 20.000 €</p>
+            <div class="text-end">
+              <a href="{{ url('/vehiculo/detalle_vehiculo/1') }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-shopping-cart"></i> Añadir
+              </a>
+            </div>
           </div>
-        </div>
+        </div>        
       </div>
       <!-- Card 2 -->
       <div class="col-sm-6 col-md-3 mb-4">

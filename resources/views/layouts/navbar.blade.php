@@ -23,10 +23,9 @@
             </a>
           </li>
           <!-- Foto de perfil (link al perfil) -->
-          <li class="nav-item d-flex align-items-center">
-            <a class="nav-link d-flex align-items-center" href="">
-              <span class="ms-2">Perfil</span>
-              <img src="{{ asset('img/' . Auth::user()->foto_perfil) }}" alt="Foto de perfil" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url('/perfil/' . Auth::user()->id) }}">
+              <img src="{{ asset(Auth::user()->foto_perfil ? 'img/' . Auth::user()->foto_perfil : 'img/default.png') }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;" alt="Perfil">
             </a>
           </li>
         @endauth
