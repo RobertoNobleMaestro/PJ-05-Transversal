@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             PagoSeeder::class,
             MetodoPagoSeeder::class,
             ValoracionSeeder::class,
+            CarritoSeeder::class,
         ]);
     }
 }

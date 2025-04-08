@@ -5,6 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CarritoController;
+
+Route::get('/ver-carrito', [CarritoController::class, 'index'])->middleware('auth');
+Route::get('/carrito', function () {
+    return view('carrito.index');
+})->middleware('auth');
 
 Route::redirect('/', '/home');
 
