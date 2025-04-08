@@ -14,7 +14,7 @@
 
 <div class="breadcrumb-container">
     <div class="container">
-        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</small>
+        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo->nombre }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
     </div>
 </div>
 
