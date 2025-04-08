@@ -22,6 +22,12 @@ class ValoracionSeeder extends Seeder
                 'id_reservas' => 2,
                 'id_usuario' => 2,
             ],
+            [
+                'comentario' => 'El servicio fue bueno',
+                'valoracion' => 3,
+                'id_reservas' => 2,
+                'id_usuario' => 3,
+            ],
         ]);
     }
 }
