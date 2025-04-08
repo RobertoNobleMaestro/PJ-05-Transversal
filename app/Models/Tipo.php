@@ -9,6 +9,8 @@ class Tipo extends Model
 {
     use HasFactory;
 
+    protected $table = 'tipo';
+
     protected $primaryKey = 'id_tipo';
 
     protected $fillable = [

@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container">
-      <a class="navbar-brand" href="#">CARFLOW</a>
+      <img src="{{ asset('img/logo.png') }}">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
               aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon" style="color:#fff;">&#9776;</span>
