@@ -49,6 +49,19 @@
             <p><strong>Licencia de conducir:</strong> <span id="licencia_conducir_info"></span></p>
             </div>
         </div>
+        <div class="mb-3 text-center">
+          <button type="button" class="btn" id="btnAbrirCamara">
+            <i class="fas fa-camera me-2"></i>Tomar foto con cámara
+          </button>
+        </div>
+
+        <!-- Vista previa cámara -->
+        <div class="text-center mb-3" id="camaraContainer" style="display:none;">
+          <video id="videoCamara" autoplay style="width: 100%; max-width: 300px; border-radius: 10px;"></video>
+          <br>
+          <button type="button" class="btn btn-success mt-2" id="btnCapturarFoto">Capturar</button>
+          <canvas id="canvasFoto" style="display:none;"></canvas>
+        </div>
         <button class="btn btn-editar" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">Editar perfil</button>            
         </div>
     </div>

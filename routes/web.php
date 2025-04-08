@@ -21,6 +21,7 @@ Route::controller(AuthController::class)->group(function () {
 Route::get('/perfil/{id}', [PerfilController::class, 'usuario'])->name('perfil');
 Route::get('/perfil/{id}/datos', [PerfilController::class, 'obtenerDatos'])->name('perfil.datos');
 Route::post('/perfil/{id}/actualizar', [PerfilController::class, 'actualizar'])->name('perfil.actualizar');
+Route::post('/perfil/upload-foto', [PerfilController::class, 'uploadFoto'])->name('perfil.upload-foto');
 
 Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 

@@ -76,4 +76,27 @@ class PerfilController extends Controller
 
         return response()->json(['message' => 'Perfil actualizado correctamente', 'user' => $user]);
     }
+    public function uploadFoto(Request $request)
+{
+    $user = User::findOrFail($request->id);
+
+    if ($request->hasFile('foto_perfil')) {
+        $foto = $request->file('foto_perfil');
+        $nombreFoto = uniqid('foto_', true) . '.' . $foto->getClientOriginalExtension();
+        $foto->move(public_path('img'), $nombreFoto);
+
+        // Guarda en la BD
+        $user->foto_perfil = $nombreFoto;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Foto actualizada correctamente',
+            'nombre' => $user->nombre, // <- Aquí puedes enviar lo que luego accedes en JS
+            'foto' => $nombreFoto
+        ]);
+    }
+
+    return response()->json(['error' => 'No se recibió una imagen.'], 422);
+}
+
 }

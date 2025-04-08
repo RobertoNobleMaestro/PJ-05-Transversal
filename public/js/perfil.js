@@ -113,3 +113,77 @@ function configurarFormulario() {
     });
 }
 document.getElementById('modalEditarPerfil').addEventListener('show.bs.modal', cargarDatosPerfil);
+
+document.getElementById('btnAbrirCamara').addEventListener('click', function () {
+    const camaraContainer = document.getElementById('camaraContainer');
+    const video = document.getElementById('videoCamara');
+
+    camaraContainer.style.display = 'block';
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+            video.srcObject = stream;
+        })
+        .catch(function (error) {
+            Swal.fire('Error', 'No se pudo acceder a la cámara.', 'error');
+            console.error(error);
+        });
+});
+
+document.getElementById('btnCapturarFoto').addEventListener('click', function () {
+    const pathParts = window.location.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+    const video = document.getElementById('videoCamara');
+    const canvas = document.getElementById('canvasFoto');
+    const context = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+
+    // Detener la cámara
+    video.srcObject.getTracks().forEach(track => track.stop());
+
+    // Mostrar preview y generar archivo para subir
+    canvas.toBlob(function(blob) {
+        const file = new File([blob], 'foto_perfil.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        // Asignar el archivo al input file
+        document.getElementById('foto_perfil').files = dataTransfer.files;
+
+        // Mostrar imagen en preview
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('foto_perfil_preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        // --- AUTOMÁTICAMENTE ENVIAR LOS DATOS CON FETCH ---
+        const form = document.getElementById('profileForm');
+        const formData = new FormData(form);
+
+        fetch(`/perfil/${id}/actualizar`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(data => {
+            Swal.fire('¡Foto actualizada!', data.message, 'success');
+
+            const user = data.user;
+            debugger
+
+            // Ocultar cámara
+            document.getElementById('camaraContainer').style.display = 'none';
+        })
+        .catch(error => {
+            Swal.fire('Error', error.message, 'error');
+            console.error(error);
+        });
+        // --- FIN FETCH ---
+    });
+});
