@@ -14,7 +14,16 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/login', 'loginProcess')->name('login.post');
+    Route::get('/logout', 'logout')->name('logout');
 });
+
+Route::get('/usuario/perfil-imagen', function () {
+    $user = Auth::user();
+
+    return response()->json([
+        'foto' => $user->foto_perfil ? asset('img/' . $user->foto_perfil) : asset('img/default.png')
+    ]);
+})->middleware('auth');
 
 
 Route::get('/perfil/{id}', [PerfilController::class, 'usuario'])->name('perfil');
