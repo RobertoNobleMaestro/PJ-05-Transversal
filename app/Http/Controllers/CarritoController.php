@@ -11,11 +11,10 @@ class CarritoController extends Controller
     public function index()
     {
         $user = Auth::user();
-
         $reservas = Reserva::with('vehiculos.imagenes')
-            ->where('id_usuario', $user->id_usuario)
-            ->get();
-
+        ->where('id_usuario', $user->id_usuario)
+        ->where('estado', 'pendiente')
+        ->get();
         $vehiculos = $reservas->flatMap->vehiculos;
 
         return response()->json($vehiculos);

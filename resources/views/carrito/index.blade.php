@@ -34,12 +34,11 @@
                     contenedor.innerHTML = '<p>No tienes vehículos reservados.</p>';
                     return;
                 }
-
                 data.forEach(vehiculo => {
                     const div = document.createElement('div');
                     div.innerHTML = `
                         <h3>${vehiculo.marca} ${vehiculo.modelo}</h3>
-                        <p>Año: ${vehiculo.anio}</p>
+                        <p>Año: ${vehiculo.año}</p>
                         <p>Precio por día: ${vehiculo.precio_dia}€</p>
                         ${vehiculo.imagenes?.[0] ? `<img src="/storage/${vehiculo.imagenes[0].ruta}" width="200">` : ''}
                         <hr>

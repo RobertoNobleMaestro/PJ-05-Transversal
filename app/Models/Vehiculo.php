@@ -40,7 +40,7 @@ class Vehiculo extends Model
 
     public function caracteristicas()
     {
-        return $this->hasMany(Caracteristica::class, 'id_vehiculos', 'id_vehiculos');
+        return $this->hasOne(Caracteristica::class, 'id_vehiculos', 'id_vehiculos');
     }
 
     public function reservas()
