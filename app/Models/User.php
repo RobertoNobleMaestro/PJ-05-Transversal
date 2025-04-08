@@ -51,7 +51,7 @@ class User extends Authenticatable
     /**
      * Get the rol associated with the user.
      */
-    public function rol()
+    public function role()
     {
         return $this->belongsTo(Role::class, 'id_roles', 'id_roles');
     }
@@ -78,5 +78,10 @@ class User extends Authenticatable
     public function pagos()
     {
         return $this->hasMany(Pago::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function hasRole($roleName)
+    {
+        return $this->role && $this->role->nombre_rol === $roleName;
     }
 }
