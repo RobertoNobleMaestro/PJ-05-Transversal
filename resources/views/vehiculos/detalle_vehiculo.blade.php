@@ -103,8 +103,8 @@
         @foreach ($vehiculo->valoraciones as $valoracion)
             <div class="valoracion mb-4">
                 <p>
-                    <strong><i class="fas fa-user-circle"></i> {{ $valoracion->usuario_nombre }}</strong>
-                    <small class="text-muted">{{ $valoracion->created_at->format('d M Y') }}</small>
+                    <strong><i class="fas fa-user-circle"></i> {{ $valoracion->usuario->name }}</strong>
+                    {{-- <small class="text-muted">{{ $valoracion->created_at->format('d M Y') }}</small> --}}
                 </p>
                 {{-- <p>
                     @for ($i = 0; $i < $valoracion->calificacion; $i++)
