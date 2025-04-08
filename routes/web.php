@@ -17,6 +17,14 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/logout', 'logout')->name('logout');
 });
 
+Route::get('/usuario/perfil-imagen', function () {
+    $user = Auth::user();
+
+    return response()->json([
+        'foto' => $user->foto_perfil ? asset('img/' . $user->foto_perfil) : asset('img/default.png')
+    ]);
+})->middleware('auth');
+
 
 Route::get('/perfil/{id}', [PerfilController::class, 'usuario'])->name('perfil');
 Route::get('/perfil/{id}/datos', [PerfilController::class, 'obtenerDatos'])->name('perfil.datos');

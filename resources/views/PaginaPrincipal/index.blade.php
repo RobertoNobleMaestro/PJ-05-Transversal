@@ -223,4 +223,20 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<script>
+  function refrescarImagenPerfilNavbar() {
+    fetch("/usuario/perfil-imagen")
+      .then(response => response.json())
+      .then(data => {
+        const img = document.getElementById('navbar-profile-img');
+        if (img && data.foto) {
+          img.src = data.foto + '?' + new Date().getTime(); // evita caché
+        }
+      })
+      .catch(error => console.error('Error al actualizar la imagen:', error));
+  }
+
+  // Ejemplo: actualiza cada 30 segundos
+  setInterval(refrescarImagenPerfilNavbar, 30000);
+</script>
 </html>
