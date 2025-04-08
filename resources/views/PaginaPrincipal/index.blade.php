@@ -16,7 +16,7 @@
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
     <div class="container">
-      <small>Inicio &gt; Alquiler coches</small>
+      <small>Inicio &gt; Alquiler coches &gt; </small>
     </div>
   </div>
 
