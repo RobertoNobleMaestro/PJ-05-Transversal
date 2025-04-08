@@ -47,7 +47,7 @@ body {
 
 /* ===== Hero Section ===== */
 .hero-section {
-  padding: 2rem 0;
+  padding-bottom: 2rem;
 }
 
 .hero-section h1 {
@@ -201,4 +201,14 @@ footer {
   border-top: 1px solid #ddd;
   font-size: 0.9rem;
   color: #666;
+}
+
+.btn-group-toggle .btn.active {
+  background-color: #e100ff;
+  color: #fff;
+  border-color: #e100ff;
+}
+
+.btn-group-toggle .btn {
+  font-weight: 500;
 }

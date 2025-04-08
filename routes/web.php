@@ -10,7 +10,6 @@ Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-
 // Rutas del login
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
