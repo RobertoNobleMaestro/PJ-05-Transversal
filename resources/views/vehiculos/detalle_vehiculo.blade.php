@@ -5,6 +5,8 @@
     <title>{{ $vehiculo->marca }} {{ $vehiculo->modelo }} | Carflow</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
+
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -56,7 +58,7 @@
 
 <div class="breadcrumb-container">
     <div class="container">
-        <small>Inicio > Alquiler furgonetas > {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</small>
+        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</small>
     </div>
 </div>
 
@@ -70,7 +72,7 @@
                 Publicado: {{ $vehiculo->created_at->format('d/m/Y H:i') }} | 
                 Modificado: {{ $vehiculo->updated_at->format('d/m/Y H:i') }}
             </p>
-                        <h2>{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</h2>
+            <h2>{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</h2>
             <p>{{ $vehiculo->descripcion }}</p>
 
             <!-- Características -->
@@ -87,7 +89,7 @@
             </ul>
 
             <div class="highlight-box">
-                <i class="fas fa-shopping-cart"></i> Guarda tus búsquedas favoritas en el carrito!<br>
+                <i class="fas fa-shopping-cart"></i> Guarda tus búsquedas favoritas en el carrito!
             </div>
         </div>
     </div>
@@ -95,16 +97,29 @@
     <hr>
 
     <!-- Valoraciones -->
-    <h4>VALORACIONES</h4>
-    <div class="valoracion">
-        <p><strong><i class="fas fa-user-circle"></i> Hugo A.</strong> <small class="text-muted">24 de oct de 2021</small></p>
-        <p>
-            @for ($i = 0; $i < 5; $i++)
-                <i class="fas fa-star"></i>
-            @endfor
-        </p>
-        <p>Compré este coche de segunda mano y ha superado todas mis expectativas. Tiene un motor suave pero potente, gasta menos de lo que esperaba y el interior está como nuevo. ¡Repetiría sin duda!</p>
-    </div>
+    <h4 class="mt-5">VALORACIONES</h4>
+
+    @if ($vehiculo->valoraciones->count())
+        @foreach ($vehiculo->valoraciones as $valoracion)
+            <div class="valoracion mb-4">
+                <p>
+                    <strong><i class="fas fa-user-circle"></i> {{ $valoracion->usuario_nombre }}</strong>
+                    <small class="text-muted">{{ $valoracion->created_at->format('d M Y') }}</small>
+                </p>
+                {{-- <p>
+                    @for ($i = 0; $i < $valoracion->calificacion; $i++)
+                        <i class="fas fa-star"></i>
+                    @endfor
+                    @for ($i = $valoracion->calificacion; $i < 5; $i++)
+                        <i class="far fa-star"></i>
+                    @endfor
+                </p> --}}
+                <p>{{ $valoracion->comentario }}</p>
+            </div>
+        @endforeach
+    @else
+        <p class="text-muted">Este vehículo aún no tiene valoraciones.</p>
+    @endif
 </div>
 
 <footer>

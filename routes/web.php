@@ -45,6 +45,5 @@ Route::get('/admin', function () {
 
 use App\Http\Controllers\VehiculoController;
 
-Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
+Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'index'])->name('vehiculo.detalle');
 
-// Route::get('/vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
