@@ -2,19 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <title>Carflow - Alquiler de vehículos</title>
+  <!-- Enlace a Bootstrap (versión 4.x o 5.x) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
   <title>Carflow - Alquiler de vehículos</title>
 </head>
 <body>
 
   <!-- Navbar -->
-  @include('PaginaPrincipal.navbar')
+  @include('layouts.navbar')
 
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
     <div class="container">
-      <small>Inicio &gt; Alquiler coches</small>
+      <small>Inicio &gt; Alquiler coches &gt; </small>
     </div>
   </div>
 
@@ -27,19 +31,20 @@
         <form class="filter-form">
           <div class="form-group">
             <label>Tipo de vehículo:</label><br>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipoVehiculo" id="coches" value="coches" checked>
-              <label class="form-check-label" for="coches">Coches</label>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+              @foreach ($tipos as $index => $tipo)
+                <label class="btn btn-outline-primary {{ $index === 0 ? 'active' : '' }}">
+                  <input 
+                    type="radio" 
+                    name="tipoVehiculo" 
+                    value="{{ $tipo->nombre }}" 
+                    autocomplete="off" 
+                    {{ $index === 0 ? 'checked' : '' }}>
+                  {{ $tipo->nombre }}
+                </label>
+              @endforeach
             </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipoVehiculo" id="motos" value="motos">
-              <label class="form-check-label" for="motos">Motos</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipoVehiculo" id="furgonetas" value="furgonetas">
-              <label class="form-check-label" for="furgonetas">Furgonetas</label>
-            </div>
-          </div>
+          </div>               
 
           <div class="form-row">
             <div class="form-group col-md-6">
@@ -57,41 +62,43 @@
       </div>
       <div class="col-md-6 text-center">
         <!-- Ejemplo de imágenes a la derecha -->
-        <img src="https://via.placeholder.com/350x200/4f2b90/FFFFFF?text=Auto+1" class="img-fluid mb-2" alt="Auto 1">
-        <img src="https://via.placeholder.com/350x200/4f2b90/FFFFFF?text=Auto+2" class="img-fluid" alt="Auto 2">
+        <img src="{{ asset('img/coches.png') }}" class="img-fluid mb-2" alt="Auto 1">
       </div>
     </div>
-  </div>
-
+  </div> 
+  
   <!-- Sección de estadísticas -->
-  <div class="container stats-section">
-    <div class="row text-center">
-      <div class="col-6 col-md-3">
+  <div class="container-fluid stats-section">
+    <div class="row no-gutters text-center">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <h3>8</h3>
-          <p>Usuarios registrados</p>
+          <i class="fas fa-users"></i>
+          <div class="stat-content">
+            <h3>{{ $usuariosClientes }}</h3>
+            <p>Usuarios registrados</p>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <h3>100.000</h3>
-          <p>Vehículos registrados</p>
+          <i class="fas fa-car"></i>
+          <div class="stat-content">
+            <h3>{{ number_format($vehiculos, 0, ',', '.') }}</h3>
+            <p>Vehículos registrados</p>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <h3>4.8</h3>
-          <p>Valoración de la web</p>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-box">
-          <h3>★ ★ ★ ★ ☆</h3>
-          <p>Opiniones</p>
+          <i class="fas fa-star"></i>
+          <div class="stat-content">
+            <h3>{{ $valoracionMedia }}</h3>
+            <p>Valoración de la web</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </div>    
 
   <!-- Sección de Top 10 vehículos -->
   <div class="container vehicles-section">
@@ -104,8 +111,13 @@
           <div class="card-body">
             <h5 class="card-title">Coche 1</h5>
             <p class="card-text">80.000 km | 20.000 €</p>
+            <div class="text-end">
+              <a href="{{ route('vehiculo.detalle', ['id' => 1]) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-shopping-cart"></i> Añadir
+              </a>              
+            </div>
           </div>
-        </div>
+        </div>        
       </div>
       <!-- Card 2 -->
       <div class="col-sm-6 col-md-3 mb-4">

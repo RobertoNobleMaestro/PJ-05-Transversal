@@ -65,10 +65,18 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(){
-        if(Auth::check()){
+    public function logout(Request $request)
+    {
+        if (Auth::check()) {
             Auth::logout();
-            return redirect()->route('login')->with('success', 'Sesión cerrada correctamente');
+
+            // Invalidar la sesión
+            $request->session()->invalidate();
+
+            // Regenerar el token CSRF por seguridad
+            $request->session()->regenerateToken();
+
+            return redirect()->route('home')->with('success', 'Sesión cerrada correctamente.');
         }
 
         return redirect()->route('login');
