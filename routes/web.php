@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VehiculoController;
 
 Route::redirect('/', '/home');
 
@@ -37,8 +38,4 @@ Route::get('/admin', function () {
     return view('admin.index');
 })->name('admin.index');
 
-use App\Http\Controllers\VehiculoController;
-
 Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-
-// Route::get('/vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
