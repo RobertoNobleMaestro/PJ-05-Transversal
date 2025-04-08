@@ -112,9 +112,9 @@
             <h5 class="card-title">Coche 1</h5>
             <p class="card-text">80.000 km | 20.000 €</p>
             <div class="text-end">
-              <a href="{{ url('/vehiculo/detalle_vehiculo/1') }}" class="btn btn-sm btn-outline-primary">
+              <a href="{{ route('vehiculo.detalle', ['id' => 1]) }}" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-shopping-cart"></i> Añadir
-              </a>
+              </a>              
             </div>
           </div>
         </div>        
