@@ -8,23 +8,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\CarritoController;
 
+Route::redirect('/', '/home');
+
 Route::get('/ver-carrito', [CarritoController::class, 'index'])->middleware('auth');
 Route::get('/carrito', function () {
     return view('carrito.index');
 })->middleware('auth');
 
-Route::redirect('/', '/home');
-
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-
-// Rutas del login
-Route::controller(AuthController::class)->group(function () {
-    Route::get('/login', 'login')->name('login');
-    Route::post('/login', 'loginProcess')->name('login.post');
-    Route::get('/logout', 'logout')->name('logout');
-});
-
-Route::get('/usuario/perfil-imagen', function () {
+Route::get('/home-stats', [\App\Http\Controllers\HomeController::class, 'stats']);
+Route::get('/perfil-imagen', function () {
     $user = Auth::user();
 
     return response()->json([
@@ -32,6 +25,12 @@ Route::get('/usuario/perfil-imagen', function () {
     ]);
 })->middleware('auth');
 
+// Rutas del login
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'login')->name('login');
+    Route::post('/login', 'loginProcess')->name('login.post');
+    Route::get('/logout', 'logout')->name('logout');
+});
 
 Route::get('/perfil/{id}', [PerfilController::class, 'usuario'])->name('perfil');
 Route::get('/perfil/{id}/datos', [PerfilController::class, 'obtenerDatos'])->name('perfil.datos');
