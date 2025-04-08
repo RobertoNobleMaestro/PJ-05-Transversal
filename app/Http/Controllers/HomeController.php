@@ -10,18 +10,32 @@ use App\Models\Tipo;
 
 class HomeController extends Controller
 {
+    /**
+     * Muestra la página principal con estadísticas y tipos.
+     */
     public function index()
     {
-        $usuariosClientes = User::where('id_roles', 2)->count();
-        $vehiculos = Vehiculo::count();
-        $valoracionMedia = Valoracion::avg('valoracion');
-        $tipos = Tipo::all(); // Tipos de vehículos
+        return view('PaginaPrincipal.index', $this->getStatsData());
+    }
 
-        return view('PaginaPrincipal.index', [
-            'usuariosClientes' => $usuariosClientes,
-            'vehiculos' => $vehiculos,
-            'valoracionMedia' => round($valoracionMedia, 1),
-            'tipos' => $tipos,
-        ]);
+    /**
+     * Devuelve las estadísticas como JSON para peticiones AJAX.
+     */
+    public function stats()
+    {
+        return response()->json($this->getStatsData());
+    }
+
+    /**
+     * Reúne los datos de estadísticas y tipos de vehículos.
+     */
+    private function getStatsData(): array
+    {
+        return [
+            'usuariosClientes' => User::where('id_roles', 2)->count(),
+            'vehiculos' => Vehiculo::count(),
+            'valoracionMedia' => round(Valoracion::avg('valoracion'), 1),
+            'tipos' => Tipo::all(),
+        ];
     }
 }

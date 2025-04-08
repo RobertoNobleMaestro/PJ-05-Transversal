@@ -12,10 +12,10 @@
             <a class="nav-link" href="{{ route('logout') }}">
               <i class="fas fa-sign-out-alt"></i>
             </a>
-          </li>          
+          </li>
           <!-- Carrito -->
           <li class="nav-item">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="{{ route('carrito') }}">
               <i class="fas fa-shopping-cart me-1"></i>
             </a>
           </li>
