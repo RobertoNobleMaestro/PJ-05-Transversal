@@ -34,7 +34,7 @@ class HomeController extends Controller
     }
 
     // Vehiculos via fetch
-    public function apiListado() {
+    public function listado() {
         $vehiculos = Vehiculo::select('id_vehiculos', 'marca', 'modelo', 'kilometraje')->get();
         return response()->json($vehiculos);
     }
