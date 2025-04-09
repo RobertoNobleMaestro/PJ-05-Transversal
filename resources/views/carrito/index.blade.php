@@ -24,10 +24,10 @@
 
     .resumen-carrito {
       flex: 1;
-      background: #f5f5f5;
+      background: white;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
       height: fit-content;
     }
 
@@ -35,16 +35,16 @@
       background: white;
       margin-bottom: 20px;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 16px;
       display: flex;
       gap: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .vehiculo-item:hover {
       transform: translateY(-5px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
     }
 
     .vehiculo-item img {
@@ -72,7 +72,7 @@
 
     .detalle i {
       margin-right: 8px;
-      color: #28a745;
+      color: #6f42c1;
     }
 
     .resumen-titulo {
@@ -82,30 +82,31 @@
 
     .resumen-precio {
       font-size: 22px;
-      color: #27ae60;
+      color: #6f42c1;
       font-weight: bold;
     }
 
     .boton {
       display: block;
-      width: 100%;
       margin-top: 20px;
       padding: 12px;
-      background: #28a745;
+      background: linear-gradient(to right, #6f42c1, #9b59b6);
       color: white;
       text-align: center;
-      border-radius: 5px;
+      border-radius: 15px;
       text-decoration: none;
       font-weight: bold;
+      transition: all 0.3s ease;
     }
 
     .boton:hover {
-      background: #218838;
+      background: linear-gradient(to right, #5a2b97, #8e44ad);
+      transform: translateY(-2px) scale(1.05);
     }
 
     .subtexto {
       font-size: 14px;
-      color: #777;
+      color: #444;
     }
 
     hr {
@@ -113,9 +114,37 @@
       border: 0;
       border-top: 1px solid #ccc;
     }
+
+    .btn-volver {
+      display: inline-block;
+      background: linear-gradient(to right, #6f42c1, #e100ff);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 15px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-volver:hover {
+      background: linear-gradient(to right, #5a2b97, #c400e3);
+      transform: scale(1.05);
+      color: white;
+    }
+
+    .btn-volver i {
+      margin-right: 6px;
+    }
   </style>
 </head>
 <body>
+  <div class="container mt-4">
+    <a href="{{ asset('home') }}" class="btn-volver">
+      <i class="fas fa-arrow-left me-2"></i> Volver
+    </a>
+  </div>
   <h1>Carrito de Vehículos Reservados</h1>
   <div class="contenedor-principal">
     
@@ -125,15 +154,14 @@
     <!-- Resumen de reserva -->
     <div class="resumen-carrito" id="resumenReserva">
       <div class="resumen-titulo">Tu Reserva 🔒</div>
-      <p><img src="/storage/default-logo.png" style="height: 20px;"> Proveedor</p>
       <p><span class="subtexto">–</span> <span class="subtexto">0 opiniones</span></p>
       <hr>
       <p class="subtexto">Precio total del día</p>
-      <p class="resumen-precio" id="precioDia">EUR$ —</p>
+      <p class="resumen-precio" id="precioDia">EUR€ —</p>
       <p class="subtexto" id="planIncluido">Incluido en el plan: Básico</p>
       <hr>
       <p><strong>Monto total:</strong></p>
-      <p class="resumen-precio" id="montoTotal">EUR$ —</p>
+      <p class="resumen-precio" id="montoTotal">EUR€ —</p>
       <a href="/finalizar-compra" class="boton">Continuar</a>
     </div>
 
@@ -199,8 +227,8 @@
         });
 
         // Actualizar resumen general
-        document.getElementById('precioDia').textContent = `EUR$ ${precioDia.toFixed(2)}`;
-        document.getElementById('montoTotal').textContent = `EUR$ ${total.toFixed(2)}`;
+        document.getElementById('precioDia').textContent = `EUR€ ${precioDia.toFixed(2)}`;
+        document.getElementById('montoTotal').textContent = `EUR€ ${total.toFixed(2)}`;
       })
       .catch(error => {
         console.error(error);
