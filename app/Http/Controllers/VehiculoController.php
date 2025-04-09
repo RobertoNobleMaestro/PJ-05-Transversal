@@ -11,19 +11,19 @@ class VehiculoController extends Controller
 {
     public function detalle($id)
     {
-        // Cargar detalles del vehículo, sus características, valoraciones, etc.
-        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones'])->findOrFail($id);
-    
-        // Obtener el precio unitario desde la tabla vehiculos_reservas, si existe alguna reserva activa
-        $precioUnitario = VehiculosReservas::where('id_vehiculos', $id)
-            ->where('fecha_final', '>=', now())  // Asegurarse de que la reserva esté activa
-            ->first()->precio_unitario ?? 100;  // Valor por defecto si no se encuentra una reserva activa
+        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva'])
+            ->findOrFail($id);
+
+        $precioUnitario = $vehiculo->vehiculosReservas
+            ->where('fecha_final', '>=', now())
+            ->first()->precio_unitario ?? $vehiculo->precio_unitario;
 
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo,
-            'precioUnitario' => $precioUnitario
+            'precio_unitario' => $precioUnitario
         ]);
     }
+
 
     public function añadirAlCarrito($id)
     {
