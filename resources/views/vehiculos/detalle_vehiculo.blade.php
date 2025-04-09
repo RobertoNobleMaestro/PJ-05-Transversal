@@ -54,7 +54,7 @@
             <!-- Carrito con estilo destacado -->
             <div class="highlight-box">
                 <button id="btnAñadirCarrito" 
-                        class="btn btn-warning w-100 d-flex align-items-center"
+                        class="btn w-100 d-flex align-items-center"
                         data-vehiculo-id="{{ $vehiculo->id_vehiculos }}">
                     <i class="fas fa-shopping-cart fa-bounce mr-3"></i> 
                     <div>
@@ -88,6 +88,7 @@
 </footer>
 
 <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/vehiculos.js') }}"></script>

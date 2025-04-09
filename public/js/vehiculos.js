@@ -21,18 +21,14 @@ function cargarValoraciones(vehiculoId) {
             let html = '';
             data.forEach(valoracion => {
                 let estrellas = '';
-                // Verificar si usar valoracion o puntuacion según lo que devuelva la API
                 const rating = valoracion.valoracion !== undefined ? valoracion.valoracion : valoracion.puntuacion;
                 
                 for (let i = 0; i < 5; i++) {
-                    if (i < rating) {
-                        estrellas += '<i class="fas fa-star"></i>';
-                    } else {
-                        estrellas += '<i class="far fa-star"></i>';
-                    }
+                    estrellas += i < rating 
+                        ? '<i class="fas fa-star"></i>' 
+                        : '<i class="far fa-star"></i>';
                 }
                 
-                // Manejar usuario y foto de perfil
                 const usuarioNombre = valoracion.usuario ? valoracion.usuario.nombre : 'Usuario';
                 const fotoPerfil = valoracion.usuario && valoracion.usuario.foto_perfil 
                     ? `/img/${valoracion.usuario.foto_perfil}` 
@@ -66,10 +62,7 @@ function cargarValoraciones(vehiculoId) {
  * @param {number} vehiculoId - ID del vehículo
  */
 function iniciarDetalleVehiculo(vehiculoId) {
-    // Cargar valoraciones al iniciar la página
     cargarValoraciones(vehiculoId);
-    
-    // Aquí podrían añadirse más funcionalidades para la página de detalle
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -79,7 +72,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const vehiculoId = btnCarrito.getAttribute('data-vehiculo-id');
 
             if (!vehiculoId) {
-                alert('No se encontró el ID del vehículo.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se encontró el ID del vehículo.'
+                });
                 return;
             }
 
@@ -93,15 +90,27 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    alert('✅ ¡Vehículo añadido al carrito!');
+                if (data.alert) {
+                    Swal.fire({
+                        icon: data.alert.icon || 'info',
+                        title: data.alert.title || '',
+                        text: data.alert.text || ''
+                    });
                 } else {
-                    alert('⚠️ Error: ' + data.error);
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Atención',
+                        text: 'No se recibió una respuesta válida del servidor.'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error al añadir al carrito:', error);
-                alert('❌ Hubo un error al procesar tu solicitud.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un problema al procesar tu solicitud.'
+                });
             });
         });
     }
