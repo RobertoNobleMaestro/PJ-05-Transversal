@@ -49,7 +49,11 @@ class Vehiculo extends Model
     {
         return $this->belongsToMany(Reserva::class, 'vehiculos_reservas', 'id_vehiculos', 'id_reservas');
     }
-
+    public function vehiculosReservas()
+    {
+        return $this->hasMany(VehiculosReservas::class, 'id_vehiculos', 'id_vehiculos');
+    }
+    
     public function valoraciones()
     {
         return $this->hasManyThrough(

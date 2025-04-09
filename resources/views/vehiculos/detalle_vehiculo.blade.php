@@ -5,52 +5,8 @@
     <title>{{ $vehiculo->marca }} {{ $vehiculo->modelo }} | Carflow</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
-
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f9f9f9;
-        }
-        .breadcrumb-container {
-            background-color: #e9ecef;
-            padding: 10px 0;
-        }
-        .vehiculo-detail-section {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .highlight-box {
-            background-color: #fffcdb;
-            border-left: 6px solid #ffcc00;
-            padding: 15px;
-            margin-top: 20px;
-            font-weight: 500;
-        }
-        .valoracion i {
-            color: gold;
-        }
-        ul.caracteristicas {
-            list-style: none;
-            padding: 0;
-        }
-        ul.caracteristicas li {
-            padding: 5px 0;
-        }
-        ul.caracteristicas li i {
-            color: #007bff;
-            margin-right: 6px;
-        }
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            background-color: #222;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/Vehiculos/styles.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
 
@@ -58,14 +14,17 @@
 
 <div class="breadcrumb-container">
     <div class="container">
-        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</small>
+        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo->nombre }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
     </div>
 </div>
 
 <div class="container vehiculo-detail-section">
     <div class="row">
-        <div class="col-md-6 text-center">
-            <img src="{{ asset('img/' . $vehiculo->imagen) }}" class="img-fluid" alt="{{ $vehiculo->marca }}">
+        <div class="col-md-6">
+            <div class="imagen-box text-center">
+                <img src="{{ asset('img/' . $vehiculo->imagen) }}" class="img-fluid mb-3" alt="">
+                <img src="{{ asset('img/mercedes.png') }}" class="img-fluid" alt="">
+            </div>
         </div>
         <div class="col-md-6">
             <p class="text-muted">
@@ -75,51 +34,51 @@
             <h2>{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</h2>
             <p>{{ $vehiculo->descripcion }}</p>
 
-            <!-- Características -->
-            <h4 class="mt-4">Características</h4>
-            <ul class="caracteristicas">
-                <li><i class="fas fa-cogs"></i> Transmisión: {{ $vehiculo->caracteristicas->transmision }}</li>
-                <li><i class="fas fa-car"></i> Tipo: {{ $vehiculo->tipo->nombre }}</li>
-                <li><i class="fas fa-tachometer-alt"></i> Kilometraje: {{ number_format($vehiculo->kilometraje, 0, ',', '.') }} km</li>
-                <li><i class="fas fa-map-marker-alt"></i> Ubicación: {{ $vehiculo->lugar->nombre }}</li>
-                <li><i class="fas fa-snowflake"></i> Aire acondicionado: {{ $vehiculo->caracteristicas->aire_acondicionado ? 'Sí' : 'No' }}</li>
-                <li><i class="fas fa-sun"></i> Techo solar: {{ $vehiculo->caracteristicas->techo ? 'Sí' : 'No' }}</li>
-                <li><i class="fas fa-suitcase"></i> Capacidad del maletero: {{ $vehiculo->caracteristicas->capacidad_maletero }} L</li>
-                <li><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</li>
-            </ul>
+            <!-- Características en 4 filas de 2 columnas -->
+            <div class="caracteristicas-box">
+                <div class="row caracteristicas">
+                    <div class="col-md-6"><i class="fas fa-cogs"></i> Transmisión: {{ $vehiculo->caracteristicas->transmision }}</div>
+                    <div class="col-md-6"><i class="fas fa-car"></i> Tipo: {{ $vehiculo->tipo->nombre }}</div>
 
-            <div class="highlight-box">
-                <i class="fas fa-shopping-cart"></i> Guarda tus búsquedas favoritas en el carrito!
+                    <div class="col-md-6"><i class="fas fa-tachometer-alt"></i> Kilometraje: {{ number_format($vehiculo->kilometraje, 0, ',', '.') }} km</div>
+                    <div class="col-md-6"><i class="fas fa-map-marker-alt"></i> Ubicación: {{ $vehiculo->lugar->nombre }}</div>
+
+                    <div class="col-md-6"><i class="fas fa-snowflake"></i> Aire acondicionado: {{ $vehiculo->caracteristicas->aire_acondicionado ? 'Sí' : 'No' }}</div>
+                    <div class="col-md-6"><i class="fas fa-sun"></i> Techo solar: {{ $vehiculo->caracteristicas->techo ? 'Sí' : 'No' }}</div>
+
+                    <div class="col-md-6"><i class="fas fa-suitcase"></i> Maletero: {{ $vehiculo->caracteristicas->capacidad_maletero }} L</div>
+                    <div class="col-md-6"><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</div>
+                </div>
             </div>
+
+            <!-- Carrito con estilo destacado -->
+            <div class="highlight-box">
+                <button id="btnAñadirCarrito" 
+                        class="btn w-100 d-flex align-items-center"
+                        data-vehiculo-id="{{ $vehiculo->id_vehiculos }}">
+                    <i class="fas fa-shopping-cart fa-bounce mr-3"></i> 
+                    <div>
+                        <strong>¡Añade este vehículo a tu carrito!</strong><br>
+                        Guarda tus búsquedas favoritas en el carrito para compararlas más tarde.
+                    </div>
+                </button>
+            </div>
+
         </div>
     </div>
 
     <hr>
 
-    <!-- Valoraciones -->
+    <!-- Valoraciones con Fetch API -->
     <h4 class="mt-5">VALORACIONES</h4>
-
-    @if ($vehiculo->valoraciones->count())
-        @foreach ($vehiculo->valoraciones as $valoracion)
-            <div class="valoracion mb-4">
-                <p>
-                    <strong><i class="fas fa-user-circle"></i> {{ $valoracion->usuario->name }}</strong>
-                    {{-- <small class="text-muted">{{ $valoracion->created_at->format('d M Y') }}</small> --}}
-                </p>
-                {{-- <p>
-                    @for ($i = 0; $i < $valoracion->calificacion; $i++)
-                        <i class="fas fa-star"></i>
-                    @endfor
-                    @for ($i = $valoracion->calificacion; $i < 5; $i++)
-                        <i class="far fa-star"></i>
-                    @endfor
-                </p> --}}
-                <p>{{ $valoracion->comentario }}</p>
+    <div id="valoraciones-container">
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Cargando valoraciones...</span>
             </div>
-        @endforeach
-    @else
-        <p class="text-muted">Este vehículo aún no tiene valoraciones.</p>
-    @endif
+            <p>Cargando valoraciones...</p>
+        </div>
+    </div>
 </div>
 
 <footer>
@@ -128,5 +87,15 @@
     </div>
 </footer>
 
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/vehiculos.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        iniciarDetalleVehiculo({{ $vehiculo->id_vehiculos }});
+    });
+</script>
 </body>
 </html>

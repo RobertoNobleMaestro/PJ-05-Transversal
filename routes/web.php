@@ -31,7 +31,7 @@
         Route::post('/perfil/{id}/actualizar', [PerfilController::class, 'actualizar'])->name('perfil.actualizar');
         Route::post('/perfil/upload-foto', [PerfilController::class, 'uploadFoto'])->name('perfil.upload-foto');
 
-        // Actualización imagen de perfil /home
+        // ActualizaciÃ³n imagen de perfil /home
         Route::get('/perfil-imagen', function () {
             $user = Auth::user();
             return response()->json([
@@ -50,3 +50,12 @@
 
     // Vehiculos
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
+
+    // API para valoraciones
+    Route::get('/api/vehiculos/{id}/valoraciones', function($id) {
+        $vehiculo = App\Models\Vehiculo::findOrFail($id);
+        $valoraciones = $vehiculo->valoraciones()->with('usuario')->get();
+        
+        return response()->json($valoraciones);
+    });
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
