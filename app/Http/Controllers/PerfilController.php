@@ -11,7 +11,9 @@ class PerfilController extends Controller
 {
     public function usuario($id)
     {
-        return view('Perfil.index');
+        $licencias = ['AM', 'A1', 'A2', 'A', 'B', 'B+E', 'C1', 'C1+E', 'C', 'C+E', 'D1', 'D1+E', 'D', 'D+E'];
+        $user = User::findOrFail($id);
+        return view('Perfil.index', compact('user', 'licencias'));
     }
 
     public function obtenerDatos($id)

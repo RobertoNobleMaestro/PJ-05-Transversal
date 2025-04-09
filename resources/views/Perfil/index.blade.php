@@ -124,7 +124,13 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="licencia_conducir" class="form-label">Licencia de conducir</label>
-              <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+              <select class="form-control" id="licencia_conducir" name="licencia_conducir" required>
+                  <option value="">Selecciona una opción</option>
+                  @foreach ($licencias as $licencia)
+                      <option value="{{ $licencia }}" {{ $licencia == old('licencia_conducir', $user->licencia_conducir) ? 'selected' : '' }}>{{ $licencia }}</option>
+                  @endforeach
+              </select>
+              <span class="error_message" id="error_licencia_conducir"></span>
             </div>
             <div class="col-12 mb-3">
               <label for="foto_perfil" class="form-label">Foto de perfil</label>
