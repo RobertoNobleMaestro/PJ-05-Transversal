@@ -31,7 +31,10 @@
                 Publicado: {{ $vehiculo->created_at->format('d/m/Y H:i') }} | 
                 Modificado: {{ $vehiculo->updated_at->format('d/m/Y H:i') }}
             </p>
-            <h2>{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</h2>
+            <h2 class="d-flex justify-content-between">
+                {{ $vehiculo->marca }} {{ $vehiculo->modelo }}
+                <span class="h4 text-success">€{{ number_format($vehiculo->precio_unitario, 2, ',', '.') }}</span>
+            </h2>
             <p>{{ $vehiculo->descripcion }}</p>
 
             <!-- Características en 4 filas de 2 columnas -->
@@ -50,8 +53,7 @@
                     <div class="col-md-6"><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</div>
                 </div>
             </div>
-
-            <!-- Carrito con estilo destacado -->
+            
             <div class="highlight-box">
                 <button id="btnAñadirCarrito" 
                         class="btn w-100 d-flex align-items-center"
@@ -59,7 +61,6 @@
                     <i class="fas fa-shopping-cart fa-bounce mr-3"></i> 
                     <div>
                         <strong>¡Añade este vehículo a tu carrito!</strong><br>
-                        Guarda tus búsquedas favoritas en el carrito para compararlas más tarde.
                     </div>
                 </button>
             </div>

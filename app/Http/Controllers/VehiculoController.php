@@ -14,8 +14,14 @@ class VehiculoController extends Controller
         // Cargar detalles del vehículo, sus características, valoraciones, etc.
         $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones'])->findOrFail($id);
     
+        // Obtener el precio unitario desde la tabla vehiculos_reservas, si existe alguna reserva activa
+        $precioUnitario = VehiculosReservas::where('id_vehiculos', $id)
+            ->where('fecha_final', '>=', now())  // Asegurarse de que la reserva esté activa
+            ->first()->precio_unitario ?? 100;  // Valor por defecto si no se encuentra una reserva activa
+
         return view('vehiculos.detalle_vehiculo', [
-            'vehiculo' => $vehiculo
+            'vehiculo' => $vehiculo,
+            'precioUnitario' => $precioUnitario
         ]);
     }
 
@@ -41,12 +47,17 @@ class VehiculoController extends Controller
                 ],
                 [
                     'fecha_reserva' => now(),
-                    'total_precio' => 0, // se puede recalcular luego
+                    'total_precio' => 0, // Se puede recalcular luego
                     'id_lugar' => $vehiculo->id_lugar,
                 ]
             );
 
-            // 2. Insertar el vehículo en vehiculos_reservas si aún no está
+            // 2. Obtener el precio unitario del vehículo desde la tabla vehiculos_reservas
+            $precioUnitario = VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)
+                ->where('id_reservas', $reserva->id_reservas)
+                ->first()->precio_unitario ?? 100; // Usamos 100 como valor por defecto si no se encuentra el precio.
+
+            // 3. Insertar el vehículo en vehiculos_reservas si aún no está
             $existe = VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)
                 ->where('id_reservas', $reserva->id_reservas)
                 ->exists();
@@ -59,10 +70,11 @@ class VehiculoController extends Controller
                 ]]);
             }
 
+            // Insertar la relación con el precio unitario obtenido
             VehiculosReservas::create([
                 'fecha_ini' => now()->toDateString(),
                 'fecha_final' => now()->addDays(3)->toDateString(),
-                'precio_unitario' => 100,  // Este precio puede venir del vehículo
+                'precio_unitario' => $precioUnitario,  // Usar el precio unitario de la reserva
                 'id_reservas' => $reserva->id_reservas,
                 'id_vehiculos' => $vehiculo->id_vehiculos,
             ]);

@@ -62,7 +62,7 @@
           <button type="button" class="btn btn-success mt-2" id="btnCapturarFoto">Capturar</button>
           <canvas id="canvasFoto" style="display:none;"></canvas>
         </div>
-        <button class="btn btn-editar" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">Editar perfil</button>            
+        <button class="btn-editar" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">Editar perfil</button>            
         </div>
     </div>
   </div>

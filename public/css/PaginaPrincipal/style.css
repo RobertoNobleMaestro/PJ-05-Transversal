@@ -6,26 +6,6 @@ body {
   background-color: #ECECEC;
 }
 
-/* ===== Navbar personalizada ===== */
-.navbar-custom {
-  background-color: #fff;
-  padding: 1rem 0;
-  border-bottom: 2px solid #e5e5e5;
-}
-
-.navbar-custom .nav-link {
-  color: #fff;
-  background-color: #e100ff;
-  border-radius: 5px;
-  padding: 6px 12px;
-  margin-left: 10px;
-  font-weight: 500;
-}
-
-.navbar-custom .nav-link:hover {
-  background-color: #c000d6;
-  color: #fff;
-}
 
 /* ===== Breadcrumb ===== */
 .breadcrumb-container {
@@ -62,25 +42,27 @@ body {
 }
 
 .btn-group-toggle .btn {
-  border: none;
-  background-color: transparent;
-  color: #000;
+  border: none !important;
+  background-color: transparent !important;
+  color: #000 !important;
   font-weight: 500;
   padding: 4px 18px;
   border-radius: 10px;
   transition: background-color 0.2s ease, color 0.2s ease;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
-.btn-group-toggle .btn:hover {
-  background-color: #5a21cb;
+/* Hover solo si NO está activo */
+.btn-group-toggle .btn:not(.active):hover {
+  background-color: #cacaca !important;
 }
 
+/* Estado activo (ya seleccionado) */
 .btn-group-toggle .btn.active {
-  background-color: #fff;
+  background-color: #fff !important;
   color: #000;
-  border: 2px solid #fff;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  border: 2px solid #fff !important;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1) !important;
 }
 
 .btn-outline-primary.active,

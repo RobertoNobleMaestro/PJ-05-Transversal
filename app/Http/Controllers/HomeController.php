@@ -10,25 +10,19 @@ use App\Models\Tipo;
 
 class HomeController extends Controller
 {
-    /**
-     * Muestra la página principal con estadísticas y tipos.
-     */
+    // Pagina principal con las estadisticas y el tipo
     public function index()
     {
         return view('PaginaPrincipal.index', $this->getStatsData());
     }
 
-    /**
-     * Devuelve las estadísticas como JSON para peticiones AJAX.
-     */
+    // Devolver estadísticas via JSON
     public function stats()
     {
         return response()->json($this->getStatsData());
     }
 
-    /**
-     * Reúne los datos de estadísticas y tipos de vehículos.
-     */
+    // Estadísticas y tipo vehiculo via fetch
     private function getStatsData(): array
     {
         return [
@@ -38,4 +32,11 @@ class HomeController extends Controller
             'tipos' => Tipo::all(),
         ];
     }
+
+    // Vehiculos via fetch
+    public function apiListado() {
+        $vehiculos = Vehiculo::select('id_vehiculos', 'marca', 'modelo', 'kilometraje')->get();
+        return response()->json($vehiculos);
+    }
+    
 }

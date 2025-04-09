@@ -1,0 +1,88 @@
+/* Estilos generales para la navbar */
+.navbar-custom {
+    padding: 10px 0; /* Espaciado interno */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra */
+}
+
+.navbar-custom .navbar-brand img {
+    height: 40px; /* Altura del logo */
+    transition: transform 0.3s ease; /* Transición suave */
+}
+
+.navbar-custom .navbar-brand img:hover {
+    transform: scale(1.08); /* Efecto de escala al pasar el mouse */
+}
+
+.navbar-custom .navbar-toggler {
+    border: none; 
+}
+
+.navbar-custom .navbar-toggler-icon {
+    color: #000000; 
+}
+
+.navbar-custom .nav-link {
+    color: #000000 !important;
+    margin: 0 10px; 
+    font-size: 16px; /* Tamaño del texto */
+    transition: color 0.3s ease; /* Transición suave del color */
+}
+
+.navbar-custom .nav-link:hover {
+    color: #6f42c1 !important; /* Color del texto al pasar el mouse */
+}
+
+.navbar-custom .navbar-nav {
+    align-items: center; /* Centra los elementos verticalmente */
+}
+
+.navbar-custom .navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-custom .navbar-nav .nav-item img {
+    border: 2px solid #000000; /* Borde de la imagen de perfil */
+    transition: border-color 0.3s ease; /* Transición suave del borde */
+}
+
+.navbar-custom .navbar-nav .nav-item img:hover {
+    border-color: #6f42c1; /* Cambia el color del borde al pasar el mouse */
+}
+
+/* Estilos para el menú desplegable en dispositivos móviles */
+@media (max-width: 991.98px) {
+    .navbar-custom .navbar-collapse {
+        padding: 10px; /* Espaciado interno */
+        border-radius: 5px; /* Bordes redondeados */
+        margin-top: 10px; /* Espaciado superior */
+    }
+
+    .navbar-custom .navbar-nav .nav-item {
+        margin: 5px 0; /* Espaciado entre los elementos del menú */
+    }
+
+    .navbar-custom .navbar-nav .nav-link {
+        padding: 10px; /* Espaciado interno de los enlaces */
+    }
+}
+
+/* Estilos para pantallas pequeñas (móviles) */
+@media (max-width: 575.98px) {
+    .navbar-custom .navbar-brand img {
+        height: 30px; /* Altura del logo en pantallas pequeñas */
+    }
+
+    .navbar-custom .navbar-toggler-icon {
+        font-size: 24px; /* Tamaño del ícono del toggler */
+    }
+
+    .navbar-custom .nav-link {
+        font-size: 14px; /* Tamaño del texto en pantallas pequeñas */
+    }
+
+    .navbar-custom .navbar-nav .nav-item img {
+        width: 30px; /* Tamaño de la imagen de perfil */
+        height: 30px; /* Tamaño de la imagen de perfil */
+    }
+} 
