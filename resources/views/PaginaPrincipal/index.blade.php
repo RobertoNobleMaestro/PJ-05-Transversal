@@ -45,19 +45,19 @@
               @endforeach
             </div>            
           </div>               
-
           <div class="form-row">
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-5">
               <label for="ubicacion">Ubicación:</label>
               <input type="text" class="form-control" id="ubicacion" value="Madrid, España">
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-5">
               <label for="fecha">Fecha:</label>
               <input type="date" class="form-control" id="fecha">
             </div>
-          </div>
-          
-          <button type="submit" class="btn btn-primary">Buscar</button>
+            <div class="form-group col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+          </div>          
         </form>
       </div>
       <div class="col-md-6 text-center">
