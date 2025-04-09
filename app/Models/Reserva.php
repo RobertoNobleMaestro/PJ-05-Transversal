@@ -17,7 +17,8 @@ class Reserva extends Model
         'total_precio',
         'estado',
         'id_lugar',
-        'id_usuario'
+        'id_usuario',
+        'referencia_pago'
     ];
 
     protected $casts = [
@@ -37,7 +38,13 @@ class Reserva extends Model
 
     public function vehiculos()
     {
-        return $this->belongsToMany(Vehiculo::class, 'vehiculos_reservas', 'id_reservas', 'id_vehiculos');
+        return $this->belongsToMany(Vehiculo::class, 'vehiculos_reservas', 'id_reservas', 'id_vehiculos')
+                    ->withPivot('fecha_ini', 'fecha_final', 'precio_unitario');
+    }
+
+    public function vehiculosReservas()
+    {
+        return $this->hasMany(VehiculosReservas::class, 'id_reservas', 'id_reservas');
     }
 
     public function pago()
