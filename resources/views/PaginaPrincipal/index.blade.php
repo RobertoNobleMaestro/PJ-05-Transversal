@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
+  <script src="{{ asset('js/home.js') }}"></script>
   <title>Carflow - Alquiler de vehículos</title>
 </head>
 <body>
@@ -45,19 +46,19 @@
               @endforeach
             </div>            
           </div>               
-
           <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="ubicacion">Ubicación:</label>
-              <input type="text" class="form-control" id="ubicacion" value="Madrid, España">
+            <div class="form-group col-md-5">
+              <label for="ubicacion">Ciudad:</label>
+              <input type="text" class="form-control" id="ubicacion" value="Barcelona">
             </div>
-            <div class="form-group col-md-6">
-              <label for="fecha">Fecha:</label>
+            <div class="form-group col-md-5">
+              <label for="fecha">Fecha de reserva:</label>
               <input type="date" class="form-control" id="fecha">
             </div>
-          </div>
-          
-          <button type="submit" class="btn btn-primary">Buscar</button>
+            <div class="form-group col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+          </div>          
         </form>
       </div>
       <div class="col-md-6 text-center">
@@ -100,184 +101,15 @@
     </div>
   </div>    
 
-  <!-- Sección de Top 10 vehículos -->
   <div class="container vehicles-section">
     <h2>Top 10 Vehículos más solicitados</h2>
-    <div class="row">
-      <!-- Card 1 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+1" class="card-img-top" alt="Coche 1">
-          <div class="card-body">
-            <h5 class="card-title">Coche 1</h5>
-            <p class="card-text">80.000 km | 20.000 €</p>
-            <div class="text-end">
-              <a href="{{ route('vehiculo.detalle', ['id' => 1]) }}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-shopping-cart"></i> Añadir
-              </a>              
-            </div>
-          </div>
-        </div>        
-      </div>
-      <!-- Card 2 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+2" class="card-img-top" alt="Coche 2">
-          <div class="card-body">
-            <h5 class="card-title">Coche 2</h5>
-            <p class="card-text">40.000 km | 32.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 3 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+3" class="card-img-top" alt="Coche 3">
-          <div class="card-body">
-            <h5 class="card-title">Coche 3</h5>
-            <p class="card-text">10.000 km | 25.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 4 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+4" class="card-img-top" alt="Coche 4">
-          <div class="card-body">
-            <h5 class="card-title">Coche 4</h5>
-            <p class="card-text">80.000 km | 18.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 5 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+5" class="card-img-top" alt="Coche 5">
-          <div class="card-body">
-            <h5 class="card-title">Coche 5</h5>
-            <p class="card-text">90.000 km | 24.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 6 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+6" class="card-img-top" alt="Coche 6">
-          <div class="card-body">
-            <h5 class="card-title">Coche 6</h5>
-            <p class="card-text">40.000 km | 20.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 7 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+7" class="card-img-top" alt="Coche 7">
-          <div class="card-body">
-            <h5 class="card-title">Coche 7</h5>
-            <p class="card-text">70.000 km | 28.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 8 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+8" class="card-img-top" alt="Coche 8">
-          <div class="card-body">
-            <h5 class="card-title">Coche 8</h5>
-            <p class="card-text">50.000 km | 22.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 9 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+9" class="card-img-top" alt="Coche 9">
-          <div class="card-body">
-            <h5 class="card-title">Coche 9</h5>
-            <p class="card-text">30.000 km | 26.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 10 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+10" class="card-img-top" alt="Coche 10">
-          <div class="card-body">
-            <h5 class="card-title">Coche 10</h5>
-            <p class="card-text">20.000 km | 19.000 €</p>
-          </div>
-        </div>
-      </div>
+    <div class="row" id="vehiculos-container">
+      <!-- Aquí se insertarán los vehículos dinámicamente -->
     </div>
-  </div>
+  </div>  
 
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script>
-  function refrescarImagenPerfilNavbar() {
-    fetch("/perfil-imagen")
-      .then(response => response.json())
-      .then(data => {
-        const img = document.getElementById('navbar-profile-img');
-        if (img && data.foto) {
-          img.src = data.foto + '?' + new Date().getTime(); // evita caché
-        }
-      })
-      .catch(error => console.error('Error al actualizar la imagen:', error));
-  }
-
-  // Ejemplo: actualiza cada 30 segundos
-  setInterval(refrescarImagenPerfilNavbar, 30000);
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    fetch('/home-stats')
-      .then(res => res.json())
-      .then(data => {
-        // Actualizar estadísticas
-        document.querySelector('.stat-box .fa-users + .stat-content h3').textContent = data.usuariosClientes;
-        document.querySelector('.fa-car + .stat-content h3').textContent = new Intl.NumberFormat().format(data.vehiculos);
-        document.querySelector('.fa-star + .stat-content h3').textContent = data.valoracionMedia;
-  
-        // Actualizar tipos de vehículo dinámicamente
-        const container = document.querySelector('.btn-group-toggle');
-        if (container && data.tipos) {
-          container.innerHTML = ''; // limpiar
-          data.tipos.forEach((tipo, index) => {
-            container.innerHTML += `
-              <label class="btn btn-outline-primary ${index === 0 ? 'active' : ''}">
-                <input type="radio" name="tipoVehiculo" value="${tipo.nombre}" autocomplete="off" ${index === 0 ? 'checked' : ''}>
-                ${tipo.nombre}
-              </label>
-            `;
-          });
-        }
-      })
-      .catch(error => console.error('Error al cargar los datos:', error));
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const breadcrumbTipo = document.getElementById('breadcrumb-tipo');
-
-    // Inicializa con el tipo seleccionado por defecto
-    const tipoInicial = document.querySelector('input[name="tipoVehiculo"]:checked');
-    if (tipoInicial && breadcrumbTipo) {
-      breadcrumbTipo.textContent = tipoInicial.value;
-    }
-
-    // Actualiza cuando se cambia el tipo
-    document.addEventListener('change', function(e) {
-      if (e.target.name === 'tipoVehiculo') {
-        const tipoSeleccionado = e.target.value;
-        if (breadcrumbTipo) {
-          breadcrumbTipo.textContent = tipoSeleccionado;
-        }
-      }
-    });
-  });
-</script>
 </html>
