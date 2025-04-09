@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     cargarDatosPerfil();
     configurarFormulario();
@@ -185,4 +184,191 @@ document.getElementById('btnCapturarFoto').addEventListener('click', function ()
         });
         // --- FIN FETCH ---
     });
+});
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('profileForm');
+    const nombre = document.getElementById('nombre');
+    const email = document.getElementById('email');
+    const DNI = document.getElementById('DNI');
+    const fechaNacimiento = document.getElementById('fecha_nacimiento');
+    const direccion = document.getElementById('direccion');
+    const licenciaConducir = document.getElementById('licencia_conducir');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    // Errores
+    let nombreError = document.createElement('div');
+    let emailError = document.createElement('div');
+    let DNIError = document.createElement('div');
+    let fechaNacimientoError = document.createElement('div');
+    let direccionError = document.createElement('div');
+    let licenciaConducirError = document.createElement('div');
+
+    [nombreError, emailError, DNIError, fechaNacimientoError, direccionError, licenciaConducirError].forEach(error => {
+        error.style.color = 'red';
+        error.style.fontSize = '12px';
+    });
+
+    nombre.after(nombreError);
+    email.after(emailError);
+    DNI.after(DNIError);
+    fechaNacimiento.after(fechaNacimientoError);
+    direccion.after(direccionError);
+    licenciaConducir.after(licenciaConducirError);
+
+    // Estado inicial del formulario
+    let originalValues = {
+        nombre: nombre.value,
+        email: email.value,
+        DNI: DNI.value,
+        fechaNacimiento: fechaNacimiento.value,
+        direccion: direccion.value,
+        licenciaConducir: licenciaConducir.value
+    };
+
+    function checkChanges() {
+        let isChanged = (
+            nombre.value !== originalValues.nombre ||
+            email.value !== originalValues.email ||
+            DNI.value !== originalValues.DNI ||
+            fechaNacimiento.value !== originalValues.fechaNacimiento ||
+            direccion.value !== originalValues.direccion ||
+            licenciaConducir.value !== originalValues.licenciaConducir
+        );
+        submitButton.disabled = !isChanged;
+    }
+
+    function validateNombre() {
+        const value = nombre.value.trim();
+        const regex = /^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/;
+
+        if (value === "") {
+            nombreError.textContent = "El nombre está vacío";
+            nombre.style.borderColor = "red";
+            return false;
+        } else if (value.length < 3) {
+            nombreError.textContent = "Debe tener al menos 3 caracteres";
+            nombre.style.borderColor = "red";
+            return false;
+        } else if (!regex.test(value)) {
+            nombreError.textContent = "No puede contener números ni caracteres especiales";
+            nombre.style.borderColor = "red";
+            return false;
+        } else {
+            nombreError.textContent = "";
+            nombre.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validateEmail() {
+        const value = email.value.trim();
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        if (value === "") {
+            emailError.textContent = "El email está vacío";
+            email.style.borderColor = "red";
+            return false;
+        } else if (!regex.test(value)) {
+            emailError.textContent = "El email no tiene un formato válido";
+            email.style.borderColor = "red";
+            return false;
+        } else {
+            emailError.textContent = "";
+            email.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validateDNI() {
+        const value = DNI.value.trim();
+        const regex = /^\d{8}[A-Za-z]$/;
+
+        if (value === "") {
+            DNIError.textContent = "El DNI está vacío";
+            DNI.style.borderColor = "red";
+            return false;
+        } else if (!regex.test(value)) {
+            DNIError.textContent = "El DNI no tiene un formato válido";
+            DNI.style.borderColor = "red";
+            return false;
+        } else {
+            DNIError.textContent = "";
+            DNI.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validateFechaNacimiento() {
+        const value = fechaNacimiento.value.trim();
+        const today = new Date();
+        const birthDate = new Date(value);
+
+        if (value === "") {
+            fechaNacimientoError.textContent = "La fecha de nacimiento está vacía";
+            fechaNacimiento.style.borderColor = "red";
+            return false;
+        } else if (birthDate >= today) {
+            fechaNacimientoError.textContent = "La fecha de nacimiento no puede ser en el futuro";
+            fechaNacimiento.style.borderColor = "red";
+            return false;
+        } else {
+            fechaNacimientoError.textContent = "";
+            fechaNacimiento.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validateDireccion() {
+        const value = direccion.value.trim();
+
+        if (value === "") {
+            direccionError.textContent = "La dirección está vacía";
+            direccion.style.borderColor = "red";
+            return false;
+        } else {
+            direccionError.textContent = "";
+            direccion.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validateLicenciaConducir() {
+        const value = licenciaConducir.value.trim();
+
+        if (value === "") {
+            document.getElementById('error_licencia_conducir').textContent = "Debe seleccionar una licencia de conducir";
+            licenciaConducir.style.borderColor = "red";
+            return false;
+        } else {
+            document.getElementById('error_licencia_conducir').textContent = "";
+            licenciaConducir.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validateForm(event) {
+        let isValid = true;
+        if (!validateNombre()) isValid = false;
+        if (!validateEmail()) isValid = false;
+        if (!validateDNI()) isValid = false;
+        if (!validateFechaNacimiento()) isValid = false;
+        if (!validateDireccion()) isValid = false;
+        if (!validateLicenciaConducir()) isValid = false;
+
+        if (!isValid) {
+            event.preventDefault();
+        }
+    }
+
+    // Eventos
+    nombre.addEventListener('input', () => { validateNombre(); checkChanges(); });
+    email.addEventListener('input', () => { validateEmail(); checkChanges(); });
+    DNI.addEventListener('input', () => { validateDNI(); checkChanges(); });
+    fechaNacimiento.addEventListener('input', () => { validateFechaNacimiento(); checkChanges(); });
+    direccion.addEventListener('input', () => { validateDireccion(); checkChanges(); });
+    licenciaConducir.addEventListener('input', () => { validateLicenciaConducir(); checkChanges(); });
+    form.addEventListener('submit', validateForm);
+
+    // Deshabilitar el botón de guardar al inicio
+    submitButton.disabled = true;
 });
