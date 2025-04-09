@@ -74,6 +74,7 @@
                     <div class="form-row submit-row">
                         <button type="submit" class="btn-completar-registro">Completar Registro</button>
                     </div>
+                    <a href="{{route('login')}}" class=""> Ya tienes cuenta? Inicia Sesión </a>
                 </form>
             </div>
         </div>

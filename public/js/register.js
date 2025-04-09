@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Recogida de inputs y campos de error del formulario
     const inputNombre = document.getElementById('nombre');
     const error_nombre = document.getElementById('error_nombre');
     const inputEmail = document.getElementById('email');
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const error_permiso = document.getElementById('error_permiso');
     const form = document.getElementById('registerForm');
 
+    // Asignación de eventos onblur y definición del nombre de la función
     inputNombre.onblur = validaNombre;
     inputEmail.onblur = validaMail;
     inputDni.onblur = validaDni;
@@ -25,8 +27,11 @@ document.addEventListener('DOMContentLoaded', function () {
     inputDateNac.onblur = validaDateNac;
     inputDireccion.onblur = validaDireccion;
     inputPermiso.onblur = validaPermiso;
+
+    // Asignación del evento submit y definición de la función para validar el formulario
     form.onsubmit = validaForm;
 
+    // Función para validar el nombre
     function validaNombre() {
         const nombre = inputNombre.value.trim();
         const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
@@ -46,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Función para validar el mail
     function validaMail() {
         const email = inputEmail.value.trim();
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Función para validar el dni
     function validaDni() {
         const dni = inputDni.value.trim().toUpperCase();
         const dniRegex = /^[0-9]{8}[A-Z]$/;
@@ -97,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     }
 
+    // Función para validar la imagen
     function validaImg() {
         const img = inputImg.value.trim();
 
@@ -111,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Función de validación de telefono
     function validaTelf() {
         const telf = inputTelf.value.trim();
         const regex = /^\d{3}\s\d{2}\s\d{2}\s\d{2}$/;
@@ -130,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Función para validar la fecha de nacimiento
     function validaDateNac() {
         const dateNac = inputDateNac.value.trim();
 
@@ -165,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     }
 
+    // Función para validar el campo de dirección
     function validaDireccion() {
         const direccion = inputDireccion.value.trim();
 
@@ -179,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Función para validar el campo de permiso
     function validaPermiso() {
         const permiso = inputPermiso.value.trim();
 
@@ -193,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Función para vlidar el formulario
     function validaForm(e) {
         e.preventDefault();
 
@@ -217,3 +230,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
+
+
+// === REGISTRO CON AJAX ===
+
