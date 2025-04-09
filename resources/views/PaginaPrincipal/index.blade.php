@@ -28,7 +28,7 @@
     <div class="row">
       <div class="col-md-6">
         <h1>Alquiler de vehículos de todo tipo<br>y con precios asequibles</h1>
-        <!-- Formulario de filtros (ejemplo) -->
+        <!-- Formulario de filtros -->
         <form class="filter-form">
           <div class="form-group">
             <label>Tipo de vehículo:</label><br>
