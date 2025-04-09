@@ -58,3 +58,32 @@ function refrescarImagenPerfilNavbar() {
         })
         .catch(error => console.error('Error al actualizar la imagen:', error));
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/vehiculos')
+        .then(res => res.json())
+        .then(vehiculos => {
+            const container = document.getElementById('vehiculos-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            vehiculos.forEach(v => {
+                const card = `
+                    <div class="col-sm-6 col-md-3 mb-4">
+                        <a href="/vehiculo/detalle_vehiculo/${v.id_vehiculos}">
+                            <div class="card">
+                              <img src="https://via.placeholder.com/300x180?text=${encodeURIComponent(v.marca)}+${encodeURIComponent(v.modelo)}" class="card-img-top" alt="${v.marca}">
+                              <div class="card-body">
+                                <h5 class="card-title">${v.marca} ${v.modelo}</h5>
+                                <p class="card-text">${Number(v.kilometraje).toLocaleString()} km</p>
+                              </div>
+                            </div>
+                        </a>
+                    </div>
+          `;
+                container.innerHTML += card;
+            });
+        })
+        .catch(error => console.error('Error al cargar los vehículos:', error));
+});
