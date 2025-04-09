@@ -83,6 +83,10 @@ class AuthController extends Controller
     }
 
     public function register(){
-        return view('auth.register');
+
+    $licencias = ['AM', 'A1', 'A2', 'A', 'B', 'B+E', 'C1', 'C1+E', 'C', 'C+E', 'D1', 'D1+E', 'D', 'D+E'];
+
+    return view('auth.register', compact('licencias'));
+       
     }
 }
