@@ -6,26 +6,6 @@ body {
   background-color: #ECECEC;
 }
 
-/* ===== Navbar personalizada ===== */
-.navbar-custom {
-  background-color: #fff;
-  padding: 1rem 0;
-  border-bottom: 2px solid #e5e5e5;
-}
-
-.navbar-custom .nav-link {
-  color: #fff;
-  background-color: #e100ff;
-  border-radius: 5px;
-  padding: 6px 12px;
-  margin-left: 10px;
-  font-weight: 500;
-}
-
-.navbar-custom .nav-link:hover {
-  background-color: #c000d6;
-  color: #fff;
-}
 
 /* ===== Breadcrumb ===== */
 .breadcrumb-container {
