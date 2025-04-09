@@ -42,7 +42,7 @@
 }
 
 .navbar-custom .navbar-nav .nav-item img {
-    border: 2px solid #fff; /* Borde de la imagen de perfil */
+    border: 2px solid #000000; /* Borde de la imagen de perfil */
     transition: border-color 0.3s ease; /* Transición suave del borde */
 }
 
