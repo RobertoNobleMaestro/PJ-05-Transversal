@@ -71,3 +71,38 @@ function iniciarDetalleVehiculo(vehiculoId) {
     
     // Aquí podrían añadirse más funcionalidades para la página de detalle
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btnCarrito = document.getElementById('btnAñadirCarrito');
+    if (btnCarrito) {
+        btnCarrito.addEventListener('click', function () {
+            const vehiculoId = btnCarrito.getAttribute('data-vehiculo-id');
+
+            if (!vehiculoId) {
+                alert('No se encontró el ID del vehículo.');
+                return;
+            }
+
+            fetch(`/vehiculos/${vehiculoId}/añadir-al-carrito`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ¡Vehículo añadido al carrito!');
+                } else {
+                    alert('⚠️ Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error al añadir al carrito:', error);
+                alert('❌ Hubo un error al procesar tu solicitud.');
+            });
+        });
+    }
+});

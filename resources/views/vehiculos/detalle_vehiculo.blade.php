@@ -53,14 +53,15 @@
 
             <!-- Carrito con estilo destacado -->
             <div class="highlight-box">
-                <!-- Enlace al carrito -->
-                <a href="{{ route('carrito') }}" class="d-flex align-items-center text-decoration-none text-dark">
+                <button id="btnAñadirCarrito" 
+                        class="btn btn-warning w-100 d-flex align-items-center"
+                        data-vehiculo-id="{{ $vehiculo->id_vehiculos }}">
                     <i class="fas fa-shopping-cart fa-bounce mr-3"></i> 
                     <div>
                         <strong>¡Añade este vehículo a tu carrito!</strong><br>
                         Guarda tus búsquedas favoritas en el carrito para compararlas más tarde.
                     </div>
-                </a>
+                </button>
             </div>
 
         </div>

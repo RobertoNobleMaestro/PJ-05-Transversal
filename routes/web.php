@@ -57,3 +57,4 @@
         
         return response()->json($valoraciones);
     });
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
