@@ -48,11 +48,11 @@
           </div>               
           <div class="form-row">
             <div class="form-group col-md-5">
-              <label for="ubicacion">Ubicación:</label>
-              <input type="text" class="form-control" id="ubicacion" value="Madrid, España">
+              <label for="ubicacion">Ciudad:</label>
+              <input type="text" class="form-control" id="ubicacion" value="Barcelona">
             </div>
             <div class="form-group col-md-5">
-              <label for="fecha">Fecha:</label>
+              <label for="fecha">Fecha de reserva:</label>
               <input type="date" class="form-control" id="fecha">
             </div>
             <div class="form-group col-md-2 d-flex align-items-end">
@@ -101,117 +101,12 @@
     </div>
   </div>    
 
-  <!-- Sección de Top 10 vehículos -->
   <div class="container vehicles-section">
     <h2>Top 10 Vehículos más solicitados</h2>
-    <div class="row">
-      <!-- Card 1 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+1" class="card-img-top" alt="Coche 1">
-          <div class="card-body">
-            <h5 class="card-title">Coche 1</h5>
-            <p class="card-text">80.000 km | 20.000 €</p>
-            <div class="text-end">
-              <a href="{{ route('vehiculo.detalle', ['id' => 1]) }}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-shopping-cart"></i> Añadir
-              </a>              
-            </div>
-          </div>
-        </div>        
-      </div>
-      <!-- Card 2 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+2" class="card-img-top" alt="Coche 2">
-          <div class="card-body">
-            <h5 class="card-title">Coche 2</h5>
-            <p class="card-text">40.000 km | 32.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 3 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+3" class="card-img-top" alt="Coche 3">
-          <div class="card-body">
-            <h5 class="card-title">Coche 3</h5>
-            <p class="card-text">10.000 km | 25.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 4 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+4" class="card-img-top" alt="Coche 4">
-          <div class="card-body">
-            <h5 class="card-title">Coche 4</h5>
-            <p class="card-text">80.000 km | 18.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 5 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+5" class="card-img-top" alt="Coche 5">
-          <div class="card-body">
-            <h5 class="card-title">Coche 5</h5>
-            <p class="card-text">90.000 km | 24.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 6 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+6" class="card-img-top" alt="Coche 6">
-          <div class="card-body">
-            <h5 class="card-title">Coche 6</h5>
-            <p class="card-text">40.000 km | 20.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 7 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+7" class="card-img-top" alt="Coche 7">
-          <div class="card-body">
-            <h5 class="card-title">Coche 7</h5>
-            <p class="card-text">70.000 km | 28.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 8 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+8" class="card-img-top" alt="Coche 8">
-          <div class="card-body">
-            <h5 class="card-title">Coche 8</h5>
-            <p class="card-text">50.000 km | 22.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 9 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+9" class="card-img-top" alt="Coche 9">
-          <div class="card-body">
-            <h5 class="card-title">Coche 9</h5>
-            <p class="card-text">30.000 km | 26.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 10 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+10" class="card-img-top" alt="Coche 10">
-          <div class="card-body">
-            <h5 class="card-title">Coche 10</h5>
-            <p class="card-text">20.000 km | 19.000 €</p>
-          </div>
-        </div>
-      </div>
+    <div class="row" id="vehiculos-container">
+      <!-- Aquí se insertarán los vehículos dinámicamente -->
     </div>
-  </div>
+  </div>  
 
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>

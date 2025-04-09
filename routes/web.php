@@ -13,6 +13,7 @@
     Route::redirect('/', '/home');
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
+    Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
 
     // Rutas Auth publicas
     Route::controller(AuthController::class)->group(function () {
