@@ -88,6 +88,9 @@
             <p class="m-0 text-muted small">{{ number_format($reserva->vehiculo->isNotEmpty() ? $reserva->vehiculo->first()->km : 0, 0, ',', '.') }} km</p>
             <div class="d-flex justify-content-between mt-2">
               <i class="fas fa-shopping-cart"></i>
+              <a href="{{ route('facturas.descargar', ['id_reserva' => $reserva->id_reservas]) }}" class="btn btn-sm btn-outline-secondary" title="Descargar factura">
+                <i class="fas fa-file-invoice"></i> Factura
+              </a>
             </div>
           </div>
         </div>

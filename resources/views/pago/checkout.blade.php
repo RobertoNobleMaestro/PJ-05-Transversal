@@ -71,7 +71,7 @@
                                 <div>Del {{ date('d/m/Y', strtotime($vr->fecha_ini)) }} al {{ date('d/m/Y', strtotime($vr->fecha_final)) }}</div>
                             </div>
                             <div class="text-right">
-                                <strong>€{{ number_format($vr->precio_unitario, 2, ',', '.') }}</strong>
+                                <strong>€{{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}</strong>
                             </div>
                         </div>
                     @endforeach

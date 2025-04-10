@@ -27,8 +27,8 @@ class PagoController extends Controller
 
         // Calcular el precio total de la reserva
         $totalPrecio = 0;
-        foreach ($reserva->vehiculos as $vehiculo) {
-            $totalPrecio += $vehiculo->pivot->precio_unitario;
+        foreach ($reserva->vehiculosReservas as $vr) {
+            $totalPrecio += $vr->vehiculo->precio_dia;
         }
 
         // Actualizar la reserva con el precio total
@@ -51,7 +51,7 @@ class PagoController extends Controller
                             'description' => 'Reserva del ' . date('d/m/Y', strtotime($vr->fecha_ini)) . ' al ' . date('d/m/Y', strtotime($vr->fecha_final)),
                             'images' => [$vr->vehiculo->imagenes()->first() ? asset('img/' . $vr->vehiculo->imagenes()->first()->ruta) : asset('img/default-car.png')],
                         ],
-                        'unit_amount' => intval($vr->precio_unitario * 100), // Stripe trabaja en centavos
+                        'unit_amount' => intval($vr->vehiculo->precio_dia * 100), // Stripe trabaja en centavos
                     ],
                     'quantity' => 1,
                 ];
