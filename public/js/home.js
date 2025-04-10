@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             estrellas += '<i class="far fa-star"></i>';
                         }
                     }
-                    const ratingTexto = v.valoracion !== null ? `(${rating.toFixed(1)})` : ``;
 
                     const card = `
                         <div class="col-sm-6 col-md-3 mb-4">
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                   <div class="card-body">
                                     <h5 class="card-title">${v.marca} ${v.modelo}</h5>
                                     <p class="card-text">${v.precio_dia} €/dia</p>
-                                    <p>${estrellas} <span>${ratingTexto}</span></p>
+                                    <p>${estrellas}</p>
                                   </div>
                                 </div>
                             </a>
