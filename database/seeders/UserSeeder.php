@@ -42,12 +42,12 @@ class UserSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // 5 Clientes
-        for ($i = 1; $i <= 5; $i++) {
+        // 20 Clientes
+        for ($i = 1; $i <= 20; $i++) {
             DB::table('users')->insert([
                 'nombre' => "Cliente $i",
                 'email' => "cliente$i@carflow.com",
-                'DNI' => "0000000{$i}C",
+                'DNI' => str_pad($i, 8, '0', STR_PAD_LEFT) . 'C',
                 'telefono' => '615449359',
                 'password' => Hash::make('asdASD123'),
                 'fecha_nacimiento' => '1995-01-01',
