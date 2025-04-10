@@ -59,7 +59,6 @@ function cargarCarrito() {
 
     // Actualizar resumen general
     document.getElementById('precioDia').textContent = `EUR€ ${precioDia.toFixed(2)}`;
-    document.getElementById('montoTotal').textContent = `EUR€ ${total.toFixed(2)}`;
   })
   .catch(error => {
     console.error(error);

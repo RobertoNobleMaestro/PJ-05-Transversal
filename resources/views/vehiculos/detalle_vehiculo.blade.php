@@ -33,7 +33,7 @@
             </p>
             <h2 class="d-flex justify-content-between">
                 {{ $vehiculo->marca }} {{ $vehiculo->modelo }}
-                <span class="h4 text-success">€{{ number_format($precio_unitario, 2, ',', '.') }}</span>
+                <span class="h4 text-success">€{{ number_format( $vehiculo->precio_dia, 2, ',', '.') }}</span>
             </h2>
             <p>{{ $vehiculo->descripcion }}</p>
 
