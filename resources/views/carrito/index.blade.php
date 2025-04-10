@@ -29,8 +29,6 @@
       <p class="resumen-precio" id="precioDia">EUR€ —</p>
       <p class="subtexto" id="planIncluido">Incluido en el plan: Básico</p>
       <hr>
-      <p><strong>Monto total:</strong></p>
-      <p class="resumen-precio" id="montoTotal">EUR€ —</p>
       {{-- <a href="/finalizar-compra" class="boton">Continuar</a> --}}
       <a href="{{ route('pago.checkout') }}" class="boton">Continuar</a>
     </div>
