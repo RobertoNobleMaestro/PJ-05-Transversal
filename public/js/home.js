@@ -60,40 +60,46 @@ function refrescarImagenPerfilNavbar() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/vehiculos')
-        .then(res => res.json())
-        .then(vehiculos => {
-            const container = document.getElementById('vehiculos-container');
-            if (!container) return;
+    setTimeout(() => {
+        fetch('/vehiculos')
+            .then(res => res.json())
+            .then(vehiculos => {
+                const container = document.getElementById('vehiculos-container');
+                if (!container) return;
 
-            container.innerHTML = '';
+                container.innerHTML = '';
 
-            // let estrellas = '';
-            // const rating = valoracion.valoracion !== undefined ? valoracion.valoracion : valoracion.puntuacion;
-            
-            // for (let i = 0; i < 5; i++) {
-            //     estrellas += i < rating 
-            //         ? '<i class="fas fa-star"></i>' 
-            //         : '<i class="far fa-star"></i>';
-            // }
-            // <p>${estrellas}</p>
+                vehiculos.forEach(v => {
+                    const rating = parseFloat(v.valoracion) || 0;
+                    let estrellas = '';
+                    for (let i = 1; i <= 5; i++) {
+                        if (rating >= i) {
+                            estrellas += '<i class="fas fa-star"></i>';
+                        } else if (rating >= i - 0.5) {
+                            estrellas += '<i class="fas fa-star-half-alt"></i>';
+                        } else {
+                            estrellas += '<i class="far fa-star"></i>';
+                        }
+                    }
+                    const ratingTexto = v.valoracion !== null ? `(${rating.toFixed(1)})` : ``;
 
-            vehiculos.forEach(v => {
-                const card = `
-                    <div class="col-sm-6 col-md-3 mb-4">
-                        <a href="/vehiculo/detalle_vehiculo/${v.id_vehiculos}">
-                            <div class="card">
-                              <img src="https://via.placeholder.com/300x180?text=${encodeURIComponent(v.marca)}+${encodeURIComponent(v.modelo)}" class="card-img-top" alt="${v.marca}">
-                              <div class="card-body">
-                                <h5 class="card-title">${v.marca} ${v.modelo}</h5>
-                                <p class="card-text">${v.precio_dia} €/dia</p>
-                              </div>
-                            </div>
-                        </a>
-                    </div>
-          `;
-                container.innerHTML += card;
-            });
-        })
-        .catch(error => console.error('Error al cargar los vehículos:', error));
+                    const card = `
+                        <div class="col-sm-6 col-md-3 mb-4">
+                            <a href="/vehiculo/detalle_vehiculo/${v.id_vehiculos}">
+                                <div class="card">
+                                  <img src="https://via.placeholder.com/300x180?text=${encodeURIComponent(v.marca)}+${encodeURIComponent(v.modelo)}" class="card-img-top" alt="${v.marca}">
+                                  <div class="card-body">
+                                    <h5 class="card-title">${v.marca} ${v.modelo}</h5>
+                                    <p class="card-text">${v.precio_dia} €/dia</p>
+                                    <p>${estrellas} <span>${ratingTexto}</span></p>
+                                  </div>
+                                </div>
+                            </a>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            })
+            .catch(error => console.error('Error al cargar los vehículos:', error));
+    }, 0);
 });
