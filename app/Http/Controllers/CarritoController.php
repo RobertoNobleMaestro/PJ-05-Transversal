@@ -46,7 +46,6 @@ class CarritoController extends Controller
                         'lugar' => $reserva->lugar->nombre ?? null,
                     ];
         
-                    $vehiculoData['precio_dia'] = (float) $vr->precio_unitario;
         
                     if ($reserva->pago) {
                         $vehiculoData['pago'] = [

@@ -8,6 +8,7 @@
     use App\Http\Controllers\UserController;
     use App\Http\Controllers\VehiculoController;
     use App\Http\Controllers\CarritoController;
+    use App\Http\Controllers\ReservaController;
 
     // Rutas publicas
     Route::redirect('/', '/home');
@@ -50,6 +51,7 @@
 
     // Vehiculos
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
+    Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
 
     // API para valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function($id) {
@@ -59,3 +61,10 @@
         return response()->json($valoraciones);
     });
     Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+// Rutas de pago (dentro del middleware 'auth')
+Route::get('/finalizar-compra', [App\Http\Controllers\PagoController::class, 'checkout'])->name('pago.checkout');
+Route::get('/pago/exito/{id_reserva}', [App\Http\Controllers\PagoController::class, 'exito'])->name('pago.exito');
+Route::get('/pago/cancelado', [App\Http\Controllers\PagoController::class, 'cancelado'])->name('pago.cancelado');
+
+// Webhook de Stripe (ruta pública)
+Route::post('/webhook/stripe', [App\Http\Controllers\PagoController::class, 'webhook'])->name('webhook.stripe');
