@@ -3,53 +3,179 @@
 @section('title', 'Añadir Usuario')
 
 @section('content')
-<div class="container mt-5">
-    <h1>Añadir Nuevo Usuario</h1>
+<style>
+    .add-user-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .form-title {
+        color: #2d3748;
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #9F17BD;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 4;
+    }
+    
+    .form-group.half-width {
+        grid-column: span 2;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #9F17BD;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(159, 23, 189, 0.1);
+    }
+
+    /* Eliminado el estilo de photo-upload */
+
+    .btn-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+    }
+    
+    .submit-btn {
+        background: #000000;
+        color: white;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .submit-btn:hover {
+        background: #333333;
+    }
+    
+    .cancel-btn {
+        background: #9F17BD;
+        color: white;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .cancel-btn:hover {
+        background: #7E12A3;
+    }
+
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="add-user-container">
+    <h1 class="form-title">Añadir Nuevo Usuario</h1>
     <form id="addUserForm">
         @csrf
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required>
+        <div class="form-grid">
+            <!-- Columna izquierda: 4 campos -->
+            <div>
+                <div class="form-group">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_roles" class="form-label">Rol</label>
+                    <select class="form-control" id="id_roles" name="id_roles">
+                        <option value="2">Cliente</option>
+                        <option value="3">Gestor</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Columna derecha: 4 campos -->
+            <div>
+                <div class="form-group">
+                    <label for="DNI" class="form-label">DNI</label>
+                    <input type="text" class="form-control" id="DNI" name="DNI" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
+                    <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-        </div>
-        <div class="mb-3">
-            <label for="DNI" class="form-label">DNI</label>
-            <input type="text" class="form-control" id="DNI" name="DNI" required>
-        </div>
-        <div class="mb-3">
-            <label for="telefono" class="form-label">Teléfono</label>
-            <input type="text" class="form-control" id="telefono" name="telefono" required>
-        </div>
-        <div class="mb-3">
-            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" required>
-        </div>
-        <div class="mb-3">
+        
+        <!-- Dirección en ancho completo abajo -->
+        <div class="form-group full-width" style="margin-bottom: 1.5rem;">
             <label for="direccion" class="form-label">Dirección</label>
             <input type="text" class="form-control" id="direccion" name="direccion" required>
         </div>
-        <div class="mb-3">
-            <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
-            <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+
+        <div class="btn-container">
+            <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
+            <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
         </div>
-        <div class="mb-3">
-            <label for="id_roles" class="form-label">Rol</label>
-            <select class="form-select" id="id_roles" name="id_roles">
-                <option value="2">Cliente</option>
-                <option value="3">Gestor</option>
-            </select>
-        </div>
-        <button type="button" class="btn btn-primary" onclick="createUser()">Añadir Usuario</button>
     </form>
 </div>
 @endsection
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -3,27 +3,30 @@
 @section('title', 'Panel de Administrador')
 
 @section('content')
-    <style>
-        :root {
-            --sidebar-width: 250px;
-            --sidebar-color: #8a4fff; /* Color lila */
-            --header-height: 60px;
-        }
-        
-        .admin-container {
-            display: flex;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-        
-        /* Barra lateral lila */
-        .admin-sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--sidebar-color);
-            color: white;
-            padding: 1.5rem 1rem;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
+<style>
+    :root {
+        --sidebar-width: 250px;
+        --sidebar-color: #9F17BD; /* Cambiado a tu tono lila específico */
+        --header-height: 60px;
+    }
+    
+    .admin-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+    
+    /* Barra lateral lila */
+    .admin-sidebar {
+        width: var(--sidebar-width);
+        background-color: var(--sidebar-color);
+        color: white;
+        padding: 1.5rem 1rem;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    /* ... (el resto del CSS permanece igual) ... */
+
         
         .sidebar-title {
             font-size: 1.5rem;
@@ -65,8 +68,8 @@
         /* Contenido principal */
         .admin-main {
             flex: 1;
-            padding: 2rem;
-            margin-left: var(--sidebar-width);
+            padding: 0.5rem;
+            margin-left: 0;
         }
         
         /* Header modificado */
@@ -74,8 +77,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            padding: 1rem 2rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
             background-color: white; /* Fondo blanco */
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -99,9 +102,9 @@
         .filter-section {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             background-color: white;
-            padding: 1.5rem;
+            padding: 0.75rem;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
@@ -218,50 +221,199 @@
             object-fit: cover;
         }
         
-        @media (max-width: 768px) {
-            .admin-container {
-                flex-direction: column;
+        /* Botón del menú hamburguesa */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background-color: var(--sidebar-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Media queries para responsive design */
+        @media (max-width: 1199px) {
+            .crud-table th,
+            .crud-table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
             }
             
+            .search-input {
+                min-width: 180px;
+            }
+        }
+        
+        @media (max-width: 991px) {
             .admin-sidebar {
-                width: 100%;
-                margin-left: 0;
+                position: fixed;
+                left: -250px; /* Ocultar fuera de pantalla */
+                top: 0;
+                height: 100%;
+                transition: left 0.3s ease;
+                z-index: 999;
+            }
+            
+            .menu-toggle {
+                display: block;
             }
             
             .admin-main {
                 margin-left: 0;
+                width: 100%;
             }
             
+            .sidebar-visible {
+                left: 0; /* Mostrar menú cuando está visible */
+            }
+            
+            /* Overlay para cerrar menú al hacer clic */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 998;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            /* Ajustes para la tabla */
+            .crud-table {
+                overflow-x: auto;
+                display: block;
+                width: 100%;
+            }
+            
+            /* Ajustes de tabla en tablets */
+            .crud-table-container {
+                width: 100%;
+                overflow-x: auto;
+            }
+            
+            .crud-table {
+                min-width: 900px; /* Asegurar que la tabla tenga un ancho mínimo */
+            }
+            
+            /* Ancho de las columnas */
+            .crud-table th:nth-child(1) { width: 5%; } /* ID */
+            .crud-table th:nth-child(2) { width: 15%; } /* Nombre */
+            .crud-table th:nth-child(6) { width: 10%; } /* Rol */
+            .crud-table th:nth-child(9) { width: 15%; } /* Acciones */
+        }
+        
+        @media (max-width: 768px) {
             .filter-section {
                 flex-direction: column;
                 gap: 1rem;
             }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+            }
+            
+            .search-input {
+                width: 100%;
+                min-width: unset;
+            }
+            
+            .add-user-btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* Ajustes para la tabla en móviles */
+            .crud-table th, 
+            .crud-table td {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+            
+            /* Ocultar más columnas en móviles */
+            .crud-table .col-hide-sm {
+                display: none;
+            }
+            
+            /* Ajustes para móviles */
+            .crud-table {
+                min-width: 600px; /* Ancho mínimo más pequeño para móviles */
+            }
+            
+            .action-cell {
+                min-width: 120px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
+            .btn-edit, .btn-delete {
+                font-size: 0.8rem;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            /* Para móviles muy pequeños */
+            .crud-table {
+                font-size: 0.75rem;
+            }
+            
+            .crud-table th, 
+            .crud-table td {
+                padding: 0.4rem 0.2rem;
+            }
+            
+            .action-buttons form {
+                width: 100%;
+            }
+            
+            .action-buttons button {
+                width: 100%;
+            }
+            
+            .btn-edit {
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 
+    <!-- Botón de hamburguesa para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para cerrar menú al hacer clic fuera -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="admin-container">
         <!-- Barra lateral lila -->
-        <div class="admin-sidebar">
-            <div class="sidebar-title">CARELLOW</div>
+        <div class="admin-sidebar" id="sidebar">
+            <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href="#"><i class="fas fa-car"></i> Vehículos</a></li>
                 <li><a href="{{ route('admin.users') }}"><i class="fas fa-users"></i> Usuarios</a></li>
-                <li><a href="#"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
             </ul>
         </div>
 
         <!-- Contenido principal -->
         <div class="admin-main">
-            <!-- Header con bienvenida -->
-            <div class="admin-header">
-                <h2 class="admin-title">Ver Roles</h2>
-                <div class="admin-welcome">
-                    <span>Bienvenido Administrador</span>
-                    <span>|</span>
-                    <span>Usuario: {{ Auth::user()->email }}</span>
-                </div>
-            </div>
-
             <!-- Resto del contenido permanece igual -->
             <!-- ... -->
   
@@ -285,20 +437,21 @@
             </div>
 
             <!-- Tabla de usuarios -->
-            <table class="crud-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>DMI</th>
-                        <th>Permiso</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Fecha Nacimiento</th>
-                        <th>Foto</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
+            <div class="crud-table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th class="col-hide-sm">DNI</th>
+                            <th>Permiso</th>
+                            <th class="col-hide-sm">Email</th>
+                            <th>Rol</th>
+                            <th>Fecha</th>
+                            <th class="col-hide-sm">Foto</th>
+                            <th class="action-cell">Acciones</th>
+                        </tr>
+                    </thead>
                 <tbody>
                     @foreach($users as $user)
                     <tr>
@@ -331,23 +484,44 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 
-    <!-- Script para los filtros (ejemplo básico) -->
+    <!-- Script para los filtros y funcionalidad responsive -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Menú responsive
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (menuToggle && sidebar && overlay) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('active');
+                });
+                
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('sidebar-visible');
+                    overlay.classList.remove('active');
+                });
+            }
+            
             // Filtro por rol
             document.querySelector('.filter-control').addEventListener('change', function() {
                 const role = this.value.toLowerCase();
                 const rows = document.querySelectorAll('.crud-table tbody tr');
                 
                 rows.forEach(row => {
-                    const rowRole = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
-                    if(role === '' || rowRole.includes(role)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
+                    const roleCell = row.querySelector('td:nth-child(6)');
+                    if (roleCell) {
+                        const rowRole = roleCell.textContent.toLowerCase();
+                        if(role === '' || rowRole.includes(role)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
                     }
                 });
             });
@@ -358,14 +532,30 @@
                 const rows = document.querySelectorAll('.crud-table tbody tr');
                 
                 rows.forEach(row => {
-                    const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                    const email = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    const nameCell = row.querySelector('td:nth-child(2)');
+                    const emailCell = row.querySelector('td:nth-child(5)');
                     
-                    if(name.includes(searchTerm) || email.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
+                    if (nameCell && emailCell) {
+                        const name = nameCell.textContent.toLowerCase();
+                        const email = emailCell.textContent.toLowerCase();
+                        
+                        if(name.includes(searchTerm) || email.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
                     }
+                });
+            });
+            
+            // Mejorar la visibilidad de las celdas al pasar el ratón
+            const rows = document.querySelectorAll('.crud-table tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f0f7ff';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
                 });
             });
         });

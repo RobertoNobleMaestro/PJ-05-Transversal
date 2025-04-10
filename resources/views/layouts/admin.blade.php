@@ -13,32 +13,23 @@
 
 </head>
 <body>
-    <!-- Header con botón de cerrar sesión -->
-    <header class="bg-dark text-white py-2">
+    <!-- Nueva navbar blanca con mensaje de bienvenida y botón de cerrar sesión -->
+    <header class="bg-white py-2 shadow-sm">
         <div class="container-fluid">
             <div class="row align-items-center">
-                <div class="col-6">
-                    <h5 class="m-0">Panel de Administración</h5>
+                <div class="col-4"><!-- Espacio vacío a la izquierda --></div>
+                <div class="col-4 text-center">
+                    <h5 class="m-0" style="color: #999;">Bienvenido Administrador</h5>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-4 text-end">
                     @auth
-                    <div class="dropdown">
-                        <button class="btn btn-dark dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-1"></i> {{ Auth::user()->nombre }}
+                    <span class="me-3" style="color: #666;">Usuario: {{ Auth::user()->email }}</span>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-dark">
+                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ url('/home') }}"><i class="fas fa-home me-2"></i>Inicio</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                    </form>
                     @endauth
                 </div>
             </div>
