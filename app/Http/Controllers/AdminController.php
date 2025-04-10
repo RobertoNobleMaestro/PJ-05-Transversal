@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -22,6 +23,10 @@ class AdminController extends Controller
             return redirect('/')->with('error', 'No tienes permiso para acceder a esta sección');
         }
         
-        return view('admin.index');
+        $users = User::select('users.*', 'roles.nombre as nombre_rol')
+                    ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
+                    ->get();
+
+        return view('admin.index', compact('users'));
     }
 }

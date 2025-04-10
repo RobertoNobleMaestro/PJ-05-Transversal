@@ -5,7 +5,7 @@
 @section('content')
 <div class="container mt-5">
     <h1>Añadir Nuevo Usuario</h1>
-    <form method="POST" action="{{ route('admin.users.store') }}">
+    <form id="addUserForm">
         @csrf
         <div class="mb-3">
             <label for="nombre" class="form-label">Nombre</label>
@@ -46,14 +46,14 @@
                 <option value="3">Gestor</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Añadir Usuario</button>
+        <button type="button" class="btn btn-primary" onclick="createUser()">Añadir Usuario</button>
     </form>
 </div>
 @endsection
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
+    const form = document.getElementById('addUserForm');
     const inputs = form.querySelectorAll('input, select');
     
     inputs.forEach(input => {
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!validateEmail(value)) {
                 errorMessage = 'Por favor, ingrese un email válido.';
             }
-        } else if (input.name === 'dni') {
+        } else if (input.name === 'DNI') {
             if (!/^\d{8}[A-Z]$/.test(value)) {
                 errorMessage = 'El formato del DNI es inválido. Debe terminar con una letra mayúscula.';
             } else if (!validateDNI(value)) {
@@ -123,4 +123,53 @@ document.addEventListener('DOMContentLoaded', function() {
         return calculatedLetter === letter;
     }
 });
+
+function createUser() {
+    // Limpiar mensajes de error previos
+    document.querySelectorAll('.text-danger').forEach(el => el.remove());
+    
+    // Obtener los datos del formulario
+    const form = document.getElementById('addUserForm');
+    const formData = new FormData(form);
+    
+    // Convertir FormData a objeto para enviar como JSON
+    const formDataObj = {};
+    formData.forEach((value, key) => {
+        formDataObj[key] = value;
+    });
+    
+    fetch('{{ route("admin.users.store") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(formDataObj)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message || 'Usuario creado exitosamente');
+            window.location.href = '{{ route("admin.users") }}';
+        } else if (data.errors) {
+            // Muestra errores de validación
+            Object.keys(data.errors).forEach(field => {
+                const input = document.querySelector(`[name="${field}"]`);
+                if (input) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'text-danger mt-1';
+                    errorDiv.textContent = data.errors[field][0];
+                    input.parentNode.appendChild(errorDiv);
+                }
+            });
+        } else {
+            alert('Error al crear usuario: ' + (data.message || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión. Por favor, inténtalo de nuevo.');
+    });
+}
 </script>

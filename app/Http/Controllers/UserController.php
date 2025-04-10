@@ -76,6 +76,15 @@ class UserController extends Controller
 
             User::create($validatedData);
             
+            // Si la petición espera JSON (AJAX), devolver respuesta JSON
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Usuario añadido correctamente'
+                ], 200);
+            }
+            
+            // Si es una petición tradicional, redireccionar
             return redirect()->route('admin.users')->with('success', 'Usuario añadido correctamente');
 
         } catch (\Illuminate\Validation\ValidationException $e) {

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
 
 Route::redirect('/', '/home');
 
@@ -17,8 +18,10 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin', [\App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
-
+    // Panel principal de administración
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    
+    // CRUD de usuarios
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
     Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
     Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
