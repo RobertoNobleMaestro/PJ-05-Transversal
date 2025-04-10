@@ -27,6 +27,24 @@ class UserController extends Controller
         
         return null; // El usuario es administrador, continuar
     }
+    
+    // Método para obtener usuarios en formato JSON (para AJAX)
+    public function getUsers(Request $request)
+    {
+        $authCheck = $this->checkAdmin($request);
+        if ($authCheck && $request->expectsJson()) {
+            return $authCheck;
+        }
+        
+        // Cargar usuarios con su información de rol usando join
+        $users = User::select('users.*', 'roles.nombre as nombre_rol')
+                    ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
+                    ->get();
+        
+        return response()->json([
+            'users' => $users
+        ]);
+    }
     public function index(Request $request)
     {
         $authCheck = $this->checkAdmin($request);

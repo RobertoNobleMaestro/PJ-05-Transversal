@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
-@section('title', 'Añadir Usuario')
+@section('title', 'Añadir Vehículo')
 
 @section('content')
 <style>
-    .add-user-container {
+    .add-vehicle-container {
         max-width: 1200px;
         margin: 2rem auto;
         padding: 2rem;
@@ -61,7 +61,15 @@
         box-shadow: 0 0 0 2px rgba(159, 23, 189, 0.1);
     }
 
-    /* Eliminado el estilo de photo-upload */
+    .form-check {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .form-check-input {
+        margin-right: 0.5rem;
+    }
 
     .btn-container {
         display: flex;
@@ -106,80 +114,93 @@
     }
 </style>
 
-<div class="add-user-container">
-    <h1 class="form-title">Añadir Nuevo Usuario</h1>
-    <form id="addUserForm">
+<div class="add-vehicle-container">
+    <h1 class="form-title">Añadir Nuevo Vehículo</h1>
+    <form id="addVehiculoForm">
         @csrf
         <div class="form-grid">
-            <!-- Columna izquierda: 4 campos -->
+            <!-- Columna izquierda -->
             <div>
                 <div class="form-group">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    <label for="marca" class="form-label">Marca</label>
+                    <input type="text" class="form-control" id="marca" name="marca" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <label for="modelo" class="form-label">Modelo</label>
+                    <input type="text" class="form-control" id="modelo" name="modelo" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <label for="anio" class="form-label">Año</label>
+                    <input type="number" class="form-control" id="anio" name="anio" min="1900" max="{{ date('Y') + 1 }}" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="id_roles" class="form-label">Rol</label>
-                    <select class="form-control" id="id_roles" name="id_roles">
-                        <option value="2">Cliente</option>
-                        <option value="3">Gestor</option>
-                    </select>
+                    <label for="matricula" class="form-label">Matrícula</label>
+                    <input type="text" class="form-control" id="matricula" name="matricula" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="precio_dia" class="form-label">Precio por día</label>
+                    <input type="number" class="form-control" id="precio_dia" name="precio_dia" step="0.01" min="0" required>
                 </div>
             </div>
             
-            <!-- Columna derecha: 4 campos -->
+            <!-- Columna derecha -->
             <div>
                 <div class="form-group">
-                    <label for="DNI" class="form-label">DNI</label>
-                    <input type="text" class="form-control" id="DNI" name="DNI" required>
+                    <label for="kilometraje" class="form-label">Kilometraje</label>
+                    <input type="number" class="form-control" id="kilometraje" name="kilometraje" min="0" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telefono" name="telefono" required>
+                    <label for="id_lugar" class="form-label">Lugar</label>
+                    <select class="form-control" id="id_lugar" name="id_lugar" required>
+                        <option value="">Seleccionar lugar</option>
+                        @foreach($lugares as $lugar)
+                            <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" required>
+                    <label for="id_tipo" class="form-label">Tipo de vehículo</label>
+                    <select class="form-control" id="id_tipo" name="id_tipo" required>
+                        <option value="">Seleccionar tipo</option>
+                        @foreach($tipos as $tipo)
+                            <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre_tipo }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
-                    <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="seguro_incluido" name="seguro_incluido">
+                        <label for="seguro_incluido" class="form-check-label">Seguro incluido</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="disponibilidad" name="disponibilidad" checked>
+                        <label for="disponibilidad" class="form-check-label">Disponible</label>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Dirección en ancho completo abajo -->
-        <div class="form-group full-width" style="margin-bottom: 1.5rem;">
-            <label for="direccion" class="form-label">Dirección</label>
-            <input type="text" class="form-control" id="direccion" name="direccion" required>
-        </div>
 
         <div class="btn-container">
-            <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
-            <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
+            <button type="button" class="submit-btn" onclick="createVehiculo()">Enviar</button>
+            <a href="{{ route('admin.vehiculos') }}" class="cancel-btn">Cancelar</a>
         </div>
     </form>
 </div>
 @endsection
 
-
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('addUserForm');
+    const form = document.getElementById('addVehiculoForm');
     const inputs = form.querySelectorAll('input, select');
     
     inputs.forEach(input => {
@@ -192,28 +213,29 @@ document.addEventListener('DOMContentLoaded', function() {
         let errorMessage = '';
         const value = input.value.trim();
         
-        if (input.name === 'email') {
-            if (!validateEmail(value)) {
-                errorMessage = 'Por favor, ingrese un email válido.';
+        if (input.name === 'marca' || input.name === 'modelo') {
+            if (value.length < 2) {
+                errorMessage = 'Este campo debe tener al menos 2 caracteres.';
             }
-        } else if (input.name === 'DNI') {
-            if (!/^\d{8}[A-Z]$/.test(value)) {
-                errorMessage = 'El formato del DNI es inválido. Debe terminar con una letra mayúscula.';
-            } else if (!validateDNI(value)) {
-                errorMessage = 'El DNI es inválido. La letra no coincide.';
+        } else if (input.name === 'anio') {
+            const currentYear = new Date().getFullYear();
+            if (parseInt(value) < 1900 || parseInt(value) > currentYear + 1) {
+                errorMessage = `El año debe estar entre 1900 y ${currentYear + 1}.`;
             }
-        } else if (input.name === 'password') {
-            if (value.length < 8) {
-                errorMessage = 'La contraseña debe tener al menos 8 caracteres.';
+        } else if (input.name === 'matricula') {
+            if (value.length < 4) {
+                errorMessage = 'La matrícula debe tener al menos 4 caracteres.';
             }
-        } else if (input.name === 'telefono') {
-            if (!/^\d{9}$/.test(value)) {
-                errorMessage = 'El teléfono debe contener exactamente 9 números.';
+        } else if (input.name === 'precio_dia') {
+            if (parseFloat(value) <= 0) {
+                errorMessage = 'El precio debe ser mayor que 0.';
             }
-        } else if (input.name === 'direccion') {
-            if (value.length < 5) {
-                errorMessage = 'La dirección debe tener al menos 5 caracteres.';
+        } else if (input.name === 'kilometraje') {
+            if (parseInt(value) < 0) {
+                errorMessage = 'El kilometraje no puede ser negativo.';
             }
+        } else if ((input.name === 'id_lugar' || input.name === 'id_tipo') && value === '') {
+            errorMessage = 'Por favor, seleccione una opción.';
         } else if (input.required && value === '') {
             errorMessage = 'Este campo es obligatorio.';
         }
@@ -229,36 +251,21 @@ document.addEventListener('DOMContentLoaded', function() {
             input.parentNode.insertBefore(span, input.nextSibling);
         }
     }
-
-    function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
-
-    function validateDNI(dni) {
-        const re = /^\d{8}[A-Z]$/;
-        if (!re.test(dni)) {
-            return false;
-        }
-        
-        const number = parseInt(dni.slice(0, 8), 10);
-        const letter = dni.charAt(8);
-        const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
-        const calculatedLetter = letters[number % 23];
-        
-        return calculatedLetter === letter;
-    }
 });
 
-function createUser() {
+function createVehiculo() {
     // Limpiar mensajes de error previos
     document.querySelectorAll('.text-danger').forEach(el => el.remove());
     
     // Obtener los datos del formulario
-    const form = document.getElementById('addUserForm');
+    const form = document.getElementById('addVehiculoForm');
     const formData = new FormData(form);
     
-    fetch('{{ route("admin.users.store") }}', {
+    // Añadir checkboxes manualmente (ya que solo se incluyen si están marcados)
+    formData.set('seguro_incluido', document.getElementById('seguro_incluido').checked ? 1 : 0);
+    formData.set('disponibilidad', document.getElementById('disponibilidad').checked ? 1 : 0);
+    
+    fetch('{{ route("admin.vehiculos.store") }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
@@ -270,8 +277,8 @@ function createUser() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert(data.message || 'Usuario creado exitosamente');
-            window.location.href = '{{ route("admin.users") }}';
+            alert(data.message || 'Vehículo creado exitosamente');
+            window.location.href = '{{ route("admin.vehiculos") }}';
         } else if (data.errors) {
             // Muestra errores de validación
             Object.keys(data.errors).forEach(field => {
@@ -284,7 +291,7 @@ function createUser() {
                 }
             });
         } else {
-            alert('Error al crear usuario: ' + (data.message || 'Error desconocido'));
+            alert('Error al crear vehículo: ' + (data.message || 'Error desconocido'));
         }
     })
     .catch(error => {

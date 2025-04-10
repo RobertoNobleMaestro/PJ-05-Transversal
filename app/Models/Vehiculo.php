@@ -19,6 +19,8 @@ class Vehiculo extends Model
         'matricula',
         'precio_dia',
         'disponibilidad',
+        'kilometraje',
+        'seguro_incluido',
         'id_lugar',
         'id_tipo'
     ];

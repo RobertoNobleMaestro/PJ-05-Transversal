@@ -13,7 +13,7 @@ class VehiculoSeeder extends Seeder
             [
                 'marca' => 'Toyota',
                 'modelo' => 'Corolla',
-                'año' => 2023,
+                'anio' => 2023,
                 'kilometraje' => 15000,
                 'seguro_incluido' => true,
                 'id_lugar' => 1,
@@ -22,7 +22,7 @@ class VehiculoSeeder extends Seeder
             [
                 'marca' => 'Honda',
                 'modelo' => 'CBR 600',
-                'año' => 2022,
+                'anio' => 2022,
                 'kilometraje' => 8000,
                 'seguro_incluido' => true,
                 'id_lugar' => 2,
@@ -31,7 +31,7 @@ class VehiculoSeeder extends Seeder
             [
                 'marca' => 'Mercedes',
                 'modelo' => 'Sprinter',
-                'año' => 2023,
+                'anio' => 2023,
                 'kilometraje' => 25000,
                 'seguro_incluido' => true,
                 'id_lugar' => 3,

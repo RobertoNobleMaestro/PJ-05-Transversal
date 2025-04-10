@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'CRUD de Usuarios')
+@section('title', 'CRUD de Vehículos')
 
 @section('content')
 <style>
@@ -86,21 +86,25 @@
 
     <!-- Contenido principal -->
     <div class="admin-main">
-        <h1>Gestión de Usuarios</h1>
-        <div id="loading-users" class="text-center">
+        <h1>Gestión de Vehículos</h1>
+        <div id="loading-vehiculos" class="text-center">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
             </div>
-            <p>Cargando usuarios...</p>
+            <p>Cargando vehículos...</p>
         </div>
-        <div id="users-table-container" style="display: none;">
-            <table class="table table-striped" id="users-table">
+        <div id="vehiculos-table-container" style="display: none;">
+            <table class="table table-striped" id="vehiculos-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Rol</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Año</th>
+                        <th>Kilometraje</th>
+                        <th>Seguro</th>
+                        <th>Lugar</th>
+                        <th>Tipo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -109,15 +113,18 @@
                 </tbody>
             </table>
         </div>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Añadir Usuario</a>
+        <a href="{{ route('admin.vehiculos.create') }}" class="btn btn-primary">Añadir Vehículo</a>
     </div>
 </div>
 @endsection
 
 <script>
-// Función global para cargar usuarios
-function loadUsers() {
-    fetch('{{ route("admin.users.data") }}', {
+// Función global para cargar vehículos
+document.addEventListener('DOMContentLoaded', function() {
+    loadVehiculos();
+});
+function loadVehiculos() {
+    fetch('{{ route("admin.vehiculos.data") }}', {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -126,31 +133,35 @@ function loadUsers() {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Error al cargar los usuarios');
+            throw new Error('Error al cargar los vehículos');
         }
         return response.json();
     })
     .then(data => {
         // Ocultar el indicador de carga
-        document.getElementById('loading-users').style.display = 'none';
+        document.getElementById('loading-vehiculos').style.display = 'none';
         // Mostrar la tabla
-        document.getElementById('users-table-container').style.display = 'block';
+        document.getElementById('vehiculos-table-container').style.display = 'block';
         
         // Limpiar la tabla
-        const tableBody = document.querySelector('#users-table tbody');
+        const tableBody = document.querySelector('#vehiculos-table tbody');
         tableBody.innerHTML = '';
         
         // Rellenar la tabla con los datos
-        data.users.forEach(user => {
+        data.vehiculos.forEach(vehiculo => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${user.id_usuario}</td>
-                <td>${user.nombre}</td>
-                <td>${user.email}</td>
-                <td>${user.nombre_rol || 'Sin rol asignado'}</td>
+                <td>${vehiculo.id_vehiculos}</td>
+                <td>${vehiculo.marca}</td>
+                <td>${vehiculo.modelo}</td>
+                <td>${vehiculo.anio}</td>
+                <td>${vehiculo.kilometraje}</td>
+                <td>${vehiculo.seguro_incluido ? 'Sí' : 'No'}</td>
+                <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
+                <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/users/${user.id_usuario}/edit'">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id_usuario})">Eliminar</button>
+                    <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/vehiculos/${vehiculo.id_vehiculos}/edit'">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteVehiculo(${vehiculo.id_vehiculos})">Eliminar</button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -158,17 +169,17 @@ function loadUsers() {
     })
     .catch(error => {
         console.error('Error:', error);
-        document.getElementById('loading-users').innerHTML = `<div class="alert alert-danger">Error al cargar usuarios: ${error.message}</div>`;
+        document.getElementById('loading-vehiculos').innerHTML = `<div class="alert alert-danger">Error al cargar vehículos: ${error.message}</div>`;
     });
 }
 
-// Función para eliminar usuario
-function deleteUser(userId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+// Función para eliminar vehículo
+function deleteVehiculo(vehiculoId) {
+    if (confirm('¿Estás seguro de que deseas eliminar este vehículo?')) {
         // Crear un formulario temporal para enviar mediante POST
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/admin/users/${userId}`;
+        form.action = `/admin/vehiculos/${vehiculoId}`;
         form.style.display = 'none';
         
         // Agregar token CSRF
@@ -189,8 +200,8 @@ function deleteUser(userId) {
         document.body.appendChild(form);
         
         // Antes de enviar, guardar referencia a los elementos que necesitaremos después
-        const loadingElement = document.getElementById('loading-users');
-        const tableContainer = document.getElementById('users-table-container');
+        const loadingElement = document.getElementById('loading-vehiculos');
+        const tableContainer = document.getElementById('vehiculos-table-container');
         
         // Usar XMLHttpRequest para tener mejor control
         const xhr = new XMLHttpRequest();
@@ -200,21 +211,21 @@ function deleteUser(userId) {
         
         xhr.onload = function() {
             if (xhr.status >= 200 && xhr.status < 300) {
-                alert('Usuario eliminado correctamente');
+                alert('Vehículo eliminado correctamente');
                 // Mostrar indicador de carga
                 loadingElement.style.display = 'block';
                 tableContainer.style.display = 'none';
                 // Recargar los datos
-                loadUsers();
+                loadVehiculos();
             } else {
                 console.error('Error:', xhr.statusText);
-                alert('Error: No se pudo eliminar el usuario');
+                alert('Error: No se pudo eliminar el vehículo');
             }
         };
         
         xhr.onerror = function() {
             console.error('Request error');
-            alert('Error de conexión: No se pudo eliminar el usuario');
+            alert('Error de conexión: No se pudo eliminar el vehículo');
         };
         
         xhr.send(new FormData(form));
@@ -222,8 +233,8 @@ function deleteUser(userId) {
     }
 }
 
-// Cargar usuarios cuando el DOM esté listo
+// Cargar vehículos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    loadUsers();
+    loadVehiculos();
 });
 </script>

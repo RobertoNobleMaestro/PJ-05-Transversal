@@ -409,6 +409,7 @@
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.users') }}"><i class="fas fa-users"></i> Usuarios</a></li>
+                <li><a href="{{ route('admin.vehiculos') }}"><i class="fas fa-car"></i> Vehículos</a></li>
             </ul>
         </div>
 
