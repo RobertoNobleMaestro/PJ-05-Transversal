@@ -41,6 +41,11 @@ class Reserva extends Model
         return $this->belongsToMany(Vehiculo::class, 'vehiculos_reservas', 'id_reservas', 'id_vehiculos')
                     ->withPivot('fecha_ini', 'fecha_final', 'precio_unitario');
     }
+    public function vehiculo()
+    {
+        return $this->belongsToMany(Vehiculo::class, 'vehiculos_reservas', 'id_reservas', 'id_vehiculos')
+                    ->withPivot('fecha_ini', 'fecha_final', 'precio_unitario');
+    }
 
     public function vehiculosReservas()
     {
