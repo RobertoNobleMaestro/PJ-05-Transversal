@@ -16,7 +16,6 @@ class Pago extends Model
         'estado_pago',
         'fecha_pago',
         'referencia_externa',
-        'monto_pagado',
         'total_precio',
         'moneda',
         'id_usuario',
@@ -25,7 +24,6 @@ class Pago extends Model
 
     protected $casts = [
         'fecha_pago' => 'datetime',
-        'monto_pagado' => 'decimal:2',
         'total_precio' => 'decimal:2'
     ];
 
