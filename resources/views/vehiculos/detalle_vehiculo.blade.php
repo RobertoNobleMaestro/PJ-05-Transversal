@@ -69,6 +69,31 @@
     </div>
 
     <hr>
+    <hr>
+    <h4 class="mt-5">CALENDARIO DE RESERVAS</h4>
+    <div id="calendario-reservas" class="mb-5"></div>
+
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendario-reservas');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: `/vehiculos/{{ $vehiculo->id_vehiculos }}/reservas`
+            });
+            calendar.render();
+        });
+    </script>
 
     <!-- Valoraciones con Fetch API -->
     <h4 class="mt-5">VALORACIONES</h4>
@@ -100,4 +125,3 @@
 </script>
 </body>
 </html>
-{{-- commit anterior --}}
