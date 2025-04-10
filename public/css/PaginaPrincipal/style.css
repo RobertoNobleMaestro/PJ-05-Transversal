@@ -3,9 +3,12 @@ body {
   font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #ECECEC;
+  background-color: #ECECEC !important;
 }
 
+a {
+  text-decoration: none !important;
+}
 
 /* ===== Breadcrumb ===== */
 .breadcrumb-container {
@@ -36,7 +39,7 @@ body {
 /* ===== Botones de tipo de vehículo estilo personalizado ===== */
 .btn-group-toggle {
   background-color: #d9d9d9;
-  border-radius: 12px;
+  border-radius: 14px !important;
   padding: 5px;
   display: inline-flex;
 }
