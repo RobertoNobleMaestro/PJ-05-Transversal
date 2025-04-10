@@ -23,8 +23,8 @@ class ReservaCompletaSeeder extends Seeder
 
         // VEHÍCULOS
         DB::table('vehiculos')->insertOrIgnore([
-            ['id_vehiculos' => 1, 'marca' => 'Toyota', 'modelo' => 'Corolla', 'kilometraje' => 15000, 'seguro_incluido' => 1, 'año' => '2023', 'id_lugar' => 1, 'id_tipo' => 1],
-            ['id_vehiculos' => 2, 'marca' => 'Honda', 'modelo' => 'CBR 600', 'kilometraje' => 8000, 'seguro_incluido' => 1, 'año' => '2022', 'id_lugar' => 2, 'id_tipo' => 2],
+            ['id_vehiculos' => 1, 'precio_dia' => 20, 'marca' => 'Toyota', 'modelo' => 'Corolla', 'kilometraje' => 15000, 'seguro_incluido' => 1, 'año' => '2023', 'id_lugar' => 1, 'id_tipo' => 1],
+            ['id_vehiculos' => 2, 'precio_dia' => 40, 'marca' => 'Honda', 'modelo' => 'CBR 600', 'kilometraje' => 8000, 'seguro_incluido' => 1, 'año' => '2022', 'id_lugar' => 2, 'id_tipo' => 2],
         ]);
 
         // IMÁGENES
@@ -75,8 +75,7 @@ class ReservaCompletaSeeder extends Seeder
                 'id_reservas' => 3,
                 'id_vehiculos' => 1,
                 'fecha_ini' => now()->addDays(1)->toDateString(),
-                'fecha_final' => now()->addDays(3)->toDateString(),
-                'precio_unitario' => 75.00
+                'fecha_final' => now()->addDays(3)->toDateString()
             ],
             [
                 'id_vehiculos_reservas' => 2,
@@ -84,7 +83,6 @@ class ReservaCompletaSeeder extends Seeder
                 'id_vehiculos' => 2,
                 'fecha_ini' => now()->addDays(2)->toDateString(),
                 'fecha_final' => now()->addDays(4)->toDateString(),
-                'precio_unitario' => 50.00
             ],
         ]);
 
@@ -95,7 +93,6 @@ class ReservaCompletaSeeder extends Seeder
                 'estado_pago' => 'no pagado',
                 'fecha_pago' => now()->toDateString(),
                 'referencia_externa' => 'ABC123XYZ',
-                'monto_pagado' => 125.00,
                 'total_precio' => 125.00,
                 'moneda' => 'EUR',
                 'id_usuario' => 1,

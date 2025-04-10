@@ -68,6 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             container.innerHTML = '';
 
+            // let estrellas = '';
+            // const rating = valoracion.valoracion !== undefined ? valoracion.valoracion : valoracion.puntuacion;
+            
+            // for (let i = 0; i < 5; i++) {
+            //     estrellas += i < rating 
+            //         ? '<i class="fas fa-star"></i>' 
+            //         : '<i class="far fa-star"></i>';
+            // }
+            // <p>${estrellas}</p>
+
             vehiculos.forEach(v => {
                 const card = `
                     <div class="col-sm-6 col-md-3 mb-4">
@@ -76,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                               <img src="https://via.placeholder.com/300x180?text=${encodeURIComponent(v.marca)}+${encodeURIComponent(v.modelo)}" class="card-img-top" alt="${v.marca}">
                               <div class="card-body">
                                 <h5 class="card-title">${v.marca} ${v.modelo}</h5>
-                                <p class="card-text">${Number(v.kilometraje).toLocaleString()} km</p>
+                                <p class="card-text">${v.precio_dia} €/dia</p>
                               </div>
                             </div>
                         </a>

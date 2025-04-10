@@ -14,7 +14,6 @@ class PagoSeeder extends Seeder
                 'estado_pago' => 'completado',
                 'fecha_pago' => '2024-04-07',
                 'referencia_externa' => 'PAY-1234567890',
-                'monto_pagado' => 150.00,
                 'total_precio' => 150.00,
                 'moneda' => 'EUR',
                 'id_usuario' => 2, // Usuario Regular
@@ -24,7 +23,6 @@ class PagoSeeder extends Seeder
                 'estado_pago' => 'completado',
                 'fecha_pago' => '2024-04-07',
                 'referencia_externa' => 'PAY-0987654321',
-                'monto_pagado' => 90.00,
                 'total_precio' => 90.00,
                 'moneda' => 'EUR',
                 'id_usuario' => 2, // Usuario Regular

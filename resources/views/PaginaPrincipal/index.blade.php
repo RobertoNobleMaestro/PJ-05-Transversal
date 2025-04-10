@@ -102,7 +102,7 @@
   </div>    
 
   <div class="container vehicles-section">
-    <h2>Top 10 Vehículos más solicitados</h2>
+    <h2>Alquila vehiculos</h2>
     <div class="row" id="vehiculos-container">
       <!-- Aquí se insertarán los vehículos dinámicamente -->
     </div>
