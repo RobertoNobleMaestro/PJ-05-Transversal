@@ -21,6 +21,7 @@
         Route::get('/login', 'login')->name('login');
         Route::post('/login', 'loginProcess')->name('login.post');
         Route::get('/logout', 'logout')->name('logout');
+        Route::get('/register', 'register')->name('register');
     });
 
     // Auth

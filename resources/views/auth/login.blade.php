@@ -20,7 +20,7 @@
             <br>
             <br>
             <button type="submit" id="login" disabled>Iniciar Sesión</button><br>
-            <a href="" class=""> Registrarse </a>
+            <a href="{{route('register')}}" class=""> Registrarse </a>
         </form>
     </div>
     <div class="container-derecha">
