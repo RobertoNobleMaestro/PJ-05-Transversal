@@ -35,7 +35,8 @@ class HomeController extends Controller
 
     // Vehiculos via fetch
     public function listado() {
-        $vehiculos = Vehiculo::select('id_vehiculos', 'marca', 'modelo', 'kilometraje')->get();
+        $vehiculos = Vehiculo::select('id_vehiculos', 'precio_dia', 'marca', 'año', 'modelo', 'kilometraje')->get();
+        // $valoraciones = Valoracion::select('puntuacion');
         return response()->json($vehiculos);
     }
     

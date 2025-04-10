@@ -12,7 +12,6 @@ return new class extends Migration {
             $table->string('estado_pago');
             $table->date('fecha_pago');
             $table->string('referencia_externa');
-            $table->decimal('monto_pagado', 10, 2);
             $table->decimal('total_precio', 10, 2);
             $table->string('moneda');
             $table->unsignedBigInteger('id_usuario');

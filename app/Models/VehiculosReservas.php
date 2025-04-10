@@ -13,7 +13,6 @@ class VehiculosReservas extends Model
     protected $fillable = [
         'fecha_ini',
         'fecha_final',
-        'precio_unitario',
         'id_reservas',
         'id_vehiculos'
     ];
