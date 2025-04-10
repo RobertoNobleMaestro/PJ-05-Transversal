@@ -8,6 +8,7 @@
     use App\Http\Controllers\UserController;
     use App\Http\Controllers\VehiculoController;
     use App\Http\Controllers\CarritoController;
+    use App\Http\Controllers\ReservaController;
 
     // Rutas publicas
     Route::redirect('/', '/home');
@@ -50,6 +51,7 @@
 
     // Vehiculos
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
+    Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
 
     // API para valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function($id) {
