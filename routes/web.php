@@ -59,3 +59,10 @@
         return response()->json($valoraciones);
     });
     Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+// Rutas de pago (dentro del middleware 'auth')
+Route::get('/finalizar-compra', [App\Http\Controllers\PagoController::class, 'checkout'])->name('pago.checkout');
+Route::get('/pago/exito/{id_reserva}', [App\Http\Controllers\PagoController::class, 'exito'])->name('pago.exito');
+Route::get('/pago/cancelado', [App\Http\Controllers\PagoController::class, 'cancelado'])->name('pago.cancelado');
+
+// Webhook de Stripe (ruta pública)
+Route::post('/webhook/stripe', [App\Http\Controllers\PagoController::class, 'webhook'])->name('webhook.stripe');
