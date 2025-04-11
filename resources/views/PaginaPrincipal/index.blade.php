@@ -102,11 +102,58 @@
   </div>    
 
   <div class="container vehicles-section">
-    <h2>Alquila vehiculos</h2>
-    <div class="row" id="vehiculos-container">
-      <!-- Aquí se insertarán los vehículos dinámicamente -->
+    <h2>Alquila vehículos</h2>
+  
+    <div class="mb-4">
+      <form id="filtros-form">
+        <div class="form-row align-items-end">
+          <!-- Filtro por marca -->
+          <div class="form-group col-md-2">
+            <label for="marcaFiltro">Marca:</label>
+            <input type="text" id="marcaFiltro" class="form-control" placeholder="Ej. Toyota">
+          </div>
+    
+          <!-- Filtro por año -->
+          <div class="form-group col-md-2">
+            <label for="anioFiltro">Año:</label>
+            <select id="anioFiltro" class="form-control">
+              <option value="">Todos</option>
+              <!-- años dinámicos -->
+            </select>
+          </div>
+    
+          <!-- Filtro por precio mínimo -->
+          <div class="form-group col-md-2">
+            <label for="precioMin">Precio mín (€):</label>
+            <input type="number" id="precioMin" class="form-control" placeholder="Mín">
+          </div>
+    
+          <!-- Filtro por precio máximo -->
+          <div class="form-group col-md-2">
+            <label for="precioMax">Precio máx (€):</label>
+            <input type="number" id="precioMax" class="form-control" placeholder="Máx">
+          </div>
+    
+          <!-- Selector de cantidad por página -->
+          <div class="form-group col-md-2">
+            <label for="perPageInput">Vehículos/página:</label>
+            <input id="perPageInput" type="number" class="form-control" value="8" min="1">
+          </div>
+    
+          <!-- Paginación -->
+          <div class="form-group col-md-2 text-center">
+            <div id="pagination-controls" class="btn-group d-block mb-1"></div>
+            <div id="pagination-info" class="small text-muted"></div>
+          </div>
+        </div>
+      </form>
     </div>
-  </div>  
+    
+    <!-- Contenedor de tarjetas de vehículos -->
+    <div class="row" id="vehiculos-container">
+      <!-- Se insertan dinámicamente -->
+    </div>
+  </div>
 
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>

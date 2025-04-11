@@ -36,9 +36,19 @@ class HomeController extends Controller
     }
 
     // Vehiculos via fetch
-    public function listado()
+    public function listado(Request $request)
     {
-        $vehiculos = DB::table('vehiculos')
+        $page = (int) $request->input('page', 1);
+        $perPage = (int) $request->input('perPage', 8);
+        $offset = ($page - 1) * $perPage;
+
+        $marca = $request->input('marca');
+        $anio = $request->input('anio');
+        $precioMin = $request->input('precioMin');
+        $precioMax = $request->input('precioMax');
+
+        // Base query con joins y agrupaciones
+        $query = DB::table('vehiculos')
             ->leftJoin('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
             ->leftJoin('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
             ->leftJoin('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
@@ -58,27 +68,47 @@ class HomeController extends Controller
                 'vehiculos.modelo',
                 'vehiculos.kilometraje',
                 'vehiculos.año'
-            )
-            ->get();
+            );
 
-        return response()->json($vehiculos);
+        // Aplicar filtros
+        if (!empty($marca)) {
+            $query->having('marca', 'like', "%$marca%");
+        }
+
+        if (!empty($anio)) {
+            $query->having('año', '=', $anio);
+        }
+
+        if (!empty($precioMin)) {
+            $query->having('precio_dia', '>=', $precioMin);
+        }
+
+        if (!empty($precioMax)) {
+            $query->having('precio_dia', '<=', $precioMax);
+        }
+
+        // Obtener todos los resultados filtrados
+        $all = $query->get();
+        $total = count($all);
+
+        // Aplicar paginación en PHP sobre la colección
+        $vehiculosPaginados = $all->slice($offset, $perPage)->values();
+        $totalPages = ceil($total / $perPage);
+
+        return response()->json([
+            'vehiculos' => $vehiculosPaginados,
+            'totalPages' => $totalPages,
+        ]);
     }
 
-    // public function listado()
-    // {
-    //     $vehiculos = DB::table('vehiculos')
-    //         ->select(
-    //             'id_vehiculos',
-    //             'precio_dia',
-    //             'marca',
-    //             'modelo',
-    //             'kilometraje',
-    //             'año',
-    //             DB::raw('0 as valoracion') // Provisional
-    //         )
-    //         ->get();
+    public function obtenerAño()
+    {
+        $año = Vehiculo::select('año')
+            ->distinct()
+            ->orderBy('año', 'desc')
+            ->pluck('año');
 
-    //     return response()->json($vehiculos);
-    // }
+        return response()->json($año);
+    }
 
 }

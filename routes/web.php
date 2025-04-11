@@ -17,6 +17,7 @@
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
     Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
+    Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 
     // Rutas Auth publicas
     Route::controller(AuthController::class)->group(function () {
