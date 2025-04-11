@@ -18,7 +18,7 @@ class PagoController extends Controller
         // Obtener la reserva pendiente del usuario con sus vehículos
         $reserva = Reserva::where('id_usuario', Auth::id())
                          ->where('estado', 'pendiente')
-                         ->with(['vehiculos', 'vehiculosReservas', 'vehiculosReservas.vehiculo']) // Cargamos las relaciones necesarias
+                         ->with(['vehiculos', 'vehiculosReservas', 'vehiculosReservas.vehiculo'])
                          ->first();
 
         if (!$reserva) {
@@ -26,13 +26,15 @@ class PagoController extends Controller
         }
 
         // Calcular el precio total de la reserva
-        $totalPrecio = 0;
+        $total = 0;
         foreach ($reserva->vehiculosReservas as $vr) {
-            $totalPrecio += $vr->vehiculo->precio_dia;
+            $dias = \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final);
+            $dias = max(1, $dias); // Mínimo 1 día
+            $total += $vr->vehiculo->precio_dia * $dias;
         }
 
         // Actualizar la reserva con el precio total
-        $reserva->total_precio = $totalPrecio;
+        $reserva->total_precio = $total;
         $reserva->save();
 
         // Configurar Stripe con la clave secreta
@@ -43,15 +45,29 @@ class PagoController extends Controller
             $line_items = [];
             
             foreach ($reserva->vehiculosReservas as $vr) {
+                $dias = max(1, \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
+                $precioTotal = $vr->vehiculo->precio_dia * $dias;
+                
                 $line_items[] = [
                     'price_data' => [
                         'currency' => 'eur',
                         'product_data' => [
                             'name' => $vr->vehiculo->marca . ' ' . $vr->vehiculo->modelo,
-                            'description' => 'Reserva del ' . date('d/m/Y', strtotime($vr->fecha_ini)) . ' al ' . date('d/m/Y', strtotime($vr->fecha_final)),
+                            'description' => sprintf(
+                                'Reserva del %s al %s (%d días) - Precio: %.2f€/día',
+                                date('d/m/Y', strtotime($vr->fecha_ini)),
+                                date('d/m/Y', strtotime($vr->fecha_final)),
+                                $dias,
+                                $vr->vehiculo->precio_dia
+                            ),
                             'images' => [$vr->vehiculo->imagenes()->first() ? asset('img/' . $vr->vehiculo->imagenes()->first()->ruta) : asset('img/default-car.png')],
+                            'metadata' => [
+                                'dias_alquiler' => $dias,
+                                'precio_dia' => $vr->vehiculo->precio_dia,
+                                'total' => $precioTotal
+                            ]
                         ],
-                        'unit_amount' => intval($vr->vehiculo->precio_dia * 100), // Stripe trabaja en centavos
+                        'unit_amount' => intval($precioTotal * 100), // Stripe trabaja en centavos
                     ],
                     'quantity' => 1,
                 ];
@@ -68,7 +84,9 @@ class PagoController extends Controller
                 'metadata' => [
                     'id_reserva' => $reserva->id_reservas,
                     'id_usuario' => Auth::id(),
+                    'total' => $total
                 ],
+                'locale' => 'es',
             ]);
 
             // Guardar el ID de la sesión en la reserva para referencia futura
@@ -170,8 +188,8 @@ class PagoController extends Controller
                                 'estado_pago' => 'completado',
                                 'fecha_pago' => now(),
                                 'referencia_externa' => $session->payment_intent,
-                                'monto_pagado' => $reserva->total_precio,
-                                'total_precio' => $reserva->total_precio,
+                                'monto_pagado' => $session->metadata->total,
+                                'total_precio' => $session->metadata->total,
                                 'moneda' => 'EUR',
                                 'id_usuario' => $reserva->id_usuario,
                                 'id_reservas' => $reserva->id_reservas,
@@ -179,18 +197,14 @@ class PagoController extends Controller
                         }
                     }
                     break;
-                // Puedes manejar más eventos aquí
             }
             
             return response()->json(['status' => 'success']);
         } catch (\UnexpectedValueException $e) {
-            // Error de firma inválida
             return response()->json(['error' => $e->getMessage()], 400);
         } catch (\Stripe\Exception\SignatureVerificationException $e) {
-            // Error de firma inválida
             return response()->json(['error' => $e->getMessage()], 400);
         } catch (\Exception $e) {
-            // Otro error
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
