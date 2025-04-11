@@ -45,8 +45,11 @@ function cargarCarrito() {
           <p><i class="fas fa-map-marker-alt"></i> <strong>Lugar:</strong> ${vehiculo.lugar?.nombre || 'N/D'}</p>
           <p><i class="fas fa-cogs"></i> <strong>Características:</strong> ${detalles}</p>
           <p><i class="fas fa-shield-alt"></i> <strong>Plan:</strong> Básico</p>
-          <button class="btn-eliminar" onclick="eliminarReserva(${vehiculo.reserva.id_reserva})">Eliminar</button>
-        </div>
+            <div class="acciones">
+              <button class="btn-eliminar mt-3" onclick="eliminarReserva(${vehiculo.reserva.id_reserva})">
+                <i class="fas fa-trash-alt" style="color:white"></i> Quitar
+              </button>
+            </div>        </div>
       `;
       contenedor.appendChild(div);
       if (vehiculo.reserva?.total_precio) {
@@ -64,29 +67,42 @@ function cargarCarrito() {
 }
 
 function eliminarReserva(idReserva) {
-  fetch(`/eliminar-reserva/${idReserva}`, {
-    method: 'DELETE',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      'X-Requested-With': 'XMLHttpRequest'
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Esta acción eliminará la reserva del vehículo.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/eliminar-reserva/${idReserva}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const vehiculoDiv = document.getElementById(`vehiculo-${idReserva}`);
+          if (vehiculoDiv) {
+            vehiculoDiv.remove();
+          }
+          cargarCarrito();
+          Swal.fire('Eliminado', 'La reserva ha sido eliminada.', 'success');
+        } else {
+          Swal.fire('Error', 'No se pudo eliminar la reserva.', 'error');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        Swal.fire('Error', 'Ocurrió un problema al intentar eliminar la reserva.', 'error');
+      });
     }
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      // Eliminar el vehículo de la lista
-      const vehiculoDiv = document.getElementById(`vehiculo-${idReserva}`);
-      if (vehiculoDiv) {
-        vehiculoDiv.remove();
-      }
-      // Recargar el carrito para actualizar el total
-      cargarCarrito();
-    } else {
-      alert('Error al eliminar la reserva');
-    }
-  })
-  .catch(error => {
-    console.error(error);
-    alert('Error al eliminar la reserva');
   });
 }
+
