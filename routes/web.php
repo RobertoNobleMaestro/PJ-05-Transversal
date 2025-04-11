@@ -9,6 +9,8 @@
     use App\Http\Controllers\VehiculoController;
     use App\Http\Controllers\CarritoController;
     use App\Http\Controllers\ReservaController;
+    use App\Http\Controllers\PagoController;
+    use App\Http\Controllers\FacturaController;
 
     // Rutas publicas
     Route::redirect('/', '/home');
@@ -61,10 +63,14 @@
         return response()->json($valoraciones);
     });
     Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
-// Rutas de pago (dentro del middleware 'auth')
-Route::get('/finalizar-compra', [App\Http\Controllers\PagoController::class, 'checkout'])->name('pago.checkout');
-Route::get('/pago/exito/{id_reserva}', [App\Http\Controllers\PagoController::class, 'exito'])->name('pago.exito');
-Route::get('/pago/cancelado', [App\Http\Controllers\PagoController::class, 'cancelado'])->name('pago.cancelado');
 
-// Webhook de Stripe (ruta pública)
-Route::post('/webhook/stripe', [App\Http\Controllers\PagoController::class, 'webhook'])->name('webhook.stripe');
+    // Rutas de pago (dentro del middleware 'auth')
+    Route::get('/finalizar-compra', [PagoController::class, 'checkout'])->name('pago.checkout');
+    Route::get('/pago/exito/{id_reserva}', [PagoController::class, 'exito'])->name('pago.exito');
+    Route::get('/pago/cancelado', [PagoController::class, 'cancelado'])->name('pago.cancelado');
+
+    // Facturas
+    Route::get('/facturas/descargar/{id_reserva}', [FacturaController::class, 'descargarFactura'])->name('facturas.descargar')->middleware('auth');
+
+    // Webhook de Stripe (ruta pública)
+    Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');

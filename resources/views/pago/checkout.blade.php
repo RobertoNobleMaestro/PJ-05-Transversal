@@ -5,53 +5,10 @@
     <title>Finalizar Pago | Carflow</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/carrito.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Carrito/checkout.css') }}">
     <script src="https://js.stripe.com/v3/"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        .pago-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .total-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .payment-box {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .btn-stripe {
-            background-color: #635bff;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 4px;
-            border: none;
-            font-weight: 600;
-            display: inline-block;
-            text-decoration: none;
-            transition: all 0.15s ease;
-            cursor: pointer;
-        }
-        .btn-stripe:hover {
-            background-color: #4f46e5;
-            color: white;
-            text-decoration: none;
-        }
-        .payment-icons {
-            margin-bottom: 20px;
-        }
-        .payment-icon {
-            font-size: 24px;
-            margin: 0 5px;
-            color: #6c757d;
-        }
-    </style>
+
 </head>
 <body>
     @include('layouts.navbar')
@@ -65,27 +22,33 @@
                     <h5>Resumen de tu reserva</h5>
                     <hr>
                     @foreach($reserva->vehiculosReservas as $vr)
-                        <div class="d-flex justify-content-between mb-2">
-                            <div>
-                                <strong>{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</strong>
-                                <div>Del {{ date('d/m/Y', strtotime($vr->fecha_ini)) }} al {{ date('d/m/Y', strtotime($vr->fecha_final)) }}</div>
-                            </div>
-                            <div class="text-right">
-                                <strong>€{{ number_format($vr->precio_unitario, 2, ',', '.') }}</strong>
+                        <div class="reservation-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</strong>
+                                    <div class="text-muted">
+                                        <i class="far fa-calendar-alt mr-2"></i>
+                                        Del {{ date('d/m/Y', strtotime($vr->fecha_ini)) }} al {{ date('d/m/Y', strtotime($vr->fecha_final)) }}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="total-price">{{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}</div>
+                                </div>
                             </div>
                         </div>
                     @endforeach
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <div><strong>Total a pagar:</strong></div>
-                        <div><strong>€{{ number_format($reserva->total_precio, 2, ',', '.') }}</strong></div>
+                    <div class="final-total">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><strong>Total a pagar:</strong></div>
+                            <div class="total-price">{{ number_format($reserva->total_precio, 2, ',', '.') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-5">
                 <div class="payment-box">
-                    <h5 class="mb-3">Método de pago</h5>
+                    <h5>Método de pago</h5>
                     
                     <div class="payment-icons">
                         <i class="fab fa-cc-visa payment-icon"></i>
@@ -95,10 +58,14 @@
                         <i class="fab fa-cc-paypal payment-icon"></i>
                     </div>
                     
-                    <p>Serás redirigido a la pasarela de pago segura de Stripe para completar tu compra.</p>
+                    <div class="secure-payment-text">
+                        <i class="fas fa-shield-alt"></i>
+                        Serás redirigido a la pasarela de pago segura de Stripe para completar tu compra.
+                    </div>
                     
                     <button id="checkout-button" class="btn-stripe">
-                        Pagar ahora con Stripe <i class="fas fa-lock ml-2"></i>
+                        <i class="fas fa-lock"></i>
+                        Pagar ahora con Stripe
                     </button>
                 </div>
             </div>
@@ -107,17 +74,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar Stripe
             const stripe = Stripe('{{ $stripe_public_key }}');
             const checkoutButton = document.getElementById('checkout-button');
             
-            // Manejar el clic en el botón de pago
             checkoutButton.addEventListener('click', function() {
-                // Redirigir a la página de checkout de Stripe
                 stripe.redirectToCheckout({
                     sessionId: '{{ $stripe_session_id }}'
                 }).then(function(result) {
-                    // Si hay un error, mostrar un mensaje
                     if (result.error) {
                         alert(result.error.message);
                     }
