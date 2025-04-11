@@ -23,7 +23,6 @@
     <!-- Resumen de reserva -->
     <div class="resumen-carrito" id="resumenReserva">
       <div class="resumen-titulo">Tu Reserva <i class="fas fa-lock"></i></div>
-      <p><span class="subtexto">–</span> <span class="subtexto">0 opiniones</span></p>
       <hr>
       <p class="subtexto">Precio total: </p>
       <p class="resumen-precio" id="precioDia">EUR€ —</p>
