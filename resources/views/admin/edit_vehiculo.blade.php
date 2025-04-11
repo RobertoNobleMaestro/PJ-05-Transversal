@@ -193,8 +193,8 @@
         </div>
 
         <div class="btn-container">
-            <button type="button" class="btn btn-submit" onclick="updateVehiculo({{ $vehiculo->id_vehiculos }})">Actualizar</button>
             <a href="{{ route('admin.vehiculos') }}" class="btn btn-cancel">Cancelar</a>
+            <button type="button" class="btn btn-submit" onclick="updateVehiculo({{ $vehiculo->id_vehiculos }})">Actualizar</button>
         </div>
     </form>
 </div>

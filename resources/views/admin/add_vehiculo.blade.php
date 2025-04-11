@@ -188,8 +188,8 @@
         </div>
 
         <div class="btn-container">
-            <button type="button" class="submit-btn" onclick="createVehiculo()">Enviar</button>
             <a href="{{ route('admin.vehiculos') }}" class="cancel-btn">Cancelar</a>
+            <button type="button" class="submit-btn" onclick="createVehiculo()">Enviar</button>
         </div>
     </form>
 </div>

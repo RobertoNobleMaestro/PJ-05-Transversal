@@ -104,78 +104,101 @@
         font-size: 0.875rem;
         margin-top: 0.25rem;
     }
+    
+    .form-text {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .sidebar-menu .active {
+        background-color: rgba(255,255,255,0.3);
+        font-weight: bold;
+        border-radius: 5px;
+    }
 </style>
 
 <div class="add-user-container">
-    <h1 class="form-title">Añadir Nuevo Usuario</h1>
-    <form id="addUserForm">
-        @csrf
-        <div class="form-grid">
-            <!-- Columna izquierda: 4 campos -->
-            <div>
-                <div class="form-group">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                </div>
+    <!-- Sidebar para mantener la navegación consistente -->
+    <div class="admin-sidebar" id="sidebar" style="position: fixed; left: 0; top: 0; height: 100vh; z-index: 100;">
+        <div class="sidebar-title">CARFLOW</div>
+        <ul class="sidebar-menu">
+            <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
+            <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
+        </ul>
+    </div>
+    
+    <!-- Contenido principal con margen izquierdo para evitar que se superponga con el sidebar -->
+    <div style="margin-left: 250px;">
+        <h1 class="form-title">Añadir Nuevo Usuario</h1>
+        <form id="addUserForm">
+            @csrf
+            <div class="form-grid">
+                <!-- Columna izquierda: 4 campos -->
+                <div>
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="id_roles" class="form-label">Rol</label>
-                    <select class="form-control" id="id_roles" name="id_roles">
-                        <option value="2">Cliente</option>
-                        <option value="3">Gestor</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="id_roles" class="form-label">Rol</label>
+                        <select class="form-control" id="id_roles" name="id_roles">
+                            <option value="2">Cliente</option>
+                            <option value="3">Gestor</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Columna derecha: 4 campos -->
+                <div>
+                    <div class="form-group">
+                        <label for="DNI" class="form-label">DNI</label>
+                        <input type="text" class="form-control" id="DNI" name="DNI" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" max="{{ date('Y-m-d', strtotime('-16 years')) }}" required>
+                        <small class="form-text">Debes tener al menos 16 años para registrarte.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
+                        <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+                    </div>
                 </div>
             </div>
             
-            <!-- Columna derecha: 4 campos -->
-            <div>
-                <div class="form-group">
-                    <label for="DNI" class="form-label">DNI</label>
-                    <input type="text" class="form-control" id="DNI" name="DNI" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telefono" name="telefono" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
-                    <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
-                </div>
+            <!-- Dirección en ancho completo abajo -->
+            <div class="form-group full-width" style="margin-bottom: 1.5rem;">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion" required>
             </div>
-        </div>
-        
-        <!-- Dirección en ancho completo abajo -->
-        <div class="form-group full-width" style="margin-bottom: 1.5rem;">
-            <label for="direccion" class="form-label">Dirección</label>
-            <input type="text" class="form-control" id="direccion" name="direccion" required>
-        </div>
 
-        <div class="btn-container">
-            <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
-            <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
-        </div>
-    </form>
+            <div class="btn-container">
+                <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
+                <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
-
-
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -157,7 +157,8 @@
 
                 <div class="form-group">
                     <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ $user->fecha_nacimiento }}" required>
+                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ date('Y-m-d', strtotime($user->fecha_nacimiento)) }}" max="{{ date('Y-m-d', strtotime('-16 years')) }}" required>
+                    <small class="form-text">Debes tener al menos 16 años para registrarte.</small>
                 </div>
 
                 <div class="form-group">
@@ -174,8 +175,8 @@
         </div>
 
         <div class="btn-container">
-            <button type="button" class="btn btn-submit" onclick="updateUser({{ $user->id_usuario }})">Actualizar</button>
             <a href="{{ route('admin.users') }}" class="btn btn-cancel">Cancelar</a>
+            <button type="button" class="btn btn-submit" onclick="updateUser({{ $user->id_usuario }})">Actualizar</button>
         </div>
     </form>
 </div>

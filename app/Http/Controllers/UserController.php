@@ -84,7 +84,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:8',
                 'DNI' => 'required|string|regex:/^\d{8}[A-Z]$/|max:9',
                 'telefono' => 'required|string|regex:/^\d{9}$/',
-                'fecha_nacimiento' => 'required|date',
+                'fecha_nacimiento' => 'required|date|before_or_equal:'.date('Y-m-d', strtotime('-16 years')),
                 'direccion' => 'required|string|min:5|max:255',
                 'licencia_conducir' => 'nullable|string|max:5',
                 'id_roles' => 'required|integer',
@@ -151,7 +151,7 @@ class UserController extends Controller
                 'password' => 'nullable|string|min:8',
                 'DNI' => 'required|string|regex:/^\d{8}[A-Z]$/|max:9',
                 'telefono' => 'required|string|regex:/^\d{9}$/',
-                'fecha_nacimiento' => 'required|date',
+                'fecha_nacimiento' => 'required|date|before_or_equal:'.date('Y-m-d', strtotime('-16 years')),
                 'direccion' => 'required|string|min:5|max:255',
                 'licencia_conducir' => 'nullable|string|max:5',
                 'id_roles' => 'required|integer',
@@ -189,6 +189,9 @@ class UserController extends Controller
     {
         $authCheck = $this->checkAdmin($request);
         if ($authCheck) {
+            if ($request->expectsJson()) {
+                return $authCheck;
+            }
             return $authCheck;
         }
         
@@ -196,8 +199,22 @@ class UserController extends Controller
             $user = User::findOrFail($id_usuario);
             $user->delete();
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Usuario eliminado correctamente'
+                ]);
+            }
+
             return redirect()->route('admin.users')->with('success', 'Usuario eliminado correctamente');
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error al eliminar el usuario: ' . $e->getMessage()
+                ], 500);
+            }
+            
             return redirect()->route('admin.users')->with('error', 'Error al eliminar el usuario');
         }
     }

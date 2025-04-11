@@ -41,6 +41,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
     <!-- link sweetalert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Script para resaltar la opcion activa en el menu lateral -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener la URL actual
+        const currentPath = window.location.pathname;
+        
+        // Seleccionar todos los links del menu lateral
+        const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+        
+        // Recorrer los links y aplicar la clase active al correspondiente
+        sidebarLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            // Comprobamos si la URL actual contiene la ruta del enlace (para que funcione tambien en subcarpetas)
+            if (href && (currentPath.includes('/users') && href.includes('/users')) ||
+                (currentPath.includes('/vehiculos') && href.includes('/vehiculos'))) {
+                // Aplicar estilos de activo
+                link.style.backgroundColor = 'rgba(255,255,255,0.3)';
+                link.style.fontWeight = 'bold';
+                link.style.borderRadius = '5px';
+            }
+        });
+    });
+    </script>
+    
     @yield('scripts')
 </body>
 </html>
