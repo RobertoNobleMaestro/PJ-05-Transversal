@@ -5,21 +5,24 @@
     <title>Pago Cancelado | Carflow</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/carrito.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Carrito/cancelado.css') }}">
+
 </head>
 <body>
     @include('layouts.navbar')
 
-    <div class="container py-5 text-center">
-        <div class="card mx-auto" style="max-width: 600px;">
-            <div class="card-body">
+    <div class="container pago-container py-5">
+        <div class="cancel-card mx-auto" style="max-width: 600px;">
+            <div class="text-center">
                 <div class="mb-4">
-                    <i class="fas fa-times-circle text-danger" style="font-size: 80px;"></i>
+                    <i class="fas fa-times-circle cancel-icon" style="font-size: 90px;"></i>
                 </div>
-                <h2 class="mb-3">Pago Cancelado</h2>
-                <p class="mb-4">El proceso de pago ha sido cancelado. Tu carrito sigue disponible si deseas completar la compra más tarde.</p>
+                <h2 class="mb-4">Pago Cancelado</h2>
+                <p class="cancel-message">El proceso de pago ha sido cancelado. Tu carrito sigue disponible si deseas completar la compra mÃ¡s tarde.</p>
                 <div class="mt-4">
-                    <a href="{{ route('carrito') }}" class="btn btn-primary">Volver al carrito</a>
+                    <a href="{{ route('carrito') }}" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart mr-2"></i>Volver al carrito
+                    </a>
                 </div>
             </div>
         </div>
