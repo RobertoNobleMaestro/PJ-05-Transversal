@@ -46,9 +46,10 @@ class HomeController extends Controller
         $anio = $request->input('anio');
         $precioMin = $request->input('precioMin');
         $precioMax = $request->input('precioMax');
-
+        $valoracionMin = $request->input('valoracionMin');
+        
         // Base query con joins y agrupaciones
-        $query = DB::table('vehiculos')
+        $baseQuery = DB::table('vehiculos')
             ->leftJoin('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
             ->leftJoin('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
             ->leftJoin('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
@@ -70,29 +71,37 @@ class HomeController extends Controller
                 'vehiculos.año'
             );
 
-        // Aplicar filtros
+        // Aplicar filtros (usando where si es posible para evitar conflicto con groupBy)
         if (!empty($marca)) {
-            $query->having('marca', 'like', "%$marca%");
+            $baseQuery->where('vehiculos.marca', 'like', "%$marca%");
         }
 
+        if (!empty($valoracionMin)) {
+            $baseQuery->havingRaw('ROUND(AVG(valoraciones.valoracion), 1) >= ?', [$valoracionMin]);
+        }       
+
         if (!empty($anio)) {
-            $query->having('año', '=', $anio);
+            $baseQuery->where('vehiculos.año', '=', $anio);
         }
 
         if (!empty($precioMin)) {
-            $query->having('precio_dia', '>=', $precioMin);
+            $baseQuery->where('vehiculos.precio_dia', '>=', $precioMin);
         }
 
         if (!empty($precioMax)) {
-            $query->having('precio_dia', '<=', $precioMax);
+            $baseQuery->where('vehiculos.precio_dia', '<=', $precioMax);
         }
 
-        // Obtener todos los resultados filtrados
-        $all = $query->get();
-        $total = count($all);
+        // Clonar la query para contar total antes de aplicar limit y offset
+        $countQuery = clone $baseQuery;
+        $total = $countQuery->get()->count(); // contar después de agrupar
 
-        // Aplicar paginación en PHP sobre la colección
-        $vehiculosPaginados = $all->slice($offset, $perPage)->values();
+        // Paginación SQL
+        $vehiculosPaginados = $baseQuery
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
+
         $totalPages = ceil($total / $perPage);
 
         return response()->json([
