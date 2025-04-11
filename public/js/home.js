@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             precioMin: precioMin.value,
             precioMax: precioMax.value,
             valoracionMin: valoracionMin.value
-        });
+        });        
 
         fetch(`/vehiculos?${params.toString()}`)
             .then(res => res.json())

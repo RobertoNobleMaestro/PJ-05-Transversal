@@ -78,19 +78,19 @@ class HomeController extends Controller
 
         if (!empty($valoracionMin)) {
             $baseQuery->havingRaw('ROUND(AVG(valoraciones.valoracion), 1) >= ?', [$valoracionMin]);
-        }       
+        }
 
         if (!empty($anio)) {
             $baseQuery->where('vehiculos.año', '=', $anio);
         }
 
-        if (!empty($precioMin)) {
-            $baseQuery->where('vehiculos.precio_dia', '>=', $precioMin);
+        if (is_numeric($precioMin)) {
+            $baseQuery->where('vehiculos.precio_dia', '>=', (float) $precioMin);
         }
-
-        if (!empty($precioMax)) {
-            $baseQuery->where('vehiculos.precio_dia', '<=', $precioMax);
-        }
+        
+        if (is_numeric($precioMax)) {
+            $baseQuery->where('vehiculos.precio_dia', '<=', (float) $precioMax);
+        }            
 
         // Clonar la query para contar total antes de aplicar limit y offset
         $countQuery = clone $baseQuery;
