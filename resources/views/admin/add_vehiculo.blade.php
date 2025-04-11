@@ -132,14 +132,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="anio" class="form-label">Año</label>
-                    <input type="number" class="form-control" id="anio" name="anio" min="1900" max="{{ date('Y') + 1 }}" required>
+                    <label for="año" class="form-label">Año</label>
+                    <input type="number" class="form-control" id="año" name="año" min="1900" max="{{ date('Y') + 1 }}" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="matricula" class="form-label">Matrícula</label>
-                    <input type="text" class="form-control" id="matricula" name="matricula" required>
-                </div>
+
 
                 <div class="form-group">
                     <label for="precio_dia" class="form-label">Precio por día</label>
@@ -217,15 +214,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value.length < 2) {
                 errorMessage = 'Este campo debe tener al menos 2 caracteres.';
             }
-        } else if (input.name === 'anio') {
+        } else if (input.name === 'año') {
             const currentYear = new Date().getFullYear();
             if (parseInt(value) < 1900 || parseInt(value) > currentYear + 1) {
                 errorMessage = `El año debe estar entre 1900 y ${currentYear + 1}.`;
             }
-        } else if (input.name === 'matricula') {
-            if (value.length < 4) {
-                errorMessage = 'La matrícula debe tener al menos 4 caracteres.';
-            }
+
         } else if (input.name === 'precio_dia') {
             if (parseFloat(value) <= 0) {
                 errorMessage = 'El precio debe ser mayor que 0.';

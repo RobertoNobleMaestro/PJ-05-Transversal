@@ -137,14 +137,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="anio" class="form-label">Año</label>
-                    <input type="number" class="form-control" id="anio" name="anio" value="{{ $vehiculo->anio }}" min="1900" max="{{ date('Y') + 1 }}" required>
+                    <label for="año" class="form-label">Año</label>
+                    <input type="number" class="form-control" id="año" name="año" value="{{ $vehiculo->año }}" min="1900" max="{{ date('Y') + 1 }}" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="matricula" class="form-label">Matrícula</label>
-                    <input type="text" class="form-control" id="matricula" name="matricula" value="{{ $vehiculo->matricula }}" required>
-                </div>
+
 
                 <div class="form-group">
                     <label for="precio_dia" class="form-label">Precio por día</label>

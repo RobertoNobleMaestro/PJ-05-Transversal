@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vehiculos', function (Blueprint $table) {
-            if (!Schema::hasColumn('vehiculos', 'anio')) {
-                $table->integer('anio')->after('modelo')->nullable();
+            if (!Schema::hasColumn('vehiculos', 'año')) {
+                $table->integer('año')->after('modelo')->nullable();
             }
             if (!Schema::hasColumn('vehiculos', 'kilometraje')) {
-                $table->integer('kilometraje')->after('anio')->nullable();
+                $table->integer('kilometraje')->after('año')->nullable();
             }
             if (!Schema::hasColumn('vehiculos', 'seguro_incluido')) {
                 $table->boolean('seguro_incluido')->after('kilometraje')->default(false);
@@ -30,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('vehiculos', function (Blueprint $table) {
-            $table->dropColumn(['anio', 'kilometraje', 'seguro_incluido']);
+            $table->dropColumn(['año', 'kilometraje', 'seguro_incluido']);
         });
     }
 };

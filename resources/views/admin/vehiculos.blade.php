@@ -154,7 +154,7 @@ function loadVehiculos() {
                 <td>${vehiculo.id_vehiculos}</td>
                 <td>${vehiculo.marca}</td>
                 <td>${vehiculo.modelo}</td>
-                <td>${vehiculo.anio}</td>
+                <td>${vehiculo.año}</td>
                 <td>${vehiculo.kilometraje}</td>
                 <td>${vehiculo.seguro_incluido ? 'Sí' : 'No'}</td>
                 <td>${vehiculo.nombre_lugar || 'No asignado'}</td>

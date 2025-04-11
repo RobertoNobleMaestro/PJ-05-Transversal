@@ -88,12 +88,11 @@ class VehiculoController extends Controller
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
                 'modelo' => 'required|string|max:255',
-                'anio' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+                'año' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'kilometraje' => 'required|integer|min:0',
                 'seguro_incluido' => 'boolean',
                 'id_lugar' => 'required|exists:lugares,id_lugar',
                 'id_tipo' => 'required|exists:tipos,id_tipo',
-                'matricula' => 'required|string|max:10',
                 'precio_dia' => 'required|numeric|min:0',
                 'disponibilidad' => 'boolean',
             ]);
@@ -166,12 +165,11 @@ class VehiculoController extends Controller
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
                 'modelo' => 'required|string|max:255',
-                'anio' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+                'año' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'kilometraje' => 'required|integer|min:0',
                 'seguro_incluido' => 'boolean',
                 'id_lugar' => 'required|exists:lugares,id_lugar',
                 'id_tipo' => 'required|exists:tipos,id_tipo',
-                'matricula' => 'required|string|max:10',
                 'precio_dia' => 'required|numeric|min:0',
                 'disponibilidad' => 'boolean',
             ]);
