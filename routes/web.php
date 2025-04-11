@@ -74,3 +74,6 @@
 
     // Webhook de Stripe (ruta pública)
     Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
+
+    // Eliminar reserva
+    Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');

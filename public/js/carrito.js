@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', cargarCarrito);
 
 function cargarCarrito() {
@@ -22,6 +21,7 @@ function cargarCarrito() {
     data.forEach(vehiculo => {
       const div = document.createElement('div');
       div.classList.add('vehiculo-item');
+      div.id = `vehiculo-${vehiculo.reserva.id_reserva}`;
 
       const imagen = vehiculo.imagenes?.[0]?.nombre_archivo 
         ? `<img src="/storage/${vehiculo.imagenes[0].nombre_archivo}" alt="Vehículo">`
@@ -45,13 +45,13 @@ function cargarCarrito() {
           <p><i class="fas fa-map-marker-alt"></i> <strong>Lugar:</strong> ${vehiculo.lugar?.nombre || 'N/D'}</p>
           <p><i class="fas fa-cogs"></i> <strong>Características:</strong> ${detalles}</p>
           <p><i class="fas fa-shield-alt"></i> <strong>Plan:</strong> Básico</p>
+          <button class="btn-eliminar" onclick="eliminarReserva(${vehiculo.reserva.id_reserva})">Eliminar</button>
         </div>
       `;
       contenedor.appendChild(div);
       if (vehiculo.reserva?.total_precio) {
         total += parseFloat(vehiculo.reserva.total_precio);
       }
-      
     });
 
     // Actualizar resumen general
@@ -60,5 +60,33 @@ function cargarCarrito() {
   .catch(error => {
     console.error(error);
     document.getElementById('listaVehiculos').innerHTML = '<p style="color:red;">Error al cargar el carrito.</p>';
+  });
+}
+
+function eliminarReserva(idReserva) {
+  fetch(`/eliminar-reserva/${idReserva}`, {
+    method: 'DELETE',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      // Eliminar el vehículo de la lista
+      const vehiculoDiv = document.getElementById(`vehiculo-${idReserva}`);
+      if (vehiculoDiv) {
+        vehiculoDiv.remove();
+      }
+      // Recargar el carrito para actualizar el total
+      cargarCarrito();
+    } else {
+      alert('Error al eliminar la reserva');
+    }
+  })
+  .catch(error => {
+    console.error(error);
+    alert('Error al eliminar la reserva');
   });
 }
