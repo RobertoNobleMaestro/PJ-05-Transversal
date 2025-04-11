@@ -73,7 +73,7 @@
     <div class="row no-gutters text-center">
       <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <i class="fas fa-users"></i>
+          <i class="fas fa-users" style="color: #9F17BD"></i>
           <div class="stat-content">
             <h3>{{ $usuariosClientes }}</h3>
             <p>Usuarios registrados</p>
@@ -82,7 +82,7 @@
       </div>
       <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <i class="fas fa-car"></i>
+          <i class="fas fa-car" style="color: #9F17BD"></i>
           <div class="stat-content">
             <h3>{{ number_format($vehiculos, 0, ',', '.') }}</h3>
             <p>Vehículos registrados</p>
@@ -91,7 +91,7 @@
       </div>
       <div class="col-12 col-sm-4">
         <div class="stat-box">
-          <i class="fas fa-star"></i>
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
           <div class="stat-content">
             <h3>{{ $valoracionMedia }}</h3>
             <p>Valoración de la web</p>
@@ -102,11 +102,71 @@
   </div>    
 
   <div class="container vehicles-section">
-    <h2>Alquila vehiculos</h2>
-    <div class="row" id="vehiculos-container">
-      <!-- Aquí se insertarán los vehículos dinámicamente -->
+    <h2>Alquila vehículos</h2>
+  
+    <div class="mb-4">
+      <div id="filtros-form">
+        <div class="form-row align-items-end">
+          <!-- Filtro por marca -->
+          <div class="form-group col-md">
+            <label for="marcaFiltro">Marca:</label>
+            <input type="text" id="marcaFiltro" class="form-control" placeholder="Ej. Toyota">
+          </div>
+    
+          <!-- Filtro por año -->
+          <div class="form-group col-md">
+            <label for="anioFiltro">Año:</label>
+            <select id="anioFiltro" class="form-control">
+              <option value="">Todos</option>
+              <!-- años dinámicos -->
+            </select>
+          </div>
+    
+          <!-- Filtro por precio mínimo -->
+          <div class="form-group col-md">
+            <label for="precioMin">Precio mín (€):</label>
+            <input type="number" id="precioMin" class="form-control" placeholder="Mín">
+          </div>
+    
+          <!-- Filtro por precio máximo -->
+          <div class="form-group col-md">
+            <label for="precioMax">Precio máx (€):</label>
+            <input type="number" id="precioMax" class="form-control" placeholder="Máx">
+          </div>
+
+          <!-- Filtro por valoración mínima -->
+          <div class="form-group col-md">
+            <label for="valoracionMin">Valoración mínima:</label>
+            <select id="valoracionMin" class="form-control">
+              <option value="">Todas</option>
+              <option value="5">5 ⭐</option>
+              <option value="4">4 ⭐ o más</option>
+              <option value="3">3 ⭐ o más</option>
+              <option value="2">2 ⭐ o más</option>
+              <option value="1">1 ⭐ o más</option>
+            </select>
+          </div>          
+    
+          <!-- Selector de cantidad por página -->
+          <div class="form-group col-md">
+            <label for="perPageInput">Vehículos/página:</label>
+            <input id="perPageInput" type="number" class="form-control" value="8" min="1">
+          </div>
+    
+          <!-- Paginación -->
+          <div class="form-group col-md text-center">
+            <div id="pagination-controls" class="btn-group d-block mb-1"></div>
+            <div id="pagination-info" class="small text-muted"></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>  
+    
+    <!-- Contenedor de tarjetas de vehículos -->
+    <div class="row" id="vehiculos-container">
+      <!-- Se insertan dinámicamente -->
+    </div>
+  </div>
 
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
