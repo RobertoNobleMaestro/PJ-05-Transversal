@@ -12,7 +12,7 @@ class CarritoController extends Controller
     {
         $user = Auth::user();
 
-        // Cargar vehículos que tengan al menos una reserva pendiente del usuario actual
+        // Obtener vehículos con al menos una reserva pendiente del usuario
         $vehiculos = Vehiculo::with([
             'imagenes',
             'tipo',
@@ -32,21 +32,23 @@ class CarritoController extends Controller
         foreach ($vehiculos as $vehiculo) {
             foreach ($vehiculo->vehiculosReservas as $vr) {
                 $reserva = $vr->reserva;
-        
+
                 if ($reserva && $reserva->estado === 'pendiente' && $reserva->id_usuario == $user->id_usuario) {
                     $vehiculoData = $vehiculo->toArray();
-        
+
                     // Eliminar la relación innecesaria
                     unset($vehiculoData['vehiculos_reservas']);
-        
+
+                    // Siempre incluir info de reserva + total_precio
                     $vehiculoData['reserva'] = [
                         'id_reserva' => $reserva->id_reservas,
                         'fecha_reserva' => $reserva->fecha_reserva,
                         'estado' => $reserva->estado,
                         'lugar' => $reserva->lugar->nombre ?? null,
+                        'total_precio' => (float) $reserva->total_precio, // ✅ Esto asegura que esté presente
                     ];
-        
-        
+
+                    // Si hay pago, incluir info del pago también
                     if ($reserva->pago) {
                         $vehiculoData['pago'] = [
                             'estado_pago' => $reserva->pago->estado_pago,
@@ -55,13 +57,12 @@ class CarritoController extends Controller
                             'moneda' => $reserva->pago->moneda,
                         ];
                     }
-        
+
                     $vehiculosConInfo[] = $vehiculoData;
-                    break;
+                    break; // para evitar múltiples reservas por vehículo
                 }
             }
         }
-        
 
         return response()->json($vehiculosConInfo);
     }

@@ -13,15 +13,21 @@ class ReservaController extends Controller
         $reservas = DB::table('vehiculos_reservas')
             ->where('id_vehiculos', $id)
             ->get();
+            // $reservas = DB::table('vehiculos_reservas as vr')
+            // ->join('reservas as r', 'vr.id_reservas', '=', 'r.id_reservas')
+            // ->where('vr.id_vehiculos', $id)
+            // ->where('r.estado', 'confirmada')
+            // ->get();
     
-        $eventos = $reservas->map(function ($reserva) {
-            return [
-                'title' => 'Reservado',
-                'start' => $reserva->fecha_ini,
-                'end' => $reserva->fecha_final,
-                'color' => '#dc3545'
-            ];
-        });
+            $eventos = $reservas->map(function ($reserva) {
+                return [
+                    'title' => 'Reservado',
+                    'start' => $reserva->fecha_ini,
+                    'end' => date('Y-m-d', strtotime($reserva->fecha_final . ' +1 day')), // ← aquí el ajuste
+                    'color' => '#dc3545'
+                ];
+            });
+            
     
         return response()->json($eventos);
     }
@@ -36,8 +42,8 @@ class ReservaController extends Controller
         $vehiculo = Vehiculo::findOrFail($request->id_vehiculos);
     
         // Calcular precio total (puedes mejorar esto si hay descuentos, etc.)
-        $dias = now()->parse($request->fecha_ini)->diffInDays(now()->parse($request->fecha_final));
-        $total = $vehiculo->precio_dia * ($dias ?: 1);
+        $dias = now()->parse($request->fecha_ini)->diffInDays(now()->parse($request->fecha_final)) + 1;
+        $total = $vehiculo->precio_dia * $dias;        
     
         // Crear reserva principal
         $reservaId = DB::table('reservas')->insertGetId([
