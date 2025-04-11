@@ -7,6 +7,7 @@ function cargarCarrito() {
   })
   .then(res => res.json())
   .then(data => {
+    console.log(data);
     const contenedor = document.getElementById('listaVehiculos');
     contenedor.innerHTML = '';
 
@@ -47,18 +48,14 @@ function cargarCarrito() {
         </div>
       `;
       contenedor.appendChild(div);
-
-      // Acumular precios
-      if (vehiculo.precio_dia) {
-        precioDia += parseFloat(vehiculo.precio_dia);
+      if (vehiculo.reserva?.total_precio) {
+        total += parseFloat(vehiculo.reserva.total_precio);
       }
-      if (vehiculo.pago?.total_precio) {
-        total += parseFloat(vehiculo.pago.total_precio);
-      }
+      
     });
 
     // Actualizar resumen general
-    document.getElementById('precioDia').textContent = `EUR€ ${precioDia.toFixed(2)}`;
+    document.getElementById('precioDia').textContent = `EUR€ ${total.toFixed(2)}`;
   })
   .catch(error => {
     console.error(error);

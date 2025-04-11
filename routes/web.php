@@ -54,7 +54,7 @@
     // Vehiculos
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
-
+    Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     // API para valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function($id) {
         $vehiculo = App\Models\Vehiculo::findOrFail($id);
