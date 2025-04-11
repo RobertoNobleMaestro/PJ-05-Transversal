@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\VehiculoController;
+use App\Http\Controllers\LugarController;
 
 Route::redirect('/', '/home');
 
@@ -39,4 +40,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/vehiculos/{id_vehiculos}/edit', [VehiculoController::class, 'edit'])->name('admin.vehiculos.edit');
     Route::post('/admin/vehiculos/{id_vehiculos}', [VehiculoController::class, 'update'])->name('admin.vehiculos.update');
     Route::delete('/admin/vehiculos/{id_vehiculos}', [VehiculoController::class, 'destroy'])->name('admin.vehiculos.destroy');
+    
+    // CRUD de lugares
+    Route::get('/admin/lugares', [LugarController::class, 'index'])->name('admin.lugares');
+    Route::get('/admin/lugares/data', [LugarController::class, 'getLugares'])->name('admin.lugares.data'); // Ruta para AJAX
+    Route::get('/admin/lugares/create', [LugarController::class, 'create'])->name('admin.lugares.create');
+    Route::post('/admin/lugares', [LugarController::class, 'store'])->name('admin.lugares.store');
+    Route::get('/admin/lugares/{id_lugar}/edit', [LugarController::class, 'edit'])->name('admin.lugares.edit');
+    Route::post('/admin/lugares/{id_lugar}', [LugarController::class, 'update'])->name('admin.lugares.update');
+    Route::delete('/admin/lugares/{id_lugar}', [LugarController::class, 'destroy'])->name('admin.lugares.destroy');
 });

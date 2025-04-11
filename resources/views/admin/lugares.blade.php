@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'CRUD de Vehículos')
+@section('title', 'CRUD de Lugares')
 
 @section('content')
 <style>
     :root {
         --sidebar-width: 250px;
-        --sidebar-color: #9F17BD; /* Cambiado a tu tono lila específico */
+        --sidebar-color: #9F17BD;
         --header-height: 60px;
     }
     
@@ -205,7 +205,7 @@
 </style>
 
 <div class="admin-container">
-    <!-- Overlay para menú móvil -->
+    <!-- Overlay para menu00fa mu00f3vil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <!-- Barra lateral -->
@@ -221,39 +221,36 @@
     <!-- Contenido principal -->
     <div class="admin-main">
         <div class="admin-header">
-            <h1 class="admin-title">Gestión de Vehículos</h1>
+            <h1 class="admin-title">Gestión de Lugares</h1>
         </div>
         
         <div class="filter-section">
             <div class="filter-group">                
-                <input type="text" class="search-input" placeholder="Buscar vehículo..." id="searchVehiculo">
+                <input type="text" class="search-input" placeholder="Buscar lugar..." id="searchLugar">
             </div>
-            <a href="{{ route('admin.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
+            <a href="{{ route('admin.lugares.create') }}" class="add-user-btn">Añadir Lugar</a>
         </div>
         
-        <div id="loading-vehiculos" class="text-center">
+        <div id="loading-lugares" class="text-center">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
             </div>
-            <p>Cargando vehículos...</p>
+            <p>Cargando lugares...</p>
         </div>
-        <div id="vehiculos-table-container" style="display: none;">
-            <table class="crud-table" id="vehiculos-table">
+        <div id="lugares-table-container" style="display: none;">
+            <table class="crud-table" id="lugares-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                        <th>Año</th>
-                        <th>Kilometraje</th>
-                        <th>Seguro</th>
-                        <th>Lugar</th>
-                        <th>Tipo</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Latitud</th>
+                        <th>Longitud</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Los datos se cargarán aquí mediante AJAX -->
+                    <!-- Los datos se cargaru00e1n aquu00ed mediante AJAX -->
                 </tbody>
             </table>
         </div>
@@ -262,105 +259,106 @@
 @endsection
 
 <script>
-// Función global para cargar vehículos
 document.addEventListener('DOMContentLoaded', function() {
-    loadVehiculos();
-});
-function loadVehiculos() {
-    fetch('{{ route("admin.vehiculos.data") }}', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al cargar los vehículos');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Ocultar el indicador de carga
-        document.getElementById('loading-vehiculos').style.display = 'none';
-        // Mostrar la tabla
-        document.getElementById('vehiculos-table-container').style.display = 'block';
+    cargarLugares();
+    
+    // Buscar en la tabla
+    document.getElementById('searchLugar').addEventListener('input', function(e) {
+        const valorBusqueda = e.target.value.toLowerCase();
+        const tabla = document.getElementById('lugares-table');
+        const filas = tabla.querySelectorAll('tbody tr');
         
-        // Limpiar la tabla
-        const tableBody = document.querySelector('#vehiculos-table tbody');
-        tableBody.innerHTML = '';
-        
-        // Rellenar la tabla con los datos
-        data.vehiculos.forEach(vehiculo => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${vehiculo.id_vehiculos}</td>
-                <td>${vehiculo.marca}</td>
-                <td>${vehiculo.modelo}</td>
-                <td>${vehiculo.año}</td>
-                <td>${vehiculo.kilometraje}</td>
-                <td>${vehiculo.seguro_incluido ? 'Sí' : 'No'}</td>
-                <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
-                <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/vehiculos/${vehiculo.id_vehiculos}/edit'">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteVehiculo(${vehiculo.id_vehiculos})">Eliminar</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+        filas.forEach(fila => {
+            const nombre = fila.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const direccion = fila.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            
+            if (nombre.includes(valorBusqueda) || direccion.includes(valorBusqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
         });
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('loading-vehiculos').innerHTML = `<div class="alert alert-danger">Error al cargar vehículos: ${error.message}</div>`;
     });
+});
+
+function cargarLugares() {
+    const loadingElement = document.getElementById('loading-lugares');
+    const tableContainer = document.getElementById('lugares-table-container');
+    
+    loadingElement.style.display = 'block';
+    tableContainer.style.display = 'none';
+    
+    fetch('{{ route("admin.lugares.data") }}')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#lugares-table tbody');
+            tableBody.innerHTML = '';
+            
+            data.lugares.forEach(lugar => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${lugar.id_lugar}</td>
+                    <td>${lugar.nombre}</td>
+                    <td>${lugar.direccion}</td>
+                    <td>${lugar.latitud}</td>
+                    <td>${lugar.longitud}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/lugares/${lugar.id_lugar}/edit'">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteLugar(${lugar.id_lugar}, '${lugar.nombre}')">Eliminar</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            loadingElement.style.display = 'none';
+            tableContainer.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error al cargar los lugares:', error);
+            loadingElement.innerHTML = `<p class="text-danger">Error al cargar los datos: ${error.message}</p>`;
+        });
 }
 
-// Función para eliminar vehículo
-function deleteVehiculo(vehiculoId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este vehículo?')) {
-        // Obtener el token directamente de Laravel usando {{ csrf_token() }}
-        const token = '{{ csrf_token() }}';
+function deleteLugar(id, nombre) {
+    if (confirm(`¿Estás seguro de que deseas eliminar el lugar "${nombre}"?`)) {
+        // Obtener el token CSRF de manera segura
+        let csrfToken = '';
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
         
-        // Mostrar indicador de carga
-        const loadingElement = document.getElementById('loading-vehiculos');
-        const tableContainer = document.getElementById('vehiculos-table-container');
-        loadingElement.style.display = 'block';
-        tableContainer.style.display = 'none';
+        if (metaToken) {
+            csrfToken = metaToken.getAttribute('content');
+        } else {
+            // Si no se encuentra el meta tag, buscar en los formularios existentes
+            const hiddenInput = document.querySelector('input[name="_token"]');
+            if (hiddenInput) {
+                csrfToken = hiddenInput.value;
+            } else {
+                alert('Error: No se pudo encontrar el token CSRF');
+                return;
+            }
+        }
         
-        // Usar Fetch API para la petición AJAX
-        fetch(`/admin/vehiculos/${vehiculoId}`, {
+        fetch(`/admin/lugares/${id}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-TOKEN': token,
+                'X-CSRF-TOKEN': csrfToken,
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'Accept': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            // Notificar éxito
-            alert('Vehículo eliminado correctamente');
-            // Recargar la lista de vehículos
-            loadVehiculos();
+            if (data.status === 'success') {
+                alert(data.message);
+                cargarLugares();
+            } else {
+                alert(data.message || 'Error al eliminar el lugar');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error: No se pudo eliminar el vehículo');
-            loadingElement.style.display = 'none';
-            tableContainer.style.display = 'block';
+            alert('Error al procesar la solicitud');
         });
     }
 }
-
-// Cargar vehículos cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    loadVehiculos();
-});
 </script>

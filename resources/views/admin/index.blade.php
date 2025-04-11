@@ -408,8 +408,9 @@
         <div class="admin-sidebar" id="sidebar">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('admin.users') }}"><i class="fas fa-users"></i> Usuarios</a></li>
-                <li><a href="{{ route('admin.vehiculos') }}"><i class="fas fa-car"></i> Vehículos</a></li>
+                <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
+                <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
+                <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
             </ul>
         </div>
 
