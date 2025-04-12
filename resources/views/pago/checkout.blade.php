@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="{{ asset('css/Carrito/checkout.css') }}">
     <script src="https://js.stripe.com/v3/"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
 </head>
 <body>
     @include('layouts.navbar')
@@ -21,28 +20,60 @@
                 <div class="total-box">
                     <h5>Resumen de tu reserva</h5>
                     <hr>
-                    @foreach($reserva->vehiculosReservas as $vr)
-                        <div class="reservation-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</strong>
-                                    <div class="text-muted">
-                                        <i class="far fa-calendar-alt mr-2"></i>
-                                        Del {{ date('d/m/Y', strtotime($vr->fecha_ini)) }} al {{ date('d/m/Y', strtotime($vr->fecha_final)) }}
+                    @if($reserva->vehiculosReservas->count() > 0)
+                        @foreach($reserva->vehiculosReservas as $vr)
+                            <div class="reservation-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="vehicle-details">
+                                        <strong class="vehicle-title">{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</strong>
+                                        <div class="text-muted">
+                                            <i class="far fa-calendar-alt mr-2"></i>
+                                            Del {{ date('d/m/Y', strtotime($vr->fecha_ini)) }} al {{ date('d/m/Y', strtotime($vr->fecha_final)) }}
+                                        </div>
+                                        <div class="text-muted">
+                                            <i class="fas fa-clock mr-2"></i>
+                                            @php
+                                                $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
+                                                $diasTexto = $dias == 1 ? '1 día' : $dias . ' días';
+                                            @endphp
+                                            {{ $diasTexto }}
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="price-details">
+                                            <div class="price-per-day">{{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}€/día</div>
+                                            <div class="total-price">
+                                                {{ number_format($vr->vehiculo->precio_dia * $dias, 2, ',', '.') }}€
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <div class="total-price">{{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}</div>
+                            </div>
+                        @endforeach
+
+                        <div class="final-total">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Total a pagar:</strong>
+                                    <div class="text-muted small">{{ $reserva->vehiculosReservas->count() }} {{ $reserva->vehiculosReservas->count() == 1 ? 'vehículo' : 'vehículos' }}</div>
+                                </div>
+                                <div class="total-price">
+                                    @php
+                                    $total = 0;
+                                    foreach($reserva->vehiculosReservas as $vr) {
+                                        $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
+                                        $total += $vr->vehiculo->precio_dia * $dias;
+                                    }
+                                    @endphp
+                                    {{ number_format($total, 2, ',', '.') }}€
                                 </div>
                             </div>
                         </div>
-                    @endforeach
-                    <div class="final-total">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><strong>Total a pagar:</strong></div>
-                            <div class="total-price">{{ number_format($reserva->total_precio, 2, ',', '.') }}</div>
+                    @else
+                        <div class="alert alert-info">
+                            No hay vehículos en tu cesta de reserva.
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
             

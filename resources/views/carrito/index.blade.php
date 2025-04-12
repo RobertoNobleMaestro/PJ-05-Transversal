@@ -23,9 +23,8 @@
     <!-- Resumen de reserva -->
     <div class="resumen-carrito" id="resumenReserva">
       <div class="resumen-titulo">Tu Reserva <i class="fas fa-lock"></i></div>
-      <p><span class="subtexto">–</span> <span class="subtexto">0 opiniones</span></p>
       <hr>
-      <p class="subtexto">Precio total del día</p>
+      <p class="subtexto">Precio total: </p>
       <p class="resumen-precio" id="precioDia">EUR€ —</p>
       <p class="subtexto" id="planIncluido">Incluido en el plan: Básico</p>
       <hr>
@@ -35,5 +34,6 @@
 
   </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('js/carrito.js') }}"></script>
 </html>

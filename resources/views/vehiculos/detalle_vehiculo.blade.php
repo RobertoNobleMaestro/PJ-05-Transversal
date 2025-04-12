@@ -76,11 +76,11 @@
 <!-- FullCalendar -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendario-reservas');
     const contadorDias = document.getElementById('contador-dias');
+    const precioDia = {{ $vehiculo->precio_dia }};
     let reservas = [];
 
     let fechaInicioManual = null;
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const resInicio = new Date(reserva.start);
                     const resFin = new Date(reserva.end);
                     const diaFecha = new Date(dia);
-                    if (diaFecha >= resInicio && diaFecha <= resFin) {
+                    if (diaFecha >= resInicio && diaFecha < resFin) {
                         Swal.fire('Rango no disponible', 'Algunas fechas ya están reservadas.', 'warning');
                         limpiarSeleccionVisual();
                         fechaInicioManual = null;
@@ -160,55 +160,60 @@ document.addEventListener('DOMContentLoaded', function () {
             rangoFechasStr.forEach(pintarDia);
 
             const totalDias = rangoFechasStr.length;
+            const precioTotal = (totalDias * precioDia).toFixed(2);
             contadorDias.textContent = `Has seleccionado ${totalDias} día${totalDias > 1 ? 's' : ''}`;
             contadorDias.classList.add('visible');
 
-            // Confirmar con modal
-            Swal.fire({
-                title: '¿Confirmar reserva?',
-                html: `Desde <strong>${fechaInicioManual}</strong> hasta <strong>${fechaFinManual}</strong><br><br>
-                       <strong>${totalDias} día${totalDias > 1 ? 's' : ''}</strong> de alquiler`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Reservar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('/reservas', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            id_vehiculos: {{ $vehiculo->id_vehiculos }},
-                            fecha_ini: fechaInicioManual,
-                            fecha_final: fechaFinManual
-                        })
+            // Rellenar modal
+            document.getElementById('modal-fechas').innerText = `${fechaInicioManual} - ${fechaFinManual}`;
+            document.getElementById('modal-dias').innerText = `${totalDias} día${totalDias > 1 ? 's' : ''}`;
+            document.getElementById('modal-precio-dia').innerText = precioDia.toFixed(2);
+            document.getElementById('modal-total').innerText = precioTotal;
+
+            // Abrir modal
+            $('#reservaModal').modal('show');
+
+            // Evento click botón confirmar
+            document.getElementById('btnConfirmarReserva').onclick = function () {
+                fetch('/reservas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        id_vehiculos: {{ $vehiculo->id_vehiculos }},
+                        fecha_ini: fechaInicioManual,
+                        fecha_final: fechaFinManual
                     })
-                    .then(response => response.json())
-                    .then(() => {
-                        Swal.fire('¡Reservado!', 'La reserva fue creada correctamente.', 'success');
-                        calendar.refetchEvents();
-                        limpiarSeleccionVisual();
-                        fechaInicioManual = null;
-                        fechaFinManual = null;
-                        contadorDias.classList.remove('visible');
-                    })
-                    .catch(() => {
-                        Swal.fire('Error', 'No se pudo realizar la reserva.', 'error');
-                    });
-                } else {
+                })
+                .then(res => res.json())
+                .then(() => {
+                    $('#reservaModal').modal('hide');
+                    Swal.fire('¡Reservado!', 'La reserva fue creada correctamente.', 'success');
+                    calendar.refetchEvents();
                     limpiarSeleccionVisual();
                     fechaInicioManual = null;
                     fechaFinManual = null;
                     contadorDias.classList.remove('visible');
-                }
-            });
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'No se pudo realizar la reserva.', 'error');
+                });
+            };
         }
     });
 
     calendar.render();
+
+    $('#reservaModal').on('hidden.bs.modal', function () {
+    // Siempre limpiar visual si se cierra el modal
+    limpiarSeleccionVisual();
+    fechaInicioManual = null;
+    fechaFinManual = null;
+    contadorDias.classList.remove('visible');
+});
+
 
     // Funciones auxiliares
     function limpiarSeleccionVisual() {
@@ -271,124 +276,30 @@ document.addEventListener('DOMContentLoaded', function () {
         iniciarDetalleVehiculo({{ $vehiculo->id_vehiculos }});
     });
 </script>
+<!-- Modal personalizado Bootstrap -->
+<div class="modal fade" id="reservaModal" tabindex="-1" role="dialog" aria-labelledby="reservaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow" style="border-radius: 16px; background-color: #ffffff;">
+      <div class="modal-header" style="background-color: #6f42c1; color: white; border-top-left-radius: 16px; border-top-right-radius: 16px;">
+        <h5 class="modal-title" id="reservaModalLabel">Confirmar reserva</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center" style="color: #000;">
+        <p><i class="fas fa-calendar-alt" style="color: #6f42c1; margin-right: 0.5rem;"></i> <strong>Fechas:</strong><br>
+        <span id="modal-fechas"></span></p>
+        <p><i class="fas fa-clock" style="color: #6f42c1; margin-right: 0.5rem;"></i> <strong>Días seleccionados:</strong> <span id="modal-dias"></span></p>
+        <p><i class="fas fa-euro-sign" style="color: #6f42c1; margin-right: 0.5rem;"></i> <strong>Precio por día:</strong> €<span id="modal-precio-dia"></span></p>
+        <p class="h5 mt-3 text-dark"><strong>Total estimado:</strong> €<span id="modal-total"></span></p>
+      </div>
+      <div class="modal-footer justify-content-between" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmarReserva" style="background-color: #6f42c1; border-color: #6f42c1;">Reservar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
-<style>
-    /* Fondo del calendario */
-#calendario-reservas {
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
-  margin-top: 2rem;
-  color: #000;
-  text-decoration: none;
-}
-a{
-    color: black;
-    text-decoration: none;
-}
-a:hover{
-    color: black;
-    text-decoration: none;   
-}
-/* Título del mes */
-.fc-toolbar-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #6f42c1;
-}
-
-/* Botones de navegación */
-.fc-button {
-  border: none;
-  color: white;
-  font-weight: 500;
-  padding: 0.4rem 1rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  margin: 0 2px;
-}
-
-.fc-button:hover {
-  background: #5a2b97;
-  transform: scale(1.03);
-}
-
-/* Encabezado de los días (Lun, Mar...) */
-.fc-col-header-cell {
-  background: #f3f0fa;
-  color: #6f42c1;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-}
-
-/* Celda del día */
-.fc-daygrid-day {
-  background-color: #fafafa;
-  transition: background-color 0.3s ease;
-}
-
-.fc-daygrid-day:hover {
-  background-color: #f0e9ff;
-}
-
-/* Día actual */
-.fc-day-today {
-  background-color: #e9d7ff !important;
-  border-radius: 8px;
-}
-
-/* Evento */
-.fc-event {
-  background-color: #6f42c1 !important;
-  color: #fff !important;
-  border: none;
-  font-weight: 500;
-  font-size: 0.85rem;
-  padding: 2px 6px;
-  border-radius: 12px;
-  text-align: center;
-}
-/* Resaltar los días seleccionados */
-.fc-day-selected {
-    background-color: #d0ebff !important;
-    border-radius: 8px;
-    animation: fadeIn 0.3s ease-in-out;
-    position: relative;
-}
-
-/* Animación */
-@keyframes fadeIn {
-    from { background-color: #fff; opacity: 0.2; }
-    to { background-color: #d0ebff; opacity: 1; }
-}
-
-/* Contador visual */
-#contador-dias {
-    font-weight: 600;
-    color: #0d6efd;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-    opacity: 0;
-}
-#contador-dias.visible {
-    opacity: 1;
-}
-
-/* Responsive ajustes */
-@media (max-width: 767px) {
-  .fc-toolbar-title {
-    font-size: 1.2rem;
-  }
-
-  .fc-button {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.85rem;
-  }
-}
-
-</style>

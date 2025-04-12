@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', cargarCarrito);
 
 function cargarCarrito() {
@@ -7,6 +6,7 @@ function cargarCarrito() {
   })
   .then(res => res.json())
   .then(data => {
+    console.log(data);
     const contenedor = document.getElementById('listaVehiculos');
     contenedor.innerHTML = '';
 
@@ -21,6 +21,7 @@ function cargarCarrito() {
     data.forEach(vehiculo => {
       const div = document.createElement('div');
       div.classList.add('vehiculo-item');
+      div.id = `vehiculo-${vehiculo.reserva.id_reserva}`;
 
       const imagen = vehiculo.imagenes?.[0]?.nombre_archivo 
         ? `<img src="/storage/${vehiculo.imagenes[0].nombre_archivo}" alt="Vehículo">`
@@ -44,24 +45,64 @@ function cargarCarrito() {
           <p><i class="fas fa-map-marker-alt"></i> <strong>Lugar:</strong> ${vehiculo.lugar?.nombre || 'N/D'}</p>
           <p><i class="fas fa-cogs"></i> <strong>Características:</strong> ${detalles}</p>
           <p><i class="fas fa-shield-alt"></i> <strong>Plan:</strong> Básico</p>
-        </div>
+            <div class="acciones">
+              <button class="btn-eliminar mt-3" onclick="eliminarReserva(${vehiculo.reserva.id_reserva})">
+                <i class="fas fa-trash-alt" style="color:white"></i> Quitar
+              </button>
+            </div>        </div>
       `;
       contenedor.appendChild(div);
-
-      // Acumular precios
-      if (vehiculo.precio_dia) {
-        precioDia += parseFloat(vehiculo.precio_dia);
-      }
-      if (vehiculo.pago?.total_precio) {
-        total += parseFloat(vehiculo.pago.total_precio);
+      if (vehiculo.reserva?.total_precio) {
+        total += parseFloat(vehiculo.reserva.total_precio);
       }
     });
 
     // Actualizar resumen general
-    document.getElementById('precioDia').textContent = `EUR€ ${precioDia.toFixed(2)}`;
+    document.getElementById('precioDia').textContent = `EUR€ ${total.toFixed(2)}`;
   })
   .catch(error => {
     console.error(error);
     document.getElementById('listaVehiculos').innerHTML = '<p style="color:red;">Error al cargar el carrito.</p>';
   });
 }
+
+function eliminarReserva(idReserva) {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Esta acción eliminará la reserva del vehículo.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/eliminar-reserva/${idReserva}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const vehiculoDiv = document.getElementById(`vehiculo-${idReserva}`);
+          if (vehiculoDiv) {
+            vehiculoDiv.remove();
+          }
+          cargarCarrito();
+          Swal.fire('Eliminado', 'La reserva ha sido eliminada.', 'success');
+        } else {
+          Swal.fire('Error', 'No se pudo eliminar la reserva.', 'error');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        Swal.fire('Error', 'Ocurrió un problema al intentar eliminar la reserva.', 'error');
+      });
+    }
+  });
+}
+

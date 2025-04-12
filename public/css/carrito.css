@@ -129,3 +129,16 @@ hr {
 .btn-volver i {
   margin-right: 6px;
 }
+
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background-color: #c82333;
+}
