@@ -36,59 +36,59 @@ class ImagenVehiculoSeeder extends Seeder
                 'id_vehiculo' => 6,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => 'ceed.png',
                 'id_vehiculo' => 7,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => 'leon.png',
                 'id_vehiculo' => 8,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => 'mazda_3.png',
                 'id_vehiculo' => 9,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => 'octavia.png',
                 'id_vehiculo' => 10,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => 'astra.png',
                 'id_vehiculo' => 11,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 12,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 13,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 14,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 15,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 16,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 17,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 18,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 19,
             ],
             [
-                'nombre_archivo' => 'focus.png',
+                'nombre_archivo' => '.png',
                 'id_vehiculo' => 20,
             ]
         ]);
