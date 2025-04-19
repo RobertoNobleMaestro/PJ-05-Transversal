@@ -1,63 +1,24 @@
+
 document.addEventListener('DOMContentLoaded', () => {
-    // ===== Mostrar estadísticas =====
-    fetch('/home-stats')
-        .then(res => res.json())
-        .then(data => {
-            document.querySelector('.stat-box .fa-users + .stat-content h3').textContent = data.usuariosClientes;
-            document.querySelector('.fa-car + .stat-content h3').textContent = new Intl.NumberFormat().format(data.vehiculos);
-            document.querySelector('.fa-star + .stat-content h3').textContent = data.valoracionMedia;
-
-            const container = document.querySelector('.btn-group-toggle');
-            if (container && data.tipos) {
-                container.innerHTML = '';
-                data.tipos.forEach((tipo, index) => {
-                    container.innerHTML += `
-                        <label class="btn btn-outline-primary ${index === 0 ? 'active' : ''}">
-                          <input type="radio" name="tipoVehiculo" value="${tipo.nombre}" autocomplete="off" ${index === 0 ? 'checked' : ''}>
-                          ${tipo.nombre}
-                        </label>
-                    `;
-                });
-            }
-        });
-
-    // ===== Actualizar breadcrumb según tipo =====
-    const breadcrumbTipo = document.getElementById('breadcrumb-tipo');
-    const tipoInicial = document.querySelector('input[name="tipoVehiculo"]:checked');
-    if (tipoInicial && breadcrumbTipo) breadcrumbTipo.textContent = tipoInicial.value;
-
-    document.addEventListener('change', e => {
-        if (e.target.name === 'tipoVehiculo') {
-            breadcrumbTipo.textContent = e.target.value;
-        }
-    });
-
-    // ===== Variables =====
     let currentPage = 1;
+    const perPageInput = document.getElementById('perPageInput');
     const container = document.getElementById('vehiculos-container');
     const paginationControls = document.getElementById('pagination-controls');
     const paginationInfo = document.getElementById('pagination-info');
 
-    const perPageInput = document.getElementById('perPageInput');
     const marcaFiltro = document.getElementById('marcaFiltro');
-    const anioFiltro = document.getElementById('anioFiltro');
     const precioMin = document.getElementById('precioMin');
     const precioMax = document.getElementById('precioMax');
-    const valoracionMin = document.getElementById('valoracionMin');
 
-    // ===== Cargar años disponibles =====
-    fetch('/vehiculos/año')
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(anio => {
-                const option = document.createElement('option');
-                option.value = anio;
-                option.textContent = anio;
-                anioFiltro.appendChild(option);
-            });
-        });
+    const tipoVehiculoFiltro = document.getElementById('tipoVehiculoFiltro');
+    const lugarFiltro = document.getElementById('lugarFiltro');
+    const anioFiltroContainer = document.getElementById('anioFiltroContainer');
+    const valoracionFiltro = document.getElementById('valoracionFiltro');
 
-    // ===== Renderizar paginación =====
+    function getCheckedValues(container) {
+        return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    }
+
     function renderPagination(totalPages) {
         paginationControls.innerHTML = '';
 
@@ -93,21 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationInfo.textContent = `Páginas encontradas: ${totalPages}`;
     }
 
-    // ===== Obtener vehículos =====
     function fetchVehiculos({ resetPage = false } = {}) {
         if (resetPage) currentPage = 1;
 
-        const perPage = parseInt(perPageInput.value);
+        const perPage = parseInt(perPageInput.value) || 16;
 
         const params = new URLSearchParams({
             page: currentPage,
             perPage: perPage,
             marca: marcaFiltro.value.trim(),
-            anio: anioFiltro.value,
             precioMin: precioMin.value,
             precioMax: precioMax.value,
-            valoracionMin: valoracionMin.value
-        });        
+        });
+
+        getCheckedValues(tipoVehiculoFiltro).forEach(tipo => params.append('tipos[]', tipo));
+        getCheckedValues(lugarFiltro).forEach(lugar => params.append('lugares[]', lugar));
+        getCheckedValues(anioFiltroContainer).forEach(anio => params.append('anios[]', anio));
+        getCheckedValues(valoracionFiltro).forEach(valor => params.append('valoraciones[]', valor));
 
         fetch(`/vehiculos?${params.toString()}`)
             .then(res => res.json())
@@ -156,17 +119,75 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // ===== Eventos =====
-    [marcaFiltro, anioFiltro, precioMin, precioMax, valoracionMin].forEach(el =>
+    [marcaFiltro, precioMin, precioMax].forEach(el =>
         el.addEventListener('input', () => fetchVehiculos({ resetPage: true }))
     );
 
+    [tipoVehiculoFiltro, lugarFiltro, anioFiltroContainer, valoracionFiltro].forEach(container =>
+        container.addEventListener('change', () => fetchVehiculos({ resetPage: true }))
+    );
+
     perPageInput.addEventListener('change', () => {
-        if (parseInt(perPageInput.value) >= 1) {
-            fetchVehiculos({ resetPage: true });
-        }
+        fetchVehiculos({ resetPage: true });
     });
 
-    // ===== Inicio =====
+    fetch('/home-stats')
+        .then(res => res.json())
+        .then(data => {
+            if (data.tipos) {
+                tipoVehiculoFiltro.innerHTML = '';
+                data.tipos.forEach(tipo => {
+                    tipoVehiculoFiltro.innerHTML += `
+                        <label class="form-check-label d-block">
+                            <input type="checkbox" class="form-check-input" value="${tipo.nombre}">
+                            ${tipo.nombre}
+                        </label>`;
+                });
+            }
+        });
+
+    fetch('/vehiculos/año')
+        .then(res => res.json())
+        .then(data => {
+            anioFiltroContainer.innerHTML = '';
+            data.forEach(anio => {
+                anioFiltroContainer.innerHTML += `
+                    <label class="form-check-label d-block">
+                        <input type="checkbox" class="form-check-input" value="${anio}">
+                        ${anio}
+                    </label>`;
+            });
+        });
+
+    fetch('/vehiculos/ciudades')
+        .then(res => res.json())
+        .then(data => {
+            lugarFiltro.innerHTML = '';
+            data.forEach(ciudad => {
+                lugarFiltro.innerHTML += `
+                    <label class="form-check-label d-block">
+                        <input type="checkbox" class="form-check-input" value="${ciudad}">
+                        ${ciudad}
+                    </label>`;
+            });
+        });    
+    
+    document.getElementById('resetFiltrosBtn').addEventListener('click', () => {
+        // Limpiar campos
+        marcaFiltro.value = '';
+        precioMin.value = '';
+        precioMax.value = '';
+        perPageInput.value = 8;
+    
+        // Desmarcar todos los checkboxes
+        [tipoVehiculoFiltro, lugarFiltro, anioFiltroContainer, valoracionFiltro].forEach(container => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+    
+        // Recargar vehículos
+        fetchVehiculos({ resetPage: true });
+    });
+        
+
     fetchVehiculos();
 });
