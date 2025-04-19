@@ -39,7 +39,7 @@
   <!-- Sección de estadísticas -->
   <div class="container-fluid stats-section">
     <div class="row no-gutters text-center">
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
           <i class="fas fa-users" style="color: #9F17BD"></i>
           <div class="stat-content">
@@ -48,7 +48,7 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
           <i class="fas fa-car" style="color: #9F17BD"></i>
           <div class="stat-content">
@@ -57,7 +57,16 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
+        <div class="stat-box">
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
+          <div class="stat-content">
+            <h3>{{ $valoracionVehiculos }}</h3>
+            <p>Valoración de los vehiculos</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
           <i class="fa-solid fa-star" style="color: #ffc800;"></i>
           <div class="stat-content">

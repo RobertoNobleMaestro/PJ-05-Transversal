@@ -31,6 +31,14 @@ class HomeController extends Controller
             'usuariosClientes' => User::where('id_roles', 2)->count(),
             'vehiculos' => Vehiculo::count(),
             'valoracionMedia' => round(Valoracion::avg('valoracion'), 1),
+            'valoracionVehiculos' => round(
+                DB::table('vehiculos')
+                    ->join('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
+                    ->join('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
+                    ->join('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
+                    ->avg('valoraciones.valoracion'),
+                1
+            ),
             'tipos' => Tipo::all(),
         ];
     }
