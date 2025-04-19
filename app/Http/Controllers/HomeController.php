@@ -51,34 +51,37 @@ class HomeController extends Controller
         $valoraciones = $request->input('valoraciones');
 
         $query = DB::table('vehiculos')
-            ->leftJoin('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
-            ->leftJoin('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
-            ->leftJoin('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
-            ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-            ->select(
-                'vehiculos.id_vehiculos',
-                'vehiculos.precio_dia',
-                'vehiculos.marca',
-                'vehiculos.modelo',
-                'vehiculos.kilometraje',
-                'vehiculos.año',
-                'lugares.nombre as ciudad',
-                DB::raw('ROUND(AVG(valoraciones.valoracion), 1) as valoracion')
-            )
-            ->groupBy(
-                'vehiculos.id_vehiculos',
-                'vehiculos.precio_dia',
-                'vehiculos.marca',
-                'vehiculos.modelo',
-                'vehiculos.kilometraje',
-                'vehiculos.año',
-                'lugares.nombre'
-            );
+        ->leftJoin('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
+        ->leftJoin('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
+        ->leftJoin('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
+        ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
+        ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
+        ->select(
+            'vehiculos.id_vehiculos',
+            'vehiculos.precio_dia',
+            'vehiculos.marca',
+            'vehiculos.modelo',
+            'vehiculos.kilometraje',
+            'vehiculos.año',
+            'lugares.nombre as ciudad',
+            'tipo.nombre as tipo',
+            DB::raw('ROUND(AVG(valoraciones.valoracion), 1) as valoracion')
+        )
+        ->groupBy(
+            'vehiculos.id_vehiculos',
+            'vehiculos.precio_dia',
+            'vehiculos.marca',
+            'vehiculos.modelo',
+            'vehiculos.kilometraje',
+            'vehiculos.año',
+            'lugares.nombre',
+            'tipo.nombre'
+        );
 
         if ($marca) $query->where('vehiculos.marca', 'like', "%$marca%");
         if (is_numeric($precioMin)) $query->where('vehiculos.precio_dia', '>=', (float) $precioMin);
         if (is_numeric($precioMax)) $query->where('vehiculos.precio_dia', '<=', (float) $precioMax);
-        if ($tipos) $query->whereIn('vehiculos.tipo', $tipos);
+        if ($tipos) $query->whereIn('tipo.nombre', $tipos);
         if ($lugares) $query->whereIn('lugares.nombre', $lugares);
         if ($anios) $query->whereIn('vehiculos.año', $anios);
         if ($valoraciones) {
