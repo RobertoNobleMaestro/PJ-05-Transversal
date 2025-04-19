@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         marcaFiltro.value = '';
         precioMin.value = '';
         precioMax.value = '';
-        perPageInput.value = 8;
+        perPageInput.value = 16;
     
         // Desmarcar todos los checkboxes
         [tipoVehiculoFiltro, lugarFiltro, anioFiltroContainer, valoracionFiltro].forEach(container => {

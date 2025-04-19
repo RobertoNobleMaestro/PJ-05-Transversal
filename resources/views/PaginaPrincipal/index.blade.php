@@ -127,7 +127,7 @@
   
           <div class="form-group">
             <label for="perPageInput"><strong>Vehículos/página:</strong></label>
-            <input id="perPageInput" type="number" class="form-control" value="8" min="1">
+            <input id="perPageInput" type="number" class="form-control" value="16" min="1">
           </div>
 
           <div class="form-group text-center mt-3">

@@ -85,8 +85,7 @@ class HomeController extends Controller
         if ($lugares) $query->whereIn('lugares.nombre', $lugares);
         if ($anios) $query->whereIn('vehiculos.año', $anios);
         if ($valoraciones) {
-            $valores = array_map('floatval', $valoraciones);
-            $query->havingRaw('ROUND(AVG(valoraciones.valoracion), 1) IN (' . implode(',', $valores) . ')');
+            $query->havingRaw('FLOOR(AVG(valoraciones.valoracion)) IN (' . implode(',', array_map('intval', $valoraciones)) . ')');
         }
 
         $total = $query->get()->count();
