@@ -56,6 +56,7 @@ class HomeController extends Controller
         ->leftJoin('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
         ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
         ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
+        ->leftJoin('imagen_vehiculo', 'vehiculos.id_vehiculos', '=', 'imagen_vehiculo.id_vehiculo')
         ->select(
             'vehiculos.id_vehiculos',
             'vehiculos.precio_dia',
@@ -65,7 +66,8 @@ class HomeController extends Controller
             'vehiculos.año',
             'lugares.nombre as ciudad',
             'tipo.nombre as tipo',
-            DB::raw('ROUND(AVG(valoraciones.valoracion), 1) as valoracion')
+            DB::raw('ROUND(AVG(valoraciones.valoracion), 1) as valoracion'),
+            DB::raw('MIN(imagen_vehiculo.nombre_archivo) as nombre_archivo')
         )
         ->groupBy(
             'vehiculos.id_vehiculos',
@@ -75,8 +77,9 @@ class HomeController extends Controller
             'vehiculos.kilometraje',
             'vehiculos.año',
             'lugares.nombre',
-            'tipo.nombre'
-        );
+            'tipo.nombre',
+            'imagen_vehiculo.nombre_archivo'
+        );        
 
         if ($marca) $query->where('vehiculos.marca', 'like', "%$marca%");
         if (is_numeric($precioMin)) $query->where('vehiculos.precio_dia', '>=', (float) $precioMin);

@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="col-sm-6 col-md-3 mb-4">
                             <a href="/vehiculo/detalle_vehiculo/${v.id_vehiculos}">
                                 <div class="card">
-                                    <img src="https://via.placeholder.com/300x180?text=${encodeURIComponent(v.marca)}+${encodeURIComponent(v.modelo)}" class="card-img-top" alt="${v.marca}">
+                                    <img src="/img/vehiculos/${v.nombre_archivo}" class="card-img-top" alt="${v.marca}">
                                     <div class="card-body">
                                         <h5 class="card-title">${v.marca} ${v.modelo}</h5>
                                         <div class="info-row d-flex justify-content-between">
