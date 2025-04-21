@@ -293,7 +293,7 @@ function loadUsers() {
                 <td>${user.nombre_rol || 'Sin rol asignado'}</td>
                 <td>
                     <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/users/${user.id_usuario}/edit'">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id_usuario})">Eliminar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id_usuario}, '${user.nombre}')">Eliminar</button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -306,55 +306,88 @@ function loadUsers() {
 }
 
 // Función para eliminar usuario
-function deleteUser(userId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-        // Obtener el token directamente de Laravel usando {{ csrf_token() }}
-        const token = '{{ csrf_token() }}';
-        
-        // Mostrar indicador de carga
-        const loadingElement = document.getElementById('loading-users');
-        const tableContainer = document.getElementById('users-table-container');
-        loadingElement.style.display = 'block';
-        tableContainer.style.display = 'none';
-        
-        // Usar Fetch API para la petición AJAX
-        fetch(`/admin/users/${userId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': token,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        })
-        .catch(error => {
-            // Intentar obtener el mensaje de error de la respuesta
-            if (error.message) {
-                console.error('Error:', error.message);
-                alert(`Error: ${error.message}`);
+function deleteUser(id, nombre) {
+    Swal.fire({
+        title: `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar Usuario</span>`,
+        html: `<p class="lead">u00bfEstu00e1s seguro de que deseas eliminar al usuario "${nombre}"?</p><p class="text-muted">Esta acciu00f3n no se puede deshacer.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Eliminar',
+        cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mostrar cargando
+            Swal.fire({
+                title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
+                text: 'Eliminando usuario',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            
+            // Obtener el token CSRF de manera segura
+            let csrfToken = '';
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            
+            if (metaToken) {
+                csrfToken = metaToken.getAttribute('content');
             } else {
-                console.error('Error desconocido');
-                alert('Error desconocido al eliminar el usuario');
+                // Si no se encuentra el meta tag, buscar en los formularios existentes
+                const hiddenInput = document.querySelector('input[name="_token"]');
+                if (hiddenInput) {
+                    csrfToken = hiddenInput.value;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                        html: '<p class="lead">No se pudo encontrar el token CSRF</p>',
+                        confirmButtonColor: '#9F17BD'
+                    });
+                    return;
+                }
             }
-            loadingElement.style.display = 'none';
-            tableContainer.style.display = 'block';
-            return null;
-        })
-        .then(data => {
-            if (data) {
-                // Notificar éxito
-                alert('Usuario eliminado correctamente');
-                // Recargar la lista de usuarios
-                loadUsers();
-            }
-        });
-    }
+            
+            fetch(`/admin/users/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>',
+                        html: `<p class="lead">${data.message}</p>`,
+                        confirmButtonColor: '#9F17BD'
+                    });
+                    loadUsers();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                        html: `<p class="lead">${data.message || 'Error al eliminar el usuario'}</p>`,
+                        confirmButtonColor: '#9F17BD'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                    html: '<p class="lead">Error al procesar la solicitud</p>',
+                    confirmButtonColor: '#9F17BD'
+                });
+            });
+        }
+    });
 }
 
 // Cargar usuarios cuando el DOM esté listo

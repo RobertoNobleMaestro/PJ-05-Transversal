@@ -304,7 +304,7 @@ function loadVehiculos() {
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
                 <td>
                     <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/vehiculos/${vehiculo.id_vehiculos}/edit'">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteVehiculo(${vehiculo.id_vehiculos})">Eliminar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteVehiculo(${vehiculo.id_vehiculos}, '${vehiculo.marca}')">Eliminar</button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -317,46 +317,88 @@ function loadVehiculos() {
 }
 
 // Función para eliminar vehículo
-function deleteVehiculo(vehiculoId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este vehículo?')) {
-        // Obtener el token directamente de Laravel usando {{ csrf_token() }}
-        const token = '{{ csrf_token() }}';
-        
-        // Mostrar indicador de carga
-        const loadingElement = document.getElementById('loading-vehiculos');
-        const tableContainer = document.getElementById('vehiculos-table-container');
-        loadingElement.style.display = 'block';
-        tableContainer.style.display = 'none';
-        
-        // Usar Fetch API para la petición AJAX
-        fetch(`/admin/vehiculos/${vehiculoId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': token,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+function deleteVehiculo(id, nombreMarca) {
+    Swal.fire({
+        title: `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar Vehículo</span>`,
+        html: `<p class="lead">¿Estás seguro de que deseas eliminar el vehículo "${nombreMarca}"?</p><p class="text-muted">Esta acción no se puede deshacer.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Eliminar',
+        cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mostrar cargando
+            Swal.fire({
+                title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
+                text: 'Eliminando vehículo',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            
+            // Obtener el token CSRF de manera segura
+            let csrfToken = '';
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            
+            if (metaToken) {
+                csrfToken = metaToken.getAttribute('content');
+            } else {
+                // Si no se encuentra el meta tag, buscar en los formularios existentes
+                const hiddenInput = document.querySelector('input[name="_token"]');
+                if (hiddenInput) {
+                    csrfToken = hiddenInput.value;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                        html: '<p class="lead">No se pudo encontrar el token CSRF</p>',
+                        confirmButtonColor: '#9F17BD'
+                    });
+                    return;
+                }
             }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Notificar éxito
-            alert('Vehículo eliminado correctamente');
-            // Recargar la lista de vehículos
-            loadVehiculos();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error: No se pudo eliminar el vehículo');
-            loadingElement.style.display = 'none';
-            tableContainer.style.display = 'block';
-        });
-    }
+            
+            fetch(`/admin/vehiculos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>',
+                        html: `<p class="lead">${data.message}</p>`,
+                        confirmButtonColor: '#9F17BD'
+                    });
+                    loadVehiculos();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                        html: `<p class="lead">${data.message || 'Error al eliminar el vehículo'}</p>`,
+                        confirmButtonColor: '#9F17BD'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                    html: '<p class="lead">Error al procesar la solicitud</p>',
+                    confirmButtonColor: '#9F17BD'
+                });
+            });
+        }
+    });
 }
 
 // Cargar vehículos cuando el DOM esté listo

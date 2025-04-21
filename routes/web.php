@@ -47,6 +47,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/lugares/create', [LugarController::class, 'create'])->name('admin.lugares.create');
     Route::post('/admin/lugares', [LugarController::class, 'store'])->name('admin.lugares.store');
     Route::get('/admin/lugares/{id_lugar}/edit', [LugarController::class, 'edit'])->name('admin.lugares.edit');
-    Route::post('/admin/lugares/{id_lugar}', [LugarController::class, 'update'])->name('admin.lugares.update');
+    Route::put('/admin/lugares/{id_lugar}', [LugarController::class, 'update'])->name('admin.lugares.update');
     Route::delete('/admin/lugares/{id_lugar}', [LugarController::class, 'destroy'])->name('admin.lugares.destroy');
 });

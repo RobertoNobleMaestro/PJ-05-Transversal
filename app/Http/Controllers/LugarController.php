@@ -181,30 +181,175 @@ class LugarController extends Controller
             // Obtener el lugar con sus relaciones
             $lugar = Lugar::with(['vehiculos', 'reservas'])->findOrFail($id_lugar);
             
-            // Eliminar reservas asociadas al lugar
+            // Obtener todos los IDs de vehículos asociados a este lugar
+            $vehiculosIds = $lugar->vehiculos()->pluck('id_vehiculos');
+            
+            // Detectar la acción a realizar (por defecto es eliminar)
+            $accion = $request->input('accion', 'eliminar');
+            
+            // Obtener IDs de reservas asociadas al lugar
+            $reservasIds = $lugar->reservas()->pluck('id_reservas');
+            
+            // 1. Primero eliminar vehiculos_reservas que depende tanto de reservas como de vehículos
+            if (count($reservasIds) > 0) {
+                DB::table('vehiculos_reservas')
+                    ->whereIn('id_reservas', $reservasIds)
+                    ->delete();
+            }
+            
+            if (count($vehiculosIds) > 0) {
+                DB::table('vehiculos_reservas')
+                    ->whereIn('id_vehiculos', $vehiculosIds)
+                    ->delete();
+            }
+            
+            if (count($reservasIds) > 0) {
+                // 2. Eliminar valoraciones que dependen de reservas
+                DB::table('valoraciones')
+                    ->whereIn('id_reservas', $reservasIds)
+                    ->delete();
+                
+                // Obtener IDs de pagos asociados a las reservas
+                $pagosIds = DB::table('pago')
+                    ->whereIn('id_reservas', $reservasIds)
+                    ->pluck('id_pago');
+                
+                // 3. Eliminar métodos de pago que dependen de pagos
+                if (count($pagosIds) > 0) {
+                    DB::table('metodos_de_pago')
+                        ->whereIn('id_pago', $pagosIds)
+                        ->delete();
+                }
+                
+                // 4. Eliminar pagos asociados a las reservas
+                DB::table('pago')
+                    ->whereIn('id_reservas', $reservasIds)
+                    ->delete();
+            }
+            
+            // 5. Ahora podemos eliminar reservas con seguridad
             $lugar->reservas()->delete();
             
-            // Eliminar vehículos asociados al lugar
-            $lugar->vehiculos()->delete();
-            
-            // Finalmente eliminar el lugar
-            $lugar->delete();
+            // Procesar según la acción seleccionada
+            if ($accion === 'eliminar') {
+                // Eliminar todo (comportamiento original)
+                if (count($vehiculosIds) > 0) {
+                    // 6. Eliminar imágenes de vehículos
+                    DB::table('imagen_vehiculo')
+                        ->whereIn('id_vehiculo', $vehiculosIds)
+                        ->delete();
+                    
+                    // 7. Eliminar características de los vehículos
+                    DB::table('caracteristicas')
+                        ->whereIn('id_vehiculos', $vehiculosIds)
+                        ->delete();
+                    
+                    // 8. Eliminar cualquier otra relación posible
+                    $tablas = [
+                        'valoraciones_vehiculos',
+                        'vehiculos_mantenimiento',
+                        'vehiculos_seguros',
+                        'pagos_vehiculos',
+                        'vehiculos_servicios'
+                    ];
+                    
+                    foreach ($tablas as $tabla) {
+                        if (DB::getSchemaBuilder()->hasTable($tabla)) {
+                            DB::table($tabla)
+                                ->whereIn('id_vehiculos', $vehiculosIds)
+                                ->delete();
+                        }
+                    }
+                }
+                
+                // 9. Eliminar vehículos asociados al lugar
+                $lugar->vehiculos()->delete();
+                
+                // 10. Finalmente eliminar el lugar
+                $lugar->delete();
+                
+                $mensaje = 'Lugar y todos sus elementos asociados eliminados correctamente';
+                
+            } elseif ($accion === 'reubicar') {
+                // Validar que existe un lugar de destino
+                $lugarDestinoId = $request->input('lugar_destino_id');
+                if (!$lugarDestinoId) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Debe seleccionar un lugar de destino para la reubicación'
+                    ], 422);
+                }
+                
+                // Verificar que el lugar de destino existe
+                $lugarDestino = Lugar::findOrFail($lugarDestinoId);
+                
+                // Actualizar los vehículos para asignarles el nuevo lugar
+                if (count($vehiculosIds) > 0) {
+                    DB::table('vehiculos')
+                        ->whereIn('id_vehiculos', $vehiculosIds)
+                        ->update(['id_lugar' => $lugarDestinoId]);
+                }
+                
+                // Eliminar el lugar original
+                $lugar->delete();
+                
+                $mensaje = "Lugar eliminado correctamente. Vehículos reubicados a '{$lugarDestino->nombre}'";
+                
+            } elseif ($accion === 'nuevo') {
+                // Validar datos del nuevo lugar
+                $nuevoLugarData = $request->input('nuevo_lugar');
+                if (!$nuevoLugarData || !isset($nuevoLugarData['nombre']) || !isset($nuevoLugarData['direccion']) || 
+                    !isset($nuevoLugarData['latitud']) || !isset($nuevoLugarData['longitud'])) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Información incompleta para crear el nuevo lugar'
+                    ], 422);
+                }
+                
+                // Crear el nuevo lugar
+                $nuevoLugar = Lugar::create([
+                    'nombre' => $nuevoLugarData['nombre'],
+                    'direccion' => $nuevoLugarData['direccion'],
+                    'latitud' => $nuevoLugarData['latitud'],
+                    'longitud' => $nuevoLugarData['longitud']
+                ]);
+                
+                // Actualizar los vehículos para asignarles el nuevo lugar
+                if (count($vehiculosIds) > 0) {
+                    DB::table('vehiculos')
+                        ->whereIn('id_vehiculos', $vehiculosIds)
+                        ->update(['id_lugar' => $nuevoLugar->id_lugar]);
+                }
+                
+                // Eliminar el lugar original
+                $lugar->delete();
+                
+                $mensaje = "Lugar eliminado correctamente. Vehículos reubicados al nuevo lugar '{$nuevoLugar->nombre}'";
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Acción no reconocida'
+                ], 422);
+            }
             
             // Si todo salió bien, confirmar la transacción
             DB::commit();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Lugar y todos sus elementos asociados eliminados correctamente'
+                'message' => $mensaje
             ], 200);
+            
         } catch (\Exception $e) {
             // Si algo falló, revertir la transacción
             DB::rollBack();
             
             return response()->json([
                 'status' => 'error',
-                'message' => 'Error al eliminar el lugar: ' . $e->getMessage(),
-                'errors' => $e->getMessage()
+                'message' => 'Error al procesar la operación: ' . $e->getMessage()
             ], 500);
         }
     }

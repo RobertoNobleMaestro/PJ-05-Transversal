@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Au00f1adir Lugar')
+@section('title', 'Añadir Lugar')
 
 @section('content')
-<!-- Au00f1adir CSS de Leaflet -->
+<!-- Añadir CSS de Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin="/"/>
+      crossorigin=""/>
 <style>
     .add-place-container {
         max-width: 1200px;
@@ -120,10 +120,26 @@
         border-radius: 6px;
         margin-top: 1rem;
     }
+    
+    .error-feedback {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .is-invalid {
+        border-color: #e53e3e;
+    }
+    
+    .is-invalid:focus {
+        border-color: #e53e3e;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.1);
+    }
 </style>
 
 <div class="add-place-container">
-    <h1 class="form-title">Au00f1adir Nuevo Lugar</h1>
+    <h1 class="form-title">Añadir Nuevo Lugar</h1>
     <form id="addLugarForm">
         @csrf
         <div class="form-grid">
@@ -132,11 +148,13 @@
                 <div class="form-group">
                     <label for="nombre" class="form-label">Nombre del Lugar</label>
                     <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    <div id="nombre-error" class="error-feedback"></div>
                 </div>
 
                 <div class="form-group">
-                    <label for="direccion" class="form-label">Direcciu00f3n</label>
+                    <label for="direccion" class="form-label">Dirección</label>
                     <input type="text" class="form-control" id="direccion" name="direccion" required>
+                    <div id="direccion-error" class="error-feedback"></div>
                 </div>
             </div>
             
@@ -144,21 +162,23 @@
             <div>
                 <div class="form-group">
                     <label for="latitud" class="form-label">Latitud</label>
-                    <input type="number" step="any" class="form-control" id="latitud" name="latitud" value="40.4168" required>
+                    <input type="number" step="any" class="form-control" id="latitud" name="latitud" required>
+                    <div id="latitud-error" class="error-feedback"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="longitud" class="form-label">Longitud</label>
-                    <input type="number" step="any" class="form-control" id="longitud" name="longitud" value="-3.7038" required>
+                    <input type="number" step="any" class="form-control" id="longitud" name="longitud" required>
+                    <div id="longitud-error" class="error-feedback"></div>
                 </div>
             </div>
         </div>
         
-        <!-- Mapa para seleccionar ubicaciu00f3n -->
+        <!-- Mapa para seleccionar ubicación -->
         <div class="form-group full-width">
-            <label class="form-label">Seleccionar ubicaciu00f3n en el mapa</label>
+            <label class="form-label">Seleccionar ubicación en el mapa</label>
             <div id="map"></div>
-            <small class="form-text">Haz clic en el mapa para seleccionar la ubicaciu00f3n. Las coordenadas se actualizaru00e1n automu00e1ticamente.</small>
+            <small class="form-text">Haz clic en el mapa para seleccionar la ubicación. Las coordenadas se actualizarán automáticamente.</small>
         </div>
 
         <div class="btn-container">
@@ -169,10 +189,12 @@
 </div>
 @endsection
 
-<!-- Au00f1adir JS de Leaflet -->
+<!-- Añadir JS de Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 let map;
@@ -182,16 +204,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar mapa
     initMap();
     
-    // Validaciu00f3n de formulario
-    const form = document.getElementById('addLugarForm');
-    const inputs = form.querySelectorAll('input');
+    // Configurar validación en tiempo real
+    setupLiveValidation();
+});
+
+// Configurar la validación en tiempo real
+function setupLiveValidation() {
+    const inputs = document.querySelectorAll('input');
     
     inputs.forEach(input => {
+        // Validar cuando el usuario termina de escribir en un campo
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        // Validar mientras el usuario escribe (con un pequeño retraso)
         input.addEventListener('input', function() {
-            validateField(input);
+            const inputField = this;
+            clearTimeout(inputField.timer);
+            inputField.timer = setTimeout(function() {
+                validateField(inputField);
+            }, 500); // Esperar 500ms después de que el usuario deje de escribir
         });
     });
-});
+}
 
 function initMap() {
     // Coordenadas iniciales (Madrid)
@@ -201,12 +237,12 @@ function initMap() {
     // Crear mapa
     map = L.map('map').setView([lat, lng], 13);
     
-    // Au00f1adir capa de OpenStreetMap
+    // Añadir capa de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     
-    // Au00f1adir marcador
+    // Añadir marcador
     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
     
     // Actualizar coordenadas cuando se arrastra el marcador
@@ -225,36 +261,66 @@ function initMap() {
 }
 
 function validateField(input) {
+    let isValid = true;
     let errorMessage = '';
     const value = input.value.trim();
     
-    if (input.name === 'nombre' && value.length < 3) {
+    // Validación específica para cada campo
+    if (input.name === 'nombre' && value === '') {
+        errorMessage = 'El nombre es obligatorio';
+        isValid = false;
+    } else if (input.name === 'nombre' && value.length < 3) {
         errorMessage = 'El nombre debe tener al menos 3 caracteres';
+        isValid = false;
+    } else if (input.name === 'direccion' && value === '') {
+        errorMessage = 'La dirección es obligatoria';
+        isValid = false;
     } else if (input.name === 'direccion' && value.length < 5) {
-        errorMessage = 'La direcciu00f3n debe tener al menos 5 caracteres';
-    } else if ((input.name === 'latitud' || input.name === 'longitud') && !value) {
-        errorMessage = 'Este campo es obligatorio';
+        errorMessage = 'La dirección debe tener al menos 5 caracteres';
+        isValid = false;
+    } else if (input.name === 'latitud') {
+        if (value === '' || isNaN(value)) {
+            errorMessage = 'La latitud debe ser un número válido';
+            isValid = false;
+        } else if (parseFloat(value) < -90 || parseFloat(value) > 90) {
+            errorMessage = 'La latitud debe estar entre -90 y 90';
+            isValid = false;
+        }
+    } else if (input.name === 'longitud') {
+        if (value === '' || isNaN(value)) {
+            errorMessage = 'La longitud debe ser un número válido';
+            isValid = false;
+        } else if (parseFloat(value) < -180 || parseFloat(value) > 180) {
+            errorMessage = 'La longitud debe estar entre -180 y 180';
+            isValid = false;
+        }
     }
     
-    const errorElement = input.parentElement.querySelector('.error-message');
+    // Limpiar mensaje de error anterior
+    const errorElement = document.getElementById(`${input.name}-error`);
     if (errorElement) {
-        errorElement.remove();
+        errorElement.innerHTML = isValid ? '' : `<small class="text-danger">${errorMessage}</small>`;
+        
+        if (isValid) {
+            input.classList.remove('is-invalid');
+        } else {
+            input.classList.add('is-invalid');
+        }
     }
     
-    if (errorMessage) {
-        const error = document.createElement('div');
-        error.className = 'error-message';
-        error.innerText = errorMessage;
-        input.parentElement.appendChild(error);
-        return false;
-    }
-    
-    return true;
+    return isValid;
 }
 
 function createLugar() {
     // Limpiar mensajes de error previos
-    document.querySelectorAll('.error-message').forEach(el => el.remove());
+    document.querySelectorAll('.error-feedback').forEach(el => {
+        el.innerHTML = '';
+    });
+    
+    // Eliminar clase is-invalid de todos los inputs
+    document.querySelectorAll('input').forEach(input => {
+        input.classList.remove('is-invalid');
+    });
     
     // Obtener los datos del formulario
     const form = document.getElementById('addLugarForm');
@@ -271,8 +337,24 @@ function createLugar() {
     });
     
     if (!isValid) {
+        Swal.fire({
+            icon: 'error',
+            title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
+            html: '<p class="lead">Por favor, revisa los campos marcados en rojo</p>',
+            confirmButtonColor: '#9F17BD'
+        });
         return;
     }
+    
+    // Mostrar indicador de carga
+    Swal.fire({
+        title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
+        text: 'Creando nuevo lugar',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false
+    });
     
     // Convertir FormData a objeto para enviar como JSON
     const formDataObj = {};
@@ -292,7 +374,12 @@ function createLugar() {
         if (hiddenInput) {
             csrfToken = hiddenInput.value;
         } else {
-            alert('Error: No se pudo encontrar el token CSRF');
+            Swal.fire({
+                icon: 'error',
+                title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                html: '<p class="lead">No se pudo encontrar el token CSRF</p>',
+                confirmButtonColor: '#9F17BD'
+            });
             return;
         }
     }
@@ -309,28 +396,61 @@ function createLugar() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert(data.message);
-            window.location.href = '{{ route("admin.lugares") }}';
+            Swal.fire({
+                icon: 'success',
+                title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado!</span>',
+                html: `<p class="lead">${data.message}</p>`,
+                confirmButtonColor: '#9F17BD',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("admin.lugares") }}';
+                }
+            });
         } else {
-            // Mostrar errores de validaciu00f3n si existen
+            // Mostrar errores de validación si existen
             if (data.errors) {
+                let errorHtml = '<ul class="text-start list-unstyled">';
+                
                 Object.keys(data.errors).forEach(field => {
+                    errorHtml += `<li><i class="fas fa-exclamation-circle text-danger"></i> ${data.errors[field][0]}</li>`;
+                    
                     const input = document.getElementById(field);
                     if (input) {
                         const error = document.createElement('div');
-                        error.className = 'error-message';
+                        error.className = 'error-feedback';
                         error.innerText = data.errors[field][0];
                         input.parentElement.appendChild(error);
                     }
                 });
+                
+                errorHtml += '</ul>';
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
+                    html: errorHtml,
+                    confirmButtonColor: '#9F17BD'
+                });
             } else {
-                alert(data.message || 'Error al crear el lugar');
+                Swal.fire({
+                    icon: 'error',
+                    title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                    html: `<p class="lead">${data.message || 'Error al crear el lugar'}</p>`,
+                    confirmButtonColor: '#9F17BD'
+                });
             }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al procesar la solicitud');
+        Swal.fire({
+            icon: 'error',
+            title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+            html: '<p class="lead">Error al procesar la solicitud</p>',
+            confirmButtonColor: '#9F17BD'
+        });
     });
 }
 </script>
