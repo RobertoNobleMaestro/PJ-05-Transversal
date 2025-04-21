@@ -56,36 +56,172 @@ class ImagenVehiculoSeeder extends Seeder
                 'id_vehiculo' => 11,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'c4.png',
                 'id_vehiculo' => 12,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'civic.png',
                 'id_vehiculo' => 13,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'tipo.png',
                 'id_vehiculo' => 14,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'pulsar.png',
                 'id_vehiculo' => 15,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'cruze.png',
                 'id_vehiculo' => 16,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'swift.png',
                 'id_vehiculo' => 17,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'mini.png',
                 'id_vehiculo' => 18,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'impreza.png',
                 'id_vehiculo' => 19,
+            ],
+            [
+                'nombre_archivo' => 'vesta.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => 'arrizo.png',
+                'id_vehiculo' => 21,
+            ],
+            [
+                'nombre_archivo' => 'emgrand.png',
+                'id_vehiculo' => 22,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 20,
             ],
             [
                 'nombre_archivo' => '.png',
