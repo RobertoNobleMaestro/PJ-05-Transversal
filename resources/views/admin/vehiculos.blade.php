@@ -242,6 +242,8 @@
             <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
             <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
             <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
+            <li><a href="{{ route('admin.reservas') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
+            <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
         </ul>
     </div>
 
@@ -249,6 +251,9 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Gestión de Vehículos</h1>
+            <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Panel
+            </a>
         </div>
         
         <div class="filter-section">
