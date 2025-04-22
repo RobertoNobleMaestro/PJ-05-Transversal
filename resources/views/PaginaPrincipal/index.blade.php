@@ -19,7 +19,7 @@
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
     <div class="container">
-      <small>Inicio &gt; Alquiler coches &gt; <span id="breadcrumb-tipo">Coche</span></small>
+      <small>Inicio &gt; Alquiler coches</small>
     </div>
   </div>
 
@@ -28,38 +28,6 @@
     <div class="row">
       <div class="col-md-6">
         <h1>Alquiler de vehículos de todo tipo<br>y con precios asequibles</h1>
-        <!-- Formulario de filtros -->
-        <form class="filter-form">
-          <div class="form-group">
-            <label>Tipo de vehículo:</label><br>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              @foreach ($tipos as $index => $tipo)
-                <label class="btn {{ $index === 0 ? 'active' : '' }}">
-                  <input 
-                    type="radio" 
-                    name="tipoVehiculo" 
-                    value="{{ $tipo->nombre }}" 
-                    autocomplete="off" 
-                    {{ $index === 0 ? 'checked' : '' }}>
-                  {{ strtoupper($tipo->nombre) }}
-                </label>
-              @endforeach
-            </div>            
-          </div>               
-          <div class="form-row">
-            <div class="form-group col-md-5">
-              <label for="ubicacion">Ciudad:</label>
-              <input type="text" class="form-control" id="ubicacion" value="Barcelona">
-            </div>
-            <div class="form-group col-md-5">
-              <label for="fecha">Fecha de reserva:</label>
-              <input type="date" class="form-control" id="fecha">
-            </div>
-            <div class="form-group col-md-2 d-flex align-items-end">
-              <button type="submit" class="btn btn-primary w-100">Buscar</button>
-            </div>
-          </div>          
-        </form>
       </div>
       <div class="col-md-6 text-center">
         <!-- Ejemplo de imágenes a la derecha -->
@@ -71,7 +39,7 @@
   <!-- Sección de estadísticas -->
   <div class="container-fluid stats-section">
     <div class="row no-gutters text-center">
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
           <i class="fas fa-users" style="color: #9F17BD"></i>
           <div class="stat-content">
@@ -80,7 +48,7 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
           <i class="fas fa-car" style="color: #9F17BD"></i>
           <div class="stat-content">
@@ -89,7 +57,16 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
+        <div class="stat-box">
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
+          <div class="stat-content">
+            <h3>{{ $valoracionVehiculos }}</h3>
+            <p>Valoración de los vehiculos</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
           <i class="fa-solid fa-star" style="color: #ffc800;"></i>
           <div class="stat-content">
@@ -103,68 +80,84 @@
 
   <div class="container vehicles-section">
     <h2>Alquila vehículos</h2>
+    <div class="row">
+      <!-- Filtros laterales -->
+      <div class="col-md-3">
+        <div id="filtros-form" class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 90px;">
+          <h4 class="mb-3">Filtrar</h4>
+
+          <!-- Filtro por tipo de vehículo -->
+          <div class="form-group">
+            <label><strong>Tipo de vehículo:</strong></label>
+            <div id="tipoVehiculoFiltro" class="form-check">
+              <!-- Checkboxes insertados aquí -->
+            </div>
+          </div>          
+          
+          <div class="form-group col-m">
+            <label><strong>Ciudad:</strong></label>
+            <div id="lugarFiltro" class="form-check">
+              <!-- Se insertarán dinámicamente -->
+            </div>
+          </div>          
   
-    <div class="mb-4">
-      <div id="filtros-form">
-        <div class="form-row align-items-end">
-          <!-- Filtro por marca -->
-          <div class="form-group col-md">
-            <label for="marcaFiltro">Marca:</label>
+          <div class="form-group">
+            <label for="marcaFiltro"><strong>Marca:</strong></label>
             <input type="text" id="marcaFiltro" class="form-control" placeholder="Ej. Toyota">
           </div>
-    
-          <!-- Filtro por año -->
-          <div class="form-group col-md">
-            <label for="anioFiltro">Año:</label>
-            <select id="anioFiltro" class="form-control">
-              <option value="">Todos</option>
-              <!-- años dinámicos -->
-            </select>
-          </div>
-    
-          <!-- Filtro por precio mínimo -->
-          <div class="form-group col-md">
-            <label for="precioMin">Precio mín (€):</label>
+  
+          <div class="form-group">
+            <label><strong>Año:</strong></label>
+            <div id="anioFiltroContainer" class="form-check">
+              <!-- Se insertarán dinámicamente -->
+            </div>
+          </div>          
+
+          <div class="form-group">
+            <label for="precioMin"><strong>Precio mín (€):</strong></label>
             <input type="number" id="precioMin" class="form-control" placeholder="Mín">
           </div>
-    
-          <!-- Filtro por precio máximo -->
-          <div class="form-group col-md">
-            <label for="precioMax">Precio máx (€):</label>
+  
+          <div class="form-group">
+            <label for="precioMax"><strong>Precio máx (€):</strong></label>
             <input type="number" id="precioMax" class="form-control" placeholder="Máx">
           </div>
 
-          <!-- Filtro por valoración mínima -->
-          <div class="form-group col-md">
-            <label for="valoracionMin">Valoración mínima:</label>
-            <select id="valoracionMin" class="form-control">
-              <option value="">Todas</option>
-              <option value="5">5 ⭐</option>
-              <option value="4">4 ⭐ o más</option>
-              <option value="3">3 ⭐ o más</option>
-              <option value="2">2 ⭐ o más</option>
-              <option value="1">1 ⭐ o más</option>
-            </select>
+          <div class="form-group">
+            <label><strong>Valoración:</strong></label>
+            <div id="valoracionFiltro" class="form-check">
+              <label><input type="checkbox" name="valoracion" value="5"> 5 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="4"> 4 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="3"> 3 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="2"> 2 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="1"> 1 ⭐</label><br>
+            </div>
           </div>          
-    
-          <!-- Selector de cantidad por página -->
-          <div class="form-group col-md">
-            <label for="perPageInput">Vehículos/página:</label>
-            <input id="perPageInput" type="number" class="form-control" value="8" min="1">
+  
+          <div class="form-group">
+            <label for="perPageInput"><strong>Vehículos/página:</strong></label>
+            <input id="perPageInput" type="number" class="form-control" value="16" min="1">
           </div>
-    
-          <!-- Paginación -->
-          <div class="form-group col-md text-center">
-            <div id="pagination-controls" class="btn-group d-block mb-1"></div>
-            <div id="pagination-info" class="small text-muted"></div>
-          </div>
+
+          <div class="form-group text-center mt-3">
+            <button id="resetFiltrosBtn" class="btn btn-outline-danger btn-block">
+              <i class="fas fa-undo"></i> Limpiar filtros
+            </button>
+          </div>          
         </div>
       </div>
-    </div>
-    
-    <!-- Contenedor de tarjetas de vehículos -->
-    <div class="row" id="vehiculos-container">
-      <!-- Se insertan dinámicamente -->
+  
+      <!-- Vehículos -->
+      <div class="col-md-9">
+        <div class="row" id="vehiculos-container">
+          <!-- tarjetas dinámicas -->
+        </div>
+        <!-- Paginación -->
+        <div class="d-flex justify-content-center">
+          <div class="btn-group" id="pagination-controls"></div>
+        </div>
+        <div class="text-center text-muted small mt-2" id="pagination-info"></div>
+      </div>
     </div>
   </div>
 
