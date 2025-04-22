@@ -104,78 +104,96 @@
         font-size: 0.875rem;
         margin-top: 0.25rem;
     }
+    
+    .form-text {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .sidebar-menu .active {
+        background-color: rgba(255,255,255,0.3);
+        font-weight: bold;
+        border-radius: 5px;
+    }
 </style>
 
 <div class="add-user-container">
-    <h1 class="form-title">Añadir Nuevo Usuario</h1>
-    <form id="addUserForm">
-        @csrf
-        <div class="form-grid">
-            <!-- Columna izquierda: 4 campos -->
-            <div>
-                <div class="form-group">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                </div>
+    <!-- Se eliminó la barra lateral (sidebar) que contenía CARFLOW y los enlaces a Usuarios y Vehículos -->
+    
+    <!-- Contenido principal sin margen izquierdo -->
+    <div>
+        <h1 class="form-title">Añadir Nuevo Usuario</h1>
+        <form id="addUserForm">
+            @csrf
+            <div class="form-grid">
+                <!-- Columna izquierda: 4 campos -->
+                <div>
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="id_roles" class="form-label">Rol</label>
-                    <select class="form-control" id="id_roles" name="id_roles">
-                        <option value="2">Cliente</option>
-                        <option value="3">Gestor</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="id_roles" class="form-label">Rol</label>
+                        <select class="form-control" id="id_roles" name="id_roles">
+                            <option value="2">Cliente</option>
+                            <option value="3">Gestor</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Columna derecha: 4 campos -->
+                <div>
+                    <div class="form-group">
+                        <label for="DNI" class="form-label">DNI</label>
+                        <input type="text" class="form-control" id="DNI" name="DNI" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" max="{{ date('Y-m-d', strtotime('-16 years')) }}" required>
+                        <small class="form-text">Debes tener al menos 16 años para registrarte.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
+                        <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+                    </div>
                 </div>
             </div>
             
-            <!-- Columna derecha: 4 campos -->
-            <div>
-                <div class="form-group">
-                    <label for="DNI" class="form-label">DNI</label>
-                    <input type="text" class="form-control" id="DNI" name="DNI" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telefono" name="telefono" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
-                    <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
-                </div>
+            <!-- Dirección en ancho completo abajo -->
+            <div class="form-group full-width" style="margin-bottom: 1.5rem;">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion" required>
             </div>
-        </div>
-        
-        <!-- Dirección en ancho completo abajo -->
-        <div class="form-group full-width" style="margin-bottom: 1.5rem;">
-            <label for="direccion" class="form-label">Dirección</label>
-            <input type="text" class="form-control" id="direccion" name="direccion" required>
-        </div>
 
-        <div class="btn-container">
-            <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
-            <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
-        </div>
-    </form>
+            <div class="btn-container">
+                <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
+                <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -254,8 +272,96 @@ function createUser() {
     // Limpiar mensajes de error previos
     document.querySelectorAll('.text-danger').forEach(el => el.remove());
     
-    // Obtener los datos del formulario
+    // Validar campos antes de enviar
     const form = document.getElementById('addUserForm');
+    const inputs = form.querySelectorAll('input, select');
+    let isValid = true;
+    
+    inputs.forEach(input => {
+        if (input.name) { // Solo validar elementos con nombres
+            const value = input.value.trim();
+            let errorMessage = '';
+            
+            // Reglas de validación para cada campo
+            if (input.name === 'email') {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!re.test(value)) {
+                    errorMessage = 'Por favor, ingrese un email válido.';
+                    isValid = false;
+                }
+            } else if (input.name === 'DNI') {
+                if (!/^\d{8}[A-Z]$/.test(value)) {
+                    errorMessage = 'El formato del DNI es inválido. Debe terminar con una letra mayúscula.';
+                    isValid = false;
+                } else {
+                    // Validación de la letra del DNI
+                    const number = parseInt(value.slice(0, 8), 10);
+                    const letter = value.charAt(8);
+                    const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
+                    const calculatedLetter = letters[number % 23];
+                    
+                    if (calculatedLetter !== letter) {
+                        errorMessage = 'El DNI es inválido. La letra no coincide.';
+                        isValid = false;
+                    }
+                }
+            } else if (input.name === 'password') {
+                if (value.length < 8) {
+                    errorMessage = 'La contraseña debe tener al menos 8 caracteres.';
+                    isValid = false;
+                }
+            } else if (input.name === 'telefono') {
+                if (!/^\d{9}$/.test(value)) {
+                    errorMessage = 'El teléfono debe contener exactamente 9 números.';
+                    isValid = false;
+                }
+            } else if (input.name === 'direccion') {
+                if (value.length < 5) {
+                    errorMessage = 'La dirección debe tener al menos 5 caracteres.';
+                    isValid = false;
+                }
+            } else if (input.required && value === '') {
+                errorMessage = 'Este campo es obligatorio.';
+                isValid = false;
+            }
+            
+            // Mostrar mensaje de error si es necesario
+            if (errorMessage) {
+                const errorElement = input.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('error-message')) {
+                    errorElement.textContent = errorMessage;
+                } else {
+                    const span = document.createElement('span');
+                    span.classList.add('error-message');
+                    span.style.color = 'red';
+                    span.textContent = errorMessage;
+                    input.parentNode.insertBefore(span, input.nextSibling);
+                }
+            }
+        }
+    });
+    
+    if (!isValid) {
+        Swal.fire({
+            icon: 'warning',
+            title: '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Campos Incompletos</span>',
+            html: '<p class="lead">Por favor, complete todos los campos requeridos correctamente</p>',
+            confirmButtonColor: '#9F17BD'
+        });
+        return;
+    }
+    
+    // Mostrar indicador de carga
+    Swal.fire({
+        title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
+        text: 'Creando nuevo usuario',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false
+    });
+    
+    // Obtener los datos del formulario
     const formData = new FormData(form);
     
     fetch('{{ route("admin.users.store") }}', {
@@ -270,11 +376,26 @@ function createUser() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert(data.message || 'Usuario creado exitosamente');
-            window.location.href = '{{ route("admin.users") }}';
+            Swal.fire({
+                icon: 'success',
+                title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
+                html: `<p class="lead">${data.message || 'Usuario creado exitosamente'}</p>`,
+                confirmButtonColor: '#9F17BD',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("admin.users") }}';
+                }
+            });
         } else if (data.errors) {
+            // Construir mensaje de error HTML
+            let errorHtml = '<ul class="text-start list-unstyled">';
+            
             // Muestra errores de validación
             Object.keys(data.errors).forEach(field => {
+                errorHtml += `<li><i class="fas fa-exclamation-circle text-danger"></i> ${data.errors[field][0]}</li>`;
+                
                 const input = document.querySelector(`[name="${field}"]`);
                 if (input) {
                     const errorDiv = document.createElement('div');
@@ -283,13 +404,32 @@ function createUser() {
                     input.parentNode.appendChild(errorDiv);
                 }
             });
+            
+            errorHtml += '</ul>';
+            
+            Swal.fire({
+                icon: 'error',
+                title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
+                html: errorHtml,
+                confirmButtonColor: '#9F17BD'
+            });
         } else {
-            alert('Error al crear usuario: ' + (data.message || 'Error desconocido'));
+            Swal.fire({
+                icon: 'error',
+                title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                html: `<p class="lead">Error al crear usuario: ${data.message || 'Error desconocido'}</p>`,
+                confirmButtonColor: '#9F17BD'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error de conexión. Por favor, inténtalo de nuevo.');
+        Swal.fire({
+            icon: 'error',
+            title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+            html: '<p class="lead">Error de conexión. Por favor, inténtalo de nuevo.</p>',
+            confirmButtonColor: '#9F17BD'
+        });
     });
 }
 </script>

@@ -13,10 +13,10 @@ class Lugar extends Model
     protected $primaryKey = 'id_lugar';
 
     protected $fillable = [
-        'nombre_lugar',
+        'nombre',
         'direccion',
-        'ciudad',
-        'codigo_postal'
+        'latitud',
+        'longitud'
     ];
 
     public function vehiculos()

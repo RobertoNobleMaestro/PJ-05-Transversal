@@ -24,25 +24,44 @@
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
                     @auth
-                        <a
-                            href="{{ url('/dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
-                        >
-                            Dashboard
-                        </a>
+                        <div class="dropdown">
+                            <button class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i> {{ Auth::user()->nombre }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                @if(Auth::user()->id_roles == 1)
+                                    <li><a class="dropdown-item" href="{{ url('/admin') }}"><i class="fas fa-user-shield me-2"></i>Panel de Admin</a></li>
+                                @endif
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                    </a>
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                        @csrf
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     @else
+                        <!-- Botón Iniciar Sesión color lila -->
                         <a
-                            href="{{ route('login') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal"
+                            href="{{ url('/login') }}"
+                            class="inline-block px-5 py-1.5 text-white bg-purple-600 hover:bg-purple-700 border border-purple-600 rounded-sm text-sm leading-normal shadow transition-all duration-200"
+                            style="background-color: #8A4FFF;"
                         >
-                            Log in
+                            <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
                         </a>
 
                         @if (Route::has('register'))
+                            <!-- Botón Registrarse color lila -->
                             <a
                                 href="{{ route('register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
+                                class="inline-block px-5 py-1.5 text-white bg-purple-600 hover:bg-purple-700 border border-purple-600 rounded-sm text-sm leading-normal shadow transition-all duration-200"
+                                style="background-color: #9B6DFF;"
+                            >
+                                <i class="fas fa-user-plus me-1"></i> Registrarse
                             </a>
                         @endif
                     @endauth
