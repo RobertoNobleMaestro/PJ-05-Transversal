@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const error_email = document.getElementById('error_email');
     const inputDni = document.getElementById('dni');
     const error_dni = document.getElementById('error_dni');
-    const inputImg = document.getElementById('imagen');
+    const inputImg = document.getElementById('opcionImagen');
     const error_img = document.getElementById('error_imagen');
     const inputTelf = document.getElementById('telf');
     const error_telf = document.getElementById('error_telf');
@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const error_direccion = document.getElementById('error_direccion');
     const inputPermiso = document.getElementById('permiso');
     const error_permiso = document.getElementById('error_permiso');
+    const inputPassword = document.getElementById('password');
+    const error_password = document.getElementById('error_password');
+    const inputConfirmPassword = document.getElementById('confirm_password');
+    const error_confirm_password = document.getElementById('error_password_confirmation');
     const form = document.getElementById('registerForm');
 
     // Asignación de eventos onblur y definición del nombre de la función
@@ -27,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
     inputDateNac.onblur = validaDateNac;
     inputDireccion.onblur = validaDireccion;
     inputPermiso.onblur = validaPermiso;
+    inputPassword.onblur = validaPassword;
+    inputConfirmPassword.onblur = validaConfirmPassword;
 
     // Asignación del evento submit y definición de la función para validar el formulario
     form.onsubmit = validaForm;
@@ -204,6 +210,48 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
     }
+    // Función para validar la contraseña
+    function validaPassword() {
+        const password = inputPassword.value.trim();
+
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        // Requiere al menos 1 minúscula, 1 mayúscula, 1 número, y mínimo 8 caracteres
+
+        if (password === "") {
+            error_password.textContent = "El campo es obligatorio";
+            inputPassword.classList.add('is-invalid');
+            return false;
+        } else if (!regex.test(password)) {
+            error_password.textContent = "Debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas y números";
+            inputPassword.classList.add('is-invalid');
+            return false;
+        } else {
+            error_password.textContent = "";
+            inputPassword.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    // Función para validar que las contraseñas coinciden
+    function validaConfirmPassword() {
+        const password = inputPassword.value.trim();
+        const confirmPassword = inputConfirmPassword.value.trim();
+
+        if (confirmPassword === "") {
+            error_confirm_password.textContent = "Debes confirmar la contraseña";
+            inputConfirmPassword.classList.add('is-invalid');
+            return false;
+        } else if (password !== confirmPassword) {
+            error_confirm_password.textContent = "Las contraseñas no coinciden";
+            inputConfirmPassword.classList.add('is-invalid');
+            return false;
+        } else {
+            error_confirm_password.textContent = "";
+            inputConfirmPassword.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
 
     // Función para vlidar el formulario
     function validaForm(e) {
@@ -217,8 +265,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const validoDateNac = validaDateNac();
         const validoDireccion = validaDireccion();
         const validoPermiso = validaPermiso();
-
-        const todoValido = validoNombre && validoEmail && validoDni && validoImg && validoTelf && validoDateNac && validoDireccion && validoPermiso;
+        const validoPassword = validaPassword();
+        const validoConfirmPassword = validaConfirmPassword();
+        
+        const todoValido = validoNombre && validoEmail && validoDni && validoImg && validoTelf &&
+                           validoDateNac && validoDireccion && validoPermiso &&
+                           validoPassword && validoConfirmPassword;
 
         if (todoValido) {
             form.submit();
@@ -226,11 +278,152 @@ document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
                 icon: "error",
                 title: "Error al enviar el formulario"
-              });
+            });
         }
     }
 });
 
+//=== CAMARA ===
+document.addEventListener('DOMContentLoaded', function () {
+    const opcionImagen = document.getElementById('opcionImagen');
+    const imagenInput = document.getElementById('imagenInput');
+    const camaraContainer = document.getElementById('camaraContainer');
+    const video = document.getElementById('videoCamara');
+    const btnCapturar = document.getElementById('btnCapturarFoto');
+    const canvas = document.getElementById('canvasFoto');
 
-// === REGISTRO CON AJAX ===
+    let stream = null;
+
+    opcionImagen.addEventListener('change', function () {
+        if (this.value === 'camara') {
+            imagenInput.style.display = 'none';
+            camaraContainer.style.display = 'block';
+            iniciarCamara();
+        } else {
+            camaraContainer.style.display = 'none';
+            imagenInput.style.display = 'block';
+            detenerCamara();
+        }
+    });
+
+    async function iniciarCamara() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (error) {
+            alert('No se pudo acceder a la cámara.');
+            opcionImagen.value = 'archivo';
+            imagenInput.style.display = 'block';
+            camaraContainer.style.display = 'none';
+        }
+    }
+
+    function detenerCamara() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    }
+
+    btnCapturar.addEventListener('click', function () {
+        const contexto = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'block';
+
+        // Convertir imagen capturada en archivo para enviar en el form
+        canvas.toBlob(function (blob) {
+            const archivo = new File([blob], "foto_perfil.png", { type: 'image/png' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(archivo);
+            imagenInput.files = dataTransfer.files;
+        }, 'image/png');
+    });
+
+    window.addEventListener('beforeunload', detenerCamara);
+});
+
+
+// === REGISTRO CON FETCH ===
+document.addEventListener('DOMContentLoaded', function () {
+    const registerButton = document.getElementById('registerButton');
+    const form = document.getElementById('registerForm');
+    const loginUrl = "{{ route('login') }}";
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        document.querySelectorAll('.error_message').forEach(span => span.textContent = '');
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            }
+        })
+            .then(async response => {
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    console.error("Respuesta inválida del servidor:", e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de servidor',
+                        text: 'El servidor respondió con datos inválidos.',
+                        confirmButtonText: 'Ok'
+                    });
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Registro exitoso!',
+                        text: data.message,
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
+                        window.location.href = loginUrl;
+                    });
+                } else if (response.status === 422 && data.errors) {
+                    for (let campo in data.errors) {
+                        const span = document.getElementById('error_' + campo);
+                        if (span) {
+                            span.textContent = data.errors[campo][0];
+                        }
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de validación',
+                        text: data.message || 'Por favor corrige los errores del formulario.',
+                        confirmButtonText: 'Ok'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error inesperado',
+                        text: data.message || 'Ocurrió un problema, intenta más tarde.',
+                        confirmButtonText: 'Ok'
+                    });
+                    console.error('Error detallado:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error de red o JS:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ups, algo salió mal',
+                    text: 'No se pudo completar el registro. Intenta más tarde.',
+                    confirmButtonText: 'Ok'
+                });
+            });
+    });
+});
+
+
+
 
