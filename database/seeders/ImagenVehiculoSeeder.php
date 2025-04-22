@@ -152,80 +152,80 @@ class ImagenVehiculoSeeder extends Seeder
                 'id_vehiculo' => 35,
             ],
             [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
+                'nombre_archivo' => 'monster.png',
+                'id_vehiculo' => 36,
+            ],
+            [
+                'nombre_archivo' => 'street.png',
+                'id_vehiculo' => 37,
+            ],
+            [
+                'nombre_archivo' => '390duke.png',
+                'id_vehiculo' => 38,
+            ],
+            [
+                'nombre_archivo' => 'iron883.png',
+                'id_vehiculo' => 39,
+            ],
+            [
+                'nombre_archivo' => 'rs660.webp',
+                'id_vehiculo' => 40,
+            ],
+            [
+                'nombre_archivo' => 'leoncino.png',
+                'id_vehiculo' => 41,
+            ],
+            [
+                'nombre_archivo' => '401.png',
+                'id_vehiculo' => 42,
+            ],
+            [
+                'nombre_archivo' => 'meteor350.png',
+                'id_vehiculo' => 43,
+            ],
+            [
+                'nombre_archivo' => '300nk.webp',
+                'id_vehiculo' => 44,
+            ],
+            [
+                'nombre_archivo' => 't310.png',
+                'id_vehiculo' => 45,
+            ],
+            [
+                'nombre_archivo' => 'v7stone.webp',
+                'id_vehiculo' => 46,
+            ],
+            [
+                'nombre_archivo' => '500r.png',
+                'id_vehiculo' => 47,
+            ],
+            [
+                'nombre_archivo' => 'wolf250.webp',
+                'id_vehiculo' => 48,
+            ],
+            [
+                'nombre_archivo' => 'fifty.png',
+                'id_vehiculo' => 49,
+            ],
+            [
+                'nombre_archivo' => 'kpr200.png',
+                'id_vehiculo' => 50,
             ],
             [
                 'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
+                'id_vehiculo' => 51,
             ],
             [
                 'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
+                'id_vehiculo' => 52,
             ],
             [
                 'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
+                'id_vehiculo' => 53,
             ],
             [
                 'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
-            ],
-            [
-                'nombre_archivo' => '.png',
-                'id_vehiculo' => 20,
+                'id_vehiculo' => 54,
             ]
         ]);
     }
