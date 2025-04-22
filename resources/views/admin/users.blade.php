@@ -225,8 +225,15 @@
         </div>
         
         <div class="filter-section">
-            <div class="filter-group">                
-                <input type="text" class="search-input" placeholder="Buscar usuario..." id="searchUser">
+            <div class="filter-group">
+                <input type="text" class="search-input" placeholder="Buscar por nombre..." id="searchUser">
+                <select class="filter-control" id="filterRole">
+                    <option value="">Todos los roles</option>
+                    @foreach($roles as $role)
+                        <option value="{{ $role->id_roles }}">{{ $role->nombre }}</option>
+                    @endforeach
+                </select>
+                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
             </div>
             <a href="{{ route('admin.users.create') }}" class="add-user-btn">Añadir Usuario</a>
         </div>
@@ -258,9 +265,26 @@
 @endsection
 
 <script>
-// Función global para cargar usuarios
+// Variables globales para los filtros
+let activeFilters = {};
+
+// Funciu00f3n global para cargar usuarios
 function loadUsers() {
-    fetch('{{ route("admin.users.data") }}', {
+    // Mostrar el indicador de carga
+    document.getElementById('loading-users').style.display = 'block';
+    document.getElementById('users-table-container').style.display = 'none';
+    
+    // Construir la URL con los paru00e1metros de filtro
+    let url = new URL('{{ route("admin.users.data") }}', window.location.origin);
+    
+    // Agregar todos los filtros activos a la URL
+    Object.keys(activeFilters).forEach(key => {
+        if (activeFilters[key]) {
+            url.searchParams.append(key, activeFilters[key]);
+        }
+    });
+    
+    fetch(url, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -284,20 +308,26 @@ function loadUsers() {
         tableBody.innerHTML = '';
         
         // Rellenar la tabla con los datos
-        data.users.forEach(user => {
+        if (data.users.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.id_usuario}</td>
-                <td>${user.nombre}</td>
-                <td>${user.email}</td>
-                <td>${user.nombre_rol || 'Sin rol asignado'}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/users/${user.id_usuario}/edit'">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id_usuario}, '${user.nombre}')">Eliminar</button>
-                </td>
-            `;
+            row.innerHTML = `<td colspan="5" class="text-center">No se encontraron usuarios con los filtros aplicados</td>`;
             tableBody.appendChild(row);
-        });
+        } else {
+            data.users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id_usuario}</td>
+                    <td>${user.nombre}</td>
+                    <td>${user.email}</td>
+                    <td>${user.nombre_rol || 'Sin rol asignado'}</td>
+                    <td>
+                        <a href="/admin/users/${user.id_usuario}/edit" class="btn btn-sm btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id_usuario}, '${user.nombre}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
     })
     .catch(error => {
         console.error('Error:', error);
@@ -305,7 +335,35 @@ function loadUsers() {
     });
 }
 
-// Función para eliminar usuario
+// Aplicar los filtros cuando se hace clic en el botu00f3n o se presiona Enter
+function applyFilters() {
+    // Recoger los valores de los filtros
+    const nombre = document.getElementById('searchUser').value.trim();
+    const role = document.getElementById('filterRole').value;
+    
+    // Actualizar el objeto de filtros activos
+    activeFilters = {
+        nombre: nombre,
+        role: role
+    };
+    
+    // Cargar usuarios con los filtros aplicados
+    loadUsers();
+}
+
+// Limpiar todos los filtros
+function clearFilters() {
+    document.getElementById('searchUser').value = '';
+    document.getElementById('filterRole').value = '';
+    
+    // Reiniciar el objeto de filtros activos
+    activeFilters = {};
+    
+    // Cargar usuarios sin filtros
+    loadUsers();
+}
+
+// Funciu00f3n para eliminar usuario
 function deleteUser(id, nombre) {
     Swal.fire({
         title: `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar Usuario</span>`,
@@ -390,8 +448,16 @@ function deleteUser(id, nombre) {
     });
 }
 
-// Cargar usuarios cuando el DOM esté listo
+// Cargar usuarios cuando el DOM estu00e9 listo
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar usuarios al iniciar
     loadUsers();
+    
+    // Event listener para el botón de limpiar filtros
+    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    
+    // Event listeners para aplicar filtros automáticamente al cambiar
+    document.getElementById('searchUser').addEventListener('input', applyFilters);
+    document.getElementById('filterRole').addEventListener('change', applyFilters);
 });
 </script>

@@ -36,8 +36,20 @@ class LugarController extends Controller
             return $authCheck;
         }
         
-        // Cargar lugares
-        $lugares = Lugar::all();
+        // Iniciar consulta
+        $query = Lugar::query();
+        
+        // Aplicar filtros si existen
+        if ($request->has('nombre') && !empty($request->nombre)) {
+            $query->where('nombre', 'like', '%' . $request->nombre . '%');
+        }
+        
+        if ($request->has('direccion') && !empty($request->direccion)) {
+            $query->where('direccion', 'like', '%' . $request->direccion . '%');
+        }
+        
+        // Ejecutar la consulta
+        $lugares = $query->get();
         
         return response()->json([
             'lugares' => $lugares

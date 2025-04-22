@@ -119,17 +119,10 @@
 </style>
 
 <div class="add-user-container">
-    <!-- Sidebar para mantener la navegación consistente -->
-    <div class="admin-sidebar" id="sidebar" style="position: fixed; left: 0; top: 0; height: 100vh; z-index: 100;">
-        <div class="sidebar-title">CARFLOW</div>
-        <ul class="sidebar-menu">
-            <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
-            <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
-        </ul>
-    </div>
+    <!-- Se eliminó la barra lateral (sidebar) que contenía CARFLOW y los enlaces a Usuarios y Vehículos -->
     
-    <!-- Contenido principal con margen izquierdo para evitar que se superponga con el sidebar -->
-    <div style="margin-left: 250px;">
+    <!-- Contenido principal sin margen izquierdo -->
+    <div>
         <h1 class="form-title">Añadir Nuevo Usuario</h1>
         <form id="addUserForm">
             @csrf

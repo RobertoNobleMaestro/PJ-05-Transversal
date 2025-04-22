@@ -225,8 +225,14 @@
         </div>
         
         <div class="filter-section">
-            <div class="filter-group">                
-                <input type="text" class="search-input" placeholder="Buscar lugar..." id="searchLugar">
+            <div class="filter-group">
+                <!-- Filtro por nombre -->
+                <input type="text" class="filter-control" placeholder="Buscar por nombre..." id="filterNombre">
+                
+                <!-- Filtro por dirección -->
+                <input type="text" class="filter-control" placeholder="Buscar por dirección..." id="filterDireccion">
+                
+                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
             </div>
             <a href="{{ route('admin.lugares.create') }}" class="add-user-btn">Añadir Lugar</a>
         </div>
@@ -259,41 +265,82 @@
 @endsection
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    cargarLugares();
-    
-    // Buscar en la tabla
-    document.getElementById('searchLugar').addEventListener('input', function(e) {
-        const valorBusqueda = e.target.value.toLowerCase();
-        const tabla = document.getElementById('lugares-table');
-        const filas = tabla.querySelectorAll('tbody tr');
-        
-        filas.forEach(fila => {
-            const nombre = fila.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            const direccion = fila.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            
-            if (nombre.includes(valorBusqueda) || direccion.includes(valorBusqueda)) {
-                fila.style.display = '';
-            } else {
-                fila.style.display = 'none';
-            }
-        });
-    });
-});
+// Variables globales para los filtros
+let activeFilters = {};
 
-function cargarLugares() {
-    const loadingElement = document.getElementById('loading-lugares');
-    const tableContainer = document.getElementById('lugares-table-container');
+// Función para aplicar los filtros
+function applyFilters() {
+    // Recoger los valores de los filtros
+    const nombre = document.getElementById('filterNombre').value.trim();
+    const direccion = document.getElementById('filterDireccion').value.trim();
     
-    loadingElement.style.display = 'block';
-    tableContainer.style.display = 'none';
+    // Actualizar el objeto de filtros activos
+    activeFilters = {
+        nombre: nombre,
+        direccion: direccion
+    };
     
-    fetch('{{ route("admin.lugares.data") }}')
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#lugares-table tbody');
-            tableBody.innerHTML = '';
-            
+    // Cargar lugares con los filtros aplicados
+    loadLugares();
+}
+
+// Función para limpiar los filtros
+function clearFilters() {
+    document.getElementById('filterNombre').value = '';
+    document.getElementById('filterDireccion').value = '';
+    
+    // Reiniciar el objeto de filtros activos
+    activeFilters = {};
+    
+    // Cargar lugares sin filtros
+    loadLugares();
+}
+
+// Función global para cargar lugares
+function loadLugares() {
+    // Mostrar el indicador de carga
+    document.getElementById('loading-lugares').style.display = 'block';
+    document.getElementById('lugares-table-container').style.display = 'none';
+    
+    // Construir la URL con los parámetros de filtro
+    let url = new URL('{{ route("admin.lugares.data") }}', window.location.origin);
+    
+    // Agregar todos los filtros activos a la URL
+    Object.keys(activeFilters).forEach(key => {
+        if (activeFilters[key]) {
+            url.searchParams.append(key, activeFilters[key]);
+        }
+    });
+    
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al cargar los lugares');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Ocultar el indicador de carga
+        document.getElementById('loading-lugares').style.display = 'none';
+        // Mostrar la tabla
+        document.getElementById('lugares-table-container').style.display = 'block';
+        
+        // Limpiar la tabla
+        const tableBody = document.querySelector('#lugares-table tbody');
+        tableBody.innerHTML = '';
+        
+        // Rellenar la tabla con los datos
+        if (data.lugares.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="6" class="text-center">No se encontraron lugares con los filtros aplicados</td>`;
+            tableBody.appendChild(row);
+        } else {
             data.lugares.forEach(lugar => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -303,21 +350,61 @@ function cargarLugares() {
                     <td>${lugar.latitud}</td>
                     <td>${lugar.longitud}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/lugares/${lugar.id_lugar}/edit'">Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteLugar(${lugar.id_lugar}, '${lugar.nombre}')">Eliminar</button>
+                        <a href="/admin/lugares/${lugar.id_lugar}/edit" class="btn btn-sm btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteLugar(${lugar.id_lugar}, '${lugar.nombre}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
-            
-            loadingElement.style.display = 'none';
-            tableContainer.style.display = 'block';
-        })
-        .catch(error => {
-            console.error('Error al cargar los lugares:', error);
-            loadingElement.innerHTML = `<p class="text-danger">Error al cargar los datos: ${error.message}</p>`;
-        });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loading-lugares').innerHTML = `<div class="alert alert-danger">Error al cargar lugares: ${error.message}</div>`;
+    });
 }
+
+// Limpiar todos los filtros
+function clearFilters() {
+    document.getElementById('filterNombre').value = '';
+    document.getElementById('filterDireccion').value = '';
+    
+    // Reiniciar el objeto de filtros activos
+    activeFilters = {};
+    
+    // Cargar lugares sin filtros
+    loadLugares();
+}
+
+// Función para aplicar los filtros
+function applyFilters() {
+    // Recoger los valores de los filtros
+    const nombre = document.getElementById('filterNombre').value.trim();
+    const direccion = document.getElementById('filterDireccion').value.trim();
+    
+    // Actualizar el objeto de filtros activos
+    activeFilters = {
+        nombre: nombre,
+        direccion: direccion
+    };
+    
+    // Cargar lugares con los filtros aplicados
+    loadLugares();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar la carga de lugares
+    loadLugares();
+    
+    // Event listener para el botón de limpiar filtros
+    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    
+    // Event listeners para aplicar filtros automáticamente al cambiar
+    document.getElementById('filterNombre').addEventListener('input', applyFilters);
+    document.getElementById('filterDireccion').addEventListener('input', applyFilters);
+});
+
+// Esta función ha sido reemplazada por loadLugares
 
 function deleteLugar(id, nombre) {
     // Cargar lugares disponibles para la reubicaciu00f3n

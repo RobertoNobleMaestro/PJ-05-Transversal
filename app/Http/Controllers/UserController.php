@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Role; // Import Role model
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -36,15 +37,27 @@ class UserController extends Controller
             return $authCheck;
         }
         
-        // Cargar usuarios con su información de rol usando join
-        $users = User::select('users.*', 'roles.nombre as nombre_rol')
-                    ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
-                    ->get();
+        // Iniciar la consulta
+        $query = User::select('users.*', 'roles.nombre as nombre_rol')
+                    ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles');
+        
+        // Aplicar filtros si existen
+        if ($request->has('nombre') && !empty($request->nombre)) {
+            $query->where('users.nombre', 'like', '%' . $request->nombre . '%');
+        }
+        
+        if ($request->has('role') && !empty($request->role)) {
+            $query->where('users.id_roles', $request->role);
+        }
+        
+        // Ejecutar la consulta
+        $users = $query->get();
         
         return response()->json([
             'users' => $users
         ]);
     }
+    
     public function index(Request $request)
     {
         $authCheck = $this->checkAdmin($request);
@@ -52,12 +65,15 @@ class UserController extends Controller
             return $authCheck;
         }
         
+        // Obtener todos los roles para el filtro
+        $roles = Role::all();
+        
         // Cargar usuarios con su información de rol usando join
         $users = User::select('users.*', 'roles.nombre as nombre_rol')
                     ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
                     ->get();
 
-        return view('admin.users', compact('users'));
+        return view('admin.users', compact('users', 'roles'));
     }
 
     public function create(Request $request)

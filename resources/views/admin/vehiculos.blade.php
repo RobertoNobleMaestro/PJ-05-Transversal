@@ -202,6 +202,33 @@
         text-decoration: none;
         transition: background 0.2s;
     }
+    
+    .btn-delete:hover {
+        background-color: rgba(197, 48, 48, 0.1);
+    }
+    
+    /* Estilos para las estrellas de valoración */
+    .star-rating {
+        display: inline-flex;
+        color: #ffc107; /* Color amarillo para las estrellas */
+    }
+    
+    .star-rating .fas.fa-star {
+        color: #ffc107; /* Estrella completa */
+    }
+    
+    .star-rating .fas.fa-star-half-alt {
+        color: #ffc107; /* Estrella a la mitad */
+    }
+    
+    .star-rating .far.fa-star {
+        color: #e4e5e9; /* Estrella vacía */
+    }
+    
+    .rating-value {
+        margin-left: 5px;
+        font-weight: bold;
+    }
 </style>
 
 <div class="admin-container">
@@ -226,7 +253,42 @@
         
         <div class="filter-section">
             <div class="filter-group">                
-                <input type="text" class="search-input" placeholder="Buscar vehículo..." id="searchVehiculo">
+                <!-- Filtro por marca -->
+                <input type="text" class="filter-control" placeholder="Marca..." id="filterMarca">
+                
+                <!-- Filtro por tipo de vehiculo -->
+                <select class="filter-control" id="filterTipo">
+                    <option value="">Todos los tipos</option>
+                    @foreach($tipos as $tipo)
+                        <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre_tipo }}</option>
+                    @endforeach
+                </select>
+                
+                <!-- Filtro por lugar -->
+                <select class="filter-control" id="filterLugar">
+                    <option value="">Todos los lugares</option>
+                    @foreach($lugares as $lugar)
+                        <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
+                    @endforeach
+                </select>
+                
+                <!-- Filtro por año -->
+                <select class="filter-control" id="filterAnio">
+                    <option value="">Todos los años</option>
+                    @foreach($anios as $anio)
+                        <option value="{{ $anio }}">{{ $anio }}</option>
+                    @endforeach
+                </select>
+                
+                <!-- Filtro por valoracion -->
+                <select class="filter-control" id="filterValoracion">
+                    <option value="">Todas las valoraciones</option>
+                    @foreach($valoraciones as $val)
+                        <option value="{{ $val }}">{{ $val }}+ estrellas</option>
+                    @endforeach
+                </select>
+                
+                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
             </div>
             <a href="{{ route('admin.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
         </div>
@@ -249,6 +311,7 @@
                         <th>Seguro</th>
                         <th>Lugar</th>
                         <th>Tipo</th>
+                        <th>Valoración</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -262,12 +325,26 @@
 @endsection
 
 <script>
+// Variables globales para los filtros
+let activeFilters = {};
+
 // Función global para cargar vehículos
-document.addEventListener('DOMContentLoaded', function() {
-    loadVehiculos();
-});
 function loadVehiculos() {
-    fetch('{{ route("admin.vehiculos.data") }}', {
+    // Mostrar el indicador de carga
+    document.getElementById('loading-vehiculos').style.display = 'block';
+    document.getElementById('vehiculos-table-container').style.display = 'none';
+    
+    // Construir la URL con los parámetros de filtro
+    let url = new URL('{{ route("admin.vehiculos.data") }}', window.location.origin);
+    
+    // Agregar todos los filtros activos a la URL
+    Object.keys(activeFilters).forEach(key => {
+        if (activeFilters[key]) {
+            url.searchParams.append(key, activeFilters[key]);
+        }
+    });
+    
+    fetch(url, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -291,30 +368,124 @@ function loadVehiculos() {
         tableBody.innerHTML = '';
         
         // Rellenar la tabla con los datos
-        data.vehiculos.forEach(vehiculo => {
+        if (data.vehiculos.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${vehiculo.id_vehiculos}</td>
-                <td>${vehiculo.marca}</td>
-                <td>${vehiculo.modelo}</td>
-                <td>${vehiculo.año}</td>
-                <td>${vehiculo.kilometraje}</td>
-                <td>${vehiculo.seguro_incluido ? 'Sí' : 'No'}</td>
-                <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
-                <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm" onclick="window.location.href='/admin/vehiculos/${vehiculo.id_vehiculos}/edit'">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteVehiculo(${vehiculo.id_vehiculos}, '${vehiculo.marca}')">Eliminar</button>
-                </td>
-            `;
+            row.innerHTML = `<td colspan="6" class="text-center">No se encontraron vehículos con los filtros aplicados</td>`;
             tableBody.appendChild(row);
-        });
+        } else {
+            data.vehiculos.forEach(vehiculo => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vehiculo.id_vehiculos}</td>
+                    <td>${vehiculo.marca}</td>
+                    <td>${vehiculo.modelo}</td>
+                    <td>${vehiculo.año}</td>
+                    <td>${vehiculo.kilometraje}</td>
+                    <td>${vehiculo.seguro_incluido ? 'Sí' : 'No'}</td>
+                    <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
+                    <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
+                    <td>
+                        ${renderStarRating(vehiculo.valoracion_media)}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/admin/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteVehiculo(${vehiculo.id_vehiculos}, '${vehiculo.marca}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
     })
     .catch(error => {
         console.error('Error:', error);
         document.getElementById('loading-vehiculos').innerHTML = `<div class="alert alert-danger">Error al cargar vehículos: ${error.message}</div>`;
     });
 }
+
+// Aplicar los filtros cuando se hace clic en el botón o se presiona Enter
+function applyFilters() {
+    // Recoger los valores de los filtros
+    const tipo = document.getElementById('filterTipo').value;
+    const lugar = document.getElementById('filterLugar').value;
+    const marca = document.getElementById('filterMarca').value.trim();
+    const anio = document.getElementById('filterAnio').value;
+    const valoracion = document.getElementById('filterValoracion').value;
+    
+    // Actualizar el objeto de filtros activos
+    activeFilters = {
+        tipo: tipo,
+        lugar: lugar,
+        marca: marca,
+        anio: anio,
+        valoracion: valoracion
+    };
+    
+    // Cargar vehículos con los filtros aplicados
+    loadVehiculos();
+}
+
+// Limpiar todos los filtros
+function clearFilters() {
+    document.getElementById('filterTipo').value = '';
+    document.getElementById('filterLugar').value = '';
+    document.getElementById('filterMarca').value = '';
+    document.getElementById('filterAnio').value = '';
+    document.getElementById('filterValoracion').value = '';
+    
+    // Reiniciar el objeto de filtros activos
+    activeFilters = {};
+    
+    // Cargar vehículos sin filtros
+    loadVehiculos();
+}
+
+// Función para renderizar las estrellas según la puntuación
+function renderStarRating(rating) {
+    if (rating === null) {
+        return '<span class="text-muted">Sin valoraciones</span>';
+    }
+    
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    
+    let stars = '';
+    
+    // Estrellas llenas
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star"></i>';
+    }
+    
+    // Media estrella si es necesario
+    if (halfStar) {
+        stars += '<i class="fas fa-star-half-alt"></i>';
+    }
+    
+    // Estrellas vacías
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star"></i>';
+    }
+    
+    return `<div class="star-rating">${stars} <span class="rating-value">${rating}</span></div>`;
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar la carga de vehículos
+    loadVehiculos();
+    
+    // Event listener para el botón de limpiar filtros
+    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    
+    // Event listeners para aplicar filtros automáticamente al cambiar
+    document.getElementById('filterMarca').addEventListener('input', applyFilters);
+    document.getElementById('filterTipo').addEventListener('change', applyFilters);
+    document.getElementById('filterLugar').addEventListener('change', applyFilters);
+    document.getElementById('filterAnio').addEventListener('change', applyFilters);
+    document.getElementById('filterValoracion').addEventListener('change', applyFilters);
+});
 
 // Función para eliminar vehículo
 function deleteVehiculo(id, nombreMarca) {
@@ -400,9 +571,4 @@ function deleteVehiculo(id, nombreMarca) {
         }
     });
 }
-
-// Cargar vehículos cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    loadVehiculos();
-});
 </script>

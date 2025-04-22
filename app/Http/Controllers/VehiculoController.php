@@ -37,11 +37,54 @@ class VehiculoController extends Controller
             return $authCheck;
         }
         
-        // Cargar vehículos con su información de lugar y tipo usando join
-        $vehiculos = Vehiculo::select('vehiculos.*', 'lugares.nombre as nombre_lugar', 'tipos.nombre_tipo')
+        // Iniciar la consulta
+        $query = Vehiculo::select('vehiculos.*', 'lugares.nombre as nombre_lugar', 'tipos.nombre_tipo')
                     ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-                    ->leftJoin('tipos', 'vehiculos.id_tipo', '=', 'tipos.id_tipo')
-                    ->get();
+                    ->leftJoin('tipos', 'vehiculos.id_tipo', '=', 'tipos.id_tipo');
+        
+        // Aplicar filtros si existen
+        if ($request->has('tipo') && !empty($request->tipo)) {
+            $query->where('vehiculos.id_tipo', $request->tipo);
+        }
+        
+        if ($request->has('lugar') && !empty($request->lugar)) {
+            $query->where('vehiculos.id_lugar', $request->lugar);
+        }
+        
+        if ($request->has('marca') && !empty($request->marca)) {
+            $query->where('vehiculos.marca', 'like', '%' . $request->marca . '%');
+        }
+        
+        if ($request->has('anio') && !empty($request->anio)) {
+            $query->where('vehiculos.año', $request->anio);
+        }
+        
+        if ($request->has('valoracion') && !empty($request->valoracion)) {
+            // Aquí asumimos que hay una relación con valoraciones y queremos filtrar por puntuación media
+            $query->join('valoraciones', 'vehiculos.id_vehiculos', '=', 'valoraciones.id_vehiculos')
+                  ->where('valoraciones.puntuacion', '>=', $request->valoracion)
+                  ->groupBy(
+                      'vehiculos.id_vehiculos', 'vehiculos.marca', 'vehiculos.modelo', 
+                      'vehiculos.año', 'vehiculos.kilometraje', 'vehiculos.seguro_incluido', 
+                      'vehiculos.id_lugar', 'vehiculos.id_tipo', 'vehiculos.precio_dia', 
+                      'vehiculos.disponibilidad', 'lugares.nombre', 'tipos.nombre_tipo'
+                  );
+        }
+        
+        // Ejecutar la consulta
+        $vehiculos = $query->get();
+        
+        // Calcular la valoración media para cada vehículo
+        $vehiculos->each(function ($vehiculo) {
+            try {
+                // Crear una instancia del modelo para acceder al método getValoracionMedia
+                $vehiculoModel = Vehiculo::find($vehiculo->id_vehiculos);
+                $vehiculo->valoracion_media = $vehiculoModel ? $vehiculoModel->getValoracionMedia() : null;
+            } catch (\Exception $e) {
+                // Si hay algún error al calcular la valoración, establecerla como null
+                $vehiculo->valoracion_media = null;
+            }
+        });
         
         return response()->json([
             'vehiculos' => $vehiculos
@@ -55,13 +98,17 @@ class VehiculoController extends Controller
             return $authCheck;
         }
         
-        // Cargar vehículos con su información de lugar y tipo usando join
-        $vehiculos = Vehiculo::select('vehiculos.*', 'lugares.nombre as nombre_lugar', 'tipos.nombre_tipo')
-                    ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-                    ->leftJoin('tipos', 'vehiculos.id_tipo', '=', 'tipos.id_tipo')
-                    ->get();
-
-        return view('admin.vehiculos', compact('vehiculos'));
+        // Obtener datos para los filtros
+        $tipos = Tipo::all();
+        $lugares = Lugar::all();
+        
+        // Obtener años únicos de vehículos para el filtro
+        $anios = Vehiculo::select('año')->distinct()->orderBy('año', 'desc')->pluck('año');
+        
+        // Valoraciones posibles (1-5) para el filtro
+        $valoraciones = [1, 2, 3, 4, 5];
+        
+        return view('admin.vehiculos', compact('tipos', 'lugares', 'anios', 'valoraciones'));
     }
 
     public function create(Request $request)
