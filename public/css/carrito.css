@@ -1,0 +1,144 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+}
+
+.contenedor-principal {
+  display: flex;
+  gap: 30px;
+  padding: 30px;
+}
+
+.vehiculos-lista {
+  flex: 3;
+}
+
+.resumen-carrito {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  height: fit-content;
+}
+
+.vehiculo-item {
+  background: white;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  gap: 20px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vehiculo-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.vehiculo-item img {
+  width: 150px;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.detalle {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.detalle h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.detalle p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.detalle i {
+  margin-right: 8px;
+  color: #6f42c1;
+}
+
+.resumen-titulo {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.resumen-precio {
+  font-size: 22px;
+  color: #6f42c1;
+  font-weight: bold;
+}
+
+.boton {
+  display: block;
+  margin-top: 20px;
+  padding: 12px;
+  background: linear-gradient(to right, #6f42c1, #9b59b6);
+  color: white;
+  text-align: center;
+  border-radius: 15px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.boton:hover {
+  background: linear-gradient(to right, #5a2b97, #8e44ad);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.subtexto {
+  font-size: 14px;
+  color: #444;
+}
+
+hr {
+  margin: 12px 0;
+  border: 0;
+  border-top: 1px solid #ccc;
+}
+
+.btn-volver {
+  display: inline-block;
+  background: linear-gradient(to right, #6f42c1, #e100ff);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.btn-volver:hover {
+  background: linear-gradient(to right, #5a2b97, #c400e3);
+  transform: scale(1.05);
+  color: white;
+}
+
+.btn-volver i {
+  margin-right: 6px;
+}
+
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background-color: #c82333;
+}

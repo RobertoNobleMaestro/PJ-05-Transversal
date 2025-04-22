@@ -1,56 +1,39 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Carrito de Vehículos</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta charset="UTF-8">
+  <title>Carrito de Vehículos Reservados</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ asset('css/carrito.css') }}">
 </head>
 <body>
-    <h1>Carrito de Vehículos Reservados</h1>
-    <div id="carrito">Cargando...</div>
+@include('layouts.navbar')
+  <div style="padding-left: 30px; padding-top: 30px; padding-bottom: 30px;">
+    <a href="{{ asset('home') }}" class="btn-volver">
+      <i class="fas fa-arrow-left me-2"></i> Volver
+    </a>
+  </div>
+  <h1 style="padding-left: 30px;">Carrito de Vehículos Reservados</h1>
+  <div class="contenedor-principal">
+    
+    <!-- Lista de vehículos -->
+    <div class="vehiculos-lista" id="listaVehiculos">Cargando vehículos...</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            cargarCarrito();
-        });
+    <!-- Resumen de reserva -->
+    <div class="resumen-carrito" id="resumenReserva">
+      <div class="resumen-titulo">Tu Reserva <i class="fas fa-lock"></i></div>
+      <hr>
+      <p class="subtexto">Precio total: </p>
+      <p class="resumen-precio" id="precioDia">EUR€ —</p>
+      <p class="subtexto" id="planIncluido">Incluido en el plan: Básico</p>
+      <hr>
+      {{-- <a href="/finalizar-compra" class="boton">Continuar</a> --}}
+      <a href="{{ route('pago.checkout') }}" class="boton">Continuar</a>
+    </div>
 
-        function cargarCarrito() {
-            fetch('/ver-carrito', {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al obtener los datos del carrito');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const contenedor = document.getElementById('carrito');
-                contenedor.innerHTML = '';
-
-                if (data.length === 0) {
-                    contenedor.innerHTML = '<p>No tienes vehículos reservados.</p>';
-                    return;
-                }
-                data.forEach(vehiculo => {
-                    const div = document.createElement('div');
-                    div.innerHTML = `
-                        <h3>${vehiculo.marca} ${vehiculo.modelo}</h3>
-                        <p>Año: ${vehiculo.año}</p>
-                        <p>Precio por día: ${vehiculo.precio_dia}€</p>
-                        ${vehiculo.imagenes?.[0] ? `<img src="/storage/${vehiculo.imagenes[0].ruta}" width="200">` : ''}
-                        <hr>
-                    `;
-                    contenedor.appendChild(div);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('carrito').innerHTML = '<p style="color:red;">Error al cargar el carrito.</p>';
-            });
-        }
-    </script>
+  </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('js/carrito.js') }}"></script>
 </html>

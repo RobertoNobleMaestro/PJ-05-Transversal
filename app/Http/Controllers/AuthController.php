@@ -121,7 +121,7 @@ class AuthController extends Controller
                 'telf' => 'required|string|max:20',
                 'fecha_nacimiento' => 'required|date',
                 'direccion' => 'required|string|max:255',
-                'permiso' => 'required|string',
+                'licencia_conducir' => 'required|string',
                 'password' => 'required|min:6|confirmed',
                 'imagen' => 'nullable|image|max:2048',
             ], [
@@ -134,11 +134,11 @@ class AuthController extends Controller
             $user = new User();
             $user->nombre = $request->nombre;
             $user->email = $request->email;
-            $user->DNI = $request->dni;
+            $user->DNI = $request->DNI;
             $user->telefono = $request->telf;
             $user->fecha_nacimiento = $request->fecha_nacimiento;
             $user->direccion = $request->direccion;
-            $user->licencia_conducir = $request->permiso;
+            $user->licencia_conducir = $request->licencia_conducir;
             $user->id_roles = 2;
             $user->password = Hash::make($request->password);
 

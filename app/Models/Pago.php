@@ -13,16 +13,18 @@ class Pago extends Model
     protected $primaryKey = 'id_pago';
 
     protected $fillable = [
+        'estado_pago',
         'fecha_pago',
-        'monto',
-        'estado',
+        'referencia_externa',
+        'total_precio',
+        'moneda',
         'id_usuario',
         'id_reservas'
     ];
 
     protected $casts = [
         'fecha_pago' => 'datetime',
-        'monto' => 'decimal:2'
+        'total_precio' => 'decimal:2'
     ];
 
     public function usuario()

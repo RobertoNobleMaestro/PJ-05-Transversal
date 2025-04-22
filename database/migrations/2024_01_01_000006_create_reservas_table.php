@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -14,6 +13,7 @@ return new class extends Migration {
             $table->string('estado');
             $table->unsignedBigInteger('id_lugar');
             $table->unsignedBigInteger('id_usuario');
+            $table->string('referencia_pago')->nullable();
             $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
             $table->foreign('id_usuario')->references('id_usuario')->on('users');
             $table->timestamps();

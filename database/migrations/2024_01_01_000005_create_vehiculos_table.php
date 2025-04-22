@@ -4,8 +4,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void {
+class CreateVehiculosTable extends Migration
+{
+    public function up()
+    {
         Schema::create('vehiculos', function (Blueprint $table) {
             $table->id('id_vehiculos');
             $table->string('marca');
@@ -13,6 +15,7 @@ return new class extends Migration {
             $table->integer('kilometraje');
             $table->boolean('seguro_incluido');
             $table->year('año');
+            $table->decimal('precio_dia', 8, 2);  // Cambiado de string a decimal para manejar precios
             $table->unsignedBigInteger('id_lugar');
             $table->unsignedBigInteger('id_tipo');
             $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
@@ -21,7 +24,8 @@ return new class extends Migration {
         });
     }
 
-    public function down(): void {
+    public function down()
+    {
         Schema::dropIfExists('vehiculos');
     }
-};
+}

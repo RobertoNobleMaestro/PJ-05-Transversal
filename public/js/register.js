@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     const registerButton = document.getElementById('registerButton');
     const form = document.getElementById('registerForm');
-    const loginUrl = "{{ route('login') }}";
+    const loginUrl = "/login";
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();

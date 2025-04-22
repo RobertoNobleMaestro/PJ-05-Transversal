@@ -10,7 +10,6 @@ return new class extends Migration {
         Schema::create('vehiculos_reservas', function (Blueprint $table) {
             $table->id('id_vehiculos_reservas');
             $table->date('fecha_ini');
-            $table->decimal('precio_unitario', 10, 2);
             $table->date('fecha_final');
             $table->unsignedBigInteger('id_reservas');
             $table->unsignedBigInteger('id_vehiculos');

@@ -8,11 +8,17 @@
     use App\Http\Controllers\UserController;
     use App\Http\Controllers\VehiculoController;
     use App\Http\Controllers\CarritoController;
+    use App\Http\Controllers\ReservaController;
+    use App\Http\Controllers\PagoController;
+    use App\Http\Controllers\FacturaController;
 
     // Rutas publicas
     Route::redirect('/', '/home');
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
+    Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
+    Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
+    Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
     // Rutas Auth publicas
     Route::controller(AuthController::class)->group(function () {
@@ -32,7 +38,7 @@
         Route::post('/perfil/{id}/actualizar', [PerfilController::class, 'actualizar'])->name('perfil.actualizar');
         Route::post('/perfil/upload-foto', [PerfilController::class, 'uploadFoto'])->name('perfil.upload-foto');
 
-        // Actualización imagen de perfil /home
+        // ActualizaciÃ³n imagen de perfil /home
         Route::get('/perfil-imagen', function () {
             $user = Auth::user();
             return response()->json([
@@ -51,3 +57,27 @@
 
     // Vehiculos
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
+    Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
+    Route::post('/reservas', [ReservaController::class, 'crearReserva']);
+    // API para valoraciones
+    Route::get('/api/vehiculos/{id}/valoraciones', function($id) {
+        $vehiculo = App\Models\Vehiculo::findOrFail($id);
+        $valoraciones = $vehiculo->valoraciones()->with('usuario')->get();
+        
+        return response()->json($valoraciones);
+    });
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+
+    // Rutas de pago (dentro del middleware 'auth')
+    Route::get('/finalizar-compra', [PagoController::class, 'checkout'])->name('pago.checkout');
+    Route::get('/pago/exito/{id_reserva}', [PagoController::class, 'exito'])->name('pago.exito');
+    Route::get('/pago/cancelado', [PagoController::class, 'cancelado'])->name('pago.cancelado');
+
+    // Facturas
+    Route::get('/facturas/descargar/{id_reserva}', [FacturaController::class, 'descargarFactura'])->name('facturas.descargar')->middleware('auth');
+
+    // Webhook de Stripe (ruta pública)
+    Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
+
+    // Eliminar reserva
+    Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');

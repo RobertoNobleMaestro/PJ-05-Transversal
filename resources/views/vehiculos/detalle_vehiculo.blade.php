@@ -5,52 +5,8 @@
     <title>{{ $vehiculo->marca }} {{ $vehiculo->modelo }} | Carflow</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
-
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f9f9f9;
-        }
-        .breadcrumb-container {
-            background-color: #e9ecef;
-            padding: 10px 0;
-        }
-        .vehiculo-detail-section {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .highlight-box {
-            background-color: #fffcdb;
-            border-left: 6px solid #ffcc00;
-            padding: 15px;
-            margin-top: 20px;
-            font-weight: 500;
-        }
-        .valoracion i {
-            color: gold;
-        }
-        ul.caracteristicas {
-            list-style: none;
-            padding: 0;
-        }
-        ul.caracteristicas li {
-            padding: 5px 0;
-        }
-        ul.caracteristicas li i {
-            color: #007bff;
-            margin-right: 6px;
-        }
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            background-color: #222;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/Vehiculos/styles.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
 
@@ -58,68 +14,250 @@
 
 <div class="breadcrumb-container">
     <div class="container">
-        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</small>
+        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo->nombre }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
     </div>
 </div>
 
 <div class="container vehiculo-detail-section">
     <div class="row">
-        <div class="col-md-6 text-center">
-            <img src="{{ asset('img/' . $vehiculo->imagen) }}" class="img-fluid" alt="{{ $vehiculo->marca }}">
+        <div class="col-md-6">
+            <div class="imagen-box text-center">
+                <img src="{{ asset('img/' . $vehiculo->imagen) }}" class="img-fluid mb-3" alt="">
+                <img src="{{ asset('img/mercedes.png') }}" class="img-fluid" alt="">
+            </div>
         </div>
         <div class="col-md-6">
             <p class="text-muted">
                 Publicado: {{ $vehiculo->created_at->format('d/m/Y H:i') }} | 
                 Modificado: {{ $vehiculo->updated_at->format('d/m/Y H:i') }}
             </p>
-            <h2>{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</h2>
+            <h2 class="d-flex justify-content-between">
+                {{ $vehiculo->marca }} {{ $vehiculo->modelo }}
+                <span class="h4 text-success">€{{ number_format( $vehiculo->precio_dia, 2, ',', '.') }}</span>
+            </h2>
             <p>{{ $vehiculo->descripcion }}</p>
 
-            <!-- Características -->
-            <h4 class="mt-4">Características</h4>
-            <ul class="caracteristicas">
-                <li><i class="fas fa-cogs"></i> Transmisión: {{ $vehiculo->caracteristicas->transmision }}</li>
-                <li><i class="fas fa-car"></i> Tipo: {{ $vehiculo->tipo->nombre }}</li>
-                <li><i class="fas fa-tachometer-alt"></i> Kilometraje: {{ number_format($vehiculo->kilometraje, 0, ',', '.') }} km</li>
-                <li><i class="fas fa-map-marker-alt"></i> Ubicación: {{ $vehiculo->lugar->nombre }}</li>
-                <li><i class="fas fa-snowflake"></i> Aire acondicionado: {{ $vehiculo->caracteristicas->aire_acondicionado ? 'Sí' : 'No' }}</li>
-                <li><i class="fas fa-sun"></i> Techo solar: {{ $vehiculo->caracteristicas->techo ? 'Sí' : 'No' }}</li>
-                <li><i class="fas fa-suitcase"></i> Capacidad del maletero: {{ $vehiculo->caracteristicas->capacidad_maletero }} L</li>
-                <li><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</li>
-            </ul>
+            <!-- Características en 4 filas de 2 columnas -->
+            <div class="caracteristicas-box">
+                <div class="row caracteristicas">
+                    <div class="col-md-6"><i class="fas fa-cogs"></i> Transmisión: {{ $vehiculo->caracteristicas->transmision }}</div>
+                    <div class="col-md-6"><i class="fas fa-car"></i> Tipo: {{ $vehiculo->tipo->nombre }}</div>
 
-            <div class="highlight-box">
-                <i class="fas fa-shopping-cart"></i> Guarda tus búsquedas favoritas en el carrito!
+                    <div class="col-md-6"><i class="fas fa-tachometer-alt"></i> Kilometraje: {{ number_format($vehiculo->kilometraje, 0, ',', '.') }} km</div>
+                    <div class="col-md-6"><i class="fas fa-map-marker-alt"></i> Ubicación: {{ $vehiculo->lugar->nombre }}</div>
+
+                    <div class="col-md-6"><i class="fas fa-snowflake"></i> Aire acondicionado: {{ $vehiculo->caracteristicas->aire_acondicionado ? 'Sí' : 'No' }}</div>
+                    <div class="col-md-6"><i class="fas fa-sun"></i> Techo solar: {{ $vehiculo->caracteristicas->techo ? 'Sí' : 'No' }}</div>
+
+                    <div class="col-md-6"><i class="fas fa-suitcase"></i> Maletero: {{ $vehiculo->caracteristicas->capacidad_maletero }} L</div>
+                    <div class="col-md-6"><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</div>
+                </div>
             </div>
+            
+            <div class="highlight-box">
+                <button id="btnAñadirCarrito" 
+                        class="btn w-100 d-flex align-items-center"
+                        data-vehiculo-id="{{ $vehiculo->id_vehiculos }}">
+                    <i class="fas fa-shopping-cart fa-bounce mr-3"></i> 
+                    <div>
+                        <strong>¡Añade este vehículo a tu carrito!</strong><br>
+                    </div>
+                </button>
+            </div>
+
         </div>
     </div>
 
     <hr>
+    <h4 class="mt-5">CALENDARIO DE RESERVAS</h4>
+<div id="contador-dias"></div>
+<div id="calendario-reservas" class="mb-5"></div>
 
-    <!-- Valoraciones -->
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendario-reservas');
+    const contadorDias = document.getElementById('contador-dias');
+    const precioDia = {{ $vehiculo->precio_dia }};
+    let reservas = [];
+
+    let fechaInicioManual = null;
+    let fechaFinManual = null;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        height: 'auto',
+        contentHeight: 'auto',
+        selectable: false,
+
+        events: {
+            url: `/vehiculos/{{ $vehiculo->id_vehiculos }}/reservas`,
+            failure: () => Swal.fire('Error', 'No se pudieron cargar las reservas.', 'error'),
+            success: (data) => {
+                reservas = data;
+            }
+        },
+
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+
+        dateClick: function (info) {
+            const clickedDateStr = info.dateStr;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const clickedDate = new Date(clickedDateStr);
+            clickedDate.setHours(0, 0, 0, 0);
+
+            if (clickedDate < today) return;
+
+            // Primer clic: seleccionar fecha inicio
+            if (!fechaInicioManual) {
+                fechaInicioManual = clickedDateStr;
+                fechaFinManual = null;
+                limpiarSeleccionVisual();
+                pintarDia(clickedDateStr);
+                contadorDias.textContent = 'Selecciona la fecha de fin';
+                contadorDias.classList.add('visible');
+                return;
+            }
+
+            // Segundo clic: seleccionar fecha fin
+            fechaFinManual = clickedDateStr;
+
+            // Reordenar si clicó al revés
+            if (new Date(fechaFinManual) < new Date(fechaInicioManual)) {
+                [fechaInicioManual, fechaFinManual] = [fechaFinManual, fechaInicioManual];
+            }
+
+            const rangoFechasStr = obtenerRangoFechasStr(fechaInicioManual, fechaFinManual);
+
+            // Validar fechas bloqueadas por reservas existentes
+            for (let dia of rangoFechasStr) {
+                for (let reserva of reservas) {
+                    const resInicio = new Date(reserva.start);
+                    const resFin = new Date(reserva.end);
+                    const diaFecha = new Date(dia);
+                    if (diaFecha >= resInicio && diaFecha < resFin) {
+                        Swal.fire('Rango no disponible', 'Algunas fechas ya están reservadas.', 'warning');
+                        limpiarSeleccionVisual();
+                        fechaInicioManual = null;
+                        fechaFinManual = null;
+                        contadorDias.classList.remove('visible');
+                        return;
+                    }
+                }
+            }
+
+            // Pintar visualmente el rango
+            limpiarSeleccionVisual();
+            rangoFechasStr.forEach(pintarDia);
+
+            const totalDias = rangoFechasStr.length;
+            const precioTotal = (totalDias * precioDia).toFixed(2);
+            contadorDias.textContent = `Has seleccionado ${totalDias} día${totalDias > 1 ? 's' : ''}`;
+            contadorDias.classList.add('visible');
+
+            // Rellenar modal
+            document.getElementById('modal-fechas').innerText = `${fechaInicioManual} - ${fechaFinManual}`;
+            document.getElementById('modal-dias').innerText = `${totalDias} día${totalDias > 1 ? 's' : ''}`;
+            document.getElementById('modal-precio-dia').innerText = precioDia.toFixed(2);
+            document.getElementById('modal-total').innerText = precioTotal;
+
+            // Abrir modal
+            $('#reservaModal').modal('show');
+
+            // Evento click botón confirmar
+            document.getElementById('btnConfirmarReserva').onclick = function () {
+                fetch('/reservas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        id_vehiculos: {{ $vehiculo->id_vehiculos }},
+                        fecha_ini: fechaInicioManual,
+                        fecha_final: fechaFinManual
+                    })
+                })
+                .then(res => res.json())
+                .then(() => {
+                    $('#reservaModal').modal('hide');
+                    Swal.fire('¡Reservado!', 'La reserva fue creada correctamente.', 'success');
+                    calendar.refetchEvents();
+                    limpiarSeleccionVisual();
+                    fechaInicioManual = null;
+                    fechaFinManual = null;
+                    contadorDias.classList.remove('visible');
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'No se pudo realizar la reserva.', 'error');
+                });
+            };
+        }
+    });
+
+    calendar.render();
+
+    $('#reservaModal').on('hidden.bs.modal', function () {
+    // Siempre limpiar visual si se cierra el modal
+    limpiarSeleccionVisual();
+    fechaInicioManual = null;
+    fechaFinManual = null;
+    contadorDias.classList.remove('visible');
+});
+
+
+    // Funciones auxiliares
+    function limpiarSeleccionVisual() {
+        document.querySelectorAll('.fc-daygrid-day').forEach(el => {
+            el.classList.remove('fc-day-selected');
+        });
+    }
+
+    function pintarDia(fechaStr) {
+        const celda = document.querySelector(`[data-date="${fechaStr}"]`);
+        if (celda) {
+            celda.classList.add('fc-day-selected');
+        }
+    }
+
+    function obtenerRangoFechasStr(fechaInicioStr, fechaFinStr) {
+        const rango = [];
+        const inicio = new Date(fechaInicioStr);
+        const fin = new Date(fechaFinStr);
+        const actual = new Date(inicio.getTime());
+
+        while (actual <= fin) {
+            const fechaFormateada = actual.toISOString().split('T')[0];
+            rango.push(fechaFormateada);
+            actual.setDate(actual.getDate() + 1);
+        }
+
+        return rango;
+    }
+});
+</script>
+
+
+
+    <!-- Valoraciones con Fetch API -->
     <h4 class="mt-5">VALORACIONES</h4>
-
-    @if ($vehiculo->valoraciones->count())
-        @foreach ($vehiculo->valoraciones as $valoracion)
-            <div class="valoracion mb-4">
-                <p>
-                    <strong><i class="fas fa-user-circle"></i> {{ $valoracion->usuario->name }}</strong>
-                    {{-- <small class="text-muted">{{ $valoracion->created_at->format('d M Y') }}</small> --}}
-                </p>
-                {{-- <p>
-                    @for ($i = 0; $i < $valoracion->calificacion; $i++)
-                        <i class="fas fa-star"></i>
-                    @endfor
-                    @for ($i = $valoracion->calificacion; $i < 5; $i++)
-                        <i class="far fa-star"></i>
-                    @endfor
-                </p> --}}
-                <p>{{ $valoracion->comentario }}</p>
+    <div id="valoraciones-container">
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Cargando valoraciones...</span>
             </div>
-        @endforeach
-    @else
-        <p class="text-muted">Este vehículo aún no tiene valoraciones.</p>
-    @endif
+            <p>Cargando valoraciones...</p>
+        </div>
+    </div>
 </div>
 
 <footer>
@@ -127,6 +265,41 @@
         <p class="m-0">Carflow &copy; 2025</p>
     </div>
 </footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/vehiculos.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        iniciarDetalleVehiculo({{ $vehiculo->id_vehiculos }});
+    });
+</script>
+<!-- Modal personalizado Bootstrap -->
+<div class="modal fade" id="reservaModal" tabindex="-1" role="dialog" aria-labelledby="reservaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow" style="border-radius: 16px; background-color: #ffffff;">
+      <div class="modal-header" style="background-color: #6f42c1; color: white; border-top-left-radius: 16px; border-top-right-radius: 16px;">
+        <h5 class="modal-title" id="reservaModalLabel">Confirmar reserva</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center" style="color: #000;">
+        <p><i class="fas fa-calendar-alt" style="color: #6f42c1; margin-right: 0.5rem;"></i> <strong>Fechas:</strong><br>
+        <span id="modal-fechas"></span></p>
+        <p><i class="fas fa-clock" style="color: #6f42c1; margin-right: 0.5rem;"></i> <strong>Días seleccionados:</strong> <span id="modal-dias"></span></p>
+        <p><i class="fas fa-euro-sign" style="color: #6f42c1; margin-right: 0.5rem;"></i> <strong>Precio por día:</strong> €<span id="modal-precio-dia"></span></p>
+        <p class="h5 mt-3 text-dark"><strong>Total estimado:</strong> €<span id="modal-total"></span></p>
+      </div>
+      <div class="modal-footer justify-content-between" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmarReserva" style="background-color: #6f42c1; border-color: #6f42c1;">Reservar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

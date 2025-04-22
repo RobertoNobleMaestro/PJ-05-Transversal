@@ -311,37 +311,51 @@ a:hover {
 
 .container-abajo {
     height: calc(100% - 120px);
-    padding: 20px; /* Nuevo */
-    justify-content: center; /* Añadido para centrar horizontalmente */
-    background-color: #ffffff; 
+    padding: 20px;
+    justify-content: center;
+    background-color: #ffffff;
     border-radius: 5px;
+    overflow-y: auto; 
+    max-height: 480px; 
 }
 
 /* Estilos específicos para el formulario de registro */
-/* Centrar el form en el medio */
 .container-abajo form {
-    max-width: 900px; /* Aumentamos para que sea más grande */
-    margin: 0 auto;   /* Centra horizontalmente */
+    max-width: 100vw;
     height: auto;
     justify-content: center;
     align-items: center;
-    
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
 }
-
 
 .form-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 25px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 30px;
     width: 100%;
     margin-bottom: 25px;
-    padding: 0 20px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+    .form-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 .form-row > div {
     width: 100%;
-    min-width: 200px;
 }
+
 
 .container-abajo label {
     display: block;
@@ -418,12 +432,11 @@ a:hover {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: auto; /* Antes: 100% */
+    width: auto;
     margin-top: 10px;
     box-shadow: 0 4px 6px rgba(159, 23, 189, 0.2);
     margin: 0 auto;
 }
-
 
 .btn-completar-registro:hover {
     background-color: #8a14a3;

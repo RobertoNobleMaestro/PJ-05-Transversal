@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
+  <script src="{{ asset('js/home.js') }}"></script>
   <title>Carflow - Alquiler de vehículos</title>
 </head>
 <body>
@@ -18,7 +19,7 @@
   <!-- Breadcrumb / Ruta de navegación -->
   <div class="breadcrumb-container">
     <div class="container">
-      <small>Inicio &gt; Alquiler coches &gt; </small>
+      <small>Inicio &gt; Alquiler coches</small>
     </div>
   </div>
 
@@ -27,38 +28,6 @@
     <div class="row">
       <div class="col-md-6">
         <h1>Alquiler de vehículos de todo tipo<br>y con precios asequibles</h1>
-        <!-- Formulario de filtros (ejemplo) -->
-        <form class="filter-form">
-          <div class="form-group">
-            <label>Tipo de vehículo:</label><br>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              @foreach ($tipos as $index => $tipo)
-                <label class="btn btn-outline-primary {{ $index === 0 ? 'active' : '' }}">
-                  <input 
-                    type="radio" 
-                    name="tipoVehiculo" 
-                    value="{{ $tipo->nombre }}" 
-                    autocomplete="off" 
-                    {{ $index === 0 ? 'checked' : '' }}>
-                  {{ $tipo->nombre }}
-                </label>
-              @endforeach
-            </div>
-          </div>               
-
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="ubicacion">Ubicación:</label>
-              <input type="text" class="form-control" id="ubicacion" value="Madrid, España">
-            </div>
-            <div class="form-group col-md-6">
-              <label for="fecha">Fecha:</label>
-              <input type="date" class="form-control" id="fecha">
-            </div>
-          </div>
-          
-          <button type="submit" class="btn btn-primary">Buscar</button>
-        </form>
       </div>
       <div class="col-md-6 text-center">
         <!-- Ejemplo de imágenes a la derecha -->
@@ -70,27 +39,36 @@
   <!-- Sección de estadísticas -->
   <div class="container-fluid stats-section">
     <div class="row no-gutters text-center">
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
-          <i class="fas fa-users"></i>
+          <i class="fas fa-users" style="color: #9F17BD"></i>
           <div class="stat-content">
             <h3>{{ $usuariosClientes }}</h3>
             <p>Usuarios registrados</p>
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
-          <i class="fas fa-car"></i>
+          <i class="fas fa-car" style="color: #9F17BD"></i>
           <div class="stat-content">
             <h3>{{ number_format($vehiculos, 0, ',', '.') }}</h3>
             <p>Vehículos registrados</p>
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-3">
         <div class="stat-box">
-          <i class="fas fa-star"></i>
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
+          <div class="stat-content">
+            <h3>{{ $valoracionVehiculos }}</h3>
+            <p>Valoración de los vehiculos</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-3">
+        <div class="stat-box">
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
           <div class="stat-content">
             <h3>{{ $valoracionMedia }}</h3>
             <p>Valoración de la web</p>
@@ -100,171 +78,91 @@
     </div>
   </div>    
 
-  <!-- Sección de Top 10 vehículos -->
   <div class="container vehicles-section">
-    <h2>Top 10 Vehículos más solicitados</h2>
+    <h2>Alquila vehículos</h2>
     <div class="row">
-      <!-- Card 1 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+1" class="card-img-top" alt="Coche 1">
-          <div class="card-body">
-            <h5 class="card-title">Coche 1</h5>
-            <p class="card-text">80.000 km | 20.000 €</p>
-            <div class="text-end">
-              <a href="{{ route('vehiculo.detalle', ['id' => 1]) }}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-shopping-cart"></i> Añadir
-              </a>              
+      <!-- Filtros laterales -->
+      <div class="col-md-3">
+        <div id="filtros-form" class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 90px;">
+          <h4 class="mb-3">Filtrar</h4>
+
+          <!-- Filtro por tipo de vehículo -->
+          <div class="form-group">
+            <label><strong>Tipo de vehículo:</strong></label>
+            <div id="tipoVehiculoFiltro" class="form-check">
+              <!-- Checkboxes insertados aquí -->
             </div>
+          </div>          
+          
+          <div class="form-group col-m">
+            <label><strong>Ciudad:</strong></label>
+            <div id="lugarFiltro" class="form-check">
+              <!-- Se insertarán dinámicamente -->
+            </div>
+          </div>          
+  
+          <div class="form-group">
+            <label for="marcaFiltro"><strong>Marca:</strong></label>
+            <input type="text" id="marcaFiltro" class="form-control" placeholder="Ej. Toyota">
           </div>
-        </div>        
-      </div>
-      <!-- Card 2 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+2" class="card-img-top" alt="Coche 2">
-          <div class="card-body">
-            <h5 class="card-title">Coche 2</h5>
-            <p class="card-text">40.000 km | 32.000 €</p>
+  
+          <div class="form-group">
+            <label><strong>Año:</strong></label>
+            <div id="anioFiltroContainer" class="form-check">
+              <!-- Se insertarán dinámicamente -->
+            </div>
+          </div>          
+
+          <div class="form-group">
+            <label for="precioMin"><strong>Precio mín (€):</strong></label>
+            <input type="number" id="precioMin" class="form-control" placeholder="Mín">
           </div>
+  
+          <div class="form-group">
+            <label for="precioMax"><strong>Precio máx (€):</strong></label>
+            <input type="number" id="precioMax" class="form-control" placeholder="Máx">
+          </div>
+
+          <div class="form-group">
+            <label><strong>Valoración:</strong></label>
+            <div id="valoracionFiltro" class="form-check">
+              <label><input type="checkbox" name="valoracion" value="5"> 5 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="4"> 4 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="3"> 3 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="2"> 2 ⭐</label><br>
+              <label><input type="checkbox" name="valoracion" value="1"> 1 ⭐</label><br>
+            </div>
+          </div>          
+  
+          <div class="form-group">
+            <label for="perPageInput"><strong>Vehículos/página:</strong></label>
+            <input id="perPageInput" type="number" class="form-control" value="16" min="1">
+          </div>
+
+          <div class="form-group text-center mt-3">
+            <button id="resetFiltrosBtn" class="btn btn-outline-danger btn-block">
+              <i class="fas fa-undo"></i> Limpiar filtros
+            </button>
+          </div>          
         </div>
       </div>
-      <!-- Card 3 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+3" class="card-img-top" alt="Coche 3">
-          <div class="card-body">
-            <h5 class="card-title">Coche 3</h5>
-            <p class="card-text">10.000 km | 25.000 €</p>
-          </div>
+  
+      <!-- Vehículos -->
+      <div class="col-md-9">
+        <div class="row" id="vehiculos-container">
+          <!-- tarjetas dinámicas -->
         </div>
-      </div>
-      <!-- Card 4 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+4" class="card-img-top" alt="Coche 4">
-          <div class="card-body">
-            <h5 class="card-title">Coche 4</h5>
-            <p class="card-text">80.000 km | 18.000 €</p>
-          </div>
+        <!-- Paginación -->
+        <div class="d-flex justify-content-center">
+          <div class="btn-group" id="pagination-controls"></div>
         </div>
-      </div>
-      <!-- Card 5 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+5" class="card-img-top" alt="Coche 5">
-          <div class="card-body">
-            <h5 class="card-title">Coche 5</h5>
-            <p class="card-text">90.000 km | 24.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 6 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+6" class="card-img-top" alt="Coche 6">
-          <div class="card-body">
-            <h5 class="card-title">Coche 6</h5>
-            <p class="card-text">40.000 km | 20.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 7 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+7" class="card-img-top" alt="Coche 7">
-          <div class="card-body">
-            <h5 class="card-title">Coche 7</h5>
-            <p class="card-text">70.000 km | 28.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 8 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+8" class="card-img-top" alt="Coche 8">
-          <div class="card-body">
-            <h5 class="card-title">Coche 8</h5>
-            <p class="card-text">50.000 km | 22.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 9 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+9" class="card-img-top" alt="Coche 9">
-          <div class="card-body">
-            <h5 class="card-title">Coche 9</h5>
-            <p class="card-text">30.000 km | 26.000 €</p>
-          </div>
-        </div>
-      </div>
-      <!-- Card 10 -->
-      <div class="col-sm-6 col-md-3 mb-4">
-        <div class="card">
-          <img src="https://via.placeholder.com/300x180?text=Coche+10" class="card-img-top" alt="Coche 10">
-          <div class="card-body">
-            <h5 class="card-title">Coche 10</h5>
-            <p class="card-text">20.000 km | 19.000 €</p>
-          </div>
-        </div>
+        <div class="text-center text-muted small mt-2" id="pagination-info"></div>
       </div>
     </div>
   </div>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container text-center">
-      <p class="m-0">Carflow &copy; 2025</p>
-    </div>
-  </footer>
 
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script>
-  function refrescarImagenPerfilNavbar() {
-    fetch("/perfil-imagen")
-      .then(response => response.json())
-      .then(data => {
-        const img = document.getElementById('navbar-profile-img');
-        if (img && data.foto) {
-          img.src = data.foto + '?' + new Date().getTime(); // evita caché
-        }
-      })
-      .catch(error => console.error('Error al actualizar la imagen:', error));
-  }
-
-  // Ejemplo: actualiza cada 30 segundos
-  setInterval(refrescarImagenPerfilNavbar, 30000);
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    fetch('/home-stats')
-      .then(res => res.json())
-      .then(data => {
-        // Actualizar estadísticas
-        document.querySelector('.stat-box .fa-users + .stat-content h3').textContent = data.usuariosClientes;
-        document.querySelector('.fa-car + .stat-content h3').textContent = new Intl.NumberFormat().format(data.vehiculos);
-        document.querySelector('.fa-star + .stat-content h3').textContent = data.valoracionMedia;
-  
-        // Actualizar tipos de vehículo dinámicamente
-        const container = document.querySelector('.btn-group-toggle');
-        if (container && data.tipos) {
-          container.innerHTML = ''; // limpiar
-          data.tipos.forEach((tipo, index) => {
-            container.innerHTML += `
-              <label class="btn btn-outline-primary ${index === 0 ? 'active' : ''}">
-                <input type="radio" name="tipoVehiculo" value="${tipo.nombre}" autocomplete="off" ${index === 0 ? 'checked' : ''}>
-                ${tipo.nombre}
-              </label>
-            `;
-          });
-        }
-      })
-      .catch(error => console.error('Error al cargar los datos:', error));
-  });
-  </script>
-  
 </html>
