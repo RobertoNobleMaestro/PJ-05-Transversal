@@ -78,8 +78,8 @@
                         </div>
 
                         <div>
-                            <label for="permiso">Permiso de Conducir</label>
-                            <select name="permiso" id="permiso">
+                            <label for="licencia_conducir">Permiso de Conducir</label>
+                            <select name="licencia_conducir" id="permiso">
                                 <option value="">Selecciona una opción</option>
                                 @foreach ($licencias as $licencia)
                                     <option value="{{ $licencia }}">{{ $licencia }}</option>
