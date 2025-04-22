@@ -272,14 +272,15 @@ document.addEventListener('DOMContentLoaded', function () {
                            validoDateNac && validoDireccion && validoPermiso &&
                            validoPassword && validoConfirmPassword;
 
-        if (todoValido) {
-            form.submit();
-        } else {
+        if (!todoValido) {
+            e.preventDefault();
             Swal.fire({
                 icon: "error",
                 title: "Error al enviar el formulario"
             });
+            return false;
         }
+                        
     }
 });
 

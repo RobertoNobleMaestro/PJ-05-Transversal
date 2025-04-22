@@ -102,8 +102,9 @@ class AuthController extends Controller
             // Normalizar email y dni
             $request->merge([
                 'email' => strtolower(trim($request->email)),
-                'dni' => strtoupper(trim($request->dni))
+                'DNI' => strtoupper(trim($request->dni)) // <-- CAMBIO AQUÍ
             ]);
+            
 
             // Validar campos
             $request->validate([
