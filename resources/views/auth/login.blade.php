@@ -15,7 +15,7 @@
             <span class="error_message" id="error_email"></span>
             <br>
             <label for="pwd">Contraseña</label><br>
-            <input type="password" name="pwd" id="pwd">
+            <input type="password" name="pwd" id="pwd" placeholder="********">
             <span class="error_message" id="error_pwd"></span>
             <br>
             <br>
