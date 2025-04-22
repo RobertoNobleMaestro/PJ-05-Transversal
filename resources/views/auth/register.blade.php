@@ -3,6 +3,7 @@
 @section('title', 'Registro')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
     <div class="container-register">
         <div class="auth-container">
             <div class="container-arriba">
@@ -11,7 +12,7 @@
             </div>
             <div class="container-abajo">
                 <!-- contenido con el formulario para registrarse -->
-                <form action="{{ route('register') }}" method="POST" id="registerForm" enctype="multipart/form-data">
+                <form action="{{ route('register.post') }}" method="POST" id="registerForm" enctype="multipart/form-data">
                     @csrf
                     <h2 class="singIn"> Registrarse </h2>
                     <div class="form-row">
@@ -35,9 +36,26 @@
 
                         <div>
                             <label for="imagen">Imagen de Perfil</label>
-                            <input type="file" name="imagen" id="imagen" accept="image/*">
+                        
+                            <select id="opcionImagen" class="form-select mb-2">
+                                <option value="archivo" selected>Seleccionar de mis imágenes</option>
+                                <option value="camara">Tomar foto con cámara</option>
+                            </select>
+                        
+                            <!-- Input tradicional de archivos -->
+                            <input type="file" name="imagen" id="imagenInput" accept="image/*">
+                        
+                            <!-- Contenedor para la cámara -->
+                            <div id="camaraContainer" style="display:none; text-align:center;">
+                                <video id="videoCamara" autoplay style="width:100%; max-width:300px; border-radius:10px;"></video>
+                                <br>
+                                <button type="button" class="btn btn-success mt-2" id="btnCapturarFoto">Capturar</button>
+                                <canvas id="canvasFoto" name="canvasFoto" style="display:none;"></canvas>
+                            </div>
+                        
                             <span class="error_message" id="error_imagen"></span>
                         </div>
+                        
                     </div>
 
                     <div class="form-row">
@@ -60,8 +78,8 @@
                         </div>
 
                         <div>
-                            <label for="permiso">Permiso de Conducir</label>
-                            <select name="permiso" id="permiso">
+                            <label for="licencia_conducir">Permiso de Conducir</label>
+                            <select name="licencia_conducir" id="permiso">
                                 <option value="">Selecciona una opción</option>
                                 @foreach ($licencias as $licencia)
                                     <option value="{{ $licencia }}">{{ $licencia }}</option>
@@ -70,9 +88,22 @@
                             <span class="error_message" id="error_permiso"></span>
                         </div>
 
+                        <div>
+                            <label for="password">Contraseña</label>
+                            <input type="password" name="password" id="password">
+                            <span class="error_message" id="error_password"></span>
+                        </div>
+
+                        <div>
+                            <label for="confirm_password">Confirmar Contraseña</label>
+                            <input type="password" name="password_confirmation" id="confirm_password">
+                            <span class="error_message" id="error_password_confirmation"></span>
+                        </div>
+                        
+
                     </div>
                     <div class="form-row submit-row">
-                        <button type="submit" class="btn-completar-registro">Completar Registro</button>
+                        <button type="submit" id="registerButton" class="btn-completar-registro">Completar Registro</button>
                     </div>
                     <a href="{{route('login')}}" class=""> Ya tienes cuenta? Inicia Sesión </a>
                 </form>
