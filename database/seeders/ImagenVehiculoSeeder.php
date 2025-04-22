@@ -212,20 +212,44 @@ class ImagenVehiculoSeeder extends Seeder
                 'id_vehiculo' => 50,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'sprinter.png',
                 'id_vehiculo' => 51,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'transit.webp',
                 'id_vehiculo' => 52,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'master.png',
                 'id_vehiculo' => 53,
             ],
             [
-                'nombre_archivo' => '.png',
+                'nombre_archivo' => 'crafter.webp',
                 'id_vehiculo' => 54,
+            ],
+            [
+                'nombre_archivo' => 'jumper.png',
+                'id_vehiculo' => 55,
+            ],
+            [
+                'nombre_archivo' => 'boxer.png',
+                'id_vehiculo' => 56,
+            ],
+            [
+                'nombre_archivo' => 'ducato.png',
+                'id_vehiculo' => 57,
+            ],
+            [
+                'nombre_archivo' => 'daily.png',
+                'id_vehiculo' => 58,
+            ],
+            [
+                'nombre_archivo' => 'movano.png',
+                'id_vehiculo' => 59,
+            ],
+            [
+                'nombre_archivo' => 'nv400.png',
+                'id_vehiculo' => 60,
             ]
         ]);
     }
