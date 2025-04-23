@@ -226,6 +226,90 @@ class ImagenVehiculoSeeder extends Seeder
             [
                 'nombre_archivo' => '.png',
                 'id_vehiculo' => 54,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 55,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 56,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 57,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 58,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 59,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 60,
+            ],
+            [
+                'nombre_archivo' => 'h350.png',
+                'id_vehiculo' => 61,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 62,
+            ],
+            [
+                'nombre_archivo' => 'tge.png',
+                'id_vehiculo' => 63,
+            ],
+            [
+                'nombre_archivo' => 'n-series.png',
+                'id_vehiculo' => 64,
+            ],
+            [
+                'nombre_archivo' => 'deliver9.png',
+                'id_vehiculo' => 65,
+            ],
+            [
+                'nombre_archivo' => 'fl.png',
+                'id_vehiculo' => 66,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 67,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 68,
+            ],
+            [
+                'nombre_archivo' => 'p-series.png',
+                'id_vehiculo' => 69,
+            ],
+            [
+                'nombre_archivo' => 'tgl.png',
+                'id_vehiculo' => 70,
+            ],
+            [
+                'nombre_archivo' => 'eurocargo.png',
+                'id_vehiculo' => 71,
+            ],
+            [
+                'nombre_archivo' => 'd-series.png',
+                'id_vehiculo' => 72,
+            ],
+            [
+                'nombre_archivo' => '.png',
+                'id_vehiculo' => 73,
+            ],
+            [
+                'nombre_archivo' => '500-series.png',
+                'id_vehiculo' => 74,
+            ],
+            [
+                'nombre_archivo' => 'lpt1618.png',
+                'id_vehiculo' => 75,
             ]
         ]);
     }
