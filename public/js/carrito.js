@@ -24,7 +24,7 @@ function cargarCarrito() {
       div.id = `vehiculo-${vehiculo.reserva.id_reserva}`;
 
       const imagen = vehiculo.imagenes?.[0]?.nombre_archivo 
-        ? `<img src="/storage/${vehiculo.imagenes[0].nombre_archivo}" alt="Vehículo">`
+        ? `<img src="img/vehiculos/${vehiculo.imagenes[0].nombre_archivo}" alt="Vehículo">`
         : `<div style="width:150px;height:100px;background:#ccc;border-radius:6px;"></div>`;
 
       const caracteristicas = vehiculo.caracteristicas || {};
