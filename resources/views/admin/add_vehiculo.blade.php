@@ -132,14 +132,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="anio" class="form-label">Año</label>
-                    <input type="number" class="form-control" id="anio" name="anio" min="1900" max="{{ date('Y') + 1 }}" required>
+                    <label for="año" class="form-label">Año</label>
+                    <input type="number" class="form-control" id="año" name="año" min="1900" max="{{ date('Y') + 1 }}" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="matricula" class="form-label">Matrícula</label>
-                    <input type="text" class="form-control" id="matricula" name="matricula" required>
-                </div>
+
 
                 <div class="form-group">
                     <label for="precio_dia" class="form-label">Precio por día</label>
@@ -191,12 +188,14 @@
         </div>
 
         <div class="btn-container">
-            <button type="button" class="submit-btn" onclick="createVehiculo()">Enviar</button>
             <a href="{{ route('admin.vehiculos') }}" class="cancel-btn">Cancelar</a>
+            <button type="button" class="submit-btn" onclick="createVehiculo()">Enviar</button>
         </div>
     </form>
 </div>
 @endsection
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -217,15 +216,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value.length < 2) {
                 errorMessage = 'Este campo debe tener al menos 2 caracteres.';
             }
-        } else if (input.name === 'anio') {
+        } else if (input.name === 'año') {
             const currentYear = new Date().getFullYear();
             if (parseInt(value) < 1900 || parseInt(value) > currentYear + 1) {
                 errorMessage = `El año debe estar entre 1900 y ${currentYear + 1}.`;
             }
-        } else if (input.name === 'matricula') {
-            if (value.length < 4) {
-                errorMessage = 'La matrícula debe tener al menos 4 caracteres.';
-            }
+
         } else if (input.name === 'precio_dia') {
             if (parseFloat(value) <= 0) {
                 errorMessage = 'El precio debe ser mayor que 0.';
@@ -257,8 +253,83 @@ function createVehiculo() {
     // Limpiar mensajes de error previos
     document.querySelectorAll('.text-danger').forEach(el => el.remove());
     
-    // Obtener los datos del formulario
+    // Validar campos antes de enviar
     const form = document.getElementById('addVehiculoForm');
+    const inputs = form.querySelectorAll('input, select');
+    let isValid = true;
+    
+    inputs.forEach(input => {
+        if (input.name) { // Solo validar elementos con nombres
+            const value = input.value.trim();
+            let errorMessage = '';
+            
+            // Reglas de validación para cada campo
+            if (input.name === 'marca' || input.name === 'modelo') {
+                if (value.length < 2) {
+                    errorMessage = 'Este campo debe tener al menos 2 caracteres.';
+                    isValid = false;
+                }
+            } else if (input.name === 'año') {
+                const currentYear = new Date().getFullYear();
+                if (parseInt(value) < 1900 || parseInt(value) > currentYear + 1) {
+                    errorMessage = `El año debe estar entre 1900 y ${currentYear + 1}.`;
+                    isValid = false;
+                }
+            } else if (input.name === 'precio_dia') {
+                if (parseFloat(value) <= 0) {
+                    errorMessage = 'El precio debe ser mayor que 0.';
+                    isValid = false;
+                }
+            } else if (input.name === 'kilometraje') {
+                if (parseInt(value) < 0) {
+                    errorMessage = 'El kilometraje no puede ser negativo.';
+                    isValid = false;
+                }
+            } else if ((input.name === 'id_lugar' || input.name === 'id_tipo') && value === '') {
+                errorMessage = 'Por favor, seleccione una opción.';
+                isValid = false;
+            } else if (input.required && value === '') {
+                errorMessage = 'Este campo es obligatorio.';
+                isValid = false;
+            }
+            
+            // Mostrar mensaje de error si es necesario
+            if (errorMessage) {
+                const errorElement = input.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('error-message')) {
+                    errorElement.textContent = errorMessage;
+                } else {
+                    const span = document.createElement('span');
+                    span.classList.add('error-message');
+                    span.style.color = 'red';
+                    span.textContent = errorMessage;
+                    input.parentNode.insertBefore(span, input.nextSibling);
+                }
+            }
+        }
+    });
+    
+    if (!isValid) {
+        Swal.fire({
+            icon: 'warning',
+            title: '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Campos Incompletos</span>',
+            html: '<p class="lead">Por favor, complete todos los campos requeridos correctamente</p>',
+            confirmButtonColor: '#9F17BD'
+        });
+        return;
+    }
+    
+    // Mostrar indicador de carga
+    Swal.fire({
+        title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
+        text: 'Creando nuevo vehículo',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false
+    });
+    
+    // Obtener los datos del formulario
     const formData = new FormData(form);
     
     // Añadir checkboxes manualmente (ya que solo se incluyen si están marcados)
@@ -277,11 +348,26 @@ function createVehiculo() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert(data.message || 'Vehículo creado exitosamente');
-            window.location.href = '{{ route("admin.vehiculos") }}';
+            Swal.fire({
+                icon: 'success',
+                title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
+                html: `<p class="lead">${data.message || 'Vehículo creado exitosamente'}</p>`,
+                confirmButtonColor: '#9F17BD',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("admin.vehiculos") }}';
+                }
+            });
         } else if (data.errors) {
+            // Construir mensaje de error HTML
+            let errorHtml = '<ul class="text-start list-unstyled">';
+            
             // Muestra errores de validación
             Object.keys(data.errors).forEach(field => {
+                errorHtml += `<li><i class="fas fa-exclamation-circle text-danger"></i> ${data.errors[field][0]}</li>`;
+                
                 const input = document.querySelector(`[name="${field}"]`);
                 if (input) {
                     const errorDiv = document.createElement('div');
@@ -290,13 +376,32 @@ function createVehiculo() {
                     input.parentNode.appendChild(errorDiv);
                 }
             });
+            
+            errorHtml += '</ul>';
+            
+            Swal.fire({
+                icon: 'error',
+                title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
+                html: errorHtml,
+                confirmButtonColor: '#9F17BD'
+            });
         } else {
-            alert('Error al crear vehículo: ' + (data.message || 'Error desconocido'));
+            Swal.fire({
+                icon: 'error',
+                title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                html: `<p class="lead">Error al crear vehículo: ${data.message || 'Error desconocido'}</p>`,
+                confirmButtonColor: '#9F17BD'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error de conexión. Por favor, inténtalo de nuevo.');
+        Swal.fire({
+            icon: 'error',
+            title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+            html: '<p class="lead">Error de conexión. Por favor, inténtalo de nuevo.</p>',
+            confirmButtonColor: '#9F17BD'
+        });
     });
 }
 </script>
