@@ -78,9 +78,9 @@
         <div class="col-6 col-md-3 mb-4">
           <div class="card shadow-sm">
             @if($vehiculo->imagenes->isNotEmpty())
-              <img src="{{ asset('img/vehiculos/' . $vehiculo->imagenes->first()->ruta) }}" class="card-img-top" alt="{{ $vehiculo->modelo }}" style="height: 200px; object-fit: cover;">
+                <img src="{{ asset('img/vehiculos/' . $vehiculo->imagenes->first()->nombre_archivo) }}" class="card-img-top" alt="{{ $vehiculo->modelo }}" style="height: 200px; object-fit: cover;">
             @else
-              <img src="{{ asset('img/vehiculos/default.jpg') }}" class="card-img-top" alt="Vehículo no disponible" style="height: 200px; object-fit: cover;">
+                <img src="{{ asset('img/vehiculos/default.jpg') }}" class="card-img-top" alt="Vehículo no disponible" style="height: 200px; object-fit: cover;">
             @endif
             <div class="card-body text-start p-2">
               <p class="m-0 fw-bold">{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</p>
