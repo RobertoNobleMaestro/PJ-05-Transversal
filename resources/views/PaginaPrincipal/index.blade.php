@@ -84,7 +84,7 @@
       <!-- Filtros laterales -->
       <div class="col-md-3">
         <div id="filtros-form" class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 90px;">
-          <h4 class="mb-3">Filtrar</h4>
+          <h4 class="mb-3">Filtros</h4>
 
           <!-- Filtro por tipo de vehículo -->
           <div class="form-group">
