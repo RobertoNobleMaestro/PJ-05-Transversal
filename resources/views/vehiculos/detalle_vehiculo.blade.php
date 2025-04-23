@@ -22,8 +22,10 @@
     <div class="row">
         <div class="col-md-6">
             <div class="imagen-box text-center">
-                <img src="{{ asset('img/' . $vehiculo->imagen) }}" class="img-fluid mb-3" alt="">
-                <img src="{{ asset('img/mercedes.png') }}" class="img-fluid" alt="">
+            @foreach($imagenes as $imagen)
+                <img src="{{ asset('img/vehiculos/' . $imagen->nombre_archivo) }}" alt="Imagen del vehículo" class="img-fluid">
+            @endforeach
+
             </div>
         </div>
         <div class="col-md-6">

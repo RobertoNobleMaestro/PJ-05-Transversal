@@ -6,13 +6,15 @@ use App\Models\Vehiculo;
 use App\Models\Reserva;
 use App\Models\VehiculosReservas;
 use Illuminate\Http\Request;
+use App\Models\ImagenVehiculo;
 
 class VehiculoController extends Controller
 {
     public function detalle($id)
     {
-        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva'])
-            ->findOrFail($id);
+        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva', 'imagenes'])
+        ->findOrFail($id);
+    
 
         $precioUnitario = $vehiculo->vehiculosReservas
             ->where('fecha_final', '>=', now())
@@ -20,7 +22,8 @@ class VehiculoController extends Controller
 
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo,
-            'precio_unitario' => $precioUnitario
+            'precio_unitario' => $precioUnitario,
+            'imagenes' => $vehiculo->imagenes
         ]);
     }
 
@@ -30,6 +33,9 @@ class VehiculoController extends Controller
         try {
             $vehiculo = Vehiculo::findOrFail($id);
             $usuarioId = auth()->id();
+
+            // Depurador para ver el vehículo y el ID del usuario
+            dd($vehiculo, $usuarioId);
 
             if (!$usuarioId) {
                 return response()->json(['alert' => [
@@ -52,10 +58,16 @@ class VehiculoController extends Controller
                 ]
             );
 
+            // Depurador para ver la reserva creada o encontrada
+            dd($reserva);
+
             // 2. Obtener el precio unitario del vehículo desde la tabla vehiculos_reservas
             $precioUnitario = VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)
                 ->where('id_reservas', $reserva->id_reservas)
                 ->first()->precio_unitario ?? 100; // Usamos 100 como valor por defecto si no se encuentra el precio.
+
+            // Depurador para ver el precio unitario
+            dd($precioUnitario);
 
             // 3. Insertar el vehículo en vehiculos_reservas si aún no está
             $existe = VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)

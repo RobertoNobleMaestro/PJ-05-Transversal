@@ -38,9 +38,18 @@ body {
   transform: translateY(-5px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
-
+h1::after {
+  content: '';
+  position: absolute;
+  left: 30px;
+  width: 60px;
+  top: 265px;
+  height: 3px;
+  background: #8704a4;
+  border-radius: 2px;
+}
 .vehiculo-item img {
-  width: 150px;
+  width: 300px;
   height: auto;
   border-radius: 6px;
   object-fit: cover;

@@ -14,7 +14,7 @@
       <i class="fas fa-arrow-left me-2"></i> Volver
     </a>
   </div>
-  <h1 style="padding-left: 30px;">Carrito de Vehículos Reservados</h1>
+  <h1 style="padding-left: 30px;" class="mb-4">Carrito de Vehículos Reservados</h1>
   <div class="contenedor-principal">
     
     <!-- Lista de vehículos -->
