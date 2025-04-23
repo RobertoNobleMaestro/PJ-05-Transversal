@@ -18,7 +18,7 @@ a {
 
 /* ===== Hero Section ===== */
 .hero-section {
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
 }
 
 .hero-section h1 {
@@ -212,4 +212,9 @@ a {
   background-color: #9F17BD !important;
   color: #fff !important;
   border-color: #9F17BD !important;
+}
+
+.bg-purple {
+  background-color: #9F17BD;
+  border-radius: 10px;
 }

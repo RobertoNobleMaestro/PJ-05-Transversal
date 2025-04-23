@@ -26,12 +26,20 @@
   <!-- Sección principal (Hero) -->
   <div class="container hero-section">
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-5">
         <h1>Alquiler de vehículos de todo tipo<br>y con precios asequibles</h1>
+        <p>Encuentra el vehículo perfecto para tus necesidades, con una amplia variedad de opciones y precios competitivos.</p>
+        <ul class="list-unstyled mt-4">
+          <li><i class="fas fa-check-circle text-success mr-2"></i>Reserva cuando quieras</li>
+          <li><i class="fas fa-check-circle text-success mr-2"></i>Todo tipo de vehiculos</li>
+          <li><i class="fas fa-check-circle text-success mr-2"></i>Seguro incluido</li>
+          <li><i class="fas fa-check-circle text-success mr-2"></i>Sin comisiones</li>
+        </ul>
+        <a href="#alquiler" class="btn btn-light font-weight-bold">Encuentra ya tu vehiculo a reservar!</a>
       </div>
       <div class="col-md-6 text-center">
         <!-- Ejemplo de imágenes a la derecha -->
-        <img src="{{ asset('img/coches.png') }}" class="img-fluid mb-2" alt="Auto 1">
+        <img src="{{ asset('img/coches.png') }}" class="img-fluid" alt="Auto 1">
       </div>
     </div>
   </div> 
@@ -78,7 +86,7 @@
     </div>
   </div>    
 
-  <div class="container vehicles-section">
+  <div id="alquiler" class="container vehicles-section">
     <h2>Alquila vehículos</h2>
     <div class="row">
       <!-- Filtros laterales -->
