@@ -6,7 +6,7 @@
 <style>
     :root {
         --sidebar-width: 250px;
-        --sidebar-color: #9F17BD; /* Cambiado a tu tono lila específico */
+        --sidebar-color: #9F17BD;
         --header-height: 60px;
     }
     
@@ -221,6 +221,74 @@
             object-fit: cover;
         }
         
+        /* Estilos para las tarjetas del panel de administración */
+        .admin-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .admin-card-icon {
+            color: var(--sidebar-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(159, 23, 189, 0.1);
+            margin: 0 auto 1.5rem;
+        }
+        
+        .admin-card h3 {
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .admin-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .btn-admin-card {
+            background-color: var(--sidebar-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-admin-card:hover {
+            background-color: #8714a1;
+            color: white;
+        }
+        
+        .admin-welcome-message {
+            border-left: 5px solid var(--sidebar-color);
+        }
+        
         /* Botón del menú hamburguesa */
         .menu-toggle {
             display: none;
@@ -411,86 +479,105 @@
                 <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
                 <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
                 <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
+                <li><a href="{{ route('admin.reservas') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
+                <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
             </ul>
         </div>
 
         <!-- Contenido principal -->
         <div class="admin-main">
-            <!-- Resto del contenido permanece igual -->
-            <!-- ... -->
-  
-            
-            <!-- Filtros y botón añadir -->
-            <div class="filter-section">
-                <div class="filter-group">
-                    <select class="filter-control">
-                        <option value="">Todos los roles</option>
-                        <option value="admin">Admin</option>
-                        <option value="gestor">Gestor</option>
-                        <option value="usuario">Usuario</option>
-                    </select>
-                    
-                    <input type="text" class="search-input" placeholder="Buscar por nombre o email">
+            <div class="admin-header">
+                <h1 class="admin-title">Panel de Administración</h1>
+                <div class="admin-welcome">
+                    @if(auth()->check())
+                    <span>Bienvenido, {{ auth()->user()->nombre }}</span>
+                    <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                    @endif
                 </div>
-                
-                <a href="{{ route('admin.users.create') }}" class="add-user-btn">
-                    <i class="fas fa-plus"></i> Añadir Usuario
-                </a>
             </div>
 
-            <!-- Tabla de usuarios -->
-            <div class="crud-table-container">
-                <table class="crud-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th class="col-hide-sm">DNI</th>
-                            <th>Permiso</th>
-                            <th class="col-hide-sm">Email</th>
-                            <th>Rol</th>
-                            <th>Fecha</th>
-                            <th class="col-hide-sm">Foto</th>
-                            <th class="action-cell">Acciones</th>
-                        </tr>
-                    </thead>
-                <tbody>
-                    @foreach($users as $user)
-                    <tr>
-                        <td>{{ $user->id_usuario }}</td>
-                        <td>
-                            <div class="user-info">
-                               
-                                {{ $user->nombre }}
+            <div class="content-section">
+                <div class="alert alert-info admin-welcome-message p-4 mb-4">
+                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al panel de administración!</h3>
+                    <p class="mb-0">Desde aquí podrás gestionar todos los aspectos de la plataforma de alquiler de vehículos. Selecciona una de las opciones a continuación para acceder a las diferentes funcionalidades.</p>
+                </div>
+                
+                <div class="row g-4">
+                    <!-- Tarjeta de Usuarios -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-users fa-3x"></i>
                             </div>
-                        </td>
-                        <td>{{ $user->DNI }}</td>
-                        <td>{{ $user->licencia_conducir ?? 'N/A' }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->nombre_rol }}</td>
-                        <td>{{ $user->fecha_nacimiento->format('d/m/Y') }}</td>
-                        <td>
-                            <img src="{{ asset($user->foto_perfil ?: 'img/icons/image-icon.svg') }}" alt="Foto" style="width: 24px;">
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="{{ route('admin.users.edit', $user->id_usuario) }}" class="btn-edit">Editar</a>
-                                <form action="{{ route('admin.users.destroy', $user->id_usuario) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-delete">Eliminar</button>
-                                </form>
+                            <h3>Gestión de Usuarios</h3>
+                            <p>Administra los usuarios del sistema, sus roles y permisos.</p>
+                            <a href="{{ route('admin.users') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Tarjeta de Vehículos -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-car fa-3x"></i>
                             </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            <h3>Gestión de Vehículos</h3>
+                            <p>Administra el inventario de vehículos, precios y disponibilidad.</p>
+                            <a href="{{ route('admin.vehiculos') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Tarjeta de Lugares -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-map-marker-alt fa-3x"></i>
+                            </div>
+                            <h3>Gestión de Lugares</h3>
+                            <p>Administra las ubicaciones de recogida y entrega de vehículos.</p>
+                            <a href="{{ route('admin.lugares') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Tarjeta de Reservas -->
+                    <div class="col-md-6 col-lg-6">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-calendar-alt fa-3x"></i>
+                            </div>
+                            <h3>Gestión de Reservas</h3>
+                            <p>Administra las reservas actuales, crea nuevas reservas o modifica las existentes.</p>
+                            <a href="{{ route('admin.reservas') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Tarjeta de Historial -->
+                    <div class="col-md-6 col-lg-6">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-history fa-3x"></i>
+                            </div>
+                            <h3>Historial de Reservas</h3>
+                            <p>Consulta el historial completo de todas las reservas realizadas en el sistema.</p>
+                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Script para los filtros y funcionalidad responsive -->
+    <!-- Script para funcionalidad responsive -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Menú responsive
