@@ -14,9 +14,9 @@
             <input type="text" name="email" id="email" placeholder="usuario@gmail.com">
             <span class="error_message" id="error_email"></span>
             <br>
-            <label for="pwd">Contraseña</label><br>
-            <input type="password" name="pwd" id="pwd" placeholder="********">
-            <span class="error_message" id="error_pwd"></span>
+            <label for="password">Contraseña</label><br>
+            <input type="password" name="password" id="password" placeholder="********">
+            <span class="error_message" id="error_password"></span>
             <br>
             <br>
             <button type="submit" id="login" disabled>Iniciar Sesión</button><br>
@@ -30,6 +30,25 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Habilitar el botón de login cuando se ingresen email y contraseña
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const loginButton = document.getElementById('login');
+
+// Función para verificar si ambos campos tienen valores
+function checkInputs() {
+    if (emailInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+        loginButton.disabled = false;
+    } else {
+        loginButton.disabled = true;
+    }
+}
+
+// Agregar event listeners para los campos de entrada
+emailInput.addEventListener('input', checkInputs);
+passwordInput.addEventListener('input', checkInputs);
+
+// Manejar el envío del formulario
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
     

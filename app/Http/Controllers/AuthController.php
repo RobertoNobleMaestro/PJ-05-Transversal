@@ -134,7 +134,7 @@ class AuthController extends Controller
             $user = new User();
             $user->nombre = $request->nombre;
             $user->email = $request->email;
-            $user->DNI = $request->DNI;
+            $user->DNI = $request->dni; // Corregido: usar dni (minúsculas) que es como viene del formulario
             $user->telefono = $request->telf;
             $user->fecha_nacimiento = $request->fecha_nacimiento;
             $user->direccion = $request->direccion;

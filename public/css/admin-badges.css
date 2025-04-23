@@ -1,0 +1,81 @@
+/* Estilos de píldoras para estados */
+.badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 0.25rem;
+}
+
+.badge-pendiente {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.badge-confirmada {
+    background-color: #10b981;
+    color: white;
+}
+
+.badge-cancelada {
+    background-color: #ef4444;
+    color: white;
+}
+
+.badge-completada {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Tarjetas de estadísticas */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-card .icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--sidebar-color);
+}
+
+.stat-card .value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+    color: #333;
+}
+
+.stat-card .label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Estilos para la lista de vehículos */
+.vehiculos-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.vehiculos-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.vehiculos-list li:last-child {
+    border-bottom: none;
+}

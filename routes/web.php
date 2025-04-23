@@ -13,7 +13,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\LugarController;
-use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\HistorialController;
 
     // Rutas publicas

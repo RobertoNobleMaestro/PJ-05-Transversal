@@ -14,7 +14,7 @@
 
 <div class="breadcrumb-container">
     <div class="container">
-        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo->nombre }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
+        <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo ? $vehiculo->tipo->nombre : 'Tipo no disponible' }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
     </div>
 </div>
 
@@ -28,8 +28,8 @@
         </div>
         <div class="col-md-6">
             <p class="text-muted">
-                Publicado: {{ $vehiculo->created_at->format('d/m/Y H:i') }} | 
-                Modificado: {{ $vehiculo->updated_at->format('d/m/Y H:i') }}
+                Publicado: {{ $vehiculo->created_at ? $vehiculo->created_at->format('d/m/Y H:i') : 'Fecha no disponible' }} | 
+                Modificado: {{ $vehiculo->updated_at ? $vehiculo->updated_at->format('d/m/Y H:i') : 'Fecha no disponible' }}
             </p>
             <h2 class="d-flex justify-content-between">
                 {{ $vehiculo->marca }} {{ $vehiculo->modelo }}
@@ -40,16 +40,16 @@
             <!-- Características en 4 filas de 2 columnas -->
             <div class="caracteristicas-box">
                 <div class="row caracteristicas">
-                    <div class="col-md-6"><i class="fas fa-cogs"></i> Transmisión: {{ $vehiculo->caracteristicas->transmision }}</div>
-                    <div class="col-md-6"><i class="fas fa-car"></i> Tipo: {{ $vehiculo->tipo->nombre }}</div>
+                    <div class="col-md-6"><i class="fas fa-cogs"></i> Transmisión: {{ $vehiculo->caracteristicas ? $vehiculo->caracteristicas->transmision : 'No disponible' }}</div>
+                    <div class="col-md-6"><i class="fas fa-car"></i> Tipo: {{ $vehiculo->tipo ? $vehiculo->tipo->nombre : 'No disponible' }}</div>
 
                     <div class="col-md-6"><i class="fas fa-tachometer-alt"></i> Kilometraje: {{ number_format($vehiculo->kilometraje, 0, ',', '.') }} km</div>
-                    <div class="col-md-6"><i class="fas fa-map-marker-alt"></i> Ubicación: {{ $vehiculo->lugar->nombre }}</div>
+                    <div class="col-md-6"><i class="fas fa-map-marker-alt"></i> Ubicación: {{ $vehiculo->lugar ? $vehiculo->lugar->nombre : 'No disponible' }}</div>
 
-                    <div class="col-md-6"><i class="fas fa-snowflake"></i> Aire acondicionado: {{ $vehiculo->caracteristicas->aire_acondicionado ? 'Sí' : 'No' }}</div>
-                    <div class="col-md-6"><i class="fas fa-sun"></i> Techo solar: {{ $vehiculo->caracteristicas->techo ? 'Sí' : 'No' }}</div>
+                    <div class="col-md-6"><i class="fas fa-snowflake"></i> Aire acondicionado: {{ $vehiculo->caracteristicas && $vehiculo->caracteristicas->aire_acondicionado ? 'Sí' : 'No' }}</div>
+                    <div class="col-md-6"><i class="fas fa-sun"></i> Techo solar: {{ $vehiculo->caracteristicas && $vehiculo->caracteristicas->techo ? 'Sí' : 'No' }}</div>
 
-                    <div class="col-md-6"><i class="fas fa-suitcase"></i> Maletero: {{ $vehiculo->caracteristicas->capacidad_maletero }} L</div>
+                    <div class="col-md-6"><i class="fas fa-suitcase"></i> Maletero: {{ $vehiculo->caracteristicas ? $vehiculo->caracteristicas->capacidad_maletero . ' L' : 'No disponible' }}</div>
                     <div class="col-md-6"><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</div>
                 </div>
             </div>
@@ -163,6 +163,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Evento click botón confirmar
             document.getElementById('btnConfirmarReserva').onclick = function () {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: 'Procesando...',
+                    text: 'Estamos creando tu reserva',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Realizar petición para crear la reserva
                 fetch('/reservas', {
                     method: 'POST',
                     headers: {
@@ -175,18 +187,51 @@ document.addEventListener('DOMContentLoaded', function () {
                         fecha_final: fechaFinManual
                     })
                 })
-                .then(res => res.json())
-                .then(() => {
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    // Cerrar modal
                     $('#reservaModal').modal('hide');
-                    Swal.fire('¡Reservado!', 'La reserva fue creada correctamente.', 'success');
-                    calendar.refetchEvents();
+                    
+                    if (data.status === 'success') {
+                        // Mostrar mensaje de éxito
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Reservado!',
+                            text: 'La reserva fue creada correctamente. Ya puedes verla en el calendario.',
+                            confirmButtonColor: '#9F17BD'
+                        });
+                        
+                        // Importante: refrescar eventos del calendario
+                        setTimeout(() => {
+                            calendar.refetchEvents();
+                        }, 500);
+                    } else {
+                        // Mostrar mensaje de error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'No se pudo realizar la reserva.'
+                        });
+                    }
+                    
+                    // Limpiar selección
                     limpiarSeleccionVisual();
                     fechaInicioManual = null;
                     fechaFinManual = null;
                     contadorDias.classList.remove('visible');
                 })
-                .catch(() => {
-                    Swal.fire('Error', 'No se pudo realizar la reserva.', 'error');
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo realizar la reserva. Inténtalo de nuevo más tarde.'
+                    });
                 });
             };
         }

@@ -1,0 +1,24 @@
+/* Estilos específicos para el mapa en las páginas de admin */
+#map {
+    width: 100%;
+    height: 300px;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+/* Estilos para validación */
+.error-feedback {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.is-invalid {
+    border-color: #e53e3e;
+}
+
+.is-invalid:focus {
+    border-color: #e53e3e;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.1);
+}

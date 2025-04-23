@@ -110,6 +110,141 @@ class ReservaController extends Controller
         return view('admin.add_reserva', compact('usuarios', 'lugares', 'vehiculos'));
     }
 
+    // Método para obtener reservas de un vehículo específico (para el calendario)
+    public function reservasPorVehiculo($id_vehiculo)
+    {
+        // Buscar el vehículo
+        $vehiculo = Vehiculo::findOrFail($id_vehiculo);
+        
+        // Obtener todas las reservas pendientes, confirmadas o completadas para este vehículo
+        $reservasVehiculo = $vehiculo->vehiculosReservas()
+            ->join('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
+            ->whereIn('reservas.estado', ['pendiente', 'confirmada', 'completada'])
+            ->get(['vehiculos_reservas.fecha_ini', 'vehiculos_reservas.fecha_final', 'reservas.estado']);
+        
+        // Formatear los datos para el calendario
+        $eventos = [];
+        
+        foreach ($reservasVehiculo as $reserva) {
+            // Definir color según el estado de la reserva
+            $color = '#6f42c1'; // Color lila por defecto
+            $titulo = 'Reservado';
+            
+            if ($reserva->estado === 'pendiente') {
+                $color = '#ffc107'; // Amarillo para pendientes
+                $titulo = 'Pendiente';
+            } elseif ($reserva->estado === 'completada') {
+                $color = '#28a745'; // Verde para completadas
+                $titulo = 'Completada';
+            }
+            
+            $eventos[] = [
+                'start' => $reserva->fecha_ini,
+                'end' => date('Y-m-d', strtotime($reserva->fecha_final . ' +1 day')), // Sumar un día para que incluya el día final
+                'title' => $titulo,
+                'color' => $color,
+                'display' => 'background'
+            ];
+        }
+        
+        return response()->json($eventos);
+    }
+    
+    // Método para crear una nueva reserva desde la página de detalle de vehículo
+    public function crearReserva(Request $request)
+    {
+        try {
+            // Verificar si el usuario está autenticado
+            if (!auth()->check()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Debes iniciar sesión para realizar una reserva'
+                ], 401);
+            }
+            
+            // Validar datos
+            $request->validate([
+                'id_vehiculos' => 'required|exists:vehiculos,id_vehiculos',
+                'fecha_ini' => 'required|date|after_or_equal:today',
+                'fecha_final' => 'required|date|after_or_equal:fecha_ini',
+            ]);
+            
+            // Buscar el vehículo
+            $vehiculo = Vehiculo::findOrFail($request->id_vehiculos);
+            
+            // Verificar disponibilidad en esas fechas
+            $fechaOcupada = $vehiculo->vehiculosReservas()
+                ->join('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
+                ->whereIn('reservas.estado', ['confirmada', 'completada'])
+                ->where(function($query) use ($request) {
+                    $query->where(function($q) use ($request) {
+                        $q->where('vehiculos_reservas.fecha_ini', '<=', $request->fecha_ini)
+                          ->where('vehiculos_reservas.fecha_final', '>=', $request->fecha_ini);
+                    })->orWhere(function($q) use ($request) {
+                        $q->where('vehiculos_reservas.fecha_ini', '<=', $request->fecha_final)
+                          ->where('vehiculos_reservas.fecha_final', '>=', $request->fecha_final);
+                    })->orWhere(function($q) use ($request) {
+                        $q->where('vehiculos_reservas.fecha_ini', '>=', $request->fecha_ini)
+                          ->where('vehiculos_reservas.fecha_final', '<=', $request->fecha_final);
+                    });
+                })
+                ->exists();
+                
+            if ($fechaOcupada) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'El vehículo no está disponible en las fechas seleccionadas'
+                ], 400);
+            }
+            
+            // Calcular el número de días
+            $fechaInicio = new \DateTime($request->fecha_ini);
+            $fechaFin = new \DateTime($request->fecha_final);
+            $diff = $fechaInicio->diff($fechaFin);
+            $dias = $diff->days + 1; // Incluir el día de fin
+            
+            // Calcular precio total
+            $precioUnitario = $vehiculo->precio_dia * $dias;
+            
+            // Iniciar transacción
+            DB::beginTransaction();
+            
+            // Crear reserva (estado pendiente inicialmente)
+            $reserva = Reserva::create([
+                'fecha_reserva' => now(),
+                'total_precio' => $precioUnitario,
+                'estado' => 'pendiente',
+                'id_lugar' => $vehiculo->id_lugar,
+                'id_usuario' => auth()->id(),
+            ]);
+            
+            // Asociar vehículo a la reserva
+            $reserva->vehiculos()->attach($vehiculo->id_vehiculos, [
+                'fecha_ini' => $request->fecha_ini,
+                'fecha_final' => $request->fecha_final,
+                'precio_unitario' => $precioUnitario,
+            ]);
+            
+            // Confirmar transacción
+            DB::commit();
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Reserva creada correctamente',
+                'id_reserva' => $reserva->id_reservas
+            ]);
+            
+        } catch (\Exception $e) {
+            // Revertir transacción en caso de error
+            DB::rollBack();
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al crear la reserva: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
     public function store(Request $request)
     {
         $authCheck = $this->checkAdmin($request);

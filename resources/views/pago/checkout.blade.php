@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/Carrito/checkout.css') }}">
-    <script src="https://js.stripe.com/v3/"></script>
+    <!-- No necesitamos el SDK de Stripe ya que usamos redirección directa -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
@@ -94,10 +94,10 @@
                         Serás redirigido a la pasarela de pago segura de Stripe para completar tu compra.
                     </div>
                     
-                    <button id="checkout-button" class="btn-stripe">
+                    <a href="{{ $payment_url }}" id="checkout-button" class="btn-stripe" target="_self">
                         <i class="fas fa-lock"></i>
                         Pagar ahora con Stripe
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -105,17 +105,30 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const stripe = Stripe('{{ $stripe_public_key }}');
             const checkoutButton = document.getElementById('checkout-button');
+            const paymentUrl = "{{ $payment_url }}";
             
-            checkoutButton.addEventListener('click', function() {
-                stripe.redirectToCheckout({
-                    sessionId: '{{ $stripe_session_id }}'
-                }).then(function(result) {
-                    if (result.error) {
-                        alert(result.error.message);
-                    }
-                });
+            // Comprobamos si tenemos una URL de pago válida
+            if (!paymentUrl) {
+                console.error('No se ha proporcionado una URL de pago válida');
+                return;
+            }
+            
+            // Imprimimos la URL de pago en la consola para depuración
+            console.log('URL de pago:', paymentUrl);
+            
+            // Añadimos un manejador de eventos adicional para garantizar la redirección
+            checkoutButton.addEventListener('click', function(e) {
+                e.preventDefault(); // Detenemos el comportamiento predeterminado del enlace
+                
+                // Mostramos animación de carga
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirigiendo...';
+                this.classList.add('loading');
+                
+                // Redirigimos a la página de pago de Stripe tras un breve retraso
+                setTimeout(function() {
+                    window.location.href = paymentUrl;
+                }, 500);
             });
         });
     </script>

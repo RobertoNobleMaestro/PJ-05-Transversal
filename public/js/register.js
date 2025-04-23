@@ -253,14 +253,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Función para vlidar el formulario
+    // Función para validar el formulario
     function validaForm(e) {
         e.preventDefault();
 
         const validoNombre = validaNombre();
         const validoEmail = validaMail();
         const validoDni = validaDni();
-        const validoImg = validaImg();
+        // La imagen es opcional, no la validamos como obligatoria
         const validoTelf = validaTelf();
         const validoDateNac = validaDateNac();
         const validoDireccion = validaDireccion();
@@ -268,19 +268,87 @@ document.addEventListener('DOMContentLoaded', function () {
         const validoPassword = validaPassword();
         const validoConfirmPassword = validaConfirmPassword();
         
-        const todoValido = validoNombre && validoEmail && validoDni && validoImg && validoTelf &&
+        const todoValido = validoNombre && validoEmail && validoDni && validoTelf &&
                            validoDateNac && validoDireccion && validoPermiso &&
                            validoPassword && validoConfirmPassword;
 
         if (!todoValido) {
-            e.preventDefault();
             Swal.fire({
                 icon: "error",
-                title: "Error al enviar el formulario"
+                title: "Error de validación",
+                text: "Por favor, verifica los campos marcados en rojo."
             });
             return false;
         }
-                        
+        
+        // Mostrar indicador de carga
+        Swal.fire({
+            title: 'Registrando usuario...',
+            text: 'Por favor espera un momento',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Crear FormData para enviar datos incluyendo archivos
+        const formData = new FormData(form);
+        
+        // Enviar datos mediante fetch API
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Registro exitoso
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Registro exitoso!',
+                    text: data.message || 'Tu cuenta ha sido creada correctamente',
+                    confirmButtonColor: '#9F17BD'
+                }).then(() => {
+                    // Redirigir a login
+                    window.location.href = '/login';
+                });
+            } else {
+                // Error en el registro
+                let errorMessage = data.message || 'Ha ocurrido un error en el registro';
+                let errorDetails = '';
+                
+                // Si hay errores específicos, mostrarlos
+                if (data.errors) {
+                    errorDetails = Object.values(data.errors)
+                        .flat()
+                        .join('\n');
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en el registro',
+                    text: errorMessage,
+                    footer: errorDetails ? `<small>${errorDetails}</small>` : '',
+                    confirmButtonColor: '#9F17BD'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error inesperado',
+                text: 'Ha ocurrido un error en la comunicación con el servidor. Por favor, inténtalo más tarde.',
+                confirmButtonColor: '#9F17BD'
+            });
+        });
+        
+        return false; // Evitar el envío tradicional del formulario
     }
 });
 

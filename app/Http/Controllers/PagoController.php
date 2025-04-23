@@ -7,9 +7,9 @@ use App\Models\Reserva;
 use App\Models\Pago;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Stripe\Stripe;
-use Stripe\Checkout\Session;
-use Stripe\Exception\ApiErrorException;
+use Illuminate\Support\Facades\Log;
+// Importamos nuestro servicio personalizado de Stripe
+use App\Services\Stripe\StripeService;
 
 class PagoController extends Controller
 {
@@ -37,69 +37,52 @@ class PagoController extends Controller
         $reserva->total_precio = $total;
         $reserva->save();
 
-        // Configurar Stripe con la clave secreta
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        // Usar nuestro servicio personalizado de Stripe
+        $stripeService = new StripeService();
 
         try {
-            // Preparar los items para Stripe
-            $line_items = [];
+            // Preparar descripción y metadatos para Stripe
+            $description = 'Reserva de vehículos - ID: ' . $reserva->id_reservas;
+            $metadata = [
+                'id_reserva' => $reserva->id_reservas,
+                'id_usuario' => Auth::id(),
+                'total' => $total
+            ];
             
-            foreach ($reserva->vehiculosReservas as $vr) {
-                $dias = max(1, \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
-                $precioTotal = $vr->vehiculo->precio_dia * $dias;
-                
-                $line_items[] = [
-                    'price_data' => [
-                        'currency' => 'eur',
-                        'product_data' => [
-                            'name' => $vr->vehiculo->marca . ' ' . $vr->vehiculo->modelo,
-                            'description' => sprintf(
-                                'Reserva del %s al %s (%d días) - Precio: %.2f€/día',
-                                date('d/m/Y', strtotime($vr->fecha_ini)),
-                                date('d/m/Y', strtotime($vr->fecha_final)),
-                                $dias,
-                                $vr->vehiculo->precio_dia
-                            ),
-                            'images' => [$vr->vehiculo->imagenes()->first() ? asset('img/' . $vr->vehiculo->imagenes()->first()->ruta) : asset('img/default-car.png')],
-                            'metadata' => [
-                                'dias_alquiler' => $dias,
-                                'precio_dia' => $vr->vehiculo->precio_dia,
-                                'total' => $precioTotal
-                            ]
-                        ],
-                        'unit_amount' => intval($precioTotal * 100), // Stripe trabaja en centavos
-                    ],
-                    'quantity' => 1,
-                ];
+            // URLs para redirecciones
+            $successUrl = route('pago.exito', ['id_reserva' => $reserva->id_reservas]) . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = route('pago.cancelado');
+            
+            // Llamar a nuestro servicio para crear la sesión de checkout
+            $session = $stripeService->createCheckoutSession(
+                $total,
+                $description,
+                $metadata,
+                $successUrl,
+                $cancelUrl
+            );
+            
+            // Log para depuración
+            Log::info('Respuesta de Stripe: ' . json_encode($session));
+            
+            // Verificar si hubo error
+            if (isset($session['error'])) {
+                throw new \Exception($session['message'] ?? 'Error al crear la sesión de pago');
             }
 
-            // Crear la sesión de Stripe Checkout
-            $session = Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => $line_items,
-                'mode' => 'payment',
-                'success_url' => route('pago.exito', ['id_reserva' => $reserva->id_reservas]) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('pago.cancelado'),
-                'customer_email' => Auth::user()->email,
-                'metadata' => [
-                    'id_reserva' => $reserva->id_reservas,
-                    'id_usuario' => Auth::id(),
-                    'total' => $total
-                ],
-                'locale' => 'es',
-            ]);
-
             // Guardar el ID de la sesión en la reserva para referencia futura
-            $reserva->referencia_pago = $session->id;
+            $reserva->referencia_pago = $session['id'] ?? '';
             $reserva->save();
 
             return view('pago.checkout', [
                 'reserva' => $reserva,
-                'stripe_session_id' => $session->id,
+                'stripe_session_id' => $session['id'] ?? '',
                 'stripe_public_key' => env('STRIPE_KEY'),
+                'payment_url' => $session['url'] ?? ''
             ]);
-        } catch (ApiErrorException $e) {
-            // Manejo de errores de la API de Stripe
+        } catch (\Exception $e) {
+            // Manejo de errores
+            Log::error('Error al crear la sesión de pago: ' . $e->getMessage());
             return redirect()->route('carrito')->with('error', 'Error al crear la sesión de pago: ' . $e->getMessage());
         }
     }
@@ -113,15 +96,16 @@ class PagoController extends Controller
             return redirect()->route('home');
         }
         
-        // Verificar el estado de la sesión de Stripe
+        // Verificar el estado de la sesión de Stripe con nuestro servicio
         if ($request->has('session_id')) {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            $stripeService = new StripeService();
             
             try {
-                $session = Session::retrieve($request->session_id);
+                // Verificar si el pago fue exitoso
+                $isSuccessful = $stripeService->isPaymentSuccessful($request->session_id);
                 
                 // Verificar que la sesión está pagada
-                if ($session->payment_status === 'paid') {
+                if ($isSuccessful) {
                     // Actualizar el estado de la reserva
                     $reserva->estado = 'pagado';
                     $reserva->save();
@@ -130,7 +114,7 @@ class PagoController extends Controller
                     Pago::create([
                         'estado_pago' => 'completado',
                         'fecha_pago' => now(),
-                        'referencia_externa' => $session->payment_intent,
+                        'referencia_externa' => $request->session_id, // Usamos el ID de la sesión como referencia
                         'monto_pagado' => $reserva->total_precio,
                         'total_precio' => $reserva->total_precio,
                         'moneda' => 'EUR',
@@ -140,8 +124,9 @@ class PagoController extends Controller
                     
                     return view('pago.exito', ['reserva' => $reserva]);
                 }
-            } catch (ApiErrorException $e) {
-                // Manejar errores de Stripe
+            } catch (\Exception $e) {
+                // Manejar errores
+                Log::error('Error al verificar el pago: ' . $e->getMessage());
                 return redirect()->route('carrito')->with('error', 'Error al verificar el pago: ' . $e->getMessage());
             }
         }
@@ -157,18 +142,22 @@ class PagoController extends Controller
     
     public function webhook(Request $request)
     {
-        // Configurar Stripe
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        // Usar nuestro servicio personalizado de Stripe
+        $stripeService = new StripeService();
         
         $payload = $request->getContent();
         $sig_header = $request->header('Stripe-Signature');
-        $endpoint_secret = env('STRIPE_WEBHOOK_SECRET');
         
         try {
-            // Verificar el evento de Stripe
-            $event = \Stripe\Webhook::constructEvent(
-                $payload, $sig_header, $endpoint_secret
+            // Verificar el evento de Stripe con nuestro servicio
+            $event = $stripeService->constructEventFromWebhook(
+                $payload, $sig_header
             );
+            
+            if (!$event) {
+                Log::error('No se pudo verificar el evento de webhook de Stripe');
+                return response()->json(['error' => 'Webhook error'], 400);
+            }
             
             // Manejar el evento
             switch ($event->type) {

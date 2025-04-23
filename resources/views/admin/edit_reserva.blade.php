@@ -179,7 +179,7 @@
                 </div>
                 
                 <h4 class="form-heading">Vehículos</h4>
-                <div id="vehiculos-container">
+                <div id="vehiculos-container" class="vehicles-container" data-count="{{ count($reserva_vehiculos) }}">
                     @foreach($reserva_vehiculos as $index => $vehiculo)
                         <div class="vehicle-entry" id="vehicle-entry-{{ $index }}">
                             <div class="row">
@@ -239,7 +239,7 @@
                     <i class="fas fa-plus"></i> Añadir Otro Vehículo
                 </button>
                 
-                <div class="alert alert-info mt-4" id="precio-total">
+                <div class="alert alert-info mt-4" id="precio-total" data-precio="{{ $reserva->total_precio }}">
                     <strong>Precio Total:</strong> {{ number_format($reserva->total_precio, 2) }} €
                 </div>
                 
@@ -252,170 +252,73 @@
     </div>
 </div>
 
+<!-- Plantilla para nuevos vehículos (oculta) -->
+<template id="vehicle-template">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Vehículo #${vehicleNumber}</h5>
+                <button type="button" class="remove-vehicle-btn" onclick="removeVehicle(${newIndex})">
+                    <i class="fas fa-times"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <label for="vehiculos_${newIndex}" class="form-label">Seleccionar Vehículo</label>
+            <select class="form-select" id="vehiculos_${newIndex}" name="vehiculos[]" required onchange="calcularPrecio(${newIndex})">
+                <option value="">Seleccionar Vehículo</option>
+                @foreach($vehiculos as $v)
+                    <option value="{{ $v->id_vehiculos }}" data-precio="{{ $v->precio_dia }}">
+                        {{ $v->marca }} {{ $v->modelo }} ({{ $v->precio_dia }}€/día)
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="fecha_inicio_${newIndex}" class="form-label">Fecha de Inicio</label>
+                <input type="date" class="form-control fecha-inicio" id="fecha_inicio_${newIndex}" name="fecha_inicio[]" required onchange="calcularPrecio(${newIndex})">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="fecha_fin_${newIndex}" class="form-label">Fecha de Fin</label>
+                <input type="date" class="form-control fecha-fin" id="fecha_fin_${newIndex}" name="fecha_fin[]" required onchange="calcularPrecio(${newIndex})">
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info precio-info" id="precio-info-${newIndex}" style="display: none;">
+                Seleccione un vehículo y fechas para ver el precio.
+            </div>
+        </div>
+    </div>
+</template>
+
+@section('scripts')
+<!-- Se ha movido el código JavaScript a un archivo externo -->
+<script src="{{ asset('js/admin-edit-reserva.js') }}"></script>
 <script>
-let vehicleCount = {{ count($reserva_vehiculos) }};
-let precioTotal = {{ $reserva->total_precio }};
-
-function addVehicle() {
-    const container = document.getElementById('vehiculos-container');
-    const newIndex = vehicleCount;
-    
-    const vehicleEntry = document.createElement('div');
-    vehicleEntry.className = 'vehicle-entry';
-    vehicleEntry.id = `vehicle-entry-${newIndex}`;
-    
-    vehicleEntry.innerHTML = `
-        <div class="row">
-            <div class="col-md-12">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Vehículo #${newIndex + 1}</h5>
-                    <button type="button" class="remove-vehicle-btn" onclick="removeVehicle(${newIndex})">
-                        <i class="fas fa-times"></i> Eliminar
-                    </button>
-                </div>
-            </div>
-        </div>
+    // Configurar los valores iniciales desde el servidor
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener la plantilla para nuevos vehículos
+        const template = document.getElementById('vehicle-template').innerHTML;
+        const container = document.getElementById('vehiculos-container');
         
-        <div class="row mb-3">
-            <div class="col-md-12">
-                <label for="vehiculos_${newIndex}" class="form-label">Seleccionar Vehículo</label>
-                <select class="form-select" id="vehiculos_${newIndex}" name="vehiculos[]" required onchange="calcularPrecio(${newIndex})">
-                    <option value="">Seleccionar Vehículo</option>
-                    @foreach($vehiculos as $v)
-                        <option value="{{ $v->id_vehiculos }}" data-precio="{{ $v->precio_dia }}">
-                            {{ $v->marca }} {{ $v->modelo }} ({{ $v->precio_dia }}€/día)
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
+        // Pasar la plantilla y los valores iniciales al contenedor
+        container.setAttribute('data-template', template);
+        container.setAttribute('data-count', '{{ count($reserva_vehiculos) }}');
         
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="fecha_inicio_${newIndex}" class="form-label">Fecha de Inicio</label>
-                    <input type="date" class="form-control fecha-inicio" id="fecha_inicio_${newIndex}" name="fecha_inicio[]" required onchange="calcularPrecio(${newIndex})">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="fecha_fin_${newIndex}" class="form-label">Fecha de Fin</label>
-                    <input type="date" class="form-control fecha-fin" id="fecha_fin_${newIndex}" name="fecha_fin[]" required onchange="calcularPrecio(${newIndex})">
-                </div>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-12">
-                <div class="alert alert-info precio-info" id="precio-info-${newIndex}" style="display: none;">
-                    Seleccione un vehículo y fechas para ver el precio.
-                </div>
-            </div>
-        </div>
-    `;
-    
-    container.appendChild(vehicleEntry);
-    vehicleCount++;
-    
-    // Mostrar botones de eliminar si hay más de un vehículo
-    const removeButtons = document.querySelectorAll('.remove-vehicle-btn');
-    if (removeButtons.length > 1) {
-        removeButtons.forEach(button => {
-            button.style.display = 'block';
-        });
-    }
-}
-
-function removeVehicle(index) {
-    const vehicleEntry = document.getElementById(`vehicle-entry-${index}`);
-    vehicleEntry.remove();
-    
-    // Recalcular precio total
-    actualizarPrecioTotal();
-    
-    // Ocultar botones de eliminar si solo queda un vehículo
-    const removeButtons = document.querySelectorAll('.remove-vehicle-btn');
-    if (removeButtons.length <= 1) {
-        removeButtons[0].style.display = 'none';
-    }
-}
-
-function calcularPrecio(index) {
-    const vehiculoSelect = document.getElementById(`vehiculos_${index}`);
-    const fechaInicio = document.getElementById(`fecha_inicio_${index}`);
-    const fechaFin = document.getElementById(`fecha_fin_${index}`);
-    const precioInfo = document.getElementById(`precio-info-${index}`);
-    
-    if (vehiculoSelect.value && fechaInicio.value && fechaFin.value) {
-        const precioDiario = parseFloat(vehiculoSelect.options[vehiculoSelect.selectedIndex].dataset.precio);
-        const inicio = new Date(fechaInicio.value);
-        const fin = new Date(fechaFin.value);
-        
-        // Verificar que la fecha de fin sea posterior a la de inicio
-        if (fin < inicio) {
-            precioInfo.innerHTML = '<strong class="text-danger">Error: La fecha de fin debe ser posterior a la fecha de inicio.</strong>';
-            precioInfo.className = 'alert alert-danger precio-info';
-            precioInfo.style.display = 'block';
-            return;
-        }
-        
-        // Calcular número de días (incluyendo el día de fin)
-        const diffTime = Math.abs(fin - inicio);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        
-        // Calcular precio para este vehículo
-        const precioVehiculo = precioDiario * diffDays;
-        
-        precioInfo.innerHTML = `<strong>Precio para este vehículo:</strong> ${precioVehiculo.toFixed(2)} € (${precioDiario} €/día x ${diffDays} días)`;
-        precioInfo.className = 'alert alert-info precio-info';
-        precioInfo.style.display = 'block';
-        
-        // Actualizar precio total
-        actualizarPrecioTotal();
-    } else {
-        precioInfo.style.display = 'none';
-    }
-}
-
-function actualizarPrecioTotal() {
-    let total = 0;
-    
-    // Recorrer todos los vehículos
-    for (let i = 0; i < vehicleCount; i++) {
-        const vehiculoElement = document.getElementById(`vehiculos_${i}`);
-        const fechaInicioElement = document.getElementById(`fecha_inicio_${i}`);
-        const fechaFinElement = document.getElementById(`fecha_fin_${i}`);
-        
-        // Si este índice existe y tiene todos los valores
-        if (vehiculoElement && fechaInicioElement && fechaFinElement &&
-            vehiculoElement.value && fechaInicioElement.value && fechaFinElement.value) {
-            
-            const precioDiario = parseFloat(vehiculoElement.options[vehiculoElement.selectedIndex].dataset.precio);
-            const inicio = new Date(fechaInicioElement.value);
-            const fin = new Date(fechaFinElement.value);
-            
-            // Verificar que la fecha de fin sea posterior a la de inicio
-            if (fin >= inicio) {
-                const diffTime = Math.abs(fin - inicio);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                
-                // Sumar al total
-                total += precioDiario * diffDays;
-            }
-        }
-    }
-    
-    // Actualizar elemento en la UI
-    document.getElementById('precio-total').innerHTML = `<strong>Precio Total:</strong> ${total.toFixed(2)} €`;
-    precioTotal = total;
-}
-
-// Inicializar precios para todos los vehículos existentes
-document.addEventListener('DOMContentLoaded', function() {
-    // Calcular precio para cada vehículo existente
-    for (let i = 0; i < vehicleCount; i++) {
-        calcularPrecio(i);
-    }
-});
+        // Configurar el precio total inicial
+        document.getElementById('precio-total').setAttribute('data-precio', '{{ $reserva->total_precio }}');
+    });
 </script>
 @endsection
