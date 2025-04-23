@@ -31,13 +31,14 @@
                                             Del {{ date('d/m/Y', strtotime($vr->fecha_ini)) }} al {{ date('d/m/Y', strtotime($vr->fecha_final)) }}
                                         </div>
                                         <div class="text-muted">
-                                            <i class="fas fa-clock mr-2"></i>
-                                            @php
-                                                $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
-                                                $diasTexto = $dias == 1 ? '1 día' : $dias . ' días';
-                                            @endphp
-                                            {{ $diasTexto }}
-                                        </div>
+                                        <i class="fas fa-clock mr-2"></i>
+                                        @php
+                                            // Corregir el cálculo de los días
+                                            $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final) + 1);
+                                            $diasTexto = $dias == 1 ? '1 día' : $dias . ' días';
+                                        @endphp
+                                        {{ $diasTexto }}
+                                    </div>
                                     </div>
                                     <div class="text-right">
                                         <div class="price-details">
@@ -59,11 +60,12 @@
                                 </div>
                                 <div class="total-price">
                                     @php
-                                    $total = 0;
-                                    foreach($reserva->vehiculosReservas as $vr) {
-                                        $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
-                                        $total += $vr->vehiculo->precio_dia * $dias;
-                                    }
+                                        $total = 0;
+                                        foreach($reserva->vehiculosReservas as $vr) {
+                                            // Incluir el día final sumando 1 al resultado de diffInDays
+                                            $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final) + 1);
+                                            $total += $vr->vehiculo->precio_dia * $dias;
+                                        }
                                     @endphp
                                     {{ number_format($total, 2, ',', '.') }}€
                                 </div>

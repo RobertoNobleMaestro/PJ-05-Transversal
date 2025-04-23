@@ -25,18 +25,6 @@ class PagoController extends Controller
             return redirect()->route('carrito')->with('error', 'No tienes ninguna reserva pendiente');
         }
 
-        // Calcular el precio total de la reserva
-        $total = 0;
-        foreach ($reserva->vehiculosReservas as $vr) {
-            $dias = \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final);
-            $dias = max(1, $dias); // Mínimo 1 día
-            $total += $vr->vehiculo->precio_dia * $dias;
-        }
-
-        // Actualizar la reserva con el precio total
-        $reserva->total_precio = $total;
-        $reserva->save();
-
         // Configurar Stripe con la clave secreta
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -45,7 +33,7 @@ class PagoController extends Controller
             $line_items = [];
             
             foreach ($reserva->vehiculosReservas as $vr) {
-                $dias = max(1, \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
+                $dias = \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final) + 1;  // Incluye el día final
                 $precioTotal = $vr->vehiculo->precio_dia * $dias;
                 
                 $line_items[] = [
@@ -84,7 +72,7 @@ class PagoController extends Controller
                 'metadata' => [
                     'id_reserva' => $reserva->id_reservas,
                     'id_usuario' => Auth::id(),
-                    'total' => $total
+                    'total' => $reserva->precio_total
                 ],
                 'locale' => 'es',
             ]);
