@@ -134,11 +134,11 @@
           <div class="form-group">
             <label><strong>Valoración:</strong></label>
             <div id="valoracionFiltro" class="form-check">
-              <label><input type="checkbox" name="valoracion" value="5"> 5 ⭐</label><br>
-              <label><input type="checkbox" name="valoracion" value="4"> 4 ⭐</label><br>
-              <label><input type="checkbox" name="valoracion" value="3"> 3 ⭐</label><br>
-              <label><input type="checkbox" name="valoracion" value="2"> 2 ⭐</label><br>
-              <label><input type="checkbox" name="valoracion" value="1"> 1 ⭐</label><br>
+              <label><input class="form-check-input" type="checkbox" name="valoracion" value="5"> 5 ⭐</label><br>
+              <label><input class="form-check-input" type="checkbox" name="valoracion" value="4"> 4 ⭐</label><br>
+              <label><input class="form-check-input" type="checkbox" name="valoracion" value="3"> 3 ⭐</label><br>
+              <label><input class="form-check-input" type="checkbox" name="valoracion" value="2"> 2 ⭐</label><br>
+              <label><input class="form-check-input" type="checkbox" name="valoracion" value="1"> 1 ⭐</label><br>
             </div>
           </div>          
   

@@ -32,11 +32,11 @@ class VehiculoController extends Controller
         return null; // El usuario es administrador, continuar
     }
     
-    // Método para mostrar detalles de un vehículo (para clientes)
     public function detalle($id)
     {
-        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva'])
-            ->findOrFail($id);
+        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva', 'imagenes'])
+        ->findOrFail($id);
+    
 
         $precioUnitario = $vehiculo->vehiculosReservas
             ->where('fecha_final', '>=', now())
@@ -44,7 +44,8 @@ class VehiculoController extends Controller
 
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo,
-            'precio_unitario' => $precioUnitario
+            'precio_unitario' => $precioUnitario,
+            'imagenes' => $vehiculo->imagenes
         ]);
     }
 

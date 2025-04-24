@@ -23,13 +23,9 @@ function cargarCarrito() {
       div.classList.add('vehiculo-item');
       div.id = `vehiculo-${vehiculo.reserva.id_reserva}`;
 
-      // Crear elemento de imagen con error handling
-      let imagen;
-      if (vehiculo.imagenes && vehiculo.imagenes.length > 0 && vehiculo.imagenes[0].nombre_archivo) {
-        imagen = `<img src="/storage/${vehiculo.imagenes[0].nombre_archivo}" alt="${vehiculo.marca} ${vehiculo.modelo}" onerror="this.onerror=null; this.src='/img/car-placeholder.png';">`;
-      } else {
-        imagen = `<div style="width:150px;height:100px;background:#ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-car" style="font-size:32px;color:#aaa;"></i></div>`;
-      }
+      const imagen = vehiculo.imagenes?.[0]?.nombre_archivo 
+        ? `<img src="img/vehiculos/${vehiculo.imagenes[0].nombre_archivo}" alt="Vehículo">`
+        : `<div style="width:150px;height:100px;background:#ccc;border-radius:6px;"></div>`;
 
       const caracteristicas = vehiculo.caracteristicas || {};
       const detalles = [
