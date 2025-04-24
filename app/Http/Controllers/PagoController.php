@@ -29,8 +29,9 @@ class PagoController extends Controller
         // Calcular el precio total de la reserva
         $total = 0;
         foreach ($reserva->vehiculosReservas as $vr) {
-            $dias = \Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final);
-            $dias = max(1, $dias); // Mínimo 1 día
+            $fechaInicio = \Carbon\Carbon::parse($vr->fecha_ini);
+            $fechaFin = \Carbon\Carbon::parse($vr->fecha_final);
+            $dias = $fechaInicio->diffInDays($fechaFin) + 1; // Incluir el día de fin
             $total += $vr->vehiculo->precio_dia * $dias;
         }
 

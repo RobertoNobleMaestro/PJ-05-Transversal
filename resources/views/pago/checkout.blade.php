@@ -84,7 +84,7 @@
                                         <div class="text-muted">
                                             <i class="fas fa-clock mr-2"></i>
                                             @php
-                                                $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
+                                                $dias = Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final) + 1;
                                                 $diasTexto = $dias == 1 ? '1 día' : $dias . ' días';
                                             @endphp
                                             {{ $diasTexto }}
@@ -94,7 +94,7 @@
                                         <div class="price-details">
                                             <div class="price-per-day">{{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}€/día</div>
                                             <div class="total-price">
-                                                {{ number_format($vr->vehiculo->precio_dia * $dias, 2, ',', '.') }}€
+                                                {{ number_format($vr->vehiculo->precio_dia * ($dias), 2, ',', '.') }}€
                                             </div>
                                         </div>
                                     </div>
@@ -106,17 +106,10 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong>Total a pagar:</strong>
-                                    <div class="text-muted small">{{ $reserva->vehiculosReservas->count() }} {{ $reserva->vehiculosReservas->count() == 1 ? 'vehículo' : 'vehículos' }}</div>
+                                    <div class="text-muted small">{{ count($reserva->vehiculosReservas) }} vehículo{{ count($reserva->vehiculosReservas) > 1 ? 's' : '' }}</div>
                                 </div>
                                 <div class="total-price">
-                                    @php
-                                    $total = 0;
-                                    foreach($reserva->vehiculosReservas as $vr) {
-                                        $dias = max(1, Carbon\Carbon::parse($vr->fecha_ini)->diffInDays($vr->fecha_final));
-                                        $total += $vr->vehiculo->precio_dia * $dias;
-                                    }
-                                    @endphp
-                                    {{ number_format($total, 2, ',', '.') }}€
+                                    {{ number_format($reserva->total_precio, 2, ',', '.') }}€
                                 </div>
                             </div>
                         </div>
@@ -178,7 +171,7 @@
                         </div>
                         
                         <button type="submit" class="btn-pay">
-                            <i class="fas fa-lock mr-2"></i>Pagar {{ number_format($total, 2, ',', '.') }}€
+                            <i class="fas fa-lock mr-2"></i>Pagar {{ number_format($reserva->total_precio, 2, ',', '.') }}€
                         </button>
                     </form>
                     
