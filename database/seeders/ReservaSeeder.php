@@ -69,7 +69,6 @@ class ReservaSeeder extends Seeder
                 'id_reservas' => 1,
                 'fecha_ini' => '2024-04-07',
                 'fecha_final' => '2024-04-09',
-                'precio_unitario' => 150.00,
             ],
             
             // Vehículos para la reserva 2
@@ -78,7 +77,6 @@ class ReservaSeeder extends Seeder
                 'id_reservas' => 2,
                 'fecha_ini' => '2024-04-10',
                 'fecha_final' => '2024-04-11',
-                'precio_unitario' => 90.00,
             ],
             
             // Vehículos para la reserva 3
@@ -87,7 +85,6 @@ class ReservaSeeder extends Seeder
                 'id_reservas' => 3,
                 'fecha_ini' => '2024-04-15',
                 'fecha_final' => '2024-04-18',
-                'precio_unitario' => 220.00,
             ],
             
             // Vehículos para la reserva 4
@@ -96,7 +93,6 @@ class ReservaSeeder extends Seeder
                 'id_reservas' => 4,
                 'fecha_ini' => '2024-04-20',
                 'fecha_final' => '2024-04-22',
-                'precio_unitario' => 180.00,
             ],
             
             // Vehículos para la reserva 5 (múltiples vehículos)
@@ -105,14 +101,12 @@ class ReservaSeeder extends Seeder
                 'id_reservas' => 5,
                 'fecha_ini' => '2024-04-22',
                 'fecha_final' => '2024-04-24',
-                'precio_unitario' => 150.00,
             ],
             [
                 'id_vehiculos' => 2,
                 'id_reservas' => 5,
                 'fecha_ini' => '2024-04-22',
                 'fecha_final' => '2024-04-24',
-                'precio_unitario' => 150.00,
             ],
             
             // Vehículos para la reserva 6 (múltiples vehículos)
@@ -121,14 +115,12 @@ class ReservaSeeder extends Seeder
                 'id_reservas' => 6,
                 'fecha_ini' => '2024-04-25',
                 'fecha_final' => '2024-04-28',
-                'precio_unitario' => 225.00,
             ],
             [
                 'id_vehiculos' => 4,
                 'id_reservas' => 6,
                 'fecha_ini' => '2024-04-25',
                 'fecha_final' => '2024-04-28',
-                'precio_unitario' => 225.00,
             ],
         ]);
     }

@@ -11,22 +11,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Tablas base sin dependencias
+        // 1. Primero las tablas base sin dependencias
         $this->call([
-            RoleSeeder::class,
-            LugarSeeder::class,
-            TipoSeeder::class,
-            UserSeeder::class,
-            VehiculoSeeder::class,
-            ImagenVehiculoSeeder::class,
-            CaracteristicaSeeder::class,
-            ReservaSeeder::class,
-            VehiculosReservasSeeder::class,
-            PagoSeeder::class,
-            MetodoPagoSeeder::class,
-            ValoracionSeeder::class,
-            CarritoSeeder::class,
-            ReservaCompletaSeeder::class,
+            RoleSeeder::class,           // Roles para usuarios
+            LugarSeeder::class,          // Lugares/ubicaciones
+            TipoSeeder::class,           // Tipos de vehículos
+        ]);
+        
+        // 2. Luego las tablas que dependen de las bases
+        $this->call([
+            UserSeeder::class,           // Usuarios (dependen de roles)
+            VehiculoSeeder::class,       // Vehículos (dependen de tipos y lugares)
+        ]);
+        
+        // 3. Luego las tablas que dependen de vehículos y usuarios
+        $this->call([
+            ImagenVehiculoSeeder::class, // Imágenes de vehículos
+            CaracteristicaSeeder::class, // Características de vehículos
+            ReservaSeeder::class,        // Reservas (dependen de usuarios)
+        ]);
+        
+        // 4. Finalmente las tablas con múltiples dependencias
+        $this->call([
+            VehiculosReservasSeeder::class, // Relación entre vehículos y reservas
+            PagoSeeder::class,              // Pagos (dependen de reservas)
+            MetodoPagoSeeder::class,        // Métodos de pago
+            ValoracionSeeder::class,        // Valoraciones (dependen de usuarios y vehículos)
+            CarritoSeeder::class,           // Carritos de compra
+            ReservaCompletaSeeder::class,   // Reservas completas
         ]);
     }
 }
