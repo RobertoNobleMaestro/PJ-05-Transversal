@@ -18,7 +18,7 @@ a {
 
 /* ===== Hero Section ===== */
 .hero-section {
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
 }
 
 .hero-section h1 {
@@ -190,11 +190,31 @@ a {
   margin-right: 1px;
 }
 
-/* ===== Footer ===== */
-footer {
-  background-color: #fff;
-  padding: 1rem 0;
-  border-top: 1px solid #ddd;
-  font-size: 0.9rem;
-  color: #666;
+/* === Paginación personalizada === */
+
+#pagination-controls .btn-outline-secondary {
+  background-color: #9F17BD !important;
+  color: #fff !important;
+  border-color: #9F17BD !important;
+}
+
+#pagination-controls .btn-outline-secondary:hover {
+  background-color: #9F17BD !important;
+  color: #fff !important;
+  border-color: #9F17BD !important;
+}
+
+#pagination-controls .btn-outline-secondary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(159, 23, 189, 0.3) !important;
+}
+
+#pagination-controls .btn-outline-primary.disabled {
+  background-color: #9F17BD !important;
+  color: #fff !important;
+  border-color: #9F17BD !important;
+}
+
+.bg-purple {
+  background-color: #9F17BD;
+  border-radius: 10px;
 }
