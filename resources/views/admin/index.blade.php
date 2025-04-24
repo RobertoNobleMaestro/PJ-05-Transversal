@@ -22,7 +22,7 @@
                 <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
                 <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
                 <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
-                <li><a href="{{ route('admin.reservas') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
+                <li><a href="{{ route('admin.reservas.index') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
                 <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
             </ul>
         </div>
@@ -96,7 +96,7 @@
                             </div>
                             <h3>Gestión de Reservas</h3>
                             <p>Administra las reservas actuales, crea nuevas reservas o modifica las existentes.</p>
-                            <a href="{{ route('admin.reservas') }}" class="btn-admin-card">
+                            <a href="{{ route('admin.reservas.index') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>

@@ -1,8 +1,19 @@
+/**
+ * GESTIÓN DE LUGARES - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para gestionar los lugares/sucursales
+ * desde el panel de administración, incluyendo listado, filtrado, y eliminación.
+ * Incluye una funcionalidad avanzada para reubicar vehículos cuando se elimina un lugar.
+ */
+
 // Objeto para mantener los filtros activos
 let activeFilters = {};
 
 /**
- * Carga los lugares desde la API y los muestra en la tabla
+ * loadLugares() - Carga los lugares desde la API y los muestra en la tabla
+ * 
+ * Esta función realiza una petición AJAX al servidor para obtener los lugares
+ * (aplicando los filtros si existen) y los muestra en la tabla del panel de administración.
+ * Incluye la información de nombre, dirección, coordenadas y acciones disponibles.
  */
 function loadLugares() {
     // Mostrar el indicador de carga
@@ -22,6 +33,7 @@ function loadLugares() {
         }
     });
     
+    // Realizar petición AJAX para obtener los lugares
     fetch(url, {
         method: 'GET',
         headers: {
@@ -47,10 +59,12 @@ function loadLugares() {
         
         // Rellenar la tabla con los datos
         if (data.lugares.length === 0) {
+            // Mostrar mensaje si no hay lugares con los filtros aplicados
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="6" class="text-center">No se encontraron lugares con los filtros aplicados</td>`;
             tableBody.appendChild(row);
         } else {
+            // Recorrer cada lugar y crear su fila en la tabla
             data.lugares.forEach(lugar => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -69,13 +83,17 @@ function loadLugares() {
         }
     })
     .catch(error => {
+        // Manejar errores
         console.error('Error:', error);
         document.getElementById('loading-lugares').innerHTML = `<div class="alert alert-danger">Error al cargar lugares: ${error.message}</div>`;
     });
 }
 
 /**
- * Limpia todos los filtros aplicados
+ * clearFilters() - Limpia todos los filtros aplicados y muestra todos los lugares
+ * 
+ * Esta función resetea todos los campos de filtro a sus valores predeterminados
+ * y vuelve a cargar la lista completa de lugares sin filtros aplicados.
  */
 function clearFilters() {
     document.getElementById('filterNombre').value = '';
@@ -89,7 +107,11 @@ function clearFilters() {
 }
 
 /**
- * Aplica los filtros para la búsqueda de lugares
+ * applyFilters() - Aplica los filtros para la búsqueda de lugares
+ * 
+ * Esta función recoge los valores de los diferentes campos de filtro
+ * (nombre y dirección) y actualiza la lista de lugares mostrando solo aquellos
+ * que cumplen con los criterios seleccionados.
  */
 function applyFilters() {
     // Recoger los valores de los filtros
@@ -107,9 +129,18 @@ function applyFilters() {
 }
 
 /**
- * Gestiona la eliminación de un lugar, con opciones para gestionar los vehículos asociados
- * @param {number} id ID del lugar a eliminar
- * @param {string} nombre Nombre del lugar para mostrar en la confirmación
+ * deleteLugar(id, nombre) - Gestiona el proceso de eliminación de un lugar
+ * 
+ * @param {number} id - ID del lugar a eliminar
+ * @param {string} nombre - Nombre del lugar para mostrar en la confirmación
+ * 
+ * Esta función presenta una interfaz interactiva que permite al administrador
+ * elegir entre tres opciones cuando va a eliminar un lugar:
+ * 1. Eliminar el lugar y todos los vehículos asociados
+ * 2. Reubicar los vehículos a otro lugar existente
+ * 3. Crear un nuevo lugar para transferir los vehículos
+ * 
+ * Incluye validación y gestión de las transacciones para asegurar la integridad de datos.
  */
 function deleteLugar(id, nombre) {
     // Obtener la URL base de los datos
@@ -203,190 +234,144 @@ function deleteLugar(id, nombre) {
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-md-6 mb-2">
                                         <div class="input-group">
                                             <span class="input-group-text" style="background-color: #f8f9fa;"><i class="fas fa-map-pin text-success"></i></span>
-                                            <input type="number" id="nuevo-lugar-latitud" class="form-control" placeholder="Latitud" disabled style="border-color: #28a745;">
+                                            <input type="text" id="nuevo-lugar-latitud" class="form-control" placeholder="Latitud" disabled style="border-color: #28a745;">
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-md-6 mb-2">
                                         <div class="input-group">
                                             <span class="input-group-text" style="background-color: #f8f9fa;"><i class="fas fa-map-pin text-success"></i></span>
-                                            <input type="number" id="nuevo-lugar-longitud" class="form-control" placeholder="Longitud" disabled style="border-color: #28a745;">
+                                            <input type="text" id="nuevo-lugar-longitud" class="form-control" placeholder="Longitud" disabled style="border-color: #28a745;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="text-muted mt-3">
+                            <small><i class="fas fa-info-circle"></i> Al eliminar un lugar, debes decidir qué hacer con los vehículos asociados.</small>
+                        </div>
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: '<i class="fas fa-check"></i> Continuar',
+                confirmButtonText: '<i class="fas fa-check"></i> Confirmar',
                 cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
                 confirmButtonColor: '#9F17BD',
                 cancelButtonColor: '#6c757d',
-                customClass: {
-                    confirmButton: 'btn btn-lg',
-                    cancelButton: 'btn btn-lg'
-                },
                 width: '600px',
-                focusConfirm: false,
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-secondary'
+                },
                 didOpen: () => {
-                    // Agregar estilo CSS adicional
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        .option-card:hover .form-check {
-                            background-color: #f0f0f0 !important;
-                            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-                        }
-                        .form-check-input:checked + label .form-check {
-                            border-color: #9F17BD !important;
-                        }
-                        #opcion-eliminar:checked ~ .option-card:first-child .form-check {
-                            background-color: #feecec !important;
-                            border-color: #dc3545 !important;
-                        }
-                        #opcion-reubicar:checked ~ .option-card:nth-child(2) .form-check {
-                            background-color: #eaf5ff !important;
-                            border-color: #007bff !important;
-                        }
-                        #opcion-nuevo:checked ~ .option-card:last-child .form-check {
-                            background-color: #eaffef !important;
-                            border-color: #28a745 !important;
-                        }
-                    `;
-                    document.head.appendChild(style);
-                    
-                    // Obtener referencias a todos los elementos
+                    // Configurar cambio de estados visuales al seleccionar opciones
                     const opcionEliminar = document.getElementById('opcion-eliminar');
                     const opcionReubicar = document.getElementById('opcion-reubicar');
                     const opcionNuevo = document.getElementById('opcion-nuevo');
+                    
                     const selectDestino = document.getElementById('lugar-destino');
-                    const nuevoNombre = document.getElementById('nuevo-lugar-nombre');
-                    const nuevaDireccion = document.getElementById('nuevo-lugar-direccion');
-                    const nuevaLatitud = document.getElementById('nuevo-lugar-latitud');
-                    const nuevaLongitud = document.getElementById('nuevo-lugar-longitud');
-                    const nuevoLugarForm = document.querySelector('.nuevo-lugar-form');
+                    const nombreInput = document.getElementById('nuevo-lugar-nombre');
+                    const direccionInput = document.getElementById('nuevo-lugar-direccion');
+                    const latitudInput = document.getElementById('nuevo-lugar-latitud');
+                    const longitudInput = document.getElementById('nuevo-lugar-longitud');
                     
-                    // Función para actualizar los estados de los campos
-                    function updateFieldState() {
-                        console.log('Actualizando campos, opción seleccionada:', document.querySelector('input[name="accion"]:checked').value);
+                    const updateOpcionEliminar = () => {
+                        document.querySelector(`label[for="opcion-eliminar"]`).closest('.form-check').style.backgroundColor = opcionEliminar.checked ? '#feecec' : '#f8f9fa';
+                    };
+                    
+                    const updateOpcionReubicar = () => {
+                        const container = document.querySelector(`label[for="opcion-reubicar"]`).closest('.form-check');
+                        container.style.backgroundColor = opcionReubicar.checked ? '#e8f1ff' : '#f8f9fa';
+                        selectDestino.disabled = !opcionReubicar.checked;
+                        selectDestino.style.opacity = opcionReubicar.checked ? '1' : '0.7';
+                    };
+                    
+                    const updateOpcionNuevo = () => {
+                        const container = document.querySelector(`label[for="opcion-nuevo"]`).closest('.form-check');
+                        container.style.backgroundColor = opcionNuevo.checked ? '#e8f8ee' : '#f8f9fa';
                         
-                        if (opcionEliminar.checked) {
-                            // Opción eliminar seleccionada
-                            selectDestino.disabled = true;
-                            nuevoNombre.disabled = true;
-                            nuevaDireccion.disabled = true;
-                            nuevaLatitud.disabled = true;
-                            nuevaLongitud.disabled = true;
-                            nuevoLugarForm.style.opacity = '0.7';
-                            selectDestino.parentElement.style.opacity = '0.7';
-                            
-                        } else if (opcionReubicar.checked) {
-                            // Opción reubicar seleccionada
-                            selectDestino.disabled = false;
-                            nuevoNombre.disabled = true;
-                            nuevaDireccion.disabled = true;
-                            nuevaLatitud.disabled = true;
-                            nuevaLongitud.disabled = true;
-                            nuevoLugarForm.style.opacity = '0.7';
-                            selectDestino.parentElement.style.opacity = '1';
-                            
-                        } else if (opcionNuevo.checked) {
-                            // Opción nuevo lugar seleccionada
-                            selectDestino.disabled = true;
-                            nuevoNombre.disabled = false;
-                            nuevaDireccion.disabled = false;
-                            nuevaLatitud.disabled = false;
-                            nuevaLongitud.disabled = false;
-                            nuevoLugarForm.style.opacity = '1';
-                            selectDestino.parentElement.style.opacity = '0.7';
-                        }
-                    }
+                        const formContainer = document.querySelector('.nuevo-lugar-form');
+                        formContainer.style.opacity = opcionNuevo.checked ? '1' : '0.7';
+                        
+                        nombreInput.disabled = !opcionNuevo.checked;
+                        direccionInput.disabled = !opcionNuevo.checked;
+                        latitudInput.disabled = !opcionNuevo.checked;
+                        longitudInput.disabled = !opcionNuevo.checked;
+                    };
                     
-                    // Asignar eventos a los radio buttons
-                    opcionEliminar.addEventListener('change', updateFieldState);
-                    opcionReubicar.addEventListener('change', updateFieldState);
-                    opcionNuevo.addEventListener('change', updateFieldState);
-                    
-                    // Agregar eventos de clic a las tarjetas
-                    document.querySelectorAll('.option-card').forEach(card => {
-                        card.addEventListener('click', function(e) {
-                            // No activar si se hace clic en input o select
-                            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || 
-                                e.target.tagName === 'OPTION' || e.target.classList.contains('form-control')) {
-                                return;
-                            }
-                            
-                            const radio = this.querySelector('input[type="radio"]');
-                            if (radio) {
-                                radio.checked = true;
-                                updateFieldState();
-                            }
-                        });
+                    // Event listeners para actualizar estados
+                    opcionEliminar.addEventListener('change', () => {
+                        updateOpcionEliminar();
                     });
                     
-                    // Ejecutar una vez al inicio para configurar el estado inicial
-                    updateFieldState();
+                    opcionReubicar.addEventListener('change', () => {
+                        updateOpcionReubicar();
+                    });
                     
-                    // Asegurarse de que la opción seleccionada tenga los estilos correctos
-                    setTimeout(() => {
-                        if (opcionEliminar.checked) {
-                            document.querySelector('.option-card:first-child .form-check').style.backgroundColor = '#feecec';
-                            document.querySelector('.option-card:first-child .form-check').style.borderColor = '#dc3545';
-                        } else if (opcionReubicar.checked) {
-                            document.querySelector('.option-card:nth-child(2) .form-check').style.backgroundColor = '#eaf5ff';
-                            document.querySelector('.option-card:nth-child(2) .form-check').style.borderColor = '#007bff';
-                        } else if (opcionNuevo.checked) {
-                            document.querySelector('.option-card:last-child .form-check').style.backgroundColor = '#eaffef';
-                            document.querySelector('.option-card:last-child .form-check').style.borderColor = '#28a745';
-                        }
-                    }, 100);
+                    opcionNuevo.addEventListener('change', () => {
+                        updateOpcionNuevo();
+                    });
                 }
-
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Obtener la opción seleccionada
-                    const accion = document.querySelector('input[name="accion"]:checked').value;
-                    let payload = { accion };
+                    let accion = document.querySelector('input[name="accion"]:checked').value;
+                    
+                    let data = {
+                        accion: accion,
+                        id_lugar: id
+                    };
                     
                     if (accion === 'reubicar') {
-                        const lugarDestinoId = document.getElementById('lugar-destino').value;
-                        payload.lugar_destino_id = lugarDestinoId;
-                        
-                    } else if (accion === 'nuevo') {
-                        payload.nuevo_lugar = {
-                            nombre: document.getElementById('nuevo-lugar-nombre').value,
-                            direccion: document.getElementById('nuevo-lugar-direccion').value,
-                            latitud: document.getElementById('nuevo-lugar-latitud').value,
-                            longitud: document.getElementById('nuevo-lugar-longitud').value
-                        };
-                        
-                        // Validar campos del nuevo lugar
-                        if (!payload.nuevo_lugar.nombre || !payload.nuevo_lugar.direccion || 
-                            !payload.nuevo_lugar.latitud || !payload.nuevo_lugar.longitud) {
+                        // Validar que se haya seleccionado un lugar de destino
+                        const lugarDestino = document.getElementById('lugar-destino').value;
+                        if (!lugarDestino) {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Campos incompletos',
-                                text: 'Todos los campos del nuevo lugar son requeridos',
+                                title: '<span class="text-danger">Error</span>',
+                                html: '<p>Debes seleccionar un lugar de destino para los vehículos.</p>',
                                 confirmButtonColor: '#9F17BD'
                             });
                             return;
                         }
+                        
+                        // Añadir el ID del lugar de destino
+                        data.lugar_destino = lugarDestino;
+                    } else if (accion === 'nuevo') {
+                        // Obtener y validar datos del nuevo lugar
+                        const nuevoNombre = document.getElementById('nuevo-lugar-nombre').value.trim();
+                        const nuevaDireccion = document.getElementById('nuevo-lugar-direccion').value.trim();
+                        const nuevaLatitud = document.getElementById('nuevo-lugar-latitud').value.trim();
+                        const nuevaLongitud = document.getElementById('nuevo-lugar-longitud').value.trim();
+                        
+                        if (!nuevoNombre || !nuevaDireccion) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '<span class="text-danger">Error</span>',
+                                html: '<p>El nombre y dirección del nuevo lugar son obligatorios.</p>',
+                                confirmButtonColor: '#9F17BD'
+                            });
+                            return;
+                        }
+                        
+                        // Añadir datos del nuevo lugar
+                        data.nuevo_lugar = {
+                            nombre: nuevoNombre,
+                            direccion: nuevaDireccion,
+                            latitud: nuevaLatitud || null,
+                            longitud: nuevaLongitud || null
+                        };
                     }
                     
                     // Mostrar cargando
                     Swal.fire({
-                        title: '<i class="fas fa-spin fa-spinner"></i> Procesando...',
-                        text: 'Realizando operación',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
+                        title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
+                        text: 'Ejecutando la acción seleccionada',
                         showConfirmButton: false,
-                        background: '#f8f9fa',
-                        customClass: {
-                            title: 'text-primary',
-                            content: 'text-secondary'
-                        }
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
                     });
                     
                     // Obtener el token CSRF
@@ -402,15 +387,15 @@ function deleteLugar(id, nombre) {
                         } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Error',
-                                text: 'No se pudo encontrar el token CSRF',
+                                title: '<span class="text-danger">Error</span>',
+                                html: '<p>No se pudo encontrar el token CSRF.</p>',
                                 confirmButtonColor: '#9F17BD'
                             });
                             return;
                         }
                     }
                     
-                    // Enviar petición al servidor
+                    // Realizar la petición DELETE con los datos adicionales
                     fetch(`/admin/lugares/${id}`, {
                         method: 'DELETE',
                         headers: {
@@ -418,7 +403,7 @@ function deleteLugar(id, nombre) {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(data)
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -429,12 +414,13 @@ function deleteLugar(id, nombre) {
                                 html: `<p class="lead">${data.message}</p>`,
                                 confirmButtonColor: '#9F17BD'
                             });
+                            // Recargar la tabla
                             loadLugares();
                         } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
-                                html: `<p class="lead">${data.message || 'Error al procesar la operación'}</p>`,
+                                html: `<p class="lead">${data.message || 'Error al procesar la solicitud'}</p>`,
                                 confirmButtonColor: '#9F17BD'
                             });
                         }
@@ -452,17 +438,22 @@ function deleteLugar(id, nombre) {
             });
         })
         .catch(error => {
-            console.error('Error al cargar lugares:', error);
+            console.error('Error:', error);
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
-                html: '<p class="lead">No se pudieron cargar los lugares disponibles</p>',
+                html: '<p class="lead">Error al cargar los lugares disponibles</p>',
                 confirmButtonColor: '#9F17BD'
             });
         });
 }
 
-// Inicialización cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos para el filtrado de lugares y carga
+ * la lista inicial de lugares cuando la página está lista.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar la carga de lugares
     loadLugares();
@@ -470,7 +461,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener para el botón de limpiar filtros
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
     
-    // Event listeners para aplicar filtros automáticamente al cambiar
-    document.getElementById('filterNombre').addEventListener('input', applyFilters);
-    document.getElementById('filterDireccion').addEventListener('input', applyFilters);
+    // Event listener para el botón de aplicar filtros
+    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    
+    // Event listeners para aplicar filtros cuando se presiona Enter
+    document.getElementById('filterNombre').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            applyFilters();
+        }
+    });
+    
+    document.getElementById('filterDireccion').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            applyFilters();
+        }
+    });
 });

@@ -1,7 +1,20 @@
+/**
+ * GESTIÓN DE USUARIOS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para gestionar usuarios
+ * desde el panel de administración, incluyendo listado, filtrado, y eliminación.
+ * El administrador puede buscar usuarios por nombre o filtrar por rol.
+ */
+
 // Variables globales para los filtros
 let activeFilters = {};
 
-// Función global para cargar usuarios
+/**
+ * loadUsers() - Carga los usuarios desde la API y los muestra en la tabla
+ * 
+ * Esta función realiza una petición AJAX al servidor para obtener los usuarios
+ * (aplicando los filtros si existen) y los muestra en la tabla del panel de administración.
+ * Incluye la información básica de cada usuario y opciones para editar o eliminar.
+ */
 function loadUsers() {
     // Mostrar el indicador de carga
     document.getElementById('loading-users').style.display = 'block';
@@ -17,6 +30,7 @@ function loadUsers() {
         }
     });
     
+    // Realizar petición AJAX para obtener los usuarios
     fetch(url, {
         method: 'GET',
         headers: {
@@ -42,10 +56,12 @@ function loadUsers() {
         
         // Rellenar la tabla con los datos
         if (data.users.length === 0) {
+            // Mostrar mensaje si no hay usuarios con los filtros aplicados
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="5" class="text-center">No se encontraron usuarios con los filtros aplicados</td>`;
             tableBody.appendChild(row);
         } else {
+            // Recorrer cada usuario y crear su fila en la tabla
             data.users.forEach(user => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -63,12 +79,19 @@ function loadUsers() {
         }
     })
     .catch(error => {
+        // Manejar errores en la carga de usuarios
         console.error('Error:', error);
         document.getElementById('loading-users').innerHTML = `<div class="alert alert-danger">Error al cargar usuarios: ${error.message}</div>`;
     });
 }
 
-// Aplicar los filtros cuando se hace clic en el botón o se presiona Enter
+/**
+ * applyFilters() - Aplica los filtros para la búsqueda de usuarios
+ * 
+ * Esta función recoge los valores de los diferentes campos de filtro
+ * (nombre y rol) y actualiza la lista de usuarios mostrando solo aquellos
+ * que cumplen con los criterios seleccionados.
+ */
 function applyFilters() {
     // Recoger los valores de los filtros
     const nombre = document.getElementById('searchUser').value.trim();
@@ -84,7 +107,12 @@ function applyFilters() {
     loadUsers();
 }
 
-// Limpiar todos los filtros
+/**
+ * clearFilters() - Limpia todos los filtros aplicados y muestra todos los usuarios
+ * 
+ * Esta función resetea todos los campos de filtro a sus valores predeterminados
+ * y vuelve a cargar la lista completa de usuarios sin filtros aplicados.
+ */
 function clearFilters() {
     document.getElementById('searchUser').value = '';
     document.getElementById('filterRole').value = '';
@@ -96,8 +124,18 @@ function clearFilters() {
     loadUsers();
 }
 
-// Función para eliminar usuario
+/**
+ * deleteUser(id, nombre) - Elimina un usuario del sistema
+ * 
+ * @param {number} id - ID del usuario a eliminar
+ * @param {string} nombre - Nombre del usuario para mostrar en la confirmación
+ * 
+ * Esta función muestra un diálogo de confirmación y, si el administrador confirma,
+ * realiza una petición DELETE al servidor para eliminar el usuario.
+ * Después de eliminar el usuario, actualiza la tabla para reflejar el cambio.
+ */
 function deleteUser(id, nombre) {
+    // Mostrar diálogo de confirmación con detalles del usuario
     Swal.fire({
         title: `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar Usuario</span>`,
         html: `<p class="lead">¿Estás seguro de que deseas eliminar al usuario "${nombre}"?</p><p class="text-muted">Esta acción no se puede deshacer.</p>`,
@@ -110,7 +148,7 @@ function deleteUser(id, nombre) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Mostrar cargando
+            // Mostrar indicador de carga durante el proceso
             Swal.fire({
                 title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
                 text: 'Eliminando usuario',
@@ -141,6 +179,7 @@ function deleteUser(id, nombre) {
                 }
             }
             
+            // Realizar petición DELETE al servidor
             fetch(`/admin/users/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -152,14 +191,17 @@ function deleteUser(id, nombre) {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Mostrar mensaje de éxito
                     Swal.fire({
                         icon: 'success',
                         title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>',
                         html: `<p class="lead">${data.message}</p>`,
                         confirmButtonColor: '#9F17BD'
                     });
+                    // Recargar la tabla para mostrar los cambios
                     loadUsers();
                 } else {
+                    // Mostrar mensaje de error
                     Swal.fire({
                         icon: 'error',
                         title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -169,6 +211,7 @@ function deleteUser(id, nombre) {
                 }
             })
             .catch(error => {
+                // Manejar errores de conexión o del servidor
                 console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
@@ -184,7 +227,12 @@ function deleteUser(id, nombre) {
 // Variable para almacenar la URL de datos
 let dataUrl;
 
-// Inicializar cuando el DOM esté listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos para el filtrado de usuarios y carga
+ * la lista inicial de usuarios cuando la página está lista.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener la URL de datos desde el atributo data-url
     dataUrl = document.getElementById('users-table-container').getAttribute('data-url');
@@ -200,7 +248,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener para el botón de limpiar filtros
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
     
-    // Event listeners para aplicar filtros automáticamente al cambiar
-    document.getElementById('searchUser').addEventListener('input', applyFilters);
-    document.getElementById('filterRole').addEventListener('change', applyFilters);
+    // Event listener para el botón de aplicar filtros
+    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    
+    // Event listener para buscar al presionar Enter en el campo de búsqueda
+    document.getElementById('searchUser').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            applyFilters();
+        }
+    });
 });

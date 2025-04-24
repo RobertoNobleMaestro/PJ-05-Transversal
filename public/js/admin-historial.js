@@ -1,8 +1,20 @@
+/**
+ * HISTORIAL DE RESERVAS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para gestionar el historial
+ * de reservas desde el panel de administración, incluyendo filtrado avanzado,
+ * visualización de estadísticas y consulta de detalles específicos.
+ * Proporciona una visión completa del estado del negocio y las operaciones realizadas.
+ */
+
 // Objeto para mantener los filtros activos
 let activeFilters = {};
 
 /**
- * Aplica los filtros para la búsqueda de reservas en el historial
+ * applyFilters() - Aplica los filtros para la búsqueda de reservas en el historial
+ * 
+ * Esta función recoge los valores de los diferentes campos de filtro
+ * (usuario, lugar, estado, rango de fechas) y actualiza la lista del historial
+ * mostrando solo aquellas reservas que cumplen con los criterios seleccionados.
  */
 function applyFilters() {
     // Recoger los valores de los filtros
@@ -26,7 +38,10 @@ function applyFilters() {
 }
 
 /**
- * Limpia todos los filtros aplicados
+ * clearFilters() - Limpia todos los filtros aplicados y muestra todas las reservas
+ * 
+ * Esta función resetea todos los campos de filtro a sus valores predeterminados
+ * y vuelve a cargar el historial completo de reservas sin filtros aplicados.
  */
 function clearFilters() {
     document.getElementById('filterUsuario').value = '';
@@ -43,8 +58,12 @@ function clearFilters() {
 }
 
 /**
- * Actualiza las estadísticas mostradas
- * @param {Object} stats Objeto con estadísticas
+ * updateStats(stats) - Actualiza las estadísticas mostradas en el panel
+ * 
+ * @param {Object} stats - Objeto con las estadísticas a mostrar
+ * 
+ * Esta función actualiza los contadores y valores en el panel de estadísticas
+ * mostrando información como el total de reservas, reservas por estado e ingresos.
  */
 function updateStats(stats) {
     document.getElementById('total-reservas').textContent = stats.total_reservas;
@@ -55,9 +74,13 @@ function updateStats(stats) {
 }
 
 /**
- * Formatea un valor numérico a formato de moneda
- * @param {number} value Valor a formatear
- * @returns {string} Valor formateado como moneda
+ * formatCurrency(value) - Formatea un valor numérico a formato de moneda
+ * 
+ * @param {number} value - Valor a formatear
+ * @returns {string} - Valor formateado como moneda (EUR)
+ * 
+ * Esta función utiliza la API Intl.NumberFormat para dar formato de moneda
+ * a un valor numérico, siguiendo el formato español (€).
  */
 function formatCurrency(value) {
     return new Intl.NumberFormat('es-ES', {
@@ -67,112 +90,187 @@ function formatCurrency(value) {
 }
 
 /**
- * Carga el historial de reservas desde la API y lo muestra en la tabla
+ * loadHistorial() - Carga el historial de reservas desde la API y lo muestra en la tabla
+ * 
+ * Esta función realiza una petición AJAX al servidor para obtener el historial de reservas
+ * (aplicando los filtros si existen) y lo muestra en la tabla del panel de administración.
+ * También actualiza el panel de estadísticas con los datos recibidos.
  */
 function loadHistorial() {
     // Mostrar el indicador de carga
     document.getElementById('loading-historial').style.display = 'block';
     document.getElementById('historial-table-container').style.display = 'none';
     
-    // Obtener la URL base de los datos
-    const baseUrl = document.getElementById('historial-table-container').dataset.url;
+    // Preparar los parámetros para la consulta AJAX
+    const params = new URLSearchParams();
+    
+    // Añadir filtros activos a los parámetros
+    if (activeFilters.usuario) params.append('usuario', activeFilters.usuario);
+    if (activeFilters.lugar) params.append('lugar', activeFilters.lugar);
+    if (activeFilters.estado) params.append('estado', activeFilters.estado);
+    if (activeFilters.fecha_desde) params.append('fechaDesde', activeFilters.fecha_desde);
+    if (activeFilters.fecha_hasta) params.append('fechaHasta', activeFilters.fecha_hasta);
+    
+    // Obtener la URL base de los datos (admin.historial.data)
+    let baseUrl = document.getElementById('historial-table-container').dataset.url;
+    // Asegurar que tenemos una URL válida, si no usar la ruta por defecto
+    if (!baseUrl) {
+        baseUrl = '/admin/historial/data';
+    }
     
     // Construir la URL con los parámetros de filtro
     let url = new URL(baseUrl, window.location.origin);
     
-    // Agregar todos los filtros activos a la URL
-    Object.keys(activeFilters).forEach(key => {
-        if (activeFilters[key]) {
-            url.searchParams.append(key, activeFilters[key]);
-        }
-    });
+    // Añadir los parámetros de filtro a la URL
+    url.search = params.toString();
     
-    fetch(url, {
+    // Realizar la petición AJAX
+    fetch(url.toString(), {
         method: 'GET',
         headers: {
+            'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Error al cargar el historial');
+            throw new Error(`Error HTTP: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
         // Ocultar el indicador de carga
         document.getElementById('loading-historial').style.display = 'none';
-        // Mostrar la tabla
         document.getElementById('historial-table-container').style.display = 'block';
         
-        // Actualizar las estadísticas
-        updateStats(data.stats);
+        // Actualizar tabla con los datos recibidos
+        const tableBody = document.getElementById('historial-table-body');
+        tableBody.innerHTML = ''; // Limpiar la tabla primero
         
-        // Limpiar la tabla
-        const tableBody = document.querySelector('#historial-table tbody');
-        tableBody.innerHTML = '';
-        
-        // Rellenar la tabla con los datos
-        if (data.reservas.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="8" class="text-center">No se encontraron reservas con los filtros aplicados</td>`;
-            tableBody.appendChild(row);
-        } else {
+        // Verificar si hay datos de reservas
+        if (data.reservas && data.reservas.length > 0) {
+            // Añadir cada reserva a la tabla
             data.reservas.forEach(reserva => {
-                // Formatear la fecha
-                const fechaReserva = new Date(reserva.fecha_reserva);
-                const fechaFormateada = fechaReserva.toLocaleDateString('es-ES');
-                
-                // Formatear el precio
-                const precioFormateado = formatCurrency(reserva.total_precio);
-                
-                // Crear badge según el estado
-                const estadoBadge = `<span class="badge badge-${reserva.estado}">${reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1)}</span>`;
-                
-                // Crear lista de vehículos
-                let vehiculosHTML = '<ul class="vehiculos-list">';
-                reserva.vehiculos_info.forEach(vehiculo => {
-                    vehiculosHTML += `<li>${vehiculo.marca} ${vehiculo.modelo}</li>`;
-                });
-                vehiculosHTML += '</ul>';
-                
                 const row = document.createElement('tr');
+                
+                // Formatear la fecha para mostrar
+                const fecha = new Date(reserva.fecha_reserva).toLocaleDateString('es-ES');
+                
+                // Definir clase CSS según el estado
+                let estadoClass = '';
+                switch (reserva.estado) {
+                    case 'pendiente':
+                        estadoClass = 'text-warning';
+                        break;
+                    case 'confirmada':
+                        estadoClass = 'text-success';
+                        break;
+                    case 'cancelada':
+                        estadoClass = 'text-danger';
+                        break;
+                    case 'completada':
+                        estadoClass = 'text-info';
+                        break;
+                    default:
+                        estadoClass = '';
+                }
+                
+                // Construir la fila con los datos
                 row.innerHTML = `
-                    <td>${reserva.id_reservas}</td>
+                    <td class="text-center">${reserva.id_reserva}</td>
                     <td>${reserva.nombre_usuario || 'N/A'}</td>
-                    <td>${fechaFormateada}</td>
+                    <td class="text-center">${fecha}</td>
                     <td>${reserva.nombre_lugar || 'N/A'}</td>
-                    <td>${estadoBadge}</td>
-                    <td>${precioFormateado}</td>
-                    <td>${vehiculosHTML}</td>
+                    <td class="text-center">
+                        <span class="badge badge-${reserva.estado}">
+                            ${reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1)}
+                        </span>
+                    </td>
+                    <td class="text-center">${formatCurrency(reserva.total_precio)}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-info" onclick="showDetails(${reserva.id_reservas})" title="Ver detalles">
-                            <i class="fas fa-info-circle"></i>
+                        ${reserva.vehiculos_info && reserva.vehiculos_info.length > 0 ? 
+                            `<ul class="vehiculos-list">${
+                                reserva.vehiculos_info.map(v => 
+                                    `<li>${v.marca} ${v.modelo}</li>`
+                                ).join('')
+                            }</ul>` : 'N/A'
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary btn-sm" onclick="showDetails(${reserva.id_reserva})">
+                            <i class="fas fa-info-circle"></i> Ver detalles
                         </button>
                     </td>
                 `;
+                
                 tableBody.appendChild(row);
             });
+            
+            // Actualizar el panel de estadísticas con los datos del servidor
+            if (data.stats) {
+                updateStats({
+                    total_reservas: data.stats.total || 0,
+                    reservas_completadas: data.stats.completadas || 0,
+                    reservas_pendientes: data.stats.pendientes || 0,
+                    reservas_canceladas: data.stats.canceladas || 0,
+                    ingreso_total: data.stats.ingresos || 0
+                });
+            }
+        } else {
+            // Si no hay reservas, mostrar mensaje
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="7" class="text-center py-3">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No se encontraron reservas con los filtros seleccionados.
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('loading-historial').innerHTML = `<div class="alert alert-danger">Error al cargar historial: ${error.message}</div>`;
+        // Manejar errores
+        console.error('Error al cargar historial:', error);
+        
+        // Ocultar el indicador de carga y mostrar mensaje de error
+        document.getElementById('loading-historial').style.display = 'none';
+        document.getElementById('historial-table-container').style.display = 'block';
+        
+        const tableBody = document.getElementById('historial-table-body');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-3">
+                    <div class="alert alert-danger mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al cargar el historial: ${error.message}
+                    </div>
+                </td>
+            </tr>
+        `;
     });
 }
 
 /**
- * Muestra los detalles de una reserva específica
- * @param {number} id ID de la reserva
+ * showDetails(id) - Muestra los detalles completos de una reserva específica
+ * 
+ * @param {number} id - ID de la reserva a mostrar en detalle
+ * 
+ * Esta función muestra un modal con todos los detalles de una reserva específica,
+ * incluyendo información del cliente, vehículos, fechas, precios y estado de pago.
+ * Permite consultar información detallada sin necesidad de navegar a otra página.
  */
 function showDetails(id) {
+    // Mostrar indicador de carga mientras se obtienen los detalles
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Cargando detalles...',
         text: `Obteniendo información de la reserva #${id}`,
         showConfirmButton: false,
         allowOutsideClick: false,
         didOpen: () => {
+            // Realizar petición AJAX para obtener los detalles de la reserva
             fetch(`/admin/reservas/${id}`, {
                 method: 'GET',
                 headers: {
@@ -182,7 +280,7 @@ function showDetails(id) {
             })
             .then(response => response.json())
             .then(data => {
-                // Formatear la información para mostrar en modal
+                // Formatear la información de vehículos para mostrar en modal
                 let vehiculosHtml = '';
                 data.reserva.vehiculos_info.forEach(vehiculo => {
                     vehiculosHtml += `
@@ -195,30 +293,53 @@ function showDetails(id) {
                     `;
                 });
                 
-                // Mostrar modal con detalles
+                // Mostrar modal con todos los detalles organizados por secciones
                 Swal.fire({
                     title: `<span class="text-primary"><i class="fas fa-info-circle"></i> Detalles de Reserva #${id}</span>`,
                     html: `
-                        <div class="text-start">
-                            <p><strong>Usuario:</strong> ${data.reserva.nombre_usuario}</p>
-                            <p><strong>Fecha de Reserva:</strong> ${new Date(data.reserva.fecha_reserva).toLocaleDateString('es-ES')}</p>
-                            <p><strong>Lugar:</strong> ${data.reserva.nombre_lugar}</p>
-                            <p><strong>Estado:</strong> <span class="badge badge-${data.reserva.estado}">${data.reserva.estado.charAt(0).toUpperCase() + data.reserva.estado.slice(1)}</span></p>
-                            <p><strong>Precio Total:</strong> ${formatCurrency(data.reserva.total_precio)}</p>
-                            
-                            <h5 class="mt-4 mb-3">Vehículos</h5>
-                            ${vehiculosHtml}
+                        <div class="container-fluid p-0">
+                            <div class="row">
+                                <div class="col-md-6 text-start">
+                                    <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-user text-primary"></i> Información del Cliente</h5>
+                                    <p><strong>Cliente:</strong> ${data.reserva.nombre_usuario || 'N/A'}</p>
+                                    <p><strong>Email:</strong> ${data.reserva.email_usuario || 'N/A'}</p>
+                                    <p><strong>Teléfono:</strong> ${data.reserva.telefono_usuario || 'N/A'}</p>
+                                </div>
+                                <div class="col-md-6 text-start">
+                                    <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-file-invoice-dollar text-primary"></i> Información de Pago</h5>
+                                    <p><strong>Estado:</strong> <span class="badge badge-${data.reserva.estado}">${data.reserva.estado.charAt(0).toUpperCase() + data.reserva.estado.slice(1)}</span></p>
+                                    <p><strong>Fecha de Reserva:</strong> ${new Date(data.reserva.fecha_reserva).toLocaleDateString('es-ES')}</p>
+                                    <p><strong>Total:</strong> ${formatCurrency(data.reserva.total_precio)}</p>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12 text-start">
+                                    <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-car text-primary"></i> Vehículos Reservados</h5>
+                                    ${vehiculosHtml}
+                                </div>
+                            </div>
+                            ${data.reserva.comentario ? 
+                                `<div class="row mt-3">
+                                    <div class="col-12 text-start">
+                                        <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-comment text-primary"></i> Comentarios</h5>
+                                        <p>${data.reserva.comentario}</p>
+                                    </div>
+                                </div>` : ''}
                         </div>
                     `,
-                    confirmButtonColor: '#9F17BD',
-                    confirmButtonText: 'Cerrar'
+                    width: '800px',
+                    showCloseButton: true,
+                    confirmButtonText: '<i class="fas fa-check"></i> Cerrar',
+                    confirmButtonColor: '#9F17BD'
                 });
             })
             .catch(error => {
+                // Manejar errores al cargar los detalles
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error al cargar detalles',
-                    text: error.message,
+                    title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+                    html: '<p class="lead">No se pudieron cargar los detalles de la reserva.</p>',
                     confirmButtonColor: '#9F17BD'
                 });
             });
@@ -226,7 +347,12 @@ function showDetails(id) {
     });
 }
 
-// Inicialización cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos para el filtrado del historial y carga
+ * los datos iniciales cuando la página está lista.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar la carga del historial
     loadHistorial();
@@ -234,10 +360,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener para el botón de limpiar filtros
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
     
-    // Event listeners para aplicar filtros automáticamente al cambiar
-    document.getElementById('filterUsuario').addEventListener('input', applyFilters);
-    document.getElementById('filterLugar').addEventListener('change', applyFilters);
-    document.getElementById('filterEstado').addEventListener('change', applyFilters);
-    document.getElementById('filterFechaDesde').addEventListener('change', applyFilters);
-    document.getElementById('filterFechaHasta').addEventListener('change', applyFilters);
+    // Eliminado el botón de aplicar filtros - ahora usamos filtrado en tiempo real
+    // Aplicar filtros automáticamente cuando cambia cualquier valor
+    const filterInputs = [
+        document.getElementById('filterUsuario'),
+        document.getElementById('filterLugar'),
+        document.getElementById('filterEstado')
+    ];
+    
+    // Agregar event listeners para todos los inputs de filtro
+    filterInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', function() {
+                applyFilters();
+            });
+        }
+    });
+    
+    // Configurar datepickers con opciones estándar y filtrado automático al cambiar
+    const datepickers = document.querySelectorAll('.datepicker');
+    if (datepickers.length > 0 && typeof flatpickr === 'function') {
+        datepickers.forEach(picker => {
+            flatpickr(picker, {
+                dateFormat: "Y-m-d",
+                locale: "es",
+                maxDate: "today",
+                onChange: function() {
+                    applyFilters();
+                }
+            });
+        });
+    }
 });

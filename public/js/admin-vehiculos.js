@@ -1,7 +1,23 @@
-// Variables globales para los filtros
-let activeFilters = {};
+/**
+ * GESTIÓN DE VEHÍCULOS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para administrar el listado de vehículos.
+ * Incluye funcionalidades para filtrar, cargar y eliminar vehículos desde la interfaz de administración.
+ */
 
-// Función para aplicar los filtros automáticamente
+// Variables globales para los filtros y paginación
+let activeFilters = {};
+let currentPage = 1;
+let itemsPerPage = 10;
+let totalPages = 1;
+let totalItems = 0;
+
+/**
+ * applyFilters() - Aplica los filtros seleccionados por el administrador
+ * 
+ * Esta función captura los valores de todos los campos de filtro del formulario
+ * y actualiza el objeto activeFilters. Luego llama a loadVehiculos() para 
+ * mostrar los resultados filtrados.
+ */
 function applyFilters() {
     // Recoger los valores de los filtros
     const tipo = document.getElementById('filterTipo').value;
@@ -23,7 +39,12 @@ function applyFilters() {
     loadVehiculos();
 }
 
-// Limpiar todos los filtros
+/**
+ * clearFilters() - Restablece todos los filtros a sus valores predeterminados
+ * 
+ * Esta función limpia todos los campos de filtro y reinicia el objeto activeFilters.
+ * Luego recarga el listado completo de vehículos sin aplicar ningún filtro.
+ */
 function clearFilters() {
     document.getElementById('filterTipo').value = '';
     document.getElementById('filterLugar').value = '';
@@ -38,9 +59,15 @@ function clearFilters() {
     loadVehiculos();
 }
 
-// Función global para cargar vehículos
+/**
+ * loadVehiculos() - Carga la lista de vehículos desde el servidor
+ * 
+ * Esta función realiza una petición AJAX al servidor para obtener los vehículos,
+ * aplicando los filtros que estén activos. Muestra un indicador de carga mientras
+ * se completa la petición y luego actualiza la tabla con los resultados.
+ */
 function loadVehiculos() {
-    console.log('Cargando vehículos...');
+    console.log('Cargando vehículos, página ' + currentPage + '...');
     // Mostrar el indicador de carga
     const loadingElement = document.getElementById('loading-vehiculos');
     const tableContainer = document.getElementById('vehiculos-table-container');
@@ -65,8 +92,13 @@ function loadVehiculos() {
         }
     });
     
+    // Agregar parámetros de paginación
+    url.searchParams.append('page', currentPage);
+    url.searchParams.append('per_page', itemsPerPage);
+    
     console.log('URL de la petición:', url.toString());
     
+    // Realizar petición AJAX al servidor
     fetch(url, {
         method: 'GET',
         headers: {
@@ -96,68 +128,93 @@ function loadVehiculos() {
         const tableBody = document.querySelector('#vehiculos-table tbody');
         tableBody.innerHTML = '';
         
-        // Verificar si tenemos datos o si hay error
-        if (data.status === 'error') {
-            loadingElement.style.display = 'block';
-            loadingElement.innerHTML = `<div class="alert alert-danger">${data.message || 'Error al cargar los vehículos'}</div>`;
+        // Verificar si hay vehículos
+        if (data.vehiculos.length === 0) {
+            // Mostrar mensaje si no hay vehículos
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="9" class="text-center">
+                    <p>No se encontraron vehículos que coincidan con los criterios de búsqueda.</p>
+                </td>
+            `;
+            tableBody.appendChild(emptyRow);
+            
+            // Actualizar la información de paginación con 0 resultados
+            updatePaginationControls({
+                total: 0,
+                per_page: itemsPerPage,
+                current_page: 1,
+                last_page: 1
+            });
             return;
         }
         
-        // Verificar si tenemos vehículos
-        if (!data.vehiculos || data.vehiculos.length === 0) {
+        // Recorrer la lista de vehículos y crear filas en la tabla
+        data.vehiculos.forEach(vehiculo => {
             const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="9" class="text-center">No se encontraron vehículos con los filtros aplicados</td>`;
-            tableBody.appendChild(row);
-        } else {
-            // Mostrar el número total de vehículos encontrados
-            console.log(`Se encontraron ${data.vehiculos.length} vehículos`);
             
-            data.vehiculos.forEach(vehiculo => {
-                console.log('Procesando vehículo:', vehiculo); // Depurar cada vehículo
-                
-                // Verificar si el vehículo tiene la estructura esperada
-                if (!vehiculo || !vehiculo.id_vehiculos) {
-                    console.error('Vehículo con formato inválido:', vehiculo);
-                    return; // Continuar con el siguiente vehículo
-                }
-                
-                // Determinar el año del vehículo, manejando diferentes nombres de campo
-                const anio = vehiculo.anio || vehiculo.año || 'N/A';
-                
-                // Escapar valores para prevenir XSS
-                const marca = vehiculo.marca ? vehiculo.marca.replace(/'/g, "\'") : '';
-                const modelo = vehiculo.modelo ? vehiculo.modelo.replace(/'/g, "\'") : '';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${vehiculo.id_vehiculos || ''}</td>
-                    <td>${marca || ''}</td>
-                    <td>${modelo || ''}</td>
-                    <td>${anio}</td>
-                    <td>${vehiculo.kilometraje || ''}</td>
-                    <td>${vehiculo.seguro_incluido ? 'Sí' : 'No'}</td>
-                    <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
-                    <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <a href="/admin/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteVehiculo(${vehiculo.id_vehiculos}, '${marca} ${modelo}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
+            // Determinar el color de texto según la disponibilidad
+            const textClass = vehiculo.disponible ? 'text-success' : 'text-danger';
+            
+            // Formatear el precio para mostrar
+            const precio = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(vehiculo.precio);
+            
+            // Crear la fila con los datos del vehículo
+            row.innerHTML = `
+                <td>${vehiculo.id_vehiculos}</td>
+                <td>${vehiculo.marca}</td>
+                <td>${vehiculo.modelo}</td>
+                <td>${vehiculo.año}</td>
+                <td>${vehiculo.kilometraje} km</td>
+                <td><span class="${textClass}">${vehiculo.disponible ? 'Si' : 'No'}</span></td>
+                <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
+                <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
+                <td>
+                    <div class="btn-group">
+                        <a href="/admin/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-sm btn-danger" onclick="deleteVehiculo(${vehiculo.id_vehiculos}, '${vehiculo.marca} ${vehiculo.modelo}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Actualizar los controles de paginación
+        if (data.pagination) {
+            updatePaginationControls(data.pagination);
         }
     })
     .catch(error => {
+        // Manejar errores en la petición AJAX
         console.error('Error en la petición:', error);
+        Swal.fire({
+            icon: 'error',
+            title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
+            html: `<p class="lead">Error al cargar vehículos: ${error.message}</p>`,
+            confirmButtonColor: '#9F17BD'
+        });
         loadingElement.style.display = 'block';
         loadingElement.innerHTML = `<div class="alert alert-danger">Error al cargar vehículos: ${error.message}</div>`;
     });
 }
 
-// Función para eliminar vehículo
+/**
+ * deleteVehiculo(id, nombre) - Elimina un vehículo del sistema
+ * 
+ * @param {number} id - ID del vehículo a eliminar
+ * @param {string} nombre - Nombre del vehículo (marca + modelo) para mostrar en la confirmación
+ * 
+ * Esta función muestra un diálogo de confirmación antes de eliminar el vehículo.
+ * Si el usuario confirma, realiza una petición DELETE al servidor y muestra el
+ * resultado de la operación.
+ */
 function deleteVehiculo(id, nombre) {
+    // Mostrar diálogo de confirmación usando SweetAlert2
     Swal.fire({
         title: `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar Vehículo</span>`,
         html: `<p class="lead">¿Estás seguro de que deseas eliminar el vehículo "${nombre}"?</p><p class="text-muted">Esta acción no se puede deshacer.</p>`,
@@ -170,7 +227,7 @@ function deleteVehiculo(id, nombre) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Mostrar cargando
+            // Mostrar indicador de carga durante el proceso de eliminación
             Swal.fire({
                 title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
                 text: 'Eliminando vehículo',
@@ -182,6 +239,7 @@ function deleteVehiculo(id, nombre) {
             // Obtener el token CSRF de manera segura
             let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             
+            // Enviar petición DELETE al servidor
             fetch(`/admin/vehiculos/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -192,15 +250,20 @@ function deleteVehiculo(id, nombre) {
             })
             .then(response => response.json())
             .then(data => {
+                // Manejar la respuesta del servidor
                 if (data.status === 'success') {
+                    // Mostrar mensaje de éxito
                     Swal.fire({
                         icon: 'success',
                         title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>',
                         html: `<p class="lead">${data.message}</p>`,
                         confirmButtonColor: '#9F17BD'
                     });
+                    
+                    // Recargar la lista de vehículos
                     loadVehiculos();
                 } else {
+                    // Mostrar mensaje de error
                     Swal.fire({
                         icon: 'error',
                         title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -210,11 +273,12 @@ function deleteVehiculo(id, nombre) {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                // Manejar errores en la petición
+                console.error('Error al eliminar vehículo:', error);
                 Swal.fire({
                     icon: 'error',
                     title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
-                    html: '<p class="lead">Error al procesar la solicitud</p>',
+                    html: `<p class="lead">Error al eliminar el vehículo: ${error.message}</p>`,
                     confirmButtonColor: '#9F17BD'
                 });
             });
@@ -225,28 +289,121 @@ function deleteVehiculo(id, nombre) {
 // Variable para almacenar la URL de datos
 let dataUrl;
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM cargado, iniciando carga de vehículos');
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Este bloque configura los eventos iniciales y prepara la interfaz
+ * cuando la página se carga por completo.
+ */
+/**
+ * updatePaginationControls(pagination) - Actualiza los controles de paginación
+ * 
+ * @param {Object} pagination - Información de paginación del servidor
+ * 
+ * Esta función actualiza los botones y textos de paginación
+ * para reflejar el estado actual de la paginación.
+ */
+function updatePaginationControls(pagination) {
+    // Guardar valores en variables globales
+    totalItems = pagination.total;
+    totalPages = pagination.last_page;
+    currentPage = pagination.current_page;
     
-    // Obtener la URL de datos desde el atributo data-url
-    dataUrl = document.getElementById('vehiculos-table-container').getAttribute('data-url');
+    // Actualizar el resumen de paginación
+    const from = pagination.from || 0;
+    const to = pagination.to || 0;
+    document.getElementById('pagination-summary').textContent = 
+        `Mostrando ${from}-${to} de ${totalItems} vehículos`;
     
-    if (!dataUrl) {
-        console.error('No se encontró la URL de datos. Asegúrate de establecer el atributo data-url en el contenedor de la tabla.');
-        return;
-    }
+    // Actualizar el indicador de página
+    document.getElementById('page-indicator').textContent = 
+        `Página ${currentPage} de ${totalPages}`;
     
-    // Inicializar la carga de vehículos
+    // Habilitar/deshabilitar botones de navegación
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+    
+    prevButton.disabled = currentPage <= 1;
+    nextButton.disabled = currentPage >= totalPages;
+}
+
+/**
+ * goToPage(page) - Navega a una página específica
+ * 
+ * @param {number} page - Número de página a mostrar
+ * 
+ * Esta función actualiza la página actual y recarga los datos.
+ */
+function goToPage(page) {
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage = page;
     loadVehiculos();
-    
-    // Event listener para el botón de limpiar filtros
-    document.getElementById('clearFilters').addEventListener('click', clearFilters);
-    
-    // Event listeners para aplicar filtros automáticamente al cambiar
-    document.getElementById('filterMarca').addEventListener('input', applyFilters);
-    document.getElementById('filterTipo').addEventListener('change', applyFilters);
-    document.getElementById('filterLugar').addEventListener('change', applyFilters);
-    document.getElementById('filterAnio').addEventListener('change', applyFilters);
-    document.getElementById('filterValoracion').addEventListener('change', applyFilters);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener la URL de datos del atributo data-url del contenedor
+    const vehiculosContainer = document.getElementById('vehiculos-table-container');
+    if (vehiculosContainer) {
+        dataUrl = vehiculosContainer.dataset.url;
+        console.log('URL de datos configurada:', dataUrl);
+        
+        // Cargar vehículos inicialmente
+        loadVehiculos();
+        
+        // Configurar eventos para los filtros
+        // Configurar filtros automáticos para cada campo
+        document.getElementById('filterMarca').addEventListener('input', function() {
+            currentPage = 1; // Volver a la primera página al filtrar
+            applyFilters();
+        });
+        
+        document.getElementById('filterTipo').addEventListener('change', function() {
+            currentPage = 1;
+            applyFilters();
+        });
+        
+        document.getElementById('filterLugar').addEventListener('change', function() {
+            currentPage = 1;
+            applyFilters();
+        });
+        
+        document.getElementById('filterAnio').addEventListener('change', function() {
+            currentPage = 1;
+            applyFilters();
+        });
+        
+        document.getElementById('filterValoracion').addEventListener('change', function() {
+            currentPage = 1;
+            applyFilters();
+        });
+        
+        document.getElementById('clearFilters').addEventListener('click', function(e) {
+            e.preventDefault();  // Prevenir el comportamiento predeterminado
+            currentPage = 1;     // Resetear a la primera página
+            clearFilters();      // Limpiar filtros
+        });
+        
+        // Configurar eventos para la paginación
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        });
+        
+        // Configurar el selector de items por página
+        document.getElementById('items-per-page').addEventListener('change', function() {
+            itemsPerPage = parseInt(this.value);
+            currentPage = 1; // Volver a la primera página
+            loadVehiculos();
+        });
+    } else {
+        console.error('No se encontró el contenedor de vehículos');
+    }
 });

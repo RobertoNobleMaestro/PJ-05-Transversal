@@ -34,51 +34,107 @@ class ReservaController extends Controller
     // Método para obtener reservas en formato JSON (para AJAX)
     public function getReservas(Request $request)
     {
-        $authCheck = $this->checkAdmin($request);
-        if ($authCheck && $request->expectsJson()) {
-            return $authCheck;
+        try {
+            // Log de inicio y parámetros para depuración
+            \Illuminate\Support\Facades\Log::info('Iniciando getReservas', [
+                'request_params' => $request->all(),
+                'request_ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+            
+            $authCheck = $this->checkAdmin($request);
+            if ($authCheck && $request->expectsJson()) {
+                return $authCheck;
+            }
+            
+            // Iniciar la consulta
+            $query = Reserva::select('reservas.*', 'users.nombre as nombre_usuario', 'lugares.nombre as nombre_lugar')
+                        ->leftJoin('users', 'reservas.id_usuario', '=', 'users.id_usuario')
+                        ->leftJoin('lugares', 'reservas.id_lugar', '=', 'lugares.id_lugar');
+            
+            // Log SQL para depuración
+            \Illuminate\Support\Facades\Log::info('SQL base: ' . $query->toSql());
+            
+            // Aplicar filtros si existen
+            if ($request->has('usuario') && !empty($request->usuario)) {
+                $query->where('users.nombre', 'like', '%' . $request->usuario . '%');
+                \Illuminate\Support\Facades\Log::info('Filtro usuario aplicado: ' . $request->usuario);
+            }
+            
+            if ($request->has('lugar') && !empty($request->lugar)) {
+                $query->where('reservas.id_lugar', $request->lugar);
+                \Illuminate\Support\Facades\Log::info('Filtro lugar aplicado: ' . $request->lugar);
+            }
+            
+            if ($request->has('estado') && !empty($request->estado)) {
+                $query->where('reservas.estado', $request->estado);
+                \Illuminate\Support\Facades\Log::info('Filtro estado aplicado: ' . $request->estado);
+            }
+            
+            if ($request->has('fecha') && !empty($request->fecha)) {
+                $query->whereDate('reservas.fecha_reserva', $request->fecha);
+                \Illuminate\Support\Facades\Log::info('Filtro fecha aplicado: ' . $request->fecha);
+            }
+            
+            // Ejecutar la consulta con manejo de excepciones
+            try {
+                $reservas = $query->get();
+                \Illuminate\Support\Facades\Log::info('Reservas obtenidas: ' . $reservas->count());
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error al obtener reservas: ' . $e->getMessage(), [
+                    'exception' => $e->getTraceAsString()
+                ]);
+                return response()->json([
+                    'error' => 'Error al obtener reservas: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            // Obtener los vehículos asociados a cada reserva con manejo de excepciones
+            try {
+                $reservas->each(function ($reserva) {
+                    try {
+                        $reserva->vehiculos_info = $reserva->vehiculos()->select(
+                            'vehiculos.id_vehiculos', 
+                            'vehiculos.marca', 
+                            'vehiculos.modelo', 
+                            'vehiculos_reservas.fecha_ini',
+                            'vehiculos_reservas.fecha_final',
+                            'vehiculos_reservas.precio_unitario'
+                        )->get();
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Error al obtener vehículos para reserva ' . $reserva->id_reserva . ': ' . $e->getMessage());
+                        $reserva->vehiculos_info = []; // Usar un array vacío si falla
+                    }
+                });
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error al procesar vehículos de reservas: ' . $e->getMessage(), [
+                    'exception' => $e->getTraceAsString()
+                ]);
+                return response()->json([
+                    'error' => 'Error al procesar vehículos: ' . $e->getMessage(),
+                    'reservas' => [] // Devolver un array vacío en caso de error
+                ], 500);
+            }
+            
+            // Devolver resultados exitosos
+            \Illuminate\Support\Facades\Log::info('getReservas completado con éxito');
+            return response()->json([
+                'reservas' => $reservas
+            ]);
+            
+        } catch (\Exception $e) {
+            // Capturar cualquier excepción no controlada
+            \Illuminate\Support\Facades\Log::error('Error general en getReservas: ' . $e->getMessage(), [
+                'exception' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+            
+            return response()->json([
+                'error' => 'Error interno del servidor: ' . $e->getMessage(),
+                'reservas' => [] // Devolver un array vacío en caso de error
+            ], 500);
         }
-        
-        // Iniciar la consulta
-        $query = Reserva::select('reservas.*', 'users.nombre as nombre_usuario', 'lugares.nombre as nombre_lugar')
-                    ->leftJoin('users', 'reservas.id_usuario', '=', 'users.id_usuario')
-                    ->leftJoin('lugares', 'reservas.id_lugar', '=', 'lugares.id_lugar');
-        
-        // Aplicar filtros si existen
-        if ($request->has('usuario') && !empty($request->usuario)) {
-            $query->where('users.nombre', 'like', '%' . $request->usuario . '%');
-        }
-        
-        if ($request->has('lugar') && !empty($request->lugar)) {
-            $query->where('reservas.id_lugar', $request->lugar);
-        }
-        
-        if ($request->has('estado') && !empty($request->estado)) {
-            $query->where('reservas.estado', $request->estado);
-        }
-        
-        if ($request->has('fecha') && !empty($request->fecha)) {
-            $query->whereDate('reservas.fecha_reserva', $request->fecha);
-        }
-        
-        // Ejecutar la consulta
-        $reservas = $query->get();
-        
-        // Obtener los vehículos asociados a cada reserva
-        $reservas->each(function ($reserva) {
-            $reserva->vehiculos_info = $reserva->vehiculos()->select(
-                'vehiculos.id_vehiculos', 
-                'vehiculos.marca', 
-                'vehiculos.modelo', 
-                'vehiculos_reservas.fecha_ini',
-                'vehiculos_reservas.fecha_final',
-                'vehiculos_reservas.precio_unitario'
-            )->get();
-        });
-        
-        return response()->json([
-            'reservas' => $reservas
-        ]);
     }
 
     public function index(Request $request)
@@ -325,7 +381,7 @@ class ReservaController extends Controller
             }
             
             // Si es una petición tradicional, redireccionar
-            return redirect()->route('admin.reservas')->with('success', 'Reserva añadida correctamente');
+            return redirect()->route('admin.reservas.index')->with('success', 'Reserva añadida correctamente');
         } catch (ValidationException $e) {
             DB::rollBack();
             
@@ -463,7 +519,7 @@ class ReservaController extends Controller
             }
             
             // Si es una petición tradicional, redireccionar
-            return redirect()->route('admin.reservas')->with('success', 'Reserva actualizada correctamente');
+            return redirect()->route('admin.reservas.index')->with('success', 'Reserva actualizada correctamente');
         } catch (ValidationException $e) {
             // Si hay errores de validación
             DB::rollBack();
@@ -517,7 +573,7 @@ class ReservaController extends Controller
                 ], 200);
             }
             
-            return redirect()->route('admin.reservas')->with('success', 'Reserva eliminada correctamente');
+            return redirect()->route('admin.reservas.index')->with('success', 'Reserva eliminada correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
             
@@ -528,7 +584,106 @@ class ReservaController extends Controller
                 ], 500);
             }
             
-            return redirect()->route('admin.reservas')->with('error', 'Error al eliminar la reserva: ' . $e->getMessage());
+            return redirect()->route('admin.reservas.index')->with('error', 'Error al eliminar la reserva: ' . $e->getMessage());
         }
+    }
+    
+    /**
+     * Muestra el historial de todas las reservas
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function historial(Request $request)
+    {
+        $authCheck = $this->checkAdmin($request);
+        if ($authCheck) {
+            return $authCheck;
+        }
+        
+        // Obtener datos para los filtros
+        $lugares = Lugar::all();
+        $estados = ['pendiente', 'confirmada', 'cancelada', 'completada'];
+        
+        // Obtener todas las reservas completadas ordenadas por fecha
+        $reservas = Reserva::where('estado', 'completada')
+            ->orderBy('fecha_reserva', 'desc')
+            ->with(['usuario', 'lugar', 'vehiculos'])
+            ->get();
+            
+        return view('admin.historial', compact('reservas', 'lugares', 'estados'));
+    }
+    
+    /**
+     * Obtiene datos del historial de reservas para AJAX
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getHistorialData(Request $request)
+    {
+        $authCheck = $this->checkAdmin($request);
+        if ($authCheck && $request->expectsJson()) {
+            return $authCheck;
+        }
+        
+        // Iniciar la consulta
+        $query = Reserva::select('reservas.*', 'users.nombre as nombre_usuario', 'lugares.nombre as nombre_lugar')
+                ->leftJoin('users', 'reservas.id_usuario', '=', 'users.id_usuario')
+                ->leftJoin('lugares', 'reservas.id_lugar', '=', 'lugares.id_lugar');
+        
+        // Aplicar filtros si existen
+        if ($request->has('usuario') && !empty($request->usuario)) {
+            $query->where('users.nombre', 'like', '%' . $request->usuario . '%');
+        }
+        
+        if ($request->has('lugar') && !empty($request->lugar)) {
+            $query->where('reservas.id_lugar', $request->lugar);
+        }
+        
+        if ($request->has('estado') && !empty($request->estado)) {
+            $query->where('reservas.estado', $request->estado);
+        } else {
+            // Por defecto para el historial, mostrar solo las completadas si no se especifica otro estado
+            $query->where('reservas.estado', 'completada');
+        }
+        
+        // Filtros de rango de fechas
+        if ($request->has('fechaDesde') && !empty($request->fechaDesde)) {
+            $query->whereDate('reservas.fecha_reserva', '>=', $request->fechaDesde);
+        }
+        
+        if ($request->has('fechaHasta') && !empty($request->fechaHasta)) {
+            $query->whereDate('reservas.fecha_reserva', '<=', $request->fechaHasta);
+        }
+        
+        // Ejecutar la consulta
+        $reservas = $query->orderBy('reservas.fecha_reserva', 'desc')->get();
+        
+        // Obtener los vehículos asociados a cada reserva
+        $reservas->each(function ($reserva) {
+            $reserva->vehiculos_info = $reserva->vehiculos()->select(
+                'vehiculos.id_vehiculos', 
+                'vehiculos.marca', 
+                'vehiculos.modelo', 
+                'vehiculos_reservas.fecha_ini',
+                'vehiculos_reservas.fecha_final',
+                'vehiculos_reservas.precio_unitario'
+            )->get();
+        });
+        
+        // Calcular estadísticas
+        $stats = [
+            'total' => Reserva::count(),
+            'completadas' => Reserva::where('estado', 'completada')->count(),
+            'pendientes' => Reserva::where('estado', 'pendiente')->count(),
+            'canceladas' => Reserva::where('estado', 'cancelada')->count(),
+            'ingresos' => Reserva::where('estado', 'completada')->sum('total_precio')
+        ];
+        
+        return response()->json([
+            'reservas' => $reservas,
+            'stats' => $stats
+        ]);
     }
 }

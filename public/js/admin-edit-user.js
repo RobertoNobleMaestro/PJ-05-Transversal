@@ -1,7 +1,22 @@
 /**
- * Valida un campo específico y muestra mensajes de error si es necesario
- * @param {HTMLElement} input - El campo a validar
+ * EDICIÓN DE USUARIOS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene las funciones necesarias para gestionar la edición
+ * de usuarios existentes en el sistema. Implementa validación avanzada de
+ * campos específicos (DNI español, email, teléfono) y procesamiento AJAX
+ * para actualizar los datos sin recargar la página completa.
+ * Forma parte del módulo de gestión de usuarios del panel de administración.
+ */
+
+/**
+ * validateField(input) - Valida un campo específico del formulario
+ * 
+ * @param {HTMLElement} input - El elemento input a validar
  * @returns {boolean} - Retorna true si el campo es válido, false en caso contrario
+ * 
+ * Esta función aplica reglas de validación específicas para cada campo en el formulario
+ * de edición de usuarios. A diferencia de la creación, algunas validaciones son
+ * más flexibles (como la contraseña que puede estar vacía para mantener la existente).
+ * Muestra mensajes de error en tiempo real para mejorar la experiencia de usuario.
  */
 function validateField(input) {
     let errorMessage = '';
@@ -12,7 +27,7 @@ function validateField(input) {
             errorMessage = 'Por favor, ingrese un email válido.';
         }
     } else if (input.name === 'DNI') {
-        if (!/^\\d{8}[A-Z]$/.test(value)) {
+        if (!/^\d{8}[A-Z]$/.test(value)) {
             errorMessage = 'El formato del DNI es inválido. Debe terminar con una letra mayúscula.';
         } else if (!validateDNI(value)) {
             errorMessage = 'El DNI es inválido. La letra no coincide.';
@@ -22,7 +37,7 @@ function validateField(input) {
             errorMessage = 'La contraseña debe tener al menos 8 caracteres.';
         }
     } else if (input.name === 'telefono') {
-        if (!/^\\d{9}$/.test(value)) {
+        if (!/^\d{9}$/.test(value)) {
             errorMessage = 'El teléfono debe contener exactamente 9 números.';
         }
     } else if (input.name === 'direccion') {
@@ -33,6 +48,7 @@ function validateField(input) {
         errorMessage = 'Este campo es obligatorio.';
     }
     
+    // Mostrar u ocultar mensaje de error según validación
     const errorElement = input.nextElementSibling;
     if (errorElement && errorElement.classList.contains('error-message')) {
         errorElement.textContent = errorMessage;
@@ -48,26 +64,40 @@ function validateField(input) {
 }
 
 /**
- * Valida un email
+ * validateEmail(email) - Valida el formato de un email
+ * 
  * @param {string} email - El email a validar
  * @returns {boolean} - Retorna true si el email es válido, false en caso contrario
+ * 
+ * Utiliza una expresión regular para verificar que el email tenga un formato
+ * válido con usuario, @ y dominio con punto. Esta validación se aplica
+ * tanto en la creación como en la edición de usuarios.
  */
 function validateEmail(email) {
-    const re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
 }
 
 /**
- * Valida un DNI español
+ * validateDNI(dni) - Valida un DNI español según el algoritmo oficial
+ * 
  * @param {string} dni - El DNI a validar
  * @returns {boolean} - Retorna true si el DNI es válido, false en caso contrario
+ * 
+ * Implementa la validación oficial de DNI español comprobando que:
+ * 1. El formato sea correcto (8 dígitos + letra mayúscula)
+ * 2. La letra corresponda al resultado del algoritmo oficial
+ * 
+ * Este tipo de validación añade robustez al sistema para evitar
+ * datos incorrectos en la base de datos.
  */
 function validateDNI(dni) {
-    const re = /^\\d{8}[A-Z]$/;
+    const re = /^\d{8}[A-Z]$/;
     if (!re.test(dni)) {
         return false;
     }
     
+    // Algoritmo oficial de validación de DNI español
     const number = parseInt(dni.slice(0, 8), 10);
     const letter = dni.charAt(8);
     const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
@@ -77,8 +107,19 @@ function validateDNI(dni) {
 }
 
 /**
- * Actualiza un usuario con los datos del formulario
- * @param {number} userId - ID del usuario a actualizar
+ * updateUser(userId) - Procesa el formulario para actualizar un usuario existente
+ * 
+ * @param {number} userId - ID del usuario que se está editando
+ * 
+ * Esta función gestiona todo el proceso de actualización de un usuario:
+ * 1. Valida todos los campos del formulario
+ * 2. Muestra alertas si hay errores de validación
+ * 3. Envía los datos al servidor mediante AJAX (Fetch API)
+ * 4. Procesa la respuesta del servidor (éxito o errores)
+ * 5. Redirecciona al listado si la actualización es exitosa
+ * 
+ * El campo de contraseña es especial: si se deja vacío, se mantiene
+ * la contraseña existente del usuario.
  */
 function updateUser(userId) {
     // Limpiar mensajes de error previos
@@ -97,6 +138,7 @@ function updateUser(userId) {
         }
     });
     
+    // Si hay errores, mostrar alerta y detener el proceso
     if (!isValid) {
         Swal.fire({
             icon: 'warning',
@@ -107,7 +149,7 @@ function updateUser(userId) {
         return;
     }
     
-    // Mostrar indicador de carga
+    // Mostrar indicador de carga durante el proceso
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
         text: 'Actualizando usuario',
@@ -117,7 +159,7 @@ function updateUser(userId) {
         allowEnterKey: false
     });
     
-    // Obtener los datos del formulario
+    // Obtener los datos del formulario y convertir a objeto JSON
     const formData = new FormData(form);
     const formDataObj = {};
     formData.forEach((value, key) => {
@@ -128,6 +170,7 @@ function updateUser(userId) {
     const url = form.dataset.url || `/admin/users/${userId}`;
     const redirectUrl = document.querySelector('meta[name="users-index"]').content;
     
+    // Realizar petición AJAX al servidor con método POST y datos JSON
     fetch(url, {
         method: 'POST',
         headers: {
@@ -140,6 +183,7 @@ function updateUser(userId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            // Mostrar mensaje de éxito y redirigir al listado
             Swal.fire({
                 icon: 'success',
                 title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
@@ -153,10 +197,10 @@ function updateUser(userId) {
                 }
             });
         } else if (data.errors) {
-            // Construir mensaje de error HTML
+            // Construir mensaje de error HTML para validaciones del servidor
             let errorHtml = '<ul class="text-start list-unstyled">';
             
-            // Muestra errores de validación
+            // Mostrar errores de validación provenientes del servidor
             Object.keys(data.errors).forEach(field => {
                 errorHtml += `<li><i class="fas fa-exclamation-circle text-danger"></i> ${data.errors[field][0]}</li>`;
                 
@@ -171,6 +215,7 @@ function updateUser(userId) {
             
             errorHtml += '</ul>';
             
+            // Mostrar modal con todos los errores
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
@@ -178,6 +223,7 @@ function updateUser(userId) {
                 confirmButtonColor: '#9F17BD'
             });
         } else {
+            // Mostrar mensaje de error general
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -187,6 +233,7 @@ function updateUser(userId) {
         }
     })
     .catch(error => {
+        // Manejar errores de conexión o del servidor
         console.error('Error:', error);
         Swal.fire({
             icon: 'error',
@@ -197,14 +244,20 @@ function updateUser(userId) {
     });
 }
 
-// Inicializar cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos de validación en tiempo real para todos los campos
+ * del formulario de edición de usuarios, mejorando la experiencia de usuario
+ * con retroalimentación inmediata mientras se editan los datos.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('editUserForm');
     const inputs = form.querySelectorAll('input, select');
     
     inputs.forEach(input => {
         input.addEventListener('input', function() {
-            validateField(input);
+            validateField(this);
         });
     });
 });

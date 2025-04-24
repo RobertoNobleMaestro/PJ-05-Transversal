@@ -1,12 +1,25 @@
 /**
- * Valida un campo específico y muestra mensajes de error si es necesario
- * @param {HTMLElement} input - El campo a validar
+ * EDICIÓN DE VEHÍCULOS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para gestionar la edición
+ * de vehículos existentes en el sistema, incluyendo validación de formularios
+ * y envío de datos al servidor mediante AJAX.
+ */
+
+/**
+ * validateField(input) - Valida un campo específico del formulario
+ * 
+ * @param {HTMLElement} input - El elemento input del formulario a validar
  * @returns {boolean} - Retorna true si el campo es válido, false en caso contrario
+ * 
+ * Esta función aplica reglas de validación específicas para cada tipo de campo
+ * (marca, modelo, año, precio, etc.) y muestra mensajes de error junto al campo
+ * si no cumple con los requisitos.
  */
 function validateField(input) {
     let errorMessage = '';
     const value = input.value.trim();
     
+    // Aplicar reglas de validación específicas según el tipo de campo
     if (input.name === 'marca' || input.name === 'modelo') {
         if (value.length < 2) {
             errorMessage = 'Este campo debe tener al menos 2 caracteres.';
@@ -30,10 +43,12 @@ function validateField(input) {
         errorMessage = 'Este campo es obligatorio.';
     }
     
+    // Mostrar u ocultar mensaje de error
     const errorElement = input.nextElementSibling;
     if (errorElement && errorElement.classList.contains('error-message')) {
         errorElement.textContent = errorMessage;
     } else if (errorMessage) {
+        // Crear nuevo elemento para mostrar el error
         const span = document.createElement('span');
         span.classList.add('error-message');
         span.style.color = 'red';
@@ -41,22 +56,29 @@ function validateField(input) {
         input.parentNode.insertBefore(span, input.nextSibling);
     }
     
+    // Retornar resultado de validación
     return errorMessage === '';
 }
 
 /**
- * Actualiza un vehículo con los datos del formulario
- * @param {number} vehiculoId - El ID del vehículo a actualizar
+ * updateVehiculo(vehiculoId) - Procesa el formulario para actualizar un vehículo existente
+ * 
+ * @param {number} vehiculoId - El ID del vehículo que se está editando
+ * 
+ * Esta función se ejecuta al enviar el formulario de edición. Primero realiza una validación
+ * completa de todos los campos, muestra errores si es necesario, y si todo es correcto,
+ * envía los datos actualizados al servidor mediante una petición AJAX.
  */
 function updateVehiculo(vehiculoId) {
     // Limpiar mensajes de error previos
     document.querySelectorAll('.text-danger').forEach(el => el.remove());
     
-    // Validar campos antes de enviar
+    // Validar todos los campos del formulario
     const form = document.getElementById('editVehiculoForm');
     const inputs = form.querySelectorAll('input, select');
     let isValid = true;
     
+    // Recorrer cada campo y validarlo
     inputs.forEach(input => {
         if (input.name) { // Solo validar elementos con nombres
             const value = input.value.trim();
@@ -76,6 +98,7 @@ function updateVehiculo(vehiculoId) {
         }
     });
     
+    // Si hay errores, mostrar alerta y detener el envío
     if (!isValid) {
         Swal.fire({
             icon: 'warning',
@@ -86,7 +109,7 @@ function updateVehiculo(vehiculoId) {
         return;
     }
     
-    // Mostrar indicador de carga
+    // Mostrar indicador de carga durante el proceso
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
         text: 'Actualizando vehículo',
@@ -96,7 +119,7 @@ function updateVehiculo(vehiculoId) {
         allowEnterKey: false
     });
     
-    // Obtener los datos del formulario
+    // Preparar los datos del formulario para el envío
     const formData = new FormData(form);
     
     // Añadir checkboxes manualmente (ya que solo se incluyen si están marcados)
@@ -112,8 +135,9 @@ function updateVehiculo(vehiculoId) {
     // Obtener la URL de redireccionamiento
     const redirectUrl = document.querySelector('meta[name="vehicles-index"]').content;
     
+    // Realizar petición AJAX al servidor con método POST por compatibilidad con Laravel
     fetch(`/admin/vehiculos/${vehiculoId}`, {
-        method: 'POST',
+        method: 'POST', // Se usa POST con campo _method=PUT para simular PUT en Laravel
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
@@ -123,7 +147,9 @@ function updateVehiculo(vehiculoId) {
     })
     .then(response => response.json())
     .then(data => {
+        // Procesar la respuesta del servidor
         if (data.status === 'success') {
+            // Mostrar mensaje de éxito y redirigir al listado
             Swal.fire({
                 icon: 'success',
                 title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
@@ -133,17 +159,20 @@ function updateVehiculo(vehiculoId) {
                 allowEscapeKey: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Redirigir al listado de vehículos
                     window.location.href = redirectUrl;
                 }
             });
         } else if (data.errors) {
+            // Procesamiento de errores de validación del servidor
             // Construir mensaje de error HTML
             let errorHtml = '<ul class="text-start list-unstyled">';
             
-            // Muestra errores de validación
+            // Mostrar cada error de validación
             Object.keys(data.errors).forEach(field => {
                 errorHtml += `<li><i class="fas fa-exclamation-circle text-danger"></i> ${data.errors[field][0]}</li>`;
                 
+                // Mostrar error junto al campo correspondiente
                 const input = document.querySelector(`[name="${field}"]`);
                 if (input) {
                     const errorDiv = document.createElement('div');
@@ -155,6 +184,7 @@ function updateVehiculo(vehiculoId) {
             
             errorHtml += '</ul>';
             
+            // Mostrar alerta con todos los errores
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
@@ -162,6 +192,7 @@ function updateVehiculo(vehiculoId) {
                 confirmButtonColor: '#9F17BD'
             });
         } else {
+            // Error general en el proceso
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -171,6 +202,7 @@ function updateVehiculo(vehiculoId) {
         }
     })
     .catch(error => {
+        // Manejar errores de conexión o del servidor
         console.error('Error:', error);
         Swal.fire({
             icon: 'error',
@@ -181,11 +213,18 @@ function updateVehiculo(vehiculoId) {
     });
 }
 
-// Inicializar cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos para la validación en tiempo real de campos
+ * y prepara el entorno para la edición de vehículos.
+ */
 document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el formulario y todos sus campos
     const form = document.getElementById('editVehiculoForm');
     const inputs = form.querySelectorAll('input, select');
     
+    // Configurar validación en tiempo real para cada campo
     inputs.forEach(input => {
         input.addEventListener('input', function() {
             validateField(input);

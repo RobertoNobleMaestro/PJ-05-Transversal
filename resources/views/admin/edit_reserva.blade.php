@@ -93,7 +93,7 @@
             <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
             <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
             <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
-            <li><a href="{{ route('admin.reservas') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
+            <li><a href="{{ route('admin.reservas.index') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
         </ul>
     </div>
 
@@ -101,7 +101,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Editar Reserva #{{ $reserva->id_reservas }}</h1>
-            <a href="{{ route('admin.reservas') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.reservas.index') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
         </div>
@@ -244,7 +244,7 @@
                 </div>
                 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{{ route('admin.reservas') }}" class="btn btn-cancel">Cancelar</a>
+                    <a href="{{ route('admin.reservas.index') }}" class="btn btn-cancel">Cancelar</a>
                     <button type="submit" class="btn btn-submit">Actualizar Reserva</button>
                 </div>
             </form>

@@ -1,8 +1,19 @@
+/**
+ * GESTIÓN DE RESERVAS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para gestionar las reservas
+ * desde el panel de administración, incluyendo listado, filtrado, y eliminación.
+ * Es un componente central para la gestión del ciclo de vida de las reservas.
+ */
+
 // Objeto para mantener los filtros activos
 let activeFilters = {};
 
 /**
- * Aplica los filtros para la búsqueda de reservas
+ * applyFilters() - Aplica los filtros para la búsqueda de reservas
+ * 
+ * Esta función recoge los valores de los diferentes campos de filtro
+ * (usuario, lugar, estado, fecha) y actualiza la lista de reservas
+ * mostrando solo aquellas que cumplen con los criterios seleccionados.
  */
 function applyFilters() {
     // Recoger los valores de los filtros
@@ -24,7 +35,10 @@ function applyFilters() {
 }
 
 /**
- * Limpia todos los filtros aplicados
+ * clearFilters() - Limpia todos los filtros aplicados y muestra todas las reservas
+ * 
+ * Esta función resetea todos los campos de filtro a sus valores predeterminados
+ * y vuelve a cargar la lista completa de reservas sin filtros aplicados.
  */
 function clearFilters() {
     document.getElementById('filterUsuario').value = '';
@@ -40,36 +54,59 @@ function clearFilters() {
 }
 
 /**
- * Carga las reservas desde la API y las muestra en la tabla
+ * loadReservas() - Carga las reservas desde la API y las muestra en la tabla
+ * 
+ * Esta función realiza una petición AJAX al servidor para obtener las reservas
+ * (aplicando los filtros si existen) y las muestra en la tabla del panel de administración.
+ * Incluye el formateo de fechas, precios y estados para una mejor visualización.
  */
 function loadReservas() {
     // Mostrar el indicador de carga
     document.getElementById('loading-reservas').style.display = 'block';
     document.getElementById('reservas-table-container').style.display = 'none';
     
+    // Preparar los parámetros para la consulta AJAX
+    const params = new URLSearchParams();
+    
+    // Añadir filtros activos a los parámetros
+    if (activeFilters.usuario) params.append('usuario', activeFilters.usuario);
+    if (activeFilters.lugar) params.append('lugar', activeFilters.lugar);
+    if (activeFilters.estado) params.append('estado', activeFilters.estado);
+    if (activeFilters.fecha) params.append('fecha', activeFilters.fecha);
+    
     // Obtener la URL base de los datos
     const baseUrl = document.getElementById('reservas-table-container').dataset.url;
     
     // Construir la URL con los parámetros de filtro
     let url = new URL(baseUrl, window.location.origin);
+    url.search = params.toString();
     
-    // Agregar todos los filtros activos a la URL
-    Object.keys(activeFilters).forEach(key => {
-        if (activeFilters[key]) {
-            url.searchParams.append(key, activeFilters[key]);
-        }
-    });
-    
+    // Obtener el token CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    // Realizar petición AJAX para obtener las reservas
     fetch(url, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken || ''
         }
     })
-    .then(response => {
+    .then(async response => {
         if (!response.ok) {
-            throw new Error('Error al cargar las reservas');
+            // Intentar leer el mensaje de error detallado del cuerpo de la respuesta
+            const errorText = await response.text();
+            console.error(`Error HTTP: ${response.status}`, errorText);
+            
+            // Intentar analizar como JSON para obtener el mensaje de error
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.error || `Error HTTP: ${response.status}`);
+            } catch (parseError) {
+                // Si no es JSON, usar el texto de error como está
+                throw new Error(`Error al cargar reservas: ${errorText || `Error HTTP: ${response.status}`}`);
+            }
         }
         return response.json();
     })
@@ -85,10 +122,12 @@ function loadReservas() {
         
         // Rellenar la tabla con los datos
         if (data.reservas.length === 0) {
+            // Mostrar mensaje si no hay reservas
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="8" class="text-center">No se encontraron reservas con los filtros aplicados</td>`;
             tableBody.appendChild(row);
         } else {
+            // Recorrer cada reserva y crear su fila en la tabla
             data.reservas.forEach(reserva => {
                 // Formatear la fecha
                 const fechaReserva = new Date(reserva.fecha_reserva);
@@ -100,10 +139,10 @@ function loadReservas() {
                     currency: 'EUR'
                 }).format(reserva.total_precio);
                 
-                // Crear badge según el estado
+                // Crear badge según el estado (pendiente, confirmada, completada)
                 const estadoBadge = `<span class="badge badge-${reserva.estado}">${reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1)}</span>`;
                 
-                // Crear lista de vehículos
+                // Crear lista de vehículos asociados a la reserva
                 let vehiculosHTML = '<ul class="vehiculos-list">';
                 reserva.vehiculos_info.forEach(vehiculo => {
                     vehiculosHTML += `<li>${vehiculo.marca} ${vehiculo.modelo}<br>
@@ -113,6 +152,7 @@ function loadReservas() {
                 });
                 vehiculosHTML += '</ul>';
                 
+                // Crear la fila de la tabla con toda la información
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${reserva.id_reservas}</td>
@@ -134,17 +174,24 @@ function loadReservas() {
         }
     })
     .catch(error => {
+        // Manejar errores
         console.error('Error:', error);
         document.getElementById('loading-reservas').innerHTML = `<div class="alert alert-danger">Error al cargar reservas: ${error.message}</div>`;
     });
 }
 
 /**
- * Elimina una reserva
- * @param {number} id ID de la reserva a eliminar
- * @param {string} idString ID de la reserva (como string) para mostrar en confirmación
+ * deleteReserva(id, idString) - Elimina una reserva del sistema
+ * 
+ * @param {number} id - ID de la reserva a eliminar
+ * @param {string} idString - ID de la reserva (como string) para mostrar en la confirmación
+ * 
+ * Esta función muestra un diálogo de confirmación y, si el usuario confirma,
+ * realiza una petición DELETE al servidor para eliminar la reserva.
+ * Después de eliminar la reserva, actualiza la tabla para reflejar el cambio.
  */
 function deleteReserva(id, idString) {
+    // Mostrar diálogo de confirmación
     Swal.fire({
         title: `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar Reserva</span>`,
         html: `<p class="lead">¿Estás seguro de que deseas eliminar la reserva #${idString}?</p><p class="text-muted">Esta acción no se puede deshacer.</p>`,
@@ -157,7 +204,7 @@ function deleteReserva(id, idString) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Mostrar cargando
+            // Mostrar indicador de carga durante el proceso
             Swal.fire({
                 title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
                 text: 'Eliminando reserva',
@@ -188,6 +235,7 @@ function deleteReserva(id, idString) {
                 }
             }
             
+            // Realizar petición DELETE al servidor
             fetch(`/admin/reservas/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -199,18 +247,22 @@ function deleteReserva(id, idString) {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Mostrar mensaje de éxito
                     Swal.fire({
                         icon: 'success',
-                        title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>',
-                        html: `<p class="lead">${data.message}</p>`,
+                        title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
+                        html: `<p class="lead">${data.message || 'Reserva eliminada exitosamente'}</p>`,
                         confirmButtonColor: '#9F17BD'
                     });
+                    
+                    // Recargar la tabla para mostrar los cambios
                     loadReservas();
                 } else {
+                    // Mostrar mensaje de error
                     Swal.fire({
                         icon: 'error',
                         title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
-                        html: `<p class="lead">${data.message || 'Error al eliminar la reserva'}</p>`,
+                        html: `<p class="lead">Error al eliminar reserva: ${data.message || 'Error desconocido'}</p>`,
                         confirmButtonColor: '#9F17BD'
                     });
                 }
@@ -220,7 +272,7 @@ function deleteReserva(id, idString) {
                 Swal.fire({
                     icon: 'error',
                     title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
-                    html: '<p class="lead">Error al procesar la solicitud</p>',
+                    html: '<p class="lead">Error de conexión. Por favor, inténtalo de nuevo.</p>',
                     confirmButtonColor: '#9F17BD'
                 });
             });
@@ -228,17 +280,42 @@ function deleteReserva(id, idString) {
     });
 }
 
-// Inicialización cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos para el filtrado de reservas y carga
+ * la lista inicial de reservas cuando la página está lista.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar la carga de reservas
     loadReservas();
     
-    // Event listener para el botón de limpiar filtros
-    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    // Conservamos solo el botón para limpiar filtros
+    document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+        clearFilters();
+    });
     
-    // Event listeners para aplicar filtros automáticamente al cambiar
-    document.getElementById('filterUsuario').addEventListener('input', applyFilters);
-    document.getElementById('filterLugar').addEventListener('change', applyFilters);
-    document.getElementById('filterEstado').addEventListener('change', applyFilters);
-    document.getElementById('filterFecha').addEventListener('change', applyFilters);
+    // Implementar filtrado automático en tiempo real
+    const filterInputs = [
+        document.getElementById('filterUsuario'),
+        document.getElementById('filterLugar'),
+        document.getElementById('filterEstado')
+    ];
+    
+    // Agregar event listeners para todos los inputs de filtro
+    filterInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', function() {
+                applyFilters();
+            });
+        }
+    });
+    
+    // Manejar el caso especial del datepicker
+    const fechaInput = document.getElementById('filterFecha');
+    if (fechaInput) {
+        fechaInput.addEventListener('change', function() {
+            applyFilters();
+        });
+    }
 });

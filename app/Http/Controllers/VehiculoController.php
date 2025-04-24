@@ -140,8 +140,12 @@ class VehiculoController extends Controller
                 ], 403);
             }
             
+            // Determinar la página actual y el tamaño de página
+            $page = $request->input('page', 1);
+            $perPage = $request->input('per_page', 10); // Por defecto 10 items por página
+            
             // Versión simplificada de la consulta para depuración
-            $vehiculos = Vehiculo::select(
+            $query = Vehiculo::select(
                 'vehiculos.*', 
                 'lugares.nombre as nombre_lugar', 
                 'tipos.nombre_tipo'
@@ -151,33 +155,39 @@ class VehiculoController extends Controller
             
             // Aplicar filtros básicos
             if ($request->has('tipo') && !empty($request->tipo)) {
-                $vehiculos->where('vehiculos.id_tipo', $request->tipo);
+                $query->where('vehiculos.id_tipo', $request->tipo);
             }
             
             if ($request->has('lugar') && !empty($request->lugar)) {
-                $vehiculos->where('vehiculos.id_lugar', $request->lugar);
+                $query->where('vehiculos.id_lugar', $request->lugar);
             }
             
             if ($request->has('marca') && !empty($request->marca)) {
-                $vehiculos->where('vehiculos.marca', 'like', '%' . $request->marca . '%');
+                $query->where('vehiculos.marca', 'like', '%' . $request->marca . '%');
             }
             
             if ($request->has('anio') && !empty($request->anio)) {
-                $vehiculos->where('vehiculos.año', $request->anio);
+                $query->where('vehiculos.año', $request->anio);
             }
             
-            // Obtener resultados
-            $resultados = $vehiculos->get();
+            // Paginación
+            $paginatedResults = $query->paginate($perPage, ['*'], 'page', $page);
             
-            \Illuminate\Support\Facades\Log::info('Consulta de vehículos exitosa. Encontrados: ' . count($resultados));
+            \Illuminate\Support\Facades\Log::info('Consulta de vehículos exitosa. Encontrados: ' . $paginatedResults->total() . ', Mostrando página ' . $page . ' de ' . $paginatedResults->lastPage());
             \Illuminate\Support\Facades\Log::info('Filtros aplicados: ' . json_encode($request->all()));
-            
-            // Si necesitamos depurar la consulta SQL
-            // \Illuminate\Support\Facades\Log::debug('SQL: ' . $vehiculos->toSql() . ' con parámetros: ' . json_encode($vehiculos->getBindings()));
             
             return response()->json([
                 'status' => 'success',
-                'vehiculos' => $resultados
+                'vehiculos' => $paginatedResults->items(),
+                'pagination' => [
+                    'total' => $paginatedResults->total(),
+                    'per_page' => $paginatedResults->perPage(),
+                    'current_page' => $paginatedResults->currentPage(),
+                    'last_page' => $paginatedResults->lastPage(),
+                    'from' => $paginatedResults->firstItem(),
+                    'to' => $paginatedResults->lastItem(),
+                    'has_more_pages' => $paginatedResults->hasMorePages()
+                ]
             ]);
             
         } catch (\Exception $e) {

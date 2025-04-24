@@ -1,11 +1,23 @@
 /**
- * Variables globales para el mapa
+ * EDICIÓN DE LUGARES/SUCURSALES - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene las funciones necesarias para gestionar la edición
+ * de lugares/sucursales existentes en el sistema, utilizando integración con mapas
+ * para actualizar la ubicación geográfica y validación de formularios.
+ * Los lugares son clave para la gestión de vehículos y reservas en la aplicación.
+ */
+
+/**
+ * Variables globales para el mapa de Leaflet
  */
 let map;
 let marker;
 
 /**
  * Inicializa el mapa y configura los eventos cuando el DOM está listo
+ * 
+ * Esta función se ejecuta automáticamente cuando la página ha cargado y
+ * prepara todos los componentes interactivos del formulario y el mapa
+ * para actualizar las coordenadas de un lugar existente.
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar mapa
@@ -16,7 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Configura la validación en tiempo real para los campos del formulario
+ * setupLiveValidation() - Configura la validación en tiempo real para los campos
+ * 
+ * Esta función configura escuchadores de eventos para todos los campos del
+ * formulario, permitiendo la validación mientras el usuario escribe y 
+ * cuando pierde el foco en un campo, mejorando la experiencia de usuario.
  */
 function setupLiveValidation() {
     const inputs = document.querySelectorAll('input');
@@ -39,14 +55,20 @@ function setupLiveValidation() {
 }
 
 /**
- * Inicializa el mapa de Leaflet y configura eventos
+ * initMap() - Inicializa el mapa interactivo de Leaflet
+ * 
+ * Esta función crea y configura un mapa interactivo que permite:
+ * - Visualizar la ubicación actual del lugar
+ * - Modificar la ubicación arrastrando el marcador
+ * - Seleccionar una nueva ubicación haciendo clic en el mapa
+ * - Actualizar automáticamente los campos de latitud y longitud
  */
 function initMap() {
     // Coordenadas del lugar actual
     const lat = parseFloat(document.getElementById('latitud').value) || 40.416775;
     const lng = parseFloat(document.getElementById('longitud').value) || -3.703790;
     
-    // Crear mapa
+    // Crear mapa centrado en la ubicación actual del lugar
     map = L.map('map').setView([lat, lng], 15);
     
     // Añadir capa de OpenStreetMap
@@ -54,7 +76,7 @@ function initMap() {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     
-    // Añadir marcador
+    // Añadir marcador arrastrable en la posición actual
     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
     
     // Actualizar coordenadas cuando se arrastra el marcador
@@ -73,9 +95,13 @@ function initMap() {
 }
 
 /**
- * Valida un campo específico y muestra mensajes de error si es necesario
- * @param {HTMLElement} input - El campo a validar
+ * validateField(input) - Valida un campo específico del formulario
+ * 
+ * @param {HTMLElement} input - El elemento input del formulario a validar
  * @returns {boolean} - Retorna true si el campo es válido, false en caso contrario
+ * 
+ * Esta función aplica reglas de validación específicas para cada tipo de campo
+ * (nombre, dirección, latitud, longitud) y muestra mensajes de error si es necesario.
  */
 function validateField(input) {
     // Implementar lógica de validación para cada campo
@@ -83,6 +109,7 @@ function validateField(input) {
     let errorMessage = '';
     const errorElement = document.getElementById(`${input.name}-error`);
     
+    // Validación específica para cada tipo de campo
     if (input.name === 'nombre') {
         if (input.value.trim() === '') {
             errorMessage = 'El nombre del lugar es obligatorio';
@@ -117,7 +144,7 @@ function validateField(input) {
         }
     }
     
-    // Mostrar mensaje de error si corresponde
+    // Mostrar u ocultar mensaje de error según validación
     if (errorElement) {
         errorElement.innerHTML = isValid ? '' : `<small class="text-danger">${errorMessage}</small>`;
         
@@ -132,8 +159,14 @@ function validateField(input) {
 }
 
 /**
- * Actualiza un lugar existente con los datos del formulario
- * @param {number} lugarId - ID del lugar a actualizar
+ * updateLugar(lugarId) - Procesa el formulario para actualizar un lugar existente
+ * 
+ * @param {number} lugarId - ID del lugar que se está editando
+ * 
+ * Esta función se ejecuta al enviar el formulario de edición. Realiza validación
+ * completa de todos los campos, muestra errores si es necesario, y si todo es correcto,
+ * envía los datos actualizados al servidor mediante una petición AJAX.
+ * La actualización de lugares es crítica, ya que afecta a vehículos y reservas relacionadas.
  */
 function updateLugar(lugarId) {
     // Limpiar mensajes de error previos
@@ -161,6 +194,7 @@ function updateLugar(lugarId) {
         }
     });
     
+    // Si hay errores, mostrar alerta y detener el envío
     if (!isValid) {
         Swal.fire({
             icon: 'error',
@@ -171,7 +205,7 @@ function updateLugar(lugarId) {
         return;
     }
     
-    // Mostrar indicador de carga
+    // Mostrar indicador de carga durante el proceso
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
         text: 'Actualizando lugar',
@@ -213,6 +247,7 @@ function updateLugar(lugarId) {
     const url = form.dataset.url;
     const redirectUrl = document.querySelector('meta[name="places-index"]').content;
     
+    // Realizar petición AJAX al servidor con método PUT
     fetch(url, {
         method: 'PUT',
         headers: {
@@ -224,7 +259,9 @@ function updateLugar(lugarId) {
     })
     .then(response => response.json())
     .then(data => {
+        // Procesar la respuesta del servidor
         if (data.status === 'success') {
+            // Mostrar mensaje de éxito y redirigir al listado de lugares
             Swal.fire({
                 icon: 'success',
                 title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado!</span>',
@@ -256,6 +293,7 @@ function updateLugar(lugarId) {
                 
                 errorHtml += '</ul>';
                 
+                // Mostrar alerta con todos los errores
                 Swal.fire({
                     icon: 'error',
                     title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
@@ -263,6 +301,7 @@ function updateLugar(lugarId) {
                     confirmButtonColor: '#9F17BD'
                 });
             } else {
+                // Mostrar mensaje de error general
                 Swal.fire({
                     icon: 'error',
                     title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -273,6 +312,7 @@ function updateLugar(lugarId) {
         }
     })
     .catch(error => {
+        // Manejar errores de conexión o del servidor
         console.error('Error:', error);
         Swal.fire({
             icon: 'error',

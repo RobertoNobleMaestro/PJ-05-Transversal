@@ -1,9 +1,22 @@
+/**
+ * CREACIÓN DE RESERVAS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene las funciones necesarias para la creación de reservas
+ * desde el panel de administración. Permite añadir múltiples vehículos a una 
+ * misma reserva, calcular precios dinámicamente y validar fechas.
+ * Es una funcionalidad clave para la gestión integral del negocio de alquiler.
+ */
+
 // Variables globales para el conteo de vehículos y precio total
 let vehicleCount = 1; // Empezamos con un vehículo
 let precioTotal = 0;
 
 /**
- * Agrega un nuevo vehículo al formulario
+ * addVehicle() - Agrega un nuevo vehículo al formulario de reserva
+ * 
+ * Esta función crea dinámicamente un nuevo conjunto de campos para añadir
+ * otro vehículo a la reserva. Utiliza una plantilla HTML predefinida y 
+ * actualiza los identificadores para mantener la coherencia del formulario.
+ * Permite crear reservas con múltiples vehículos de forma intuitiva.
  */
 function addVehicle() {
     const container = document.getElementById('vehiculos-container');
@@ -34,8 +47,14 @@ function addVehicle() {
 }
 
 /**
- * Elimina un vehículo del formulario
- * @param {number} index Índice del vehículo a eliminar
+ * removeVehicle(index) - Elimina un vehículo del formulario de reserva
+ * 
+ * @param {number} index - Índice del vehículo a eliminar
+ * 
+ * Esta función permite eliminar un vehículo específico del formulario,
+ * recalcula el precio total y actualiza la interfaz. También gestiona
+ * la visibilidad de los botones para garantizar que siempre quede al
+ * menos un vehículo en la reserva.
  */
 function removeVehicle(index) {
     const vehicleEntry = document.getElementById(`vehicle-entry-${index}`);
@@ -52,8 +71,14 @@ function removeVehicle(index) {
 }
 
 /**
- * Calcula el precio para un vehículo específico
- * @param {number} index Índice del vehículo
+ * calcularPrecio(index) - Calcula el precio para un vehículo específico
+ * 
+ * @param {number} index - Índice del vehículo para el que se calcula el precio
+ * 
+ * Esta función calcula el precio de alquiler para un vehículo específico 
+ * basándose en el precio diario del vehículo y el rango de fechas seleccionado.
+ * Valida que las fechas sean coherentes y muestra el desglose del cálculo
+ * para facilitar la comprensión del precio final.
  */
 function calcularPrecio(index) {
     const vehiculoSelect = document.getElementById(`vehiculos_${index}`);
@@ -93,7 +118,12 @@ function calcularPrecio(index) {
 }
 
 /**
- * Actualiza el precio total de la reserva
+ * actualizarPrecioTotal() - Actualiza el precio total de la reserva
+ * 
+ * Esta función recorre todos los vehículos añadidos al formulario, 
+ * suma sus precios individuales y actualiza el precio total mostrado.
+ * Se ejecuta automáticamente cada vez que se modifica un vehículo
+ * o sus fechas para mantener siempre actualizado el total.
  */
 function actualizarPrecioTotal() {
     let total = 0;
@@ -128,7 +158,13 @@ function actualizarPrecioTotal() {
     precioTotal = total;
 }
 
-// Inicializar cuando el DOM esté listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos iniciales para el primer vehículo y 
+ * establece la fecha actual como valor predeterminado para
+ * la fecha de reserva.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Configuración inicial
     document.getElementById('vehiculos_0').addEventListener('change', function() {

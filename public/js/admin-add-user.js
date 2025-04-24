@@ -1,6 +1,25 @@
 /**
- * Valida un campo específico y muestra mensajes de error si es necesario
- * @param {HTMLElement} input - El campo a validar
+ * CREACIÓN DE USUARIOS - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene las funciones necesarias para la creación de nuevos usuarios
+ * desde el panel de administración. Incluye validación avanzada de campos (DNI español,
+ * formato de email, contraseñas seguras, etc.) y gestiona el envío de datos al servidor.
+ * Es fundamental para la gestión de usuarios y sus diferentes roles en la plataforma.
+ */
+
+/**
+ * validateField(input) - Valida un campo específico del formulario en tiempo real
+ * 
+ * @param {HTMLElement} input - El elemento input a validar
+ * 
+ * Esta función aplica reglas de validación específicas según el tipo de campo:
+ * - Email: formato válido con @ y dominio
+ * - DNI: formato 8 dígitos + letra correcta según algoritmo español
+ * - Contraseña: longitud mínima de 8 caracteres
+ * - Teléfono: exactamente 9 dígitos
+ * - Dirección: longitud mínima
+ * - Campos requeridos: no pueden estar vacíos
+ * 
+ * Muestra mensajes de error directamente bajo cada campo para retroalimentación inmediata.
  */
 function validateField(input) {
     let errorMessage = '';
@@ -32,6 +51,7 @@ function validateField(input) {
         errorMessage = 'Este campo es obligatorio.';
     }
     
+    // Mostrar u ocultar mensaje de error bajo el campo
     const errorElement = input.nextElementSibling;
     if (errorElement && errorElement.classList.contains('error-message')) {
         errorElement.textContent = errorMessage;
@@ -45,9 +65,13 @@ function validateField(input) {
 }
 
 /**
- * Valida un email
+ * validateEmail(email) - Valida el formato de un email
+ * 
  * @param {string} email - El email a validar
  * @returns {boolean} - Retorna true si el email es válido, false en caso contrario
+ * 
+ * Utiliza una expresión regular para verificar que el email tenga un formato
+ * válido con usuario, @ y dominio con punto.
  */
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,9 +79,15 @@ function validateEmail(email) {
 }
 
 /**
- * Valida un DNI español
+ * validateDNI(dni) - Valida un DNI español según el algoritmo oficial
+ * 
  * @param {string} dni - El DNI a validar
  * @returns {boolean} - Retorna true si el DNI es válido, false en caso contrario
+ * 
+ * Comprueba el formato (8 dígitos + letra mayúscula) y verifica que la letra
+ * corresponda al resultado del algoritmo oficial para DNI españoles, donde
+ * se dividen los 8 números entre 23 y el resto determina la letra según una tabla
+ * predefinida de letras en orden específico.
  */
 function validateDNI(dni) {
     const re = /^\d{8}[A-Z]$/;
@@ -65,6 +95,7 @@ function validateDNI(dni) {
         return false;
     }
     
+    // Algoritmo para validar la letra del DNI español
     const number = parseInt(dni.slice(0, 8), 10);
     const letter = dni.charAt(8);
     const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
@@ -74,7 +105,19 @@ function validateDNI(dni) {
 }
 
 /**
- * Crea un nuevo usuario con los datos del formulario
+ * createUser() - Procesa el formulario para crear un nuevo usuario
+ * 
+ * Esta función se ejecuta al enviar el formulario de creación de usuario.
+ * Realiza una validación completa de todos los campos, muestra errores si es necesario,
+ * y si todo es correcto, envía los datos al servidor mediante una petición AJAX.
+ * 
+ * El flujo de trabajo incluye:
+ * 1. Limpieza de mensajes de error previos
+ * 2. Validación campo por campo con reglas específicas
+ * 3. Mostrar feedback visual si hay errores
+ * 4. Envío de datos mediante Fetch API si todo es válido
+ * 5. Gestión de respuestas del servidor (éxito/errores)
+ * 6. Redirección al listado tras creación exitosa
  */
 function createUser() {
     // Limpiar mensajes de error previos
@@ -149,6 +192,7 @@ function createUser() {
         }
     });
     
+    // Si hay errores, mostrar alerta general y detener el proceso
     if (!isValid) {
         Swal.fire({
             icon: 'warning',
@@ -159,7 +203,7 @@ function createUser() {
         return;
     }
     
-    // Mostrar indicador de carga
+    // Mostrar indicador de carga mientras se procesa la solicitud
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
         text: 'Creando nuevo usuario',
@@ -176,6 +220,7 @@ function createUser() {
     const url = form.dataset.url;
     const redirectUrl = document.querySelector('meta[name="users-index"]').content;
     
+    // Enviar solicitud AJAX al servidor
     fetch(url, {
         method: 'POST',
         headers: {
@@ -188,6 +233,7 @@ function createUser() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            // Mostrar mensaje de éxito y redirigir
             Swal.fire({
                 icon: 'success',
                 title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
@@ -201,7 +247,7 @@ function createUser() {
                 }
             });
         } else if (data.errors) {
-            // Construir mensaje de error HTML
+            // Construir mensaje de error HTML para errores de validación del servidor
             let errorHtml = '<ul class="text-start list-unstyled">';
             
             // Muestra errores de validación
@@ -219,6 +265,7 @@ function createUser() {
             
             errorHtml += '</ul>';
             
+            // Mostrar errores en modal
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
@@ -226,6 +273,7 @@ function createUser() {
                 confirmButtonColor: '#9F17BD'
             });
         } else {
+            // Mostrar mensaje de error general
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -235,6 +283,7 @@ function createUser() {
         }
     })
     .catch(error => {
+        // Gestionar errores de conexión o del servidor
         console.error('Error:', error);
         Swal.fire({
             icon: 'error',
@@ -245,7 +294,13 @@ function createUser() {
     });
 }
 
-// Inicializar cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos de validación en tiempo real para todos los campos
+ * del formulario, mejorando la experiencia de usuario al proporcionar
+ * retroalimentación inmediata mientras completan el formulario.
+ */
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('addUserForm');
     const inputs = form.querySelectorAll('input, select');

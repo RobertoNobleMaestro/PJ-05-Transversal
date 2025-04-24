@@ -1,0 +1,68 @@
+/**
+ * Estilos para la paginación en el panel de administración
+ */
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-top: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.pagination-info {
+    flex: 1;
+    color: #666;
+}
+
+.pagination-buttons {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.per-page-selector {
+    flex: 1;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.per-page-selector select {
+    width: auto;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Estilo para los botones de navegación */
+.pagination-buttons button {
+    min-width: 75px;
+}
+
+.pagination-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .pagination-info,
+    .pagination-buttons,
+    .per-page-selector {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+}

@@ -1,11 +1,24 @@
 /**
- * Valida un campo específico y muestra mensajes de error si es necesario
- * @param {HTMLElement} input - El campo a validar
+ * AÑADIR VEHÍCULO - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene todas las funciones necesarias para gestionar la creación
+ * de nuevos vehículos en el sistema, incluyendo validación de formularios y envío
+ * de datos al servidor mediante AJAX.
+ */
+
+/**
+ * validateField(input) - Valida un campo específico del formulario
+ * 
+ * @param {HTMLElement} input - El elemento input del formulario a validar
+ * 
+ * Esta función aplica reglas de validación específicas para cada tipo de campo
+ * (marca, modelo, año, precio, etc.) y muestra mensajes de error junto al campo
+ * si no cumple con los requisitos.
  */
 function validateField(input) {
     let errorMessage = '';
     const value = input.value.trim();
     
+    // Aplicar reglas de validación específicas según el tipo de campo
     if (input.name === 'marca' || input.name === 'modelo') {
         if (value.length < 2) {
             errorMessage = 'Este campo debe tener al menos 2 caracteres.';
@@ -29,10 +42,12 @@ function validateField(input) {
         errorMessage = 'Este campo es obligatorio.';
     }
     
+    // Mostrar u ocultar mensaje de error
     const errorElement = input.nextElementSibling;
     if (errorElement && errorElement.classList.contains('error-message')) {
         errorElement.textContent = errorMessage;
     } else if (errorMessage) {
+        // Crear nuevo elemento para mostrar el error
         const span = document.createElement('span');
         span.classList.add('error-message');
         span.style.color = 'red';
@@ -42,23 +57,28 @@ function validateField(input) {
 }
 
 /**
- * Crea un nuevo vehículo con los datos del formulario
+ * createVehiculo() - Procesa el formulario para crear un nuevo vehículo
+ * 
+ * Esta función se ejecuta al enviar el formulario. Primero realiza una validación
+ * completa de todos los campos, muestra errores si es necesario, y si todo es correcto,
+ * envía los datos al servidor mediante una petición AJAX.
  */
 function createVehiculo() {
     // Limpiar mensajes de error previos
     document.querySelectorAll('.text-danger').forEach(el => el.remove());
     
-    // Validar campos antes de enviar
+    // Validar todos los campos del formulario
     const form = document.getElementById('addVehiculoForm');
     const inputs = form.querySelectorAll('input, select');
     let isValid = true;
     
+    // Recorrer cada campo y validarlo
     inputs.forEach(input => {
         if (input.name) { // Solo validar elementos con nombres
             const value = input.value.trim();
             let errorMessage = '';
             
-            // Reglas de validación para cada campo
+            // Reglas de validación para cada tipo de campo
             if (input.name === 'marca' || input.name === 'modelo') {
                 if (value.length < 2) {
                     errorMessage = 'Este campo debe tener al menos 2 caracteres.';
@@ -104,6 +124,7 @@ function createVehiculo() {
         }
     });
     
+    // Si hay errores, mostrar alerta y detener el envío
     if (!isValid) {
         Swal.fire({
             icon: 'warning',
@@ -114,7 +135,7 @@ function createVehiculo() {
         return;
     }
     
-    // Mostrar indicador de carga
+    // Mostrar indicador de carga durante el proceso
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
         text: 'Creando nuevo vehículo',
@@ -124,7 +145,7 @@ function createVehiculo() {
         allowEnterKey: false
     });
     
-    // Obtener los datos del formulario
+    // Preparar los datos del formulario para el envío
     const formData = new FormData(form);
     
     // Añadir checkboxes manualmente (ya que solo se incluyen si están marcados)
@@ -134,6 +155,7 @@ function createVehiculo() {
     // Obtener la URL del formulario desde un atributo data
     const url = form.dataset.url;
     
+    // Realizar petición AJAX al servidor
     fetch(url, {
         method: 'POST',
         headers: {
@@ -145,7 +167,9 @@ function createVehiculo() {
     })
     .then(response => response.json())
     .then(data => {
+        // Procesar la respuesta del servidor
         if (data.status === 'success') {
+            // Mostrar mensaje de éxito y redirigir al listado
             Swal.fire({
                 icon: 'success',
                 title: '<span class="text-success"><i class="fas fa-check-circle"></i> ¡Completado!</span>',
@@ -155,17 +179,20 @@ function createVehiculo() {
                 allowEscapeKey: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Redirigir al listado de vehículos
                     window.location.href = document.querySelector('meta[name="vehicles-index"]').content;
                 }
             });
         } else if (data.errors) {
+            // Procesamiento de errores de validación del servidor
             // Construir mensaje de error HTML
             let errorHtml = '<ul class="text-start list-unstyled">';
             
-            // Muestra errores de validación
+            // Mostrar cada error de validación
             Object.keys(data.errors).forEach(field => {
                 errorHtml += `<li><i class="fas fa-exclamation-circle text-danger"></i> ${data.errors[field][0]}</li>`;
                 
+                // Mostrar error junto al campo correspondiente
                 const input = document.querySelector(`[name="${field}"]`);
                 if (input) {
                     const errorDiv = document.createElement('div');
@@ -177,6 +204,7 @@ function createVehiculo() {
             
             errorHtml += '</ul>';
             
+            // Mostrar alerta con todos los errores
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
@@ -184,6 +212,7 @@ function createVehiculo() {
                 confirmButtonColor: '#9F17BD'
             });
         } else {
+            // Error general en el proceso
             Swal.fire({
                 icon: 'error',
                 title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -193,6 +222,7 @@ function createVehiculo() {
         }
     })
     .catch(error => {
+        // Manejar errores de conexión o del servidor
         console.error('Error:', error);
         Swal.fire({
             icon: 'error',
@@ -203,14 +233,36 @@ function createVehiculo() {
     });
 }
 
-// Inicializar cuando el DOM está listo
+/**
+ * Inicialización cuando el DOM está completamente cargado
+ * 
+ * Configura los eventos para la validación en tiempo real de campos
+ * y el evento submit del formulario.
+ */
 document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el formulario y todos sus campos
     const form = document.getElementById('addVehiculoForm');
     const inputs = form.querySelectorAll('input, select');
     
+    // Configurar validación en tiempo real para cada campo
     inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            validateField(input);
-        });
+        if (input.name) { // Solo procesar elementos con nombre
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            // También validar al cambiar para campos select
+            if (input.tagName === 'SELECT') {
+                input.addEventListener('change', function() {
+                    validateField(this);
+                });
+            }
+        }
+    });
+    
+    // Configurar el evento submit del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevenir el envío tradicional
+        createVehiculo(); // Procesar mediante AJAX
     });
 });

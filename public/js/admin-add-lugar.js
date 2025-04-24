@@ -1,11 +1,22 @@
 /**
- * Variables globales para el mapa
+ * AÑADIR LUGAR/SUCURSAL - PANEL DE ADMINISTRACIÓN
+ * Este archivo contiene las funciones necesarias para gestionar la creación
+ * de nuevos lugares/sucursales en el sistema, utilizando integración con mapas
+ * para seleccionar la ubicación geográfica y validación de formularios.
+ * Los lugares son fundamentales para la gestión de vehículos y reservas.
+ */
+
+/**
+ * Variables globales para el mapa de Leaflet
  */
 let map;
 let marker;
 
 /**
  * Inicializa el mapa y configura los eventos cuando el DOM está listo
+ * 
+ * Esta función se ejecuta automáticamente cuando la página ha cargado y
+ * prepara todos los componentes interactivos del formulario y el mapa.
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar mapa
@@ -16,7 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Configura la validación en tiempo real para los campos del formulario
+ * setupLiveValidation() - Configura la validación en tiempo real para los campos
+ * 
+ * Esta función configura escuchadores de eventos para todos los campos del
+ * formulario, permitiendo la validación mientras el usuario escribe y 
+ * cuando pierde el foco en un campo.
  */
 function setupLiveValidation() {
     const inputs = document.querySelectorAll('input');
@@ -39,10 +54,15 @@ function setupLiveValidation() {
 }
 
 /**
- * Inicializa el mapa de Leaflet y configura eventos
+ * initMap() - Inicializa el mapa interactivo de Leaflet
+ * 
+ * Esta función crea y configura un mapa interactivo que permite:
+ * - Seleccionar la ubicación del lugar haciendo clic en el mapa
+ * - Arrastrar el marcador para ajustar la posición
+ * - Actualizar automáticamente los campos de latitud y longitud
  */
 function initMap() {
-    // Coordenadas iniciales (Madrid)
+    // Coordenadas iniciales (Madrid) o valores existentes si se están editando
     const lat = parseFloat(document.getElementById('latitud').value) || 40.416775;
     const lng = parseFloat(document.getElementById('longitud').value) || -3.703790;
     
@@ -54,7 +74,7 @@ function initMap() {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     
-    // Añadir marcador
+    // Añadir marcador arrastrable
     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
     
     // Actualizar coordenadas cuando se arrastra el marcador
@@ -73,9 +93,13 @@ function initMap() {
 }
 
 /**
- * Valida un campo específico y muestra mensajes de error si es necesario
- * @param {HTMLElement} input - El campo a validar
+ * validateField(input) - Valida un campo específico del formulario
+ * 
+ * @param {HTMLElement} input - El elemento input del formulario a validar
  * @returns {boolean} - Retorna true si el campo es válido, false en caso contrario
+ * 
+ * Esta función aplica reglas de validación específicas para cada tipo de campo
+ * (nombre, dirección, latitud, longitud) y muestra mensajes de error si es necesario.
  */
 function validateField(input) {
     let isValid = true;
@@ -113,7 +137,7 @@ function validateField(input) {
         }
     }
     
-    // Limpiar mensaje de error anterior
+    // Mostrar u ocultar mensaje de error
     const errorElement = document.getElementById(`${input.name}-error`);
     if (errorElement) {
         errorElement.innerHTML = isValid ? '' : `<small class="text-danger">${errorMessage}</small>`;
@@ -129,7 +153,12 @@ function validateField(input) {
 }
 
 /**
- * Crea un nuevo lugar con los datos del formulario
+ * createLugar() - Procesa el formulario para crear un nuevo lugar
+ * 
+ * Esta función se ejecuta al enviar el formulario. Realiza una validación
+ * completa de todos los campos, muestra errores si es necesario, y si todo
+ * es correcto, envía los datos al servidor mediante una petición AJAX.
+ * El nuevo lugar podrá ser utilizado para asignar vehículos y realizar reservas.
  */
 function createLugar() {
     // Limpiar mensajes de error previos
@@ -156,6 +185,7 @@ function createLugar() {
         }
     });
     
+    // Si hay errores, mostrar alerta y detener el envío
     if (!isValid) {
         Swal.fire({
             icon: 'error',
@@ -166,7 +196,7 @@ function createLugar() {
         return;
     }
     
-    // Mostrar indicador de carga
+    // Mostrar indicador de carga durante el proceso
     Swal.fire({
         title: '<i class="fas fa-spinner fa-spin"></i> Procesando...',
         text: 'Creando nuevo lugar',
@@ -208,6 +238,7 @@ function createLugar() {
     const url = form.dataset.url;
     const redirectUrl = document.querySelector('meta[name="places-index"]').content;
     
+    // Realizar petición AJAX al servidor
     fetch(url, {
         method: 'POST',
         headers: {
@@ -219,7 +250,9 @@ function createLugar() {
     })
     .then(response => response.json())
     .then(data => {
+        // Procesar la respuesta del servidor
         if (data.status === 'success') {
+            // Mostrar mensaje de éxito y redirigir a la lista de lugares
             Swal.fire({
                 icon: 'success',
                 title: '<span class="text-success"><i class="fas fa-check-circle"></i> Completado!</span>',
@@ -251,6 +284,7 @@ function createLugar() {
                 
                 errorHtml += '</ul>';
                 
+                // Mostrar alerta con todos los errores
                 Swal.fire({
                     icon: 'error',
                     title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error de validación</span>',
@@ -258,6 +292,7 @@ function createLugar() {
                     confirmButtonColor: '#9F17BD'
                 });
             } else {
+                // Mostrar mensaje de error general
                 Swal.fire({
                     icon: 'error',
                     title: '<span class="text-danger"><i class="fas fa-times-circle"></i> Error</span>',
@@ -268,6 +303,7 @@ function createLugar() {
         }
     })
     .catch(error => {
+        // Manejar errores de conexión o del servidor
         console.error('Error:', error);
         Swal.fire({
             icon: 'error',

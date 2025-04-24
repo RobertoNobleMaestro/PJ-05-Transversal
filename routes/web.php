@@ -121,4 +121,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/lugares/{id_lugar}/edit', [LugarController::class, 'edit'])->name('admin.lugares.edit');
     Route::put('/admin/lugares/{id_lugar}', [LugarController::class, 'update'])->name('admin.lugares.update');
     Route::delete('/admin/lugares/{id_lugar}', [LugarController::class, 'destroy'])->name('admin.lugares.destroy');
+    
+    // CRUD de reservas
+    Route::get('/admin/reservas', [ReservaController::class, 'index'])->name('admin.reservas.index');
+    Route::get('/admin/reservas/data', [ReservaController::class, 'getReservas'])->name('admin.reservas.data'); // Ruta para AJAX
+    Route::get('/admin/reservas/create', [ReservaController::class, 'create'])->name('admin.reservas.create');
+    Route::post('/admin/reservas', [ReservaController::class, 'store'])->name('admin.reservas.store');
+    Route::get('/admin/reservas/{id_reservas}/edit', [ReservaController::class, 'edit'])->name('admin.reservas.edit');
+    Route::post('/admin/reservas/{id_reservas}', [ReservaController::class, 'update'])->name('admin.reservas.update');
+    Route::delete('/admin/reservas/{id_reservas}', [ReservaController::class, 'destroy'])->name('admin.reservas.destroy');
+    
+    // Historial de reservas
+    Route::get('/admin/historial', [ReservaController::class, 'historial'])->name('admin.historial');
+    Route::get('/admin/historial/data', [ReservaController::class, 'getHistorialData'])->name('admin.historial.data'); // Ruta para AJAX
 });
