@@ -53,7 +53,7 @@ function cargarCarrito() {
       `;
       contenedor.appendChild(div);
       if (vehiculo.reserva?.total_precio) {
-        total += parseFloat(vehiculo.reserva.total_precio);
+        total = parseFloat(vehiculo.reserva.total_precio);
       }
     });
 

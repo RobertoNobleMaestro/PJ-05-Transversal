@@ -14,15 +14,15 @@ class PerfilController extends Controller
     {
         $licencias = ['AM', 'A1', 'A2', 'A', 'B', 'B+E', 'C1', 'C1+E', 'C', 'C+E', 'D1', 'D1+E', 'D', 'D+E'];
         $user = User::findOrFail($id);
-
-        // Obtener las reservas confirmadas y completadas (incluye tanto pagado como confirmada)
+    
         $reservas = $user->reservas()
-            ->whereIn('estado', ['confirmada', 'completada'])
-            ->with(['vehiculosReservas.vehiculo', 'vehiculosReservas']) // Cargar las relaciones correctas
+            ->where('estado', 'pagado')
+            ->with('vehiculo.imagenes') // Cargar las imágenes del vehículo
             ->get();
-
+    
         return view('Perfil.index', compact('user', 'licencias', 'reservas'));
     }
+    
 
     public function obtenerDatos($id)
     {
