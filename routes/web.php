@@ -130,6 +130,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/reservas/{id_reservas}/edit', [ReservaController::class, 'edit'])->name('admin.reservas.edit');
     Route::post('/admin/reservas/{id_reservas}', [ReservaController::class, 'update'])->name('admin.reservas.update');
     Route::delete('/admin/reservas/{id_reservas}', [ReservaController::class, 'destroy'])->name('admin.reservas.destroy');
+    Route::get('/admin/reservas/{id_reserva}', [ReservaController::class, 'getReservaDetails'])->name('admin.reservas.details'); // Nueva ruta para detalles
     
     // Historial de reservas
     Route::get('/admin/historial', [ReservaController::class, 'historial'])->name('admin.historial');

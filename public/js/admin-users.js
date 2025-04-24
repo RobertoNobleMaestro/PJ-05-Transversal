@@ -23,12 +23,9 @@ function loadUsers() {
     // Construir la URL con los parámetros de filtro
     let url = new URL(dataUrl, window.location.origin);
     
-    // Agregar todos los filtros activos a la URL
-    Object.keys(activeFilters).forEach(key => {
-        if (activeFilters[key]) {
-            url.searchParams.append(key, activeFilters[key]);
-        }
-    });
+    // Agregar parámetros de filtro con los nombres exactos que espera el controlador
+    if (activeFilters.nombre) url.searchParams.append('nombre', activeFilters.nombre);
+    if (activeFilters.role) url.searchParams.append('role', activeFilters.role);
     
     // Realizar petición AJAX para obtener los usuarios
     fetch(url, {
@@ -248,13 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener para el botón de limpiar filtros
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
     
-    // Event listener para el botón de aplicar filtros
-    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    // Implementar filtros automáticos en tiempo real (sin necesidad de botón "Aplicar")
+    document.getElementById('searchUser').addEventListener('input', function() {
+        applyFilters();
+    });
     
-    // Event listener para buscar al presionar Enter en el campo de búsqueda
-    document.getElementById('searchUser').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            applyFilters();
-        }
+    document.getElementById('filterRole').addEventListener('change', function() {
+        applyFilters();
     });
 });

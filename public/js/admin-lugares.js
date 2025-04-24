@@ -26,12 +26,9 @@ function loadLugares() {
     // Construir la URL con los parámetros de filtro
     let url = new URL(baseUrl, window.location.origin);
     
-    // Agregar todos los filtros activos a la URL
-    Object.keys(activeFilters).forEach(key => {
-        if (activeFilters[key]) {
-            url.searchParams.append(key, activeFilters[key]);
-        }
-    });
+    // Agregar parámetros de filtro con los nombres exactos que espera el controlador
+    if (activeFilters.nombre) url.searchParams.append('nombre', activeFilters.nombre);
+    if (activeFilters.direccion) url.searchParams.append('direccion', activeFilters.direccion);
     
     // Realizar petición AJAX para obtener los lugares
     fetch(url, {
@@ -461,19 +458,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener para el botón de limpiar filtros
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
     
-    // Event listener para el botón de aplicar filtros
-    document.getElementById('applyFilters').addEventListener('click', applyFilters);
-    
-    // Event listeners para aplicar filtros cuando se presiona Enter
-    document.getElementById('filterNombre').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            applyFilters();
-        }
+    // Implementar filtros automáticos en tiempo real (sin necesidad de botón "Aplicar")
+    document.getElementById('filterNombre').addEventListener('input', function() {
+        applyFilters(); // Aplicar filtros automáticamente al escribir
     });
     
-    document.getElementById('filterDireccion').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            applyFilters();
-        }
+    document.getElementById('filterDireccion').addEventListener('input', function() {
+        applyFilters(); // Aplicar filtros automáticamente al escribir
     });
 });

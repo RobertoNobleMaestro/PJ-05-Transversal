@@ -104,7 +104,7 @@ function loadHistorial() {
     // Preparar los parámetros para la consulta AJAX
     const params = new URLSearchParams();
     
-    // Añadir filtros activos a los parámetros
+    // Asegurarnos de que los parámetros coincidan exactamente con lo que espera el controlador
     if (activeFilters.usuario) params.append('usuario', activeFilters.usuario);
     if (activeFilters.lugar) params.append('lugar', activeFilters.lugar);
     if (activeFilters.estado) params.append('estado', activeFilters.estado);
@@ -124,14 +124,21 @@ function loadHistorial() {
     // Añadir los parámetros de filtro a la URL
     url.search = params.toString();
     
-    // Realizar la petición AJAX
+    // Obtener el token CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    console.log('URL del historial:', url.toString());
+    console.log('Token CSRF:', csrfToken);
+    
+    // Realizar la petición AJAX con el token CSRF incluido
     fetch(url.toString(), {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
+            'X-CSRF-TOKEN': csrfToken || ''
+        },
+        credentials: 'same-origin' // Importante para mantener la sesión
     })
     .then(response => {
         if (!response.ok) {
@@ -145,8 +152,19 @@ function loadHistorial() {
         document.getElementById('historial-table-container').style.display = 'block';
         
         // Actualizar tabla con los datos recibidos
-        const tableBody = document.getElementById('historial-table-body');
+        const tableBody = document.querySelector('#historial-table tbody');
         tableBody.innerHTML = ''; // Limpiar la tabla primero
+        
+        console.log('Datos recibidos:', data); // Debug para ver la respuesta
+        
+        // Actualizar estadísticas si existen
+        if (data.stats) {
+            document.getElementById('total-reservas').textContent = data.stats.total || 0;
+            document.getElementById('reservas-completadas').textContent = data.stats.completadas || 0;
+            document.getElementById('reservas-pendientes').textContent = data.stats.pendientes || 0;
+            document.getElementById('reservas-canceladas').textContent = data.stats.canceladas || 0;
+            document.getElementById('ingreso-total').textContent = formatCurrency(data.stats.ingresos || 0);
+        }
         
         // Verificar si hay datos de reservas
         if (data.reservas && data.reservas.length > 0) {
@@ -176,10 +194,32 @@ function loadHistorial() {
                         estadoClass = '';
                 }
                 
+                // Depurar los datos de usuario y vehículos
+                console.log('Datos de reserva:', reserva.id_reserva, reserva);
+                
+                // Extraer o preparar el nombre del usuario de manera segura
+                let nombreUsuario = 'N/A';
+                if (reserva.nombre_usuario && reserva.nombre_usuario !== 'undefined') {
+                    nombreUsuario = reserva.nombre_usuario;
+                } else if (reserva.usuario && reserva.usuario.nombre) {
+                    nombreUsuario = reserva.usuario.nombre;
+                }
+                
+                // Preparar la información de vehículos
+                let vehiculosHtml = 'N/A';
+                if (reserva.vehiculos_info && Array.isArray(reserva.vehiculos_info) && reserva.vehiculos_info.length > 0) {
+                    vehiculosHtml = `<ul class="vehiculos-list">`;
+                    reserva.vehiculos_info.forEach(vehiculo => {
+                        if (vehiculo && vehiculo.marca && vehiculo.modelo) {
+                            vehiculosHtml += `<li>${vehiculo.marca} ${vehiculo.modelo}</li>`;
+                        }
+                    });
+                    vehiculosHtml += `</ul>`;
+                }
+                
                 // Construir la fila con los datos
                 row.innerHTML = `
-                    <td class="text-center">${reserva.id_reserva}</td>
-                    <td>${reserva.nombre_usuario || 'N/A'}</td>
+                    <td>${nombreUsuario}</td>
                     <td class="text-center">${fecha}</td>
                     <td>${reserva.nombre_lugar || 'N/A'}</td>
                     <td class="text-center">
@@ -188,20 +228,7 @@ function loadHistorial() {
                         </span>
                     </td>
                     <td class="text-center">${formatCurrency(reserva.total_precio)}</td>
-                    <td>
-                        ${reserva.vehiculos_info && reserva.vehiculos_info.length > 0 ? 
-                            `<ul class="vehiculos-list">${
-                                reserva.vehiculos_info.map(v => 
-                                    `<li>${v.marca} ${v.modelo}</li>`
-                                ).join('')
-                            }</ul>` : 'N/A'
-                        }
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-sm" onclick="showDetails(${reserva.id_reserva})">
-                            <i class="fas fa-info-circle"></i> Ver detalles
-                        </button>
-                    </td>
+                    <td>${vehiculosHtml}</td>
                 `;
                 
                 tableBody.appendChild(row);
@@ -233,23 +260,13 @@ function loadHistorial() {
     })
     .catch(error => {
         // Manejar errores
-        console.error('Error al cargar historial:', error);
-        
-        // Ocultar el indicador de carga y mostrar mensaje de error
-        document.getElementById('loading-historial').style.display = 'none';
-        document.getElementById('historial-table-container').style.display = 'block';
-        
-        const tableBody = document.getElementById('historial-table-body');
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-3">
-                    <div class="alert alert-danger mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Error al cargar el historial: ${error.message}
-                    </div>
-                </td>
-            </tr>
-        `;
+        console.error('Error en la solicitud AJAX:', error);
+        document.getElementById('loading-historial').style.display = 'block';
+        document.getElementById('loading-historial').innerHTML = `<div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Error al cargar historial: ${error.message}
+        </div>`;
+        document.getElementById('historial-table-container').style.display = 'none';
     });
 }
 
@@ -270,13 +287,20 @@ function showDetails(id) {
         showConfirmButton: false,
         allowOutsideClick: false,
         didOpen: () => {
+            // Obtener el token CSRF
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            console.log('Solicitando detalles de reserva ID:', id);
+            
             // Realizar petición AJAX para obtener los detalles de la reserva
             fetch(`/admin/reservas/${id}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken || ''
+                },
+                credentials: 'same-origin' // Importante para mantener la sesión
             })
             .then(response => response.json())
             .then(data => {

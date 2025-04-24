@@ -86,11 +86,12 @@ function loadVehiculos() {
     let url = new URL(dataUrl, window.location.origin);
     
     // Agregar todos los filtros activos a la URL
-    Object.keys(activeFilters).forEach(key => {
-        if (activeFilters[key]) {
-            url.searchParams.append(key, activeFilters[key]);
-        }
-    });
+    // Asegurarnos de que los parámetros de filtro tengan los nombres correctos que espera el controlador
+    if (activeFilters.marca) url.searchParams.append('marca', activeFilters.marca);
+    if (activeFilters.tipo) url.searchParams.append('tipo', activeFilters.tipo);
+    if (activeFilters.lugar) url.searchParams.append('lugar', activeFilters.lugar);
+    if (activeFilters.anio) url.searchParams.append('anio', activeFilters.anio);
+    if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion);
     
     // Agregar parámetros de paginación
     url.searchParams.append('page', currentPage);

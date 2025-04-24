@@ -105,14 +105,12 @@
             <table class="crud-table" id="historial-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Usuario</th>
                         <th>Fecha</th>
                         <th>Lugar</th>
                         <th>Estado</th>
                         <th>Total</th>
                         <th>Vehículos</th>
-                        <th>Detalles</th>
                     </tr>
                 </thead>
                 <tbody>
