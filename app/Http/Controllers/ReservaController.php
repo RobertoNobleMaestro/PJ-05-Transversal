@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;  
 use App\Models\Vehiculo;
 use App\Models\VehiculosReservas;
+use Illuminate\Support\Facades\Auth;
+
 class ReservaController extends Controller
 {
     public function reservasPorVehiculo($id)
@@ -40,7 +42,15 @@ class ReservaController extends Controller
                 'fecha_ini' => 'required|date',
                 'fecha_final' => 'required|date|after_or_equal:fecha_ini'
             ]);
-    
+            if (!Auth::check()) {
+                return response()->json([
+                    'alert' => [
+                        'icon' => 'error',
+                        'title' => 'Usuario no autenticado',
+                        'text' => 'Debes iniciar sesión para realizar una reserva.'
+                    ]
+                ], 401);
+            }
             // Obtener el vehículo
             $vehiculo = Vehiculo::findOrFail($request->id_vehiculos);
     
