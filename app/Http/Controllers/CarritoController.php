@@ -15,7 +15,7 @@ class CarritoController extends Controller
 
         // Obtener vehículos con al menos una reserva pendiente del usuario
         $vehiculos = Vehiculo::with([
-            'imagenes',
+            'imagenes', // Aseguramos que se carguen las imágenes
             'tipo',
             'caracteristicas',
             'lugar',

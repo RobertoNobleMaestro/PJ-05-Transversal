@@ -23,6 +23,32 @@
                     <p class="mb-2"><strong>Referencia de la reserva:</strong> #{{ $reserva->id_reservas }}</p>
                     <p class="mb-0"><strong>Fecha de reserva:</strong> {{ date('d/m/Y', strtotime($reserva->fecha_reserva)) }}</p>
                 </div>
+                
+                <!-- Mostrar vehículos reservados con sus imágenes -->
+                <div class="reserved-vehicles mt-4">
+                    <h5 class="mb-3">Vehículos reservados:</h5>
+                    <div class="row justify-content-center">
+                        @foreach ($reserva->vehiculosReservas as $vr)
+                            <div class="col-md-4 mb-3">
+                                <div class="vehicle-card p-2 text-center">
+                                    @php
+                                        // Obtener las imágenes directamente de la base de datos para este vehículo
+                                        $imagenes = \App\Models\ImagenVehiculo::where('id_vehiculo', $vr->vehiculo->id_vehiculos)->get();
+                                    @endphp
+                                    
+                                    @if($imagenes && count($imagenes) > 0)
+                                        <img src="{{ asset('storage/' . $imagenes[0]->ruta_imagen) }}" alt="{{ $vr->vehiculo->marca }}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 5px; margin-bottom: 8px;">
+                                    @else
+                                        <div style="width: 100%; height: 80px; background: #e0e0e0; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                            <i class="fas fa-car" style="font-size: 24px; color: #aaa;"></i>
+                                        </div>
+                                    @endif
+                                    <p class="mb-0 font-weight-bold">{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
                 <div class="mt-4">
                     <a href="{{ route('home') }}" class="btn btn-primary">
                         <i class="fas fa-home mr-2"></i>Volver al inicio

@@ -19,7 +19,12 @@ class PagoController extends Controller
         
         $reserva = Reserva::where('id_usuario', $userId)
                          ->where('estado', 'pendiente')
-                         ->with(['vehiculos', 'vehiculosReservas', 'vehiculosReservas.vehiculo'])
+                         ->with([
+                             'vehiculos', 
+                             'vehiculosReservas', 
+                             'vehiculosReservas.vehiculo',
+                             'vehiculosReservas.vehiculo.imagenes' // Cargamos explícitamente las imágenes
+                         ])
                          ->first();
 
         if (!$reserva) {
@@ -97,8 +102,13 @@ class PagoController extends Controller
     
     public function exito(Request $request, $id_reserva)
     {
-        $reserva = Reserva::with(['vehiculos', 'vehiculosReservas', 'vehiculosReservas.vehiculo'])
-                         ->findOrFail($id_reserva);
+        $reserva = Reserva::with([
+                'vehiculos', 
+                'vehiculosReservas', 
+                'vehiculosReservas.vehiculo',
+                'vehiculosReservas.vehiculo.imagenes' // Cargamos explícitamente las imágenes
+            ])
+            ->findOrFail($id_reserva);
         
         return view('pago.exito', ['reserva' => $reserva]);
     }

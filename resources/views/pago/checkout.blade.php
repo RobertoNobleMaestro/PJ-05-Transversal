@@ -75,6 +75,21 @@
                         @foreach($reserva->vehiculosReservas as $vr)
                             <div class="reservation-item">
                                 <div class="d-flex justify-content-between align-items-start">
+                                    <!-- Imagen del vehículo -->
+                                    <div class="vehicle-image mr-3">
+                                        @php
+                                            // Obtener las imágenes directamente de la base de datos para este vehículo
+                                            $imagenes = \App\Models\ImagenVehiculo::where('id_vehiculo', $vr->vehiculo->id_vehiculos)->get();
+                                        @endphp
+                                        
+                                        @if($imagenes && count($imagenes) > 0)
+                                            <img src="{{ asset('storage/' . $imagenes[0]->ruta_imagen) }}" alt="{{ $vr->vehiculo->marca }}" style="width: 80px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                        @else
+                                            <div style="width: 80px; height: 60px; background: #e0e0e0; border-radius: 5px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-car" style="font-size: 24px; color: #aaa;"></i>
+                                            </div>
+                                        @endif
+                                    </div>
                                     <div class="vehicle-details">
                                         <strong class="vehicle-title">{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</strong>
                                         <div class="text-muted">
