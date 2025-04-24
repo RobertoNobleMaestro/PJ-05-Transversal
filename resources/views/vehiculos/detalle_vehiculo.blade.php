@@ -22,8 +22,39 @@
     <div class="row">
         <div class="col-md-6">
             <div class="imagen-box text-center">
-                <img src="{{ asset('img/' . $vehiculo->imagen) }}" class="img-fluid mb-3" alt="">
-                <img src="{{ asset('img/mercedes.png') }}" class="img-fluid" alt="">
+                @php
+                $modeloLower = strtolower($vehiculo->modelo);
+                $marca = strtolower($vehiculo->marca);
+                $imagenNombre = null;
+                
+                // Intentar encontrar una imagen basada en el modelo exacto
+                foreach(['focus.png', 'golf.png', 'civic.png', 'corolla.png', 'swift.png', 'leon.png', 'clio.png', 'sandero.png', 'c4.png', 'cruze.png'] as $img) {
+                    $nombreBase = pathinfo($img, PATHINFO_FILENAME);
+                    if (strpos($modeloLower, $nombreBase) !== false) {
+                        $imagenNombre = $img;
+                        break;
+                    }
+                }
+                
+                // Si no se encuentra por modelo, intentar por marca
+                if (!$imagenNombre) {
+                    if (strpos($marca, 'ford') !== false) {
+                        $imagenNombre = 'focus.png';
+                    } elseif (strpos($marca, 'volkswagen') !== false) {
+                        $imagenNombre = 'golf.png';
+                    } elseif (strpos($marca, 'honda') !== false) {
+                        $imagenNombre = 'civic.png';
+                    } elseif (strpos($marca, 'toyota') !== false) {
+                        $imagenNombre = 'corolla.png';
+                    } elseif (strpos($marca, 'seat') !== false) {
+                        $imagenNombre = 'leon.png';
+                    } else {
+                        // Valor predeterminado
+                        $imagenNombre = 'swift.png';
+                    }
+                }
+                @endphp
+                <img src="{{ asset('img/vehiculos/' . $imagenNombre) }}" class="img-fluid" alt="{{ $vehiculo->marca }} {{ $vehiculo->modelo }}" style="max-width: 100%; height: auto;">
             </div>
         </div>
         <div class="col-md-6">

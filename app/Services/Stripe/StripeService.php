@@ -15,6 +15,11 @@ class StripeService
     {
         $this->secretKey = env('STRIPE_SECRET');
         $this->publicKey = env('STRIPE_KEY');
+        
+        // Log de diagnóstico
+        Log::info('StripeService inicializado');
+        Log::info('Usando clave pública: ' . substr($this->publicKey, 0, 8) . '...');
+        Log::info('Usando clave secreta: ' . substr($this->secretKey, 0, 8) . '...');
     }
 
     /**

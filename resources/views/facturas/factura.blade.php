@@ -176,10 +176,10 @@
             
             <div class="info-pago">
                 <h2>Información de pago</h2>
-                <p><strong>Estado:</strong> {{ ucfirst($reserva->pago->estado_pago ?? 'Pagado') }}</p>
-                <p><strong>Fecha de pago:</strong> {{ isset($reserva->pago->fecha_pago) ? \Carbon\Carbon::parse($reserva->pago->fecha_pago)->format('d/m/Y H:i') : \Carbon\Carbon::now()->format('d/m/Y H:i') }}</p>
-                <p><strong>Referencia:</strong> {{ $reserva->pago->referencia_externa ?? $reserva->referencia_pago }}</p>
-                <p><strong>Método de pago:</strong> Tarjeta de crédito (Stripe)</p>
+                <p><strong>Estado:</strong> {{ ucfirst($reserva->estado) }}</p>
+                <p><strong>Fecha de pago:</strong> {{ $fecha_emision }}</p>
+                <p><strong>Referencia:</strong> {{ $reserva->referencia_pago ?? $numero_factura }}</p>
+                <p><strong>Método de pago:</strong> Tarjeta de crédito</p>
             </div>
             
             <div class="footer">
@@ -192,4 +192,4 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>

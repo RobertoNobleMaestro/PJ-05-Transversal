@@ -72,6 +72,7 @@ use App\Http\Controllers\LugarController;
 
     // Rutas de pago (dentro del middleware 'auth')
     Route::get('/finalizar-compra', [PagoController::class, 'checkout'])->name('pago.checkout');
+    Route::post('/pago/procesar', [PagoController::class, 'procesar'])->name('pago.procesar');
     Route::get('/pago/exito/{id_reserva}', [PagoController::class, 'exito'])->name('pago.exito');
     Route::get('/pago/cancelado', [PagoController::class, 'cancelado'])->name('pago.cancelado');
 

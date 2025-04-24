@@ -16,10 +16,14 @@ class FacturaController extends Controller
         // Verificar que la reserva pertenece al usuario
         $reserva = Reserva::with(['vehiculosReservas.vehiculo', 'pago', 'usuario', 'lugar'])
                           ->where('id_reservas', $id_reserva)
-                          ->where('estado', 'pagado')
-                          ->firstOrFail();
+                          ->whereIn('estado', ['confirmada', 'completada'])
+                          ->first();
         
-        if ($reserva->id_usuario != Auth::id() && !Auth::user()->es_admin) {
+        if (!$reserva) {
+            abort(404, 'No se encontró la factura solicitada');
+        }
+        
+        if ($reserva->id_usuario != Auth::id() && !(Auth::user() && Auth::user()->id_roles == 1)) {
             abort(403, 'No tienes permiso para acceder a esta factura');
         }
         

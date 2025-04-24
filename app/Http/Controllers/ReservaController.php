@@ -215,14 +215,13 @@ class ReservaController extends Controller
                 'total_precio' => $precioUnitario,
                 'estado' => 'pendiente',
                 'id_lugar' => $vehiculo->id_lugar,
-                'id_usuario' => auth()->id(),
+                'id_usuario' => auth()->id() ?? 1,
             ]);
             
             // Asociar vehículo a la reserva
             $reserva->vehiculos()->attach($vehiculo->id_vehiculos, [
                 'fecha_ini' => $request->fecha_ini,
                 'fecha_final' => $request->fecha_final,
-                'precio_unitario' => $precioUnitario,
             ]);
             
             // Confirmar transacción
@@ -237,6 +236,8 @@ class ReservaController extends Controller
         } catch (\Exception $e) {
             // Revertir transacción en caso de error
             DB::rollBack();
+            
+            \Illuminate\Support\Facades\Log::error('Error al crear reserva: ' . $e->getMessage());
             
             return response()->json([
                 'status' => 'error',

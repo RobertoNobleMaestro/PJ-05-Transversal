@@ -74,25 +74,41 @@
 
   <div class="row mt-4 justify-content-center">
     @forelse ($reservas as $reserva)
-      @foreach($reserva->vehiculos as $vehiculo)
+      @foreach($reserva->vehiculosReservas as $vehiculoReserva)
+        @php $vehiculo = $vehiculoReserva->vehiculo; @endphp
+        @if($vehiculo)
         <div class="col-6 col-md-3 mb-4">
           <div class="card shadow-sm">
-            @if($vehiculo->imagenes->isNotEmpty())
-              <img src="{{ asset('img/vehiculos/' . $vehiculo->imagenes->first()->ruta) }}" class="card-img-top" alt="{{ $vehiculo->modelo }}" style="height: 200px; object-fit: cover;">
-            @else
-              <img src="{{ asset('img/vehiculos/default.jpg') }}" class="card-img-top" alt="Vehículo no disponible" style="height: 200px; object-fit: cover;">
-            @endif
+            @php
+              $modeloLower = strtolower($vehiculo->modelo);
+              $imagenNombre = null;
+              
+              if (strpos($modeloLower, 'focus') !== false) {
+                $imagenNombre = 'focus.png';
+              } elseif (strpos($modeloLower, 'golf') !== false) {
+                $imagenNombre = 'golf.png';
+              } elseif (strpos($modeloLower, 'civic') !== false) {
+                $imagenNombre = 'civic.png';
+              } elseif (strpos($modeloLower, 'corolla') !== false) {
+                $imagenNombre = 'corolla.png';
+              } elseif (strpos($modeloLower, 'a3') !== false) {
+                $imagenNombre = 'a3.png';
+              } else {
+                $imagenNombre = 'default-car.png';
+              }
+            @endphp
+            <img src="{{ asset('img/vehiculos/' . $imagenNombre) }}" class="card-img-top" alt="{{ $vehiculo->modelo }}" style="height: 200px; object-fit: cover;">
             <div class="card-body text-start p-2">
-              <p class="m-0 fw-bold">{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</p>
-              <p class="m-0">Precio/día: {{ number_format($vehiculo->precio_dia, 2, ',', '.') }} €</p>
+              <p class="m-0 fw-bold">{{ $vehiculo->marca ?? 'Sin marca' }} {{ $vehiculo->modelo ?? 'Sin modelo' }}</p>
+              <p class="m-0">Precio/día: {{ number_format($vehiculo->precio_dia ?? 0, 2, ',', '.') }} €</p>
               @if($vehiculo->caracteristicas)
-                <p class="m-0 text-muted small">{{ number_format($vehiculo->kilometraje, 0, ',', '.') }} km</p>
+                <p class="m-0 text-muted small">{{ number_format($vehiculo->kilometraje ?? 0, 0, ',', '.') }} km</p>
               @endif
               <p class="m-0 text-muted small">Estado: {{ $reserva->estado }}</p>
               <div class="d-flex justify-content-between align-items-center mt-2">
                 <span class="text-muted small">
-                  {{ \Carbon\Carbon::parse($reserva->vehiculosReservas->where('id_vehiculos', $vehiculo->id_vehiculos)->first()->fecha_ini ?? '')->format('d/m/Y') }} - 
-                  {{ \Carbon\Carbon::parse($reserva->vehiculosReservas->where('id_vehiculos', $vehiculo->id_vehiculos)->first()->fecha_final ?? '')->format('d/m/Y') }}
+                  {{ \Carbon\Carbon::parse($vehiculoReserva->fecha_ini ?? now())->format('d/m/Y') }} - 
+                  {{ \Carbon\Carbon::parse($vehiculoReserva->fecha_final ?? now())->format('d/m/Y') }}
                 </span>
                 <a href="{{ route('facturas.descargar', ['id_reserva' => $reserva->id_reservas]) }}" class="btn btn-sm btn-outline-secondary" title="Descargar factura">
                   <i class="fas fa-file-invoice"></i> Factura
@@ -101,10 +117,11 @@
             </div>
           </div>
         </div>
+        @endif
       @endforeach
     @empty
       <div class="col-12 text-center">
-        <p class="text-muted">No tienes vehículos alquilados.</p>
+        <p>No tienes vehículos alquilados actualmente.</p>
       </div>
     @endforelse
   </div>
