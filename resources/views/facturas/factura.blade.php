@@ -7,19 +7,45 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        :root {
+            --color-primario: #9F17BD;
+            --color-secundario: #B3B3B3;
+            --morado-claro: #c176d6;
+            --morado-fondo: #f3e5f5;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--morado-fondo);
             margin: 0;
             padding: 20px;
             color: #333;
         }
+        .factura-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.15);
+            border-radius: 10px;
+        }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            border-bottom: 3px solid var(--color-primario);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
         }
         .logo {
             max-width: 150px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: var(--color-primario);
+            font-size: 28px;
+        }
+        h2 {
+            color: var(--color-primario);
+            font-size: 20px;
+            margin-top: 20px;
         }
         .datos-factura {
             display: flex;
@@ -28,59 +54,69 @@
         }
         .datos-empresa, .datos-cliente {
             width: 48%;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #2c3e50;
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 14px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin-top: 15px;
         }
         th, td {
-            padding: 10px;
+            padding: 12px 10px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--color-secundario);
         }
         th {
-            background-color: #f2f2f2;
-            font-weight: bold;
+            background-color: var(--morado-claro);
+            color: white;
         }
         .total {
             text-align: right;
-            margin-top: 20px;
+            font-size: 18px;
             font-weight: bold;
-        }
-        .footer {
-            margin-top: 50px;
-            font-size: 12px;
-            text-align: center;
-            color: #777;
+            color: var(--color-primario);
+            margin-top: 20px;
         }
         .info-pago {
             margin-top: 30px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
+            padding: 20px;
+            background-color: var(--morado-fondo);
+            border-left: 5px solid var(--color-primario);
+            border-radius: 6px;
         }
-        .factura-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 40px;
         }
         .actions {
             margin: 20px 0;
             text-align: center;
+        }
+        .btn-primary {
+            background-color: black;
+            border-color: black;
+        }
+        .btn-secondary {
+            background-color: var(--color-primario);
+            border-color: var(--color-primario);
+        }
+        .btn-secondary:hover {
+    background-color: #6a0080 !important;
+    border-color: #6a0080 !important;
+    color: #fff !important;
+}
+
+.btn-primary:hover {
+    background-color: #6a0080 !important;
+    border-color: #6a0080 !important;
+    color: #fff !important;
+}
+
+        .btn-secondary:hover,
+        .btn-primary:hover {
+            opacity: 0.9;
         }
         @media print {
             .no-print {
@@ -107,14 +143,15 @@
                 <i class="fas fa-print"></i> Imprimir Factura
             </button>
         </div>
-        
+
         <div class="factura-container">
             <div class="header">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo de la empresa" class="logo">
                 <h1>FACTURA</h1>
                 <p><strong>Número:</strong> {{ $numero_factura }}</p>
                 <p><strong>Fecha de emisión:</strong> {{ $fecha_emision }}</p>
             </div>
-            
+
             <div class="datos-factura">
                 <div class="datos-empresa">
                     <h2>Datos de la empresa</h2>
@@ -125,7 +162,6 @@
                     <p>Email: info@carflow.com</p>
                     <p>Teléfono: +34 91 123 45 67</p>
                 </div>
-                
                 <div class="datos-cliente">
                     <h2>Datos del cliente</h2>
                     <p><strong>{{ $reserva->usuario->nombre }}</strong></p>
@@ -137,7 +173,7 @@
                     @endif
                 </div>
             </div>
-            
+
             <h2>Detalle de la reserva</h2>
             <table>
                 <thead>
@@ -169,11 +205,11 @@
                     @endforeach
                 </tbody>
             </table>
-            
+
             <div class="total">
                 <p>Total (IVA incluido): € {{ number_format($reserva->total_precio, 2, ',', '.') }}</p>
             </div>
-            
+
             <div class="info-pago">
                 <h2>Información de pago</h2>
                 <p><strong>Estado:</strong> {{ ucfirst($reserva->estado) }}</p>
@@ -181,14 +217,14 @@
                 <p><strong>Referencia:</strong> {{ $reserva->referencia_pago ?? $numero_factura }}</p>
                 <p><strong>Método de pago:</strong> Tarjeta de crédito</p>
             </div>
-            
+
             <div class="footer">
                 <p>Gracias por confiar en CarFlow. Este documento es una factura simplificada válida a efectos fiscales.</p>
                 <p>Para cualquier consulta relacionada con esta factura, contacte con nuestro servicio de atención al cliente.</p>
             </div>
         </div>
     </div>
-    
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

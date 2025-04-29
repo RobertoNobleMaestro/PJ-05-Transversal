@@ -58,7 +58,7 @@
         <div class="text-center mb-3" id="camaraContainer" style="display:none;">
           <video id="videoCamara" autoplay style="width: 100%; max-width: 300px; border-radius: 10px;"></video>
           <br>
-          <button type="button" class="btn btn-success mt-2" id="btnCapturarFoto">Capturar</button>
+          <button type="button" class="btn-editar" id="btnCapturarFoto">Capturar</button>
           <canvas id="canvasFoto" style="display:none;"></canvas>
         </div>
         <button class="btn-editar" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">Editar perfil</button>            
