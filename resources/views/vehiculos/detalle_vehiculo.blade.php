@@ -55,6 +55,9 @@
                     <div class="col-md-6"><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</div>
                 </div>
             </div>
+            <button id="btnAbrirFormulario" class="btn btn-primary mb-3" style="background-color: #6f42c1; border-color: #6f42c1;">
+                <i class="fas fa-comment"></i> Dejar una valoración
+            </button>
         </div>
     </div>
 
@@ -236,10 +239,40 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-
-
-    <!-- Valoraciones con Fetch API -->
+    <div id="formulario-valoracion" class="mt-4" style="display: none;">
+        <h5>Deja tu valoración</h5>
+        <form id="form-valoracion" class="mb-4" method="POST">
+            <input type="hidden" name="id_vehiculos" value="{{ $vehiculo->id_vehiculos }}">
+            <div class="form-group">
+                <div class="row">
+                    @auth
+                    <div class="col-md-6">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" value="{{ Auth::user()->nombre }}" readonly>
+                    </div>
+                    @endauth
+                    <div class="col-md-6">
+                        <label for="valoracion">Puntuación</label>
+                        <div class="rating">
+                            <i class="far fa-star" data-value="1"></i>
+                            <i class="far fa-star" data-value="2"></i>
+                            <i class="far fa-star" data-value="3"></i>
+                            <i class="far fa-star" data-value="4"></i>
+                            <i class="far fa-star" data-value="5"></i>
+                        </div>
+                        <input type="hidden" id="valoracion" name="valoracion" required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="comentario">Comentario</label>
+                <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="Escribe tu comentario aquí..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar Valoración</button>
+        </form>
+    </div>
     <h4 class="mt-5">VALORACIONES</h4>
+
     <div id="valoraciones-container">
         <div class="text-center">
             <div class="spinner-border" role="status">
@@ -256,6 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/vehiculos.js') }}"></script>
+<script src="{{ asset('js/valoraciones.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         iniciarDetalleVehiculo({{ $vehiculo->id_vehiculos }});
@@ -286,123 +320,9 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 </div>
 
+<script>
+    const vehiculoId = {{ $vehiculo->id_vehiculos }};
+    const userId = {{ Auth::id() ?? 'null' }};
+</script>
 </body>
 </html>
-<style>
-#calendario-reservas {
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
-  margin-top: 2rem;
-  color: #000;
-  text-decoration: none;
-}
-a{
-    color: black;
-    text-decoration: none;
-}
-a:hover{
-    color: black;
-    text-decoration: none;   
-}
-/* Título del mes */
-.fc-toolbar-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #6f42c1;
-}
-
-/* Botones de navegación */
-.fc-button {
-  border: none;
-  color: white;
-  font-weight: 500;
-  padding: 0.4rem 1rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  margin: 0 2px;
-}
-
-.fc-button:hover {
-  background: #5a2b97;
-  transform: scale(1.03);
-}
-
-/* Encabezado de los días (Lun, Mar...) */
-.fc-col-header-cell {
-  background: #f3f0fa;
-  color: #6f42c1;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-}
-
-/* Celda del día */
-.fc-daygrid-day {
-  background-color: #fafafa;
-  transition: background-color 0.3s ease;
-}
-
-.fc-daygrid-day:hover {
-  background-color: #f0e9ff;
-}
-
-/* Día actual */
-.fc-day-today {
-  background-color: #e9d7ff !important;
-  border-radius: 8px;
-}
-
-/* Evento */
-.fc-event {
-  background-color: #6f42c1 !important;
-  color: #fff !important;
-  border: none;
-  font-weight: 500;
-  font-size: 0.85rem;
-  padding: 2px 6px;
-  border-radius: 12px;
-  text-align: center;
-}
-/* Resaltar los días seleccionados */
-.fc-day-selected {
-    background-color: #d0ebff !important;
-    border-radius: 8px;
-    animation: fadeIn 0.3s ease-in-out;
-    position: relative;
-}
-
-/* Animación */
-@keyframes fadeIn {
-    from { background-color: #fff; opacity: 0.2; }
-    to { background-color: #d0ebff; opacity: 1; }
-}
-
-/* Contador visual */
-#contador-dias {
-    font-weight: 600;
-    color: #0d6efd;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-    opacity: 0;
-}
-#contador-dias.visible {
-    opacity: 1;
-}
-
-/* Responsive ajustes */
-@media (max-width: 767px) {
-  .fc-toolbar-title {
-    font-size: 1.2rem;
-  }
-
-  .fc-button {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.85rem;
-  }
-}
-
-</style>
