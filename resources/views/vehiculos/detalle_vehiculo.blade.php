@@ -11,16 +11,16 @@
 <body>
 
 @include('layouts.navbar')
-<div style="padding-left: 30px; padding-top: 30px; padding-bottom: 30px;">
-    <a href="{{ asset('home') }}" class="btn-volver">
-      <i class="fas fa-arrow-left me-2"></i> Volver
-    </a>
-  </div>
 <div class="breadcrumb-container">
     <div class="container">
         <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo->nombre }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
     </div>
 </div>
+<div style="padding-left: 30px; padding-top: 30px; padding-bottom: 30px;">
+    <a href="{{ asset('home') }}" class="btn-volver">
+      <i class="fas fa-arrow-left me-2"></i> Volver
+    </a>
+  </div>
 
 <div class="container vehiculo-detail-section">
     <div class="row">
@@ -59,7 +59,7 @@
                     <div class="col-md-6"><i class="fas fa-shield-alt"></i> Seguro incluido: {{ $vehiculo->seguro_incluido ? 'Sí' : 'No' }}</div>
                 </div>
             </div>
-            <button id="btnAbrirFormulario" class="btn btn-primary mb-3" style="background-color: #6f42c1; border-color: #6f42c1;">
+            <button id="btnAbrirFormulario" class="btn-volver" style="border:none;">
                 <i class="fas fa-comment"></i> Dejar una valoración
             </button>
         </div>

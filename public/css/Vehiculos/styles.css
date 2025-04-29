@@ -170,9 +170,11 @@ footer {
   text-decoration: none !important;
 }
 a{
+    color: black !important;
     text-decoration: none !important;
 }
 a:hover{
+    color: black !important;
     text-decoration: none !important;   
 }
 /* Título del mes */
@@ -356,7 +358,7 @@ a:hover{
 .btn-volver {
     display: inline-block;
     background: linear-gradient(to right, #6f42c1, #e100ff);
-    color: white;
+    color: white !important;
     padding: 10px 20px;
     border-radius: 15px;
     text-decoration: none;
