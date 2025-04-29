@@ -170,11 +170,9 @@ footer {
   text-decoration: none !important;
 }
 a{
-    color: black !important;
     text-decoration: none !important;
 }
 a:hover{
-    color: black !important;
     text-decoration: none !important;   
 }
 /* Título del mes */
@@ -354,3 +352,22 @@ a:hover{
     background-color: #5a2b97;
     transform: scale(1.03);
 }
+
+.btn-volver {
+    display: inline-block;
+    background: linear-gradient(to right, #6f42c1, #e100ff);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 15px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-volver:hover {
+    background: linear-gradient(to right, #5a2b97, #c400e3);
+    transform: scale(1.05);
+    color: white;
+  }

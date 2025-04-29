@@ -77,7 +77,7 @@ body {
   }
 
   .btn-editar {
-    background: linear-gradient(to right, #6f42c1, #9b59b6);
+    background: linear-gradient(to right, #6f42c1, #e100ff);
     color: white !important;
     border-radius: 15px;
     padding: 12px 26px;
@@ -172,7 +172,6 @@ body {
   font-weight: 500;
   font-size: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .btn-volver:hover {
