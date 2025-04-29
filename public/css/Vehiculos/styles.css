@@ -160,3 +160,197 @@ footer {
 #btnAñadirCarrito div {
     font-size: 16px;
 }
+#calendario-reservas {
+  background-color: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+  padding: 1.5rem !important;
+  margin-top: 2rem !important;
+  color: #000 !important;
+  text-decoration: none !important;
+}
+a{
+    color: black !important;
+    text-decoration: none !important;
+}
+a:hover{
+    color: black !important;
+    text-decoration: none !important;   
+}
+/* Título del mes */
+.fc-toolbar-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: #6f42c1 !important;
+}
+
+/* Botones de navegación */
+.fc-button {
+  border: none !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 0.4rem 1rem !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  margin: 0 2px !important;
+}
+
+.fc-button:hover {
+  background: #5a2b97 !important;
+  transform: scale(1.03) !important;
+}
+
+/* Encabezado de los días (Lun, Mar...) */
+.fc-col-header-cell {
+  background: #f3f0fa !important;
+  color: #6f42c1 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 0.9rem !important;
+}
+
+/* Celda del día */
+.fc-daygrid-day {
+  background-color: #fafafa !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.fc-daygrid-day:hover {
+  background-color: #f0e9ff !important;
+}
+
+/* Día actual */
+.fc-day-today {
+  background-color: #e9d7ff !important;
+  border-radius: 8px !important;
+}
+
+/* Evento */
+.fc-event {
+  background-color: #6f42c1 !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
+  padding: 2px 6px !important;
+  border-radius: 12px !important;
+  text-align: center !important;
+}
+/* Resaltar los días seleccionados */
+.fc-day-selected {
+    background-color: #d0ebff !important;
+    border-radius: 8px !important;
+    animation: fadeIn 0.3s ease-in-out !important;
+    position: relative !important;
+}
+
+/* Animación */
+@keyframes fadeIn {
+    from { background-color: #fff; opacity: 0.2; }
+    to { background-color: #d0ebff; opacity: 1; }
+}
+
+/* Contador visual */
+#contador-dias {
+    font-weight: 600 !important;
+    color: #0d6efd !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 1rem !important;
+    text-align: center !important;
+    transition: all 0.3s ease-in-out !important;
+    opacity: 0 !important;
+}
+#contador-dias.visible {
+    opacity: 1 !important;
+}
+
+/* Responsive ajustes */
+@media (max-width: 767px) {
+  .fc-toolbar-title {
+    font-size: 1.2rem !important;
+  }
+
+  .fc-button {
+    padding: 0.3rem 0.8rem !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+
+#formulario-valoracion {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+#formulario-valoracion[style*="display: block"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#formulario-valoracion h5 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #6f42c1;
+    margin-bottom: 1.5rem;
+}
+
+#formulario-valoracion .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#formulario-valoracion .form-group label {
+    font-weight: 500;
+    color: #333;
+}
+
+#formulario-valoracion .form-control {
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#formulario-valoracion .form-control:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+}
+
+#formulario-valoracion .rating {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+#formulario-valoracion .rating i {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ddd;
+    transition: color 0.2s ease;
+}
+
+#formulario-valoracion .rating i:hover,
+#formulario-valoracion .rating i.active {
+    color: #ffc107;
+}
+
+#formulario-valoracion button[type="submit"] {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#formulario-valoracion button[type="submit"]:hover {
+    background-color: #5a2b97;
+    transform: scale(1.03);
+}

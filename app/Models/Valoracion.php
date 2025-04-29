@@ -13,7 +13,7 @@ class Valoracion extends Model
     protected $primaryKey = 'id_valoracion';
 
     protected $fillable = [
-        'puntuacion',
+        'valoracion',
         'comentario',
         'fecha_valoracion',
         'id_reservas',
@@ -22,7 +22,7 @@ class Valoracion extends Model
 
     protected $casts = [
         'fecha_valoracion' => 'datetime',
-        'puntuacion' => 'integer'
+        'valoracion' => 'integer'
     ];
 
     public function usuario()
