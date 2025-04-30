@@ -16,14 +16,15 @@
         <small>Inicio > Alquiler vehiculos > {{ $vehiculo->tipo->nombre }} > {{ $vehiculo->marca }} > {{ $vehiculo->modelo }}</small>
     </div>
 </div>
-<div style="padding-left: 30px; padding-top: 30px; padding-bottom: 30px;">
-    <a href="{{ asset('home') }}" class="btn-volver">
-      <i class="fas fa-arrow-left me-2"></i> Volver
-    </a>
-  </div>
+
 
 <div class="container vehiculo-detail-section">
     <div class="row">
+    <div style="padding-bottom: 30px;">
+        <a href="{{ asset('home') }}" class="btn-volver">
+        <i class="fas fa-arrow-left me-2"></i> Volver
+        </a>
+    </div>
         <div class="col-md-6">
             <div class="imagen-box text-center">
             @foreach($imagenes as $imagen)

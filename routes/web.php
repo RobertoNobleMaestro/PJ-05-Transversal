@@ -140,7 +140,8 @@ use App\Http\Controllers\ValoracionController;
         Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
         Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data'); // Ruta para AJAX
         Route::post('/valoraciones', [ValoracionController::class, 'store'])->middleware('auth');
-        Route::put('/valoraciones/{id}', [ValoracionController::class, 'update'])->middleware('auth');
+        Route::put('/valoraciones/editar/{id}', [ValoracionController::class, 'update'])->middleware('auth');
+        Route::get('/valoraciones/{id}', [ValoracionController::class, 'show'])->middleware('auth');
         Route::delete('/valoraciones/{id}', [ValoracionController::class, 'destroy'])->middleware('auth');
     });
 

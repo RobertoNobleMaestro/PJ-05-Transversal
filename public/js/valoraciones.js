@@ -1,3 +1,6 @@
+let isEditMode = false;
+let idValoracionEditando = null;
+
 // Manejar la apertura del formulario de valoraciones
 document.getElementById('btnAbrirFormulario')?.addEventListener('click', function() {
     const boton = document.getElementById('btnAbrirFormulario');
@@ -37,7 +40,6 @@ document.querySelectorAll('.rating i')?.forEach(star => {
             }
         });
 
-        // Establecer el valor de la valoración en el campo oculto
         const valoracionInput = document.getElementById('valoracion');
         if (valoracionInput) {
             valoracionInput.value = value;
@@ -47,12 +49,20 @@ document.querySelectorAll('.rating i')?.forEach(star => {
     });
 });
 
-// Manejar el envío del formulario de valoraciones
+// Manejar el envío del formulario
 document.getElementById('form-valoracion')?.addEventListener('submit', function(event) {
     event.preventDefault();
-    
-    const formData = new FormData(this);
-    
+    if (isEditMode && idValoracionEditando) {
+        actualizarValoracion(idValoracionEditando);
+    } else {
+        crearValoracion();
+    }
+});
+
+// Función para crear nueva valoración
+function crearValoracion() {
+    const formData = new FormData(document.getElementById('form-valoracion'));
+
     fetch('/valoraciones', {
         method: 'POST',
         headers: {
@@ -66,46 +76,24 @@ document.getElementById('form-valoracion')?.addEventListener('submit', function(
             Swal.fire('¡Gracias!', 'Tu valoración ha sido enviada.', 'success');
             document.getElementById('form-valoracion').reset();
             document.getElementById('formulario-valoracion').style.display = 'none';
-            
-            // Recargar las valoraciones después de enviar una nueva
             cargarValoraciones(vehiculoId);
         } else {
-            Swal.fire('Error', 'No se pudo enviar la valoración.', 'error');
+            Swal.fire('Error', data.message || 'No se pudo enviar la valoración.', 'error');
         }
     })
     .catch(error => {
         Swal.fire('Error', 'Hubo un problema al enviar la valoración.', 'error');
     });
-});
-
-
-// Manejar la edición de una valoración
-function editarValoracion(id) {
-    fetch(`/valoraciones/${id}`)
-        .then(response => response.json())
-        .then(valoracion => {
-            // Rellenar el formulario con los datos de la valoración
-            document.getElementById('valoracion').value = valoracion.valoracion;
-            document.getElementById('comentario').value = valoracion.comentario;
-
-            // Cambiar el texto del botón a "Actualizar"
-            const boton = document.querySelector('#form-valoracion button[type="submit"]');
-            boton.textContent = 'Actualizar Valoración';
-
-            // Cambiar el evento de envío para actualizar en lugar de crear
-            document.getElementById('form-valoracion').onsubmit = function(event) {
-                event.preventDefault();
-                actualizarValoracion(id);
-            };
-        });
 }
 
-// Actualizar una valoración
+// Función para actualizar una valoración existente
 function actualizarValoracion(id) {
-    const formData = new FormData(document.getElementById('form-valoracion'));
+    const form = document.getElementById('form-valoracion');
+    const formData = new FormData(form);
+    formData.append('_method', 'PUT'); // Requerido por Laravel
 
-    fetch(`/valoraciones/${id}`, {
-        method: 'PUT',
+    fetch(`/valoraciones/editar/${id}`, {
+        method: 'POST', // Laravel acepta POST + _method para PUT
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
@@ -115,12 +103,54 @@ function actualizarValoracion(id) {
     .then(data => {
         if (data.success) {
             Swal.fire('¡Éxito!', 'Valoración actualizada con éxito.', 'success');
-            // Recargar las valoraciones
-            cargarValoraciones();
+            form.reset();
+            document.getElementById('formulario-valoracion').style.display = 'none';
+            isEditMode = false;
+            idValoracionEditando = null;
+            cargarValoraciones(vehiculoId);
         } else {
-            Swal.fire('Error', 'No se pudo actualizar la valoración.', 'error');
+            Swal.fire('Error', data.message || 'No se pudo actualizar la valoración.', 'error');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error', 'Hubo un problema al actualizar la valoración.', 'error');
     });
+}
+
+// Manejar la edición de una valoración
+function editarValoracion(id) {
+    fetch(`/valoraciones/${id}`)
+        .then(response => response.json())
+        .then(valoracion => {
+            document.getElementById('valoracion').value = valoracion.valoracion;
+            document.getElementById('comentario').value = valoracion.comentario;
+
+            // Mostrar estrellas seleccionadas visualmente
+            document.querySelectorAll('.rating i').forEach((s, index) => {
+                if (index < valoracion.valoracion) {
+                    s.classList.remove('far');
+                    s.classList.add('fas');
+                } else {
+                    s.classList.remove('fas');
+                    s.classList.add('far');
+                }
+            });
+
+            const boton = document.querySelector('#form-valoracion button[type="submit"]');
+            boton.textContent = 'Actualizar Valoración';
+
+            isEditMode = true;
+            idValoracionEditando = id;
+
+            const formulario = document.getElementById('formulario-valoracion');
+            formulario.style.display = 'block';
+            formulario.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'No se pudo cargar la valoración para editar.', 'error');
+        });
 }
 
 // Manejar la eliminación de una valoración
@@ -146,13 +176,13 @@ function eliminarValoracion(id) {
             .then(data => {
                 if (data.success) {
                     Swal.fire('¡Éxito!', 'Valoración eliminada con éxito.', 'success');
-                    // Recargar las valoraciones
-                    cargarValoraciones();
+                    cargarValoraciones(vehiculoId);
                 } else {
-                    Swal.fire('Error', 'No se pudo eliminar la valoración.', 'error');
+                    Swal.fire('Error', data.message || 'No se pudo eliminar la valoración.', 'error');
                 }
             })
             .catch(error => {
+                console.error('Error:', error);
                 Swal.fire('Error', 'Hubo un problema al eliminar la valoración.', 'error');
             });
         }
@@ -161,9 +191,7 @@ function eliminarValoracion(id) {
 
 function cargarValoraciones(vehiculoId) {
     fetch(`/api/vehiculos/${vehiculoId}/valoraciones`)
-        .then(response => {
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             const contenedor = document.getElementById('valoraciones-container');
             
@@ -175,7 +203,7 @@ function cargarValoraciones(vehiculoId) {
             let html = '';
             data.forEach(valoracion => {
                 let estrellas = '';
-                const rating = valoracion.valoracion !== undefined ? valoracion.valoracion : valoracion.valoracion;
+                const rating = valoracion.valoracion !== undefined ? valoracion.valoracion : 0;
                 
                 for (let i = 0; i < 5; i++) {
                     estrellas += i < rating 
@@ -198,10 +226,16 @@ function cargarValoraciones(vehiculoId) {
                         </p>
                         <p>${estrellas}</p>
                         <p>${valoracion.comentario}</p>
+                        ${userId === valoracion.id_usuario ? `
+                            <div>
+                                <button style="border:none;" class="btn-volver" onclick="editarValoracion(${valoracion.id_valoraciones})">Editar</button>
+                                <button class="btn-eliminar" onclick="eliminarValoracion(${valoracion.id_valoraciones})">Borrar</button>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             });
-            
+
             contenedor.innerHTML = html;
         })
         .catch(error => {
@@ -210,7 +244,7 @@ function cargarValoraciones(vehiculoId) {
                 '<p class="text-danger">Ha ocurrido un error al cargar las valoraciones. Por favor, intenta nuevamente.</p>';
         });
 }
-// Llamar a la función para cargar las valoraciones al cargar la página
+
 document.addEventListener('DOMContentLoaded', function() {
     cargarValoraciones(vehiculoId);
 });

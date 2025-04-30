@@ -10,7 +10,7 @@ class Valoracion extends Model
     use HasFactory;
 
     protected $table = 'valoraciones';
-    protected $primaryKey = 'id_valoracion';
+    protected $primaryKey = 'id_valoraciones';
 
     protected $fillable = [
         'valoracion',
