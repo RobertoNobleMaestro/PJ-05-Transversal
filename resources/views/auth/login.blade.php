@@ -21,6 +21,11 @@
             <br>
             <button type="submit" id="login" disabled>Iniciar Sesión</button><br>
             <a href="{{route('register')}}" class=""> Registrarse </a>
+            <a href="{{ route('login.google') }}" class="google-login-button">
+                <img src="{{ asset('img/google-icon.svg') }}" alt="Google Icon" style="width:20px; margin-right:10px;">
+                Iniciar sesión con Google
+            </a>
+            
         </form>
     </div>
     <div class="container-derecha">
@@ -29,66 +34,8 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-// Habilitar el botón de login cuando se ingresen email y contraseña
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const loginButton = document.getElementById('login');
-
-// Función para verificar si ambos campos tienen valores
-function checkInputs() {
-    if (emailInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
-        loginButton.disabled = false;
-    } else {
-        loginButton.disabled = true;
-    }
-}
-
-// Agregar event listeners para los campos de entrada
-emailInput.addEventListener('input', checkInputs);
-passwordInput.addEventListener('input', checkInputs);
-
-// Manejar el envío del formulario
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-
-    fetch(this.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: '¡Bienvenido!',
-                text: data.message,
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = data.redirect;
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'Error al iniciar sesión'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Ha ocurrido un error al intentar iniciar sesión'
-        });
-    });
-});
-</script>
 @endsection
+
+@section('scripts')
+    <script src="{{asset('js/login.js')}}"></script>
+@endsection 
