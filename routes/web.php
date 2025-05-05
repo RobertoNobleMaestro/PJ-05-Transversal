@@ -16,6 +16,7 @@ use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\GestorController;
 
 // Rutas publicas
 Route::redirect('/', '/home');
@@ -143,4 +144,11 @@ Route::middleware(['auth'])->group(function () {
     // Historial de reservas
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data'); // Ruta para AJAX
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::controller(GestorController::class)->group(function(){
+         // Dashboard Principal Gestor
+         Route::get('/gestor', 'dashboard')->name('gestor.index');
+    });
 });
