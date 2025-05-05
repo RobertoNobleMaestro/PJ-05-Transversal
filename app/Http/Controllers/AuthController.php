@@ -40,8 +40,7 @@ class AuthController extends Controller
                 // Obtener el usuario autenticado
                 $user = Auth::user();
 
-                // Determinar la ruta de redirección según el rol
-                $redirect = $user->id_roles === 1 ? '/admin' : '/home';
+                $redirect = $user->id_roles === 1 ? '/admin' : ($user->id_roles === 3 ? '/gestor' : '/home');
 
                 // Devolver respuesta exitosa
                 return response()->json([

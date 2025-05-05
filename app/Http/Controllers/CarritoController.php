@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Vehiculo;
 use Illuminate\Support\Facades\DB;
 use App\Models\VehiculosReservas;
+use App\Models\Valoracion;
+
 class CarritoController extends Controller
 {
     public function index()
@@ -94,6 +96,7 @@ class CarritoController extends Controller
             // Restar el precio total de la reserva
             $reserva->total_precio -= $precioTotal;
             $reserva->save();
+            Valoracion::where('id_reservas', $idReserva)->delete();
 
             // Eliminar la reserva
             $reserva->delete();

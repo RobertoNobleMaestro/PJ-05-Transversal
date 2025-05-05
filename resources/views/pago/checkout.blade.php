@@ -11,7 +11,11 @@
 </head>
 <body>
     @include('layouts.navbar')
-    
+    <div style="padding-left: 30px; padding-top: 30px; padding-bottom: 30px;">
+        <a href="{{ asset('home') }}" class="btn-volver">
+          <i class="fas fa-arrow-left me-2"></i> Volver
+        </a>
+      </div>
     <div class="container pago-container">
         <h2 class="mb-4">Finalizar Pago</h2>
         

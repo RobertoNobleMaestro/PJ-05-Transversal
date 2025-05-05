@@ -151,3 +151,17 @@ hr {
 .btn-eliminar:hover {
   background-color: #c82333;
 }
+
+.carrito-logo {
+    text-align: center;
+}
+
+.carrito-logo i {
+    font-size: 100px;
+    color: #6f42c1;
+    transition: color 0.3s ease;
+}
+
+.carrito-logo i:hover {
+    color: #4a2d7a;
+}
