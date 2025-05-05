@@ -19,28 +19,6 @@
 
 </head>
 <body>
-    <!-- Nueva navbar blanca con mensaje de bienvenida y botón de cerrar sesión -->
-    <header class="bg-white py-2 shadow-sm">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-4"><!-- Espacio vacío a la izquierda --></div>
-                <div class="col-4 text-center">
-                    <h5 class="m-0" style="color: #999;">Bienvenido Administrador</h5>
-                </div>
-                <div class="col-4 text-end">
-                    @auth
-                    <span class="me-3" style="color: #666;">Usuario: {{ Auth::user()->email }}</span>
-                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-dark">
-                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
-                        </button>
-                    </form>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </header>
     
     @yield('content')
     <!-- script de bootstrap -->
