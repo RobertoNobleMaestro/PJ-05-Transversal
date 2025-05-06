@@ -3,7 +3,7 @@
 @section('title', 'CRUD de Vehículos')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-pagination.css') }}">
+<link rel="stylesheet" href="{{ asset('css/gestor-pagination.css') }}">
 @endpush
 
 @section('content')
@@ -16,21 +16,19 @@
     
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
-        <div class="sidebar-title">CARFLOW</div>
-        <ul class="sidebar-menu">
-            <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
-            <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
-            <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
-            <li><a href="{{ route('admin.reservas.index') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
-            <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
-        </ul>
+        <div style="position: fixed; width:250px;">
+            <div class="sidebar-title">CARFLOW</div>
+            <ul class="sidebar-menu">
+                <li><a href=""><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
+            </ul>            
+        </div>
     </div>
 
     <!-- Contenido principal -->
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Gestión de Vehículos</h1>
-            <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -74,7 +72,7 @@
                 
                 <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
             </div>
-            <a href="{{ route('admin.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
+            <a href="{{ route('gestor.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
         </div>
         
         <div id="loading-vehiculos" class="text-center">
@@ -83,7 +81,7 @@
             </div>
             <p>Cargando vehículos...</p>
         </div>
-        <div id="vehiculos-table-container" style="display: none;" data-url="{{ route('admin.vehiculos.data') }}">
+        <div id="vehiculos-table-container" style="display: none;" data-url="{{ route('gestor.vehiculos.data') }}">
             <table class="crud-table" id="vehiculos-table">
                 <thead>
                     <tr>
@@ -92,7 +90,6 @@
                         <th>Modelo</th>
                         <th>Año</th>
                         <th>Kilometraje</th>
-                        <th>Seguro</th>
                         <th>Lugar</th>
                         <th>Tipo</th>
                         <th>Acciones</th>
@@ -133,5 +130,5 @@
 
 @section('scripts')
 <!-- Se ha movido el código JavaScript a un archivo externo -->
-<script src="{{ asset('js/admin-vehiculos.js') }}"></script>
+<script src="{{ asset('js/gestor-vehiculos.js') }}"></script>
 @endsection

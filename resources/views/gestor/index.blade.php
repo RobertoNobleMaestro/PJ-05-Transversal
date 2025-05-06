@@ -19,7 +19,7 @@
         <div class="admin-sidebar" id="sidebar">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
+                <li><a href="{{ route('gestor.vehiculos') }}" class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
                 <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
             </ul>
         </div>
@@ -27,7 +27,7 @@
         <!-- Contenido principal -->
         <div class="admin-main">
             <div class="admin-header">
-                <h1 class="admin-title">Panel de Administración</h1>
+                <h1 class="admin-title">Panel de gestor</h1>
                 <div class="admin-welcome">
                     @if(auth()->check())
                     <span>Bienvenido, {{ auth()->user()->nombre }}</span>
@@ -53,7 +53,7 @@
                             </div>
                             <h3>Gestión de Vehículos</h3>
                             <p>Administra el inventario de vehículos, precios y disponibilidad.</p>
-                            <a href="{{ route('admin.vehiculos') }}" class="btn-admin-card">
+                            <a href="{{ route('gestor.vehiculos') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>

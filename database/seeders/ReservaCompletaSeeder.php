@@ -23,8 +23,8 @@ class ReservaCompletaSeeder extends Seeder
 
         // VEHÍCULOS
         DB::table('vehiculos')->insertOrIgnore([
-            ['id_vehiculos' => 1, 'precio_dia' => 20, 'marca' => 'Toyota', 'modelo' => 'Corolla', 'kilometraje' => 15000, 'seguro_incluido' => 1, 'año' => '2023', 'id_lugar' => 1, 'id_tipo' => 1],
-            ['id_vehiculos' => 2, 'precio_dia' => 40, 'marca' => 'Honda', 'modelo' => 'CBR 600', 'kilometraje' => 8000, 'seguro_incluido' => 1, 'año' => '2022', 'id_lugar' => 2, 'id_tipo' => 2],
+            ['id_vehiculos' => 1, 'precio_dia' => 20, 'marca' => 'Toyota', 'modelo' => 'Corolla', 'kilometraje' => 15000, 'año' => '2023', 'id_lugar' => 1, 'id_tipo' => 1],
+            ['id_vehiculos' => 2, 'precio_dia' => 40, 'marca' => 'Honda', 'modelo' => 'CBR 600', 'kilometraje' => 8000, 'año' => '2022', 'id_lugar' => 2, 'id_tipo' => 2],
         ]);
 
         // IMÁGENES

@@ -113,15 +113,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/users/{id_usuario}', [UserController::class, 'update'])->name('admin.users.update');
     Route::delete('/admin/users/{id_usuario}', [UserController::class, 'destroy'])->name('admin.users.destroy');
 
-    // CRUD de vehículos
-    Route::get('/admin/vehiculos', [VehiculoCrudController::class, 'index'])->name('admin.vehiculos');
-    Route::get('/admin/vehiculos/data', [VehiculoCrudController::class, 'getVehiculos'])->name('admin.vehiculos.data'); // Ruta para AJAX
-    Route::get('/admin/vehiculos/create', [VehiculoCrudController::class, 'create'])->name('admin.vehiculos.create');
-    Route::post('/admin/vehiculos', [VehiculoCrudController::class, 'store'])->name('admin.vehiculos.store');
-    Route::get('/admin/vehiculos/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('admin.vehiculos.edit');
-    Route::post('/admin/vehiculos/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('admin.vehiculos.update');
-    Route::delete('/admin/vehiculos/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('admin.vehiculos.destroy');
+    // // CRUD de vehículos
+    // Route::get('/admin/vehiculos', [VehiculoCrudController::class, 'index'])->name('admin.vehiculos');
+    // Route::get('/admin/vehiculos/data', [VehiculoCrudController::class, 'getVehiculos'])->name('admin.vehiculos.data'); // Ruta para AJAX
+    // Route::get('/admin/vehiculos/create', [VehiculoCrudController::class, 'create'])->name('admin.vehiculos.create');
+    // Route::post('/admin/vehiculos', [VehiculoCrudController::class, 'store'])->name('admin.vehiculos.store');
+    // Route::get('/admin/vehiculos/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('admin.vehiculos.edit');
+    // Route::post('/admin/vehiculos/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('admin.vehiculos.update');
+    // Route::delete('/admin/vehiculos/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('admin.vehiculos.destroy');
 
+    Route::get('/gestor/vehiculos', [VehiculoCrudController::class, 'index'])->name('gestor.vehiculos');
+    Route::get('/gestor/vehiculos/data', [VehiculoCrudController::class, 'getVehiculos'])->name('gestor.vehiculos.data'); // Ruta para AJAX
+    Route::get('/gestor/vehiculos/create', [VehiculoCrudController::class, 'create'])->name('gestor.vehiculos.create');
+    Route::post('/gestor/vehiculos', [VehiculoCrudController::class, 'store'])->name('gestor.vehiculos.store');
+    Route::get('/gestor/vehiculos/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('gestor.vehiculos.edit');
+    Route::post('/gestor/vehiculos/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
+    Route::delete('/gestor/vehiculos/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
     // CRUD de lugares
     Route::get('/admin/lugares', [LugarController::class, 'index'])->name('admin.lugares');
     Route::get('/admin/lugares/data', [LugarController::class, 'getLugares'])->name('admin.lugares.data'); // Ruta para AJAX

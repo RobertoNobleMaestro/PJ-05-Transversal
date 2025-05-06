@@ -9,8 +9,9 @@
 
 <div class="add-vehicle-container">
     <h1 class="form-title">Editar Vehículo</h1>
-    <form id="editVehiculoForm">
+    <form id="editVehiculoForm" data-url="{{ route('gestor.vehiculos.update', $vehiculo->id_vehiculos) }}">
         @csrf
+        @method('POST')
         <div class="form-grid">
             <!-- Columna izquierda -->
             <div>
@@ -58,30 +59,17 @@
                     <label for="id_tipo" class="form-label">Tipo de vehículo</label>
                     <select class="form-control" id="id_tipo" name="id_tipo" required>
                         <option value="">Seleccionar tipo</option>
-                        @foreach($tipos as $tipo)
-                            <option value="{{ $tipo->id_tipo }}" {{ $vehiculo->id_tipo == $tipo->id_tipo ? 'selected' : '' }}>{{ $tipo->nombre_tipo }}</option>
+                        @foreach($tipo as $tipo)
+                            <option value="{{ $tipo->id_tipo }}" {{ $vehiculo->id_tipo == $tipo->id_tipo ? 'selected' : '' }}>{{ $tipo->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="seguro_incluido" name="seguro_incluido" {{ $vehiculo->seguro_incluido ? 'checked' : '' }}>
-                        <label for="seguro_incluido" class="form-check-label">Seguro incluido</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="disponibilidad" name="disponibilidad" {{ $vehiculo->disponibilidad ? 'checked' : '' }}>
-                        <label for="disponibilidad" class="form-check-label">Disponible</label>
-                    </div>
-                </div>
             </div>
         </div>
 
         <div class="btn-container">
-            <a href="{{ route('admin.vehiculos') }}" class="btn btn-cancel">Cancelar</a>
+            <a href="{{ route('gestor.vehiculos') }}" class="btn btn-cancel">Cancelar</a>
             <button type="button" class="btn btn-submit" onclick="updateVehiculo({{ $vehiculo->id_vehiculos }})">Actualizar</button>
         </div>
     </form>
@@ -90,7 +78,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<meta name="vehicles-index" content="{{ route('admin.vehiculos') }}">
+<meta name="vehicles-index" content="{{ route('gestor.vehiculos') }}">
 
-<!-- Se ha movido el código JavaScript a un archivo externo -->
-<script src="{{ asset('js/admin-edit-vehiculo.js') }}"></script>
+<script src="{{ asset('js/gestor-edit-vehiculo.js') }}"></script>

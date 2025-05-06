@@ -13,16 +13,13 @@ use Illuminate\Support\Facades\DB;
 
 class VehiculoCrudController extends Controller
 {
-    // Método privado para verificar si el usuario es administrador
-    private function checkAdmin($request)
+    private function checkGestor($request)
     {
-        // Verificar si el usuario está autenticado
         if (!auth()->check()) {
             return redirect('/login');
         }
         
-        // Verificar si el usuario tiene rol de administrador (id_roles = 1)
-        if (auth()->user()->id_roles !== 1) {
+        if (auth()->user()->id_roles !== 3) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'No tienes permiso para acceder a esta sección'], 403);
             }
@@ -47,84 +44,9 @@ class VehiculoCrudController extends Controller
             'precio_unitario' => $precioUnitario
         ]);
     }
-
-    // Método para añadir un vehículo al carrito (para clientes)
-    public function añadirAlCarrito($id)
-    {
-        try {
-            $vehiculo = Vehiculo::findOrFail($id);
-            $usuarioId = auth()->id();
-
-            if (!$usuarioId) {
-                return response()->json(['alert' => [
-                    'icon' => 'error',
-                    'title' => 'Usuario no autenticado',
-                    'text' => 'Debes iniciar sesión para añadir vehículos al carrito.'
-                ]]);
-            }
-
-            // 1. Buscar o crear una reserva activa ("carrito") para este usuario
-            $reserva = Reserva::firstOrCreate(
-                [
-                    'estado' => 'pendiente',
-                    'id_usuario' => $usuarioId
-                ],
-                [
-                    'fecha_reserva' => now(),
-                    'total_precio' => 0, // Se puede recalcular luego
-                    'id_lugar' => $vehiculo->id_lugar,
-                ]
-            );
-
-            // 2. Obtener el precio unitario del vehículo desde la tabla vehiculos_reservas
-            $precioUnitario = VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)
-                ->where('id_reservas', $reserva->id_reservas)
-                ->first()->precio_unitario ?? 100; // Usamos 100 como valor por defecto si no se encuentra el precio.
-
-            // 3. Insertar el vehículo en vehiculos_reservas si aún no está
-            $existe = VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)
-                ->where('id_reservas', $reserva->id_reservas)
-                ->exists();
-
-            if ($existe) {
-                return response()->json(['alert' => [
-                    'icon' => 'warning',
-                    'title' => '¡Vehículo ya en el carrito!',
-                    'text' => 'Este vehículo ya está en tu carrito de compras.'
-                ]]);
-            }
-
-            // Insertar la relación con el precio unitario obtenido
-            VehiculosReservas::create([
-                'fecha_ini' => now()->toDateString(),
-                'fecha_final' => now()->addDays(3)->toDateString(),
-                'precio_unitario' => $precioUnitario,  // Usar el precio unitario de la reserva
-                'id_reservas' => $reserva->id_reservas,
-                'id_vehiculos' => $vehiculo->id_vehiculos,
-            ]);
-
-            return response()->json(['alert' => [
-                'icon' => 'success',
-                'title' => '¡Vehículo añadido al carrito!',
-                'text' => 'El vehículo ha sido añadido a tu carrito con éxito.'
-            ]]);
-
-        } catch (\Exception $e) {
-            return response()->json(['alert' => [
-                'icon' => 'error',
-                'title' => 'Error',
-                'text' => 'Ocurrió un problema al intentar añadir el vehículo al carrito.'
-            ]]);
-        }
-    }
-    
-    // MÉTODOS PARA EL PANEL DE ADMINISTRACIÓN
-    
-    // Método para obtener vehiculos en formato JSON (para AJAX)
     public function getVehiculos(Request $request)
     {
         try {
-            // Verificar autenticación
             if (!auth()->check()) {
                 return response()->json([
                     'status' => 'error',
@@ -133,7 +55,7 @@ class VehiculoCrudController extends Controller
             }
             
             // Verificar que sea administrador
-            if (auth()->user()->id_roles !== 1) {
+            if (auth()->user()->id_roles !== 3) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No tienes permiso para acceder a esta sección'
@@ -144,10 +66,10 @@ class VehiculoCrudController extends Controller
             $vehiculos = Vehiculo::select(
                 'vehiculos.*', 
                 'lugares.nombre as nombre_lugar', 
-                'tipos.nombre_tipo'
+                'tipo.nombre as nombre_tipo'
             )
             ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-            ->leftJoin('tipos', 'vehiculos.id_tipo', '=', 'tipos.id_tipo');
+            ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo');
             
             // Aplicar filtros básicos
             if ($request->has('tipo') && !empty($request->tipo)) {
@@ -193,13 +115,13 @@ class VehiculoCrudController extends Controller
 
     public function index(Request $request)
     {
-        $authCheck = $this->checkAdmin($request);
+        $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
         
         // Obtener datos para los filtros
-        $tipos = Tipo::all();
+        $tipo = Tipo::all();
         $lugares = Lugar::all();
         
         // Obtener años únicos de vehículos para el filtro
@@ -208,25 +130,25 @@ class VehiculoCrudController extends Controller
         // Valoraciones posibles (1-5) para el filtro
         $valoraciones = [1, 2, 3, 4, 5];
         
-        return view('admin.vehiculos', compact('tipos', 'lugares', 'anios', 'valoraciones'));
+        return view('gestor.crudVehiculos', compact('tipo', 'lugares', 'anios', 'valoraciones'));
     }
 
     public function create(Request $request)
     {
-        $authCheck = $this->checkAdmin($request);
+        $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
         
         $lugares = Lugar::all();
-        $tipos = Tipo::all();
+        $tipo = Tipo::all();
         
-        return view('admin.add_vehiculo', compact('lugares', 'tipos'));
+        return view('admin.add_vehiculo', compact('lugares', 'tipo'));
     }
 
     public function store(Request $request)
     {
-        $authCheck = $this->checkAdmin($request);
+        $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
@@ -235,19 +157,15 @@ class VehiculoCrudController extends Controller
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
                 'modelo' => 'required|string|max:255',
-                'año' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+                'año' => 'required|integer|min:1900|max:' . (date('Y')),
                 'kilometraje' => 'required|integer|min:0',
-                'seguro_incluido' => 'boolean',
                 'id_lugar' => 'required|exists:lugares,id_lugar',
-                'id_tipo' => 'required|exists:tipos,id_tipo',
+                'id_tipo' => 'required|exists:tipo,id_tipo',
                 'precio_dia' => 'required|numeric|min:0',
-                'disponibilidad' => 'boolean',
                 'matricula' => 'nullable|string|max:20',
             ]);
 
-            // El seguro incluido viene como checkbox, así que si no está marcado, será null
-            $validatedData['seguro_incluido'] = $request->has('seguro_incluido') ? true : false;
-            $validatedData['disponibilidad'] = $request->has('disponibilidad') ? true : false;
+
 
             Vehiculo::create($validatedData);
             
@@ -260,7 +178,7 @@ class VehiculoCrudController extends Controller
             }
             
             // Si es una petición tradicional, redireccionar
-            return redirect()->route('admin.vehiculos')->with('success', 'Vehículo añadido correctamente');
+            return redirect()->route('gestor.vehiculos')->with('success', 'Vehículo añadido correctamente');
 
         } catch (ValidationException $e) {
             if ($request->expectsJson()) {
@@ -288,44 +206,38 @@ class VehiculoCrudController extends Controller
 
     public function edit(Request $request, $id_vehiculos)
     {
-        $authCheck = $this->checkAdmin($request);
+        $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
 
         $vehiculo = Vehiculo::findOrFail($id_vehiculos);
         $lugares = Lugar::all();
-        $tipos = Tipo::all();
+        $tipo = Tipo::all();
         
-        return view('admin.edit_vehiculo', compact('vehiculo', 'lugares', 'tipos'));
+        return view('admin.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo'));
     }
 
     public function update(Request $request, $id_vehiculos)
     {
-        $authCheck = $this->checkAdmin($request);
+        $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
 
         try {
             $vehiculo = Vehiculo::findOrFail($id_vehiculos);
-            
+
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
                 'modelo' => 'required|string|max:255',
                 'año' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'kilometraje' => 'required|integer|min:0',
-                'seguro_incluido' => 'boolean',
                 'id_lugar' => 'required|exists:lugares,id_lugar',
-                'id_tipo' => 'required|exists:tipos,id_tipo',
+                'id_tipo' => 'required|exists:tipo,id_tipo',
                 'precio_dia' => 'required|numeric|min:0',
-                'disponibilidad' => 'boolean',
                 'matricula' => 'nullable|string|max:20',
             ]);
-
-            // El seguro incluido viene como checkbox, así que si no está marcado, será null
-            $validatedData['seguro_incluido'] = $request->has('seguro_incluido') ? true : false;
-            $validatedData['disponibilidad'] = $request->has('disponibilidad') ? true : false;
 
             $vehiculo->update($validatedData);
             
@@ -338,7 +250,7 @@ class VehiculoCrudController extends Controller
             }
             
             // Si es una petición tradicional, redireccionar
-            return redirect()->route('admin.vehiculos')->with('success', 'Vehículo actualizado correctamente');
+            return redirect()->route('gestor.vehiculos')->with('success', 'Vehículo actualizado correctamente');
             
         } catch (ValidationException $e) {
             if ($request->expectsJson()) {
@@ -366,15 +278,30 @@ class VehiculoCrudController extends Controller
 
     public function destroy(Request $request, $id_vehiculos)
     {
-        $authCheck = $this->checkAdmin($request);
+        $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
 
+        DB::beginTransaction(); // Iniciar la transacción
+
         try {
             $vehiculo = Vehiculo::findOrFail($id_vehiculos);
+
+            // Eliminar las características asociadas al vehículo
+            DB::table('caracteristicas')->where('id_vehiculos', $id_vehiculos)->delete();
+
+            // Eliminar las imágenes asociadas al vehículo
+            DB::table('imagen_vehiculo')->where('id_vehiculo', $id_vehiculos)->delete();
+
+            // Eliminar las reservas asociadas al vehículo
+            DB::table('vehiculos_reservas')->where('id_vehiculos', $id_vehiculos)->delete();
+
+            // Finalmente, eliminar el vehículo
             $vehiculo->delete();
-            
+
+            DB::commit(); // Confirmar la transacción
+
             // Si la petición espera JSON (AJAX), devolver respuesta JSON
             if ($request->expectsJson()) {
                 return response()->json([
@@ -382,11 +309,13 @@ class VehiculoCrudController extends Controller
                     'message' => 'Vehículo eliminado correctamente'
                 ], 200);
             }
-            
+
             // Si es una petición tradicional, redireccionar
-            return redirect()->route('admin.vehiculos')->with('success', 'Vehículo eliminado correctamente');
-            
+            return redirect()->route('gestor.vehiculos')->with('success', 'Vehículo eliminado correctamente');
+
         } catch (\Exception $e) {
+            DB::rollBack(); // Revertir la transacción en caso de error
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
@@ -394,7 +323,7 @@ class VehiculoCrudController extends Controller
                     'errors' => $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()->with('error', 'Error al eliminar el vehículo: ' . $e->getMessage());
         }
     }
