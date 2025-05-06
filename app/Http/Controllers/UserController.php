@@ -98,7 +98,7 @@ class UserController extends Controller
                 'nombre' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8',
-                'DNI' => 'required|string|regex:/^\d{8}[A-Z]$/|max:9',
+                'dni' => 'required|string|regex:/^\d{8}[A-Z]$/|max:9',
                 'telefono' => 'required|string|regex:/^\d{9}$/',
                 'fecha_nacimiento' => 'required|date|before_or_equal:'.date('Y-m-d', strtotime('-16 years')),
                 'direccion' => 'required|string|min:5|max:255',

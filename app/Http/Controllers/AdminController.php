@@ -6,31 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
-/**
- * Controlador de Administración
- * 
- * Este controlador gestiona el acceso al panel de administración y funciones generales
- * de administración del sistema. Contiene métodos para verificar permisos y cargar
- * la interfaz principal del administrador.
- */
+
 class AdminController extends Controller
 {
-    /**
-     * Muestra la página principal del panel de administración
-     * 
-     * Este método:
-     * 1. Verifica que el usuario esté autenticado
-     * 2. Valida que tenga rol de administrador (id_roles = 1)
-     * 3. Responde con JSON si es una petición AJAX o redirige si es una carga normal
-     * 4. Carga la lista de usuarios como ejemplo de datos para el dashboard
-     * 
-     * @param Request $request La petición HTTP actual
-     * @return mixed Retorna una vista o una respuesta JSON según el tipo de petición
-     */
     public function index(Request $request)
     {
         // Verificar si el usuario está autenticado
-        if (!Auth::check()) {
+        if (!Auth::check()) {   
             return redirect('/login');
         }
         

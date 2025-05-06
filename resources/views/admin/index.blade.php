@@ -20,8 +20,6 @@
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
-                <li><a href="{{ route('admin.vehiculos') }}" class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
-                <li><a href="{{ route('admin.lugares') }}" class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
                 <li><a href="{{ route('admin.reservas.index') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
                 <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
             </ul>
@@ -59,37 +57,10 @@
                             </a>
                         </div>
                     </div>
-                    
-                    <!-- Tarjeta de Vehículos -->
-                    <div class="col-md-6 col-lg-4">
-                        <div class="admin-card shadow-sm">
-                            <div class="admin-card-icon">
-                                <i class="fas fa-car fa-3x"></i>
-                            </div>
-                            <h3>Gestión de Vehículos</h3>
-                            <p>Administra el inventario de vehículos, precios y disponibilidad.</p>
-                            <a href="{{ route('admin.vehiculos') }}" class="btn-admin-card">
-                                Acceder <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Tarjeta de Lugares -->
-                    <div class="col-md-6 col-lg-4">
-                        <div class="admin-card shadow-sm">
-                            <div class="admin-card-icon">
-                                <i class="fas fa-map-marker-alt fa-3x"></i>
-                            </div>
-                            <h3>Gestión de Lugares</h3>
-                            <p>Administra las ubicaciones de recogida y entrega de vehículos.</p>
-                            <a href="{{ route('admin.lugares') }}" class="btn-admin-card">
-                                Acceder <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                        </div>
-                    </div>
+                      
                     
                     <!-- Tarjeta de Reservas -->
-                    <div class="col-md-6 col-lg-6">
+                    <div class="col-md-6 col-lg-4">
                         <div class="admin-card shadow-sm">
                             <div class="admin-card-icon">
                                 <i class="fas fa-calendar-alt fa-3x"></i>
@@ -103,7 +74,7 @@
                     </div>
                     
                     <!-- Tarjeta de Historial -->
-                    <div class="col-md-6 col-lg-6">
+                    <div class="col-md-6 col-lg-4">
                         <div class="admin-card shadow-sm">
                             <div class="admin-card-icon">
                                 <i class="fas fa-history fa-3x"></i>
