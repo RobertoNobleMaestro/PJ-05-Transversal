@@ -11,7 +11,12 @@ function cargarCarrito() {
     contenedor.innerHTML = '';
 
     if (!data.length) {
-      contenedor.innerHTML = '<p>No tienes vehículos reservados.</p>';
+      contenedor.innerHTML = `
+        <div class="carrito-logo">
+          <i class="bi bi-cart"></i>
+        </div>
+      <h4 class="text-center m-0">No tienes vehículos reservados.</h4>
+      `;
       return;
     }
 

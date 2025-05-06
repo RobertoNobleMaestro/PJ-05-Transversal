@@ -20,14 +20,14 @@ class ValoracionController extends Controller
             'comentario' => 'required|string|max:500',
         ]);
 
-        // Verificar si el usuario ha reservado el vehículo
         $reserva = DB::table('vehiculos_reservas')
-            ->join('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
-            ->where('reservas.id_usuario', Auth::id())
-            ->where('vehiculos_reservas.id_vehiculos', $request->id_vehiculos)
-            ->where('vehiculos_reservas.fecha_final', '<', Carbon::now())
-            ->first();
-
+        ->join('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
+        ->where('reservas.id_usuario', Auth::id())
+        ->where('vehiculos_reservas.id_vehiculos', $request->id_vehiculos)
+        ->where('vehiculos_reservas.fecha_final', '<', Carbon::now())
+        ->where('reservas.estado', 'pagado') 
+        ->first();
+    
         if (!$reserva) {
             return response()->json([
                 'success' => false,
@@ -35,13 +35,24 @@ class ValoracionController extends Controller
             ], 403);
         }
 
+        $valoracionExistente = Valoracion::where('id_usuario', Auth::id())
+            ->where('id_reservas', $reserva->id_reservas)
+            ->first();
+
+        if ($valoracionExistente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ya has valorado este vehículo anteriormente.'
+            ], 409); // 409 Conflict
+        }
+
+        // Crear nueva valoración
         $valoracion = Valoracion::create([
             'id_usuario' => Auth::id(),
-            'id_reservas' => $reserva->id_reservas, 
+            'id_reservas' => $reserva->id_reservas,
             'valoracion' => $request->valoracion,
             'comentario' => $request->comentario,
         ]);
-        
 
         return response()->json([
             'success' => true,
@@ -50,6 +61,21 @@ class ValoracionController extends Controller
         ]);
     }
 
+    public function show($id)
+    {
+        $valoracion = Valoracion::findOrFail($id);
+    
+        // Verificar que el usuario pueda acceder a su valoración
+        if ($valoracion->id_usuario !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para ver esta valoración.'
+            ], 403);
+        }
+    
+        return response()->json($valoracion);
+    }
+    
     // Editar una valoración existente
     public function update(Request $request, $id)
     {

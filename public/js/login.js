@@ -1,118 +1,102 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const loginButton = document.getElementById('login');
-    const form = loginButton.closest('form');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const loginButton = document.getElementById('login');
+const errorEmail = document.getElementById('error_email');
+const errorPassword = document.getElementById('error_password');
 
-    loginButton.addEventListener('click', function (e) {
-        e.preventDefault();
+// Validaciones básicas
+function validateEmail() {
+    const value = emailInput.value.trim();
+    if (value === '') {
+        errorEmail.textContent = 'El correo es obligatorio.';
+        emailInput.classList.add('is-invalid');
+        return false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        errorEmail.textContent = 'El correo no es válido.';
+        emailInput.classList.add('is-invalid');
+        return false;
+    } else {
+        errorEmail.textContent = '';
+        emailInput.classList.remove('is-invalid');
+        return true;
+    }
+}
 
-        const formData = new FormData(form);
-        const data = {
-            email: formData.get('email'),
-            password: formData.get('pwd')  
-        };
+function validatePassword() {
+    const value = passwordInput.value.trim();
+    if (value === '') {
+        errorPassword.textContent = 'La contraseña es obligatoria.';
+        passwordInput.classList.add('is-invalid');
+        return false;
+    } else if (value.length < 8) {
+        errorPassword.textContent = 'Debe tener al menos 8 caracteres.';
+        passwordInput.classList.add('is-invalid');
+        return false;
+    } else {
+        errorPassword.textContent = '';
+        passwordInput.classList.remove('is-invalid');
+        return true;
+    }
+}
 
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    window.location.href = data.redirect;
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ha ocurrido un error al intentar iniciar sesión');
+function checkInputs() {
+    const validEmail = validateEmail();
+    const validPassword = validatePassword();
+    loginButton.disabled = !(validEmail && validPassword);
+}
+
+// Listeners de entrada y validación onBlur
+emailInput.addEventListener('input', checkInputs);
+passwordInput.addEventListener('input', checkInputs);
+emailInput.addEventListener('blur', validateEmail);
+passwordInput.addEventListener('blur', validatePassword);
+
+// Envío del formulario
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!validateEmail() || !validatePassword()) {
+        return;
+    }
+
+    const formData = new FormData(this);
+
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Bienvenido!',
+                text: data.message,
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = data.redirect;
             });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Error al iniciar sesión'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ha ocurrido un error al intentar iniciar sesión'
+        });
     });
 });
-document.addEventListener('DOMContentLoaded', function () {
-    const inputEmail = document.getElementById('email');
-    const error_email = document.getElementById('error_email');
-    const inputPwd = document.getElementById('pwd');
-    const error_pwd = document.getElementById('error_pwd');
-    const loginForm = document.getElementById('loginForm');
-    const loginBtn = document.getElementById('login');
 
-    // Asignar eventos
-    inputEmail.onblur = validaMail;
-    inputPwd.onblur = validaPwd;
-
-    inputEmail.addEventListener('input', validarCampos);
-    inputPwd.addEventListener('input', validarCampos);
-
-    loginForm.onsubmit = validaForm;
-
-    // Función para validar mail
-    function validaMail() {
-        const email = inputEmail.value.trim(); 
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
-
-        if (email === "") {
-            error_email.textContent = "El campo es obligatorio";
-            inputEmail.classList.add('is-invalid');
-            return false;
-        } else if (!regex.test(email)) {
-            error_email.textContent = "El formato del correo no es válido";
-            inputEmail.classList.add('is-invalid');
-            return false;
-        } else {
-            error_email.textContent = "";
-            inputEmail.classList.remove('is-invalid');
-            return true;
-        }
-    }
-
-    // Función para validar contraseña
-    function validaPwd() {
-        const pwd = inputPwd.value.trim();
-        if (pwd === "") {
-            error_pwd.textContent = "El campo es obligatorio";
-            inputPwd.classList.add('is-invalid');
-            return false;
-        } else if (pwd.length < 8) {
-            error_pwd.textContent = "El campo debe tener mínimo 8 carácteres";
-            inputPwd.classList.add('is-invalid');
-            return false;
-        } else {
-            error_pwd.textContent = "";
-            inputPwd.classList.remove('is-invalid');
-            return true;
-        }
-    }
-
-    // Función para validar el form completo
-    function validaForm(e) {
-        e.preventDefault();
-        const isEmailValid = validaMail();
-        const isPwdValid = validaPwd();
-
-        if (isEmailValid && isPwdValid) {
-            loginForm.submit();
-        }
-    }
-
-    // Deshabilitar botón si los campos no están validados
-    function validarCampos() {
-        const isEmailValid = validaMail();
-        const isPwdValid = validaPwd();
-
-        if (isEmailValid && isPwdValid) {
-            loginBtn.disabled = false;
-        } else {
-            loginBtn.disabled = true;
-        }
-    }
-
-    // Al iniciar, desactiva el botón
-    loginBtn.disabled = true;
-});
 
 

@@ -14,7 +14,6 @@ body {
     background-color: #ffffff;
     padding: 40px;
     border-radius: 0;
-    margin-top: 20px;
     box-shadow: none;
 }
 
@@ -170,9 +169,11 @@ footer {
   text-decoration: none !important;
 }
 a{
+    color: black !important;
     text-decoration: none !important;
 }
 a:hover{
+    color: black !important;
     text-decoration: none !important;   
 }
 /* Título del mes */
@@ -356,7 +357,7 @@ a:hover{
 .btn-volver {
     display: inline-block;
     background: linear-gradient(to right, #6f42c1, #e100ff);
-    color: white;
+    color: white !important;
     padding: 10px 20px;
     border-radius: 15px;
     text-decoration: none;
@@ -369,5 +370,25 @@ a:hover{
   .btn-volver:hover {
     background: linear-gradient(to right, #5a2b97, #c400e3);
     transform: scale(1.05);
-    color: white;
+    color: white !important;
+  }
+
+  .btn-eliminar {
+    display: inline-block;
+    background: black;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 15px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border: none;
+  }
+  
+  .btn-eliminar:hover {
+    background: rgb(35, 35, 35);
+    transform: scale(1.05);
+    color: white !important;
   }
