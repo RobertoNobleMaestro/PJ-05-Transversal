@@ -2,9 +2,9 @@
 
 @section('title', 'CRUD de Vehículos')
 
-@push('styles')
+
 <link rel="stylesheet" href="{{ asset('css/gestor-pagination.css') }}">
-@endpush
+
 
 @section('content')
     
@@ -113,9 +113,9 @@
                         Siguiente <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
-                <div class="per-page-selector">
+                <div class="per-page-selector d-flex flex-column" style="gap:5px;">
                     <label for="items-per-page">Por página:</label>
-                    <select id="items-per-page" class="form-select form-select-sm">
+                    <select id="items-per-page" class="form-control">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="25">25</option>

@@ -53,65 +53,67 @@ class VehiculoCrudController extends Controller
                     'message' => 'Usuario no autenticado'
                 ], 401);
             }
-            
-            // Verificar que sea administrador
+    
             if (auth()->user()->id_roles !== 3) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No tienes permiso para acceder a esta sección'
                 ], 403);
             }
-            
-            // Versión simplificada de la consulta para depuración
+    
+            // Configuración de paginación
+            $perPage = $request->input('per_page', 10); // Valor por defecto: 10
+            $page = $request->input('page', 1); // Página actual
+    
+            // Construcción de la consulta
             $vehiculos = Vehiculo::select(
-                'vehiculos.*', 
-                'lugares.nombre as nombre_lugar', 
-                'tipo.nombre as nombre_tipo'
-            )
-            ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-            ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo');
-            
-            // Aplicar filtros básicos
-            if ($request->has('tipo') && !empty($request->tipo)) {
+                    'vehiculos.*', 
+                    'lugares.nombre as nombre_lugar', 
+                    'tipo.nombre as nombre_tipo'
+                )
+                ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
+                ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo');
+    
+            // Filtros
+            if ($request->filled('tipo')) {
                 $vehiculos->where('vehiculos.id_tipo', $request->tipo);
             }
-            
-            if ($request->has('lugar') && !empty($request->lugar)) {
+    
+            if ($request->filled('lugar')) {
                 $vehiculos->where('vehiculos.id_lugar', $request->lugar);
             }
-            
-            if ($request->has('marca') && !empty($request->marca)) {
+    
+            if ($request->filled('marca')) {
                 $vehiculos->where('vehiculos.marca', 'like', '%' . $request->marca . '%');
             }
-            
-            if ($request->has('anio') && !empty($request->anio)) {
+    
+            if ($request->filled('anio')) {
                 $vehiculos->where('vehiculos.año', $request->anio);
             }
-            
-            // Obtener resultados
-            $resultados = $vehiculos->get();
-            
-            \Illuminate\Support\Facades\Log::info('Consulta de vehículos exitosa. Encontrados: ' . count($resultados));
-            \Illuminate\Support\Facades\Log::info('Filtros aplicados: ' . json_encode($request->all()));
-            
-            // Si necesitamos depurar la consulta SQL
-            // \Illuminate\Support\Facades\Log::debug('SQL: ' . $vehiculos->toSql() . ' con parámetros: ' . json_encode($vehiculos->getBindings()));
-            
+    
+            // Aplicar paginación
+            $paginated = $vehiculos->orderBy('vehiculos.id_vehiculos', 'desc')->paginate($perPage, ['*'], 'page', $page);
+    
             return response()->json([
-                'status' => 'success',
-                'vehiculos' => $resultados
+                'vehiculos' => $paginated->items(),
+                'pagination' => [
+                    'total' => $paginated->total(),
+                    'per_page' => $paginated->perPage(),
+                    'current_page' => $paginated->currentPage(),
+                    'last_page' => $paginated->lastPage(),
+                    'from' => $paginated->firstItem(),
+                    'to' => $paginated->lastItem(),
+                ]
             ]);
-            
+    
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error en getVehiculos: ' . $e->getMessage());
-            \Illuminate\Support\Facades\Log::error('Trace: ' . $e->getTraceAsString());
-            
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error al cargar los vehículos: ' . $e->getMessage()
             ], 500);
         }
     }
+    
 
     public function index(Request $request)
     {
@@ -143,7 +145,7 @@ class VehiculoCrudController extends Controller
         $lugares = Lugar::all();
         $tipo = Tipo::all();
         
-        return view('admin.add_vehiculo', compact('lugares', 'tipo'));
+        return view('gestor.add_vehiculo', compact('lugares', 'tipo'));
     }
 
     public function store(Request $request)
@@ -215,7 +217,7 @@ class VehiculoCrudController extends Controller
         $lugares = Lugar::all();
         $tipo = Tipo::all();
         
-        return view('admin.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo'));
+        return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo'));
     }
 
     public function update(Request $request, $id_vehiculos)

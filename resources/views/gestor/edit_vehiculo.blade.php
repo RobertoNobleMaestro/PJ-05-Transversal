@@ -1,45 +1,43 @@
 @extends('layouts.admin')
 
-@section('title', 'Añadir Vehículo')
+@section('title', 'Editar Vehículo')
 
 @section('content')
-<!-- Se han movido los estilos CSS a archivos externos -->
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-<link rel="stylesheet" href="{{ asset('css/admin-forms.css') }}">
+<link rel="stylesheet" href="{{ asset('css/gestor-forms.css') }}">
 
-<div class="add-vehicle-container">
-    <h1 class="form-title">Añadir Nuevo Vehículo</h1>
-    <form id="addVehiculoForm" data-url="{{ route('gestor.vehiculos.store') }}">
+<div class="add-user-container">
+    <h1 class="form-title">Editar Vehículo</h1>
+    <form id="editVehiculoForm" data-url="{{ route('gestor.vehiculos.update', $vehiculo->id_vehiculos) }}">
         @csrf
+        @method('POST')
         <div class="form-grid">
-            <!-- Columna izquierda -->
             <div>
                 <div class="form-group">
                     <label for="marca" class="form-label">Marca</label>
-                    <input type="text" class="form-control" id="marca" name="marca" required>
+                    <input type="text" class="form-control" id="marca" name="marca" value="{{ $vehiculo->marca }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="modelo" class="form-label">Modelo</label>
-                    <input type="text" class="form-control" id="modelo" name="modelo" required>
+                    <input type="text" class="form-control" id="modelo" name="modelo" value="{{ $vehiculo->modelo }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="año" class="form-label">Año</label>
-                    <input type="number" class="form-control" id="año" name="año" min="1900" max="{{ date('Y') + 1 }}" required>
+                    <input type="number" class="form-control" id="año" name="año" value="{{ $vehiculo->año }}" min="1900" max="{{ date('Y') + 1 }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="precio_dia" class="form-label">Precio por día</label>
-                    <input type="number" class="form-control" id="precio_dia" name="precio_dia" step="0.01" min="0" required>
+                    <input type="number" class="form-control" id="precio_dia" name="precio_dia" value="{{ $vehiculo->precio_dia }}" step="0.01" min="0" required>
                 </div>
             </div>
             
-            <!-- Columna derecha -->
             <div>
                 <div class="form-group">
                     <label for="kilometraje" class="form-label">Kilometraje</label>
-                    <input type="number" class="form-control" id="kilometraje" name="kilometraje" min="0" required>
+                    <input type="number" class="form-control" id="kilometraje" name="kilometraje" value="{{ $vehiculo->kilometraje }}" min="0" required>
                 </div>
 
                 <div class="form-group">
@@ -47,7 +45,7 @@
                     <select class="form-control" id="id_lugar" name="id_lugar" required>
                         <option value="">Seleccionar lugar</option>
                         @foreach($lugares as $lugar)
-                            <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
+                            <option value="{{ $lugar->id_lugar }}" {{ $vehiculo->id_lugar == $lugar->id_lugar ? 'selected' : '' }}>{{ $lugar->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -57,25 +55,21 @@
                     <select class="form-control" id="id_tipo" name="id_tipo" required>
                         <option value="">Seleccionar tipo</option>
                         @foreach($tipo as $tipo)
-                            <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre }}</option>
+                            <option value="{{ $tipo->id_tipo }}" {{ $vehiculo->id_tipo == $tipo->id_tipo ? 'selected' : '' }}>{{ $tipo->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
-
             </div>
         </div>
 
         <div class="btn-container">
-            <a href="{{ route('gestor.vehiculos') }}" class="cancel-btn">Cancelar</a>
-            <button type="button" class="submit-btn" onclick="createVehiculo()">Enviar</button>
+            <a href="{{ route('gestor.vehiculos') }}" class="btn btn-cancel">Cancelar</a>
+            <button type="button" class="btn btn-submit" onclick="updateVehiculo({{ $vehiculo->id_vehiculos }})">Actualizar</button>
         </div>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <meta name="vehicles-index" content="{{ route('gestor.vehiculos') }}">
-
-<!-- Se ha movido el código JavaScript a un archivo externo -->
-<script src="{{ asset('js/gestor-add-vehiculo.js') }}"></script>
+<script src="{{ asset('js/gestor-edit-vehiculo.js') }}"></script>
 @endsection

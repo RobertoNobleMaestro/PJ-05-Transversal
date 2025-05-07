@@ -232,7 +232,7 @@ class VehiculoController extends Controller
         $lugares = Lugar::all();
         $tipos = Tipo::all();
         
-        return view('admin.add_vehiculo', compact('lugares', 'tipos'));
+        return view('gestor.add_vehiculo', compact('lugares', 'tipos'));
     }
 
     public function store(Request $request)
@@ -304,7 +304,7 @@ class VehiculoController extends Controller
         $lugares = Lugar::all();
         $tipos = Tipo::all();
         
-        return view('admin.edit_vehiculo', compact('vehiculo', 'lugares', 'tipos'));
+        return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipos'));
     }
 
     public function update(Request $request, $id_vehiculos)
