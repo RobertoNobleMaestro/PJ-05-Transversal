@@ -19,9 +19,6 @@ use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
 
-//
-// 🔓 RUTAS PÚBLICAS
-//
 Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -46,7 +43,7 @@ Route::controller(AuthController::class)->group(function () {
 // Webhook de Stripe (público)
 Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
 
-    
+
 Route::middleware(['auth', 'role:cliente'])->group(function () {
 
     // Perfil
