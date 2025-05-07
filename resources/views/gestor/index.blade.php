@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Panel de Administrador')
+@section('title', 'Panel de gestor')
 
 @section('content')
     <!-- Se han movido los estilos CSS a un archivo externo -->
@@ -19,8 +19,8 @@
         <div class="admin-sidebar" id="sidebar">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('admin.vehiculos') }}"
-                        class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                <li><a href="{{ route('gestor.vehiculos') }}"
+                        class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                         Vehículos</a></li>
                 <li><a href="{{ route('admin.lugares') }}"
                         class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i
@@ -60,7 +60,7 @@
                             </div>
                             <h3>Gestión de Vehículos</h3>
                             <p>Administra el inventario de vehículos, precios y disponibilidad.</p>
-                            <a href="" class="btn-admin-card">
+                            <a href="{{ route('gestor.vehiculos') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
