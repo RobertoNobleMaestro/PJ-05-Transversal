@@ -34,7 +34,7 @@
                 @if(auth()->check())
                     <span>Bienvenido, {{ auth()->user()->nombre }}</span>
                 @endif
-                <div class="admin-welcome">
+                    <div class="admin-welcome">
                     <a href="{{ route('home') }}" class="btn btn-outline-primary"><i class="fa-solid fa-house"></i>
                         Ver Página Principal</a>
                     <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
@@ -45,7 +45,7 @@
 
             <div class="content-section">
                 <div class="alert alert-info admin-welcome-message p-4 mb-4">
-                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al panel de administración!</h3>
+                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al panel del gestor!</h3>
                     <p class="mb-0">Desde aquí podrás gestionar algunos aspectos de la plataforma de alquiler de vehículos.
                         Selecciona una de las opciones a continuación para acceder a las diferentes funcionalidades.</p>
                 </div>
