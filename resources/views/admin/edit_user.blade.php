@@ -9,7 +9,7 @@
 
 <div class="add-user-container">
     <h1 class="form-title">Editar Usuario</h1>
-    <form id="editUserForm" data-url="/admin/users/{{ $usuario->id_usuario }}">
+    <form id="editUserForm" data-url="/admin/users/{{ $user->id_usuario }}">
         @csrf
         <div class="form-grid">
             <!-- Columna izquierda: 4 campos -->
