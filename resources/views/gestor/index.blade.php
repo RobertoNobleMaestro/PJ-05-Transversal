@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Panel de Administrador')
+@section('title', 'Panel de gestor')
 
 @section('content')
     <!-- Se han movido los estilos CSS a un archivo externo -->
@@ -19,8 +19,8 @@
         <div class="admin-sidebar" id="sidebar">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('admin.vehiculos') }}"
-                        class="{{ request()->routeIs('admin.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                <li><a href="{{ route('gestor.vehiculos') }}"
+                        class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                         Vehículos</a></li>
                 <li><a href="{{ route('admin.lugares') }}"
                         class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i
@@ -34,7 +34,7 @@
                 @if(auth()->check())
                     <span>Bienvenido, {{ auth()->user()->nombre }}</span>
                 @endif
-                <div class="admin-welcome">
+                    <div class="admin-welcome">
                     <a href="{{ route('home') }}" class="btn btn-outline-primary"><i class="fa-solid fa-house"></i>
                         Ver Página Principal</a>
                     <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
@@ -45,7 +45,7 @@
 
             <div class="content-section">
                 <div class="alert alert-info admin-welcome-message p-4 mb-4">
-                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al panel de administración!</h3>
+                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al panel del gestor!</h3>
                     <p class="mb-0">Desde aquí podrás gestionar algunos aspectos de la plataforma de alquiler de vehículos.
                         Selecciona una de las opciones a continuación para acceder a las diferentes funcionalidades.</p>
                 </div>
@@ -60,7 +60,7 @@
                             </div>
                             <h3>Gestión de Vehículos</h3>
                             <p>Administra el inventario de vehículos, precios y disponibilidad.</p>
-                            <a href="" class="btn-admin-card">
+                            <a href="{{ route('gestor.vehiculos') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>

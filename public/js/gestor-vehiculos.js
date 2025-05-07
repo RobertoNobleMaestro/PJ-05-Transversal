@@ -155,8 +155,6 @@ function loadVehiculos() {
             const row = document.createElement('tr');
             
             // Determinar el color de texto según la disponibilidad
-            const textClass = vehiculo.disponible ? 'text-success' : 'text-danger';
-            
             // Formatear el precio para mostrar
             const precio = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(vehiculo.precio);
             
@@ -167,12 +165,11 @@ function loadVehiculos() {
                 <td>${vehiculo.modelo}</td>
                 <td>${vehiculo.año}</td>
                 <td>${vehiculo.kilometraje} km</td>
-                <td><span class="${textClass}">${vehiculo.disponible ? 'Si' : 'No'}</span></td>
                 <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
-                        <a href="/admin/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
+                        <a href="/gestor/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
                             <i class="fas fa-edit"></i>
                         </a>
                         <button class="btn btn-sm btn-danger" onclick="deleteVehiculo(${vehiculo.id_vehiculos}, '${vehiculo.marca} ${vehiculo.modelo}')" title="Eliminar">
@@ -241,7 +238,7 @@ function deleteVehiculo(id, nombre) {
             let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             
             // Enviar petición DELETE al servidor
-            fetch(`/admin/vehiculos/${id}`, {
+            fetch(`/gestor/vehiculos/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
