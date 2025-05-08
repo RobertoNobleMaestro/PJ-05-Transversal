@@ -280,17 +280,11 @@
                 <!-- Filtro por lugar -->
                 <select class="filter-control" id="filterLugar">
                     <option value="">Todos los lugares</option>
-                    @foreach($lugares as $lugar)
-                        <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
-                    @endforeach
                 </select>
                 
                 <!-- Filtro por estado -->
                 <select class="filter-control" id="filterEstado">
                     <option value="">Todos los estados</option>
-                    @foreach($estados as $estado)
-                        <option value="{{ $estado }}">{{ ucfirst($estado) }}</option>
-                    @endforeach
                 </select>
                 
                 <!-- Filtro por fecha -->
@@ -298,7 +292,6 @@
                 
                 <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
             </div>
-            <a href="{{ route('admin.reservas.create') }}" class="add-user-btn">Añadir Reserva</a>
         </div>
         
         <div id="loading-reservas" class="text-center">
@@ -307,7 +300,7 @@
             </div>
             <p>Cargando reservas...</p>
         </div>
-        <div id="reservas-table-container" style="display: none;" data-url="{{ route('admin.reservas.data') }}">
+        <div id="reservas-table-container" style="display: none;">
             <table class="crud-table" id="reservas-table">
                 <thead>
                     <tr>
@@ -331,6 +324,5 @@
 @endsection
 
 @section('scripts')
-<!-- Se ha movido el código JavaScript a un archivo externo -->
-<script src="{{ asset('js/admin-reservas.js') }}"></script>
+    <script src="{{ asset('js/admin-reservas.js') }}"></script>
 @endsection

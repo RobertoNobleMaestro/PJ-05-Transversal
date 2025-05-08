@@ -128,13 +128,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Reservas
     Route::prefix('admin/reservas')->group(function () {
         Route::get('/', [ReservaCrudController::class, 'index'])->name('admin.reservas.index');
-        Route::get('/data', [ReservaCrudController::class, 'getReservas'])->name('admin.reservas.data');
-        Route::get('/create', [ReservaCrudController::class, 'create'])->name('admin.reservas.create');
-        Route::post('/', [ReservaCrudController::class, 'store'])->name('admin.reservas.store');
-        Route::get('/{id_reservas}/edit', [ReservaCrudController::class, 'edit'])->name('admin.reservas.edit');
-        Route::post('/{id_reservas}', [ReservaCrudController::class, 'update'])->name('admin.reservas.update');
-        Route::delete('/{id_reservas}', [ReservaCrudController::class, 'destroy'])->name('admin.reservas.destroy');
-        Route::get('/{id_reserva}', [ReservaCrudController::class, 'getReservaDetails'])->name('admin.reservas.details');
     });
 
     // Historial
