@@ -2,28 +2,31 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carflow - Alquiler de vehículos</title>
-  <!-- Enlace a Bootstrap (versión 4.x o 5.x) -->
+
+  <!-- Bootstrap & FontAwesome -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- CSS personalizado -->
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
-  <script src="{{ asset('js/home.js') }}"></script>
-  <title>Carflow - Alquiler de vehículos</title>
+  
+  <!-- CSRF Token para Ajax -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
 
-  <!-- Navbar -->
   @include('layouts.navbar')
 
-  <!-- Breadcrumb / Ruta de navegación -->
+  <!-- Breadcrumb -->
   <div class="breadcrumb-container">
     <div class="container">
       <small>Inicio &gt; Alquiler coches</small>
     </div>
   </div>
 
-  <!-- Sección principal (Hero) -->
+  <!-- Hero -->
   <div class="container hero-section">
     <div class="row">
       <div class="col-md-5">
@@ -31,146 +34,169 @@
         <p>Encuentra el vehículo perfecto para tus necesidades, con una amplia variedad de opciones y precios competitivos.</p>
         <ul class="list-unstyled mt-4">
           <li><i class="fas fa-check-circle text-success mr-2"></i>Reserva cuando quieras</li>
-          <li><i class="fas fa-check-circle text-success mr-2"></i>Todo tipo de vehiculos</li>
+          <li><i class="fas fa-check-circle text-success mr-2"></i>Todo tipo de vehículos</li>
           <li><i class="fas fa-check-circle text-success mr-2"></i>Seguro incluido</li>
           <li><i class="fas fa-check-circle text-success mr-2"></i>Sin comisiones</li>
         </ul>
-        <a href="#alquiler" class="btn btn-light font-weight-bold">Encuentra ya tu vehiculo a reservar!</a>
+        <a href="#alquiler" class="btn btn-light font-weight-bold">Encuentra ya tu vehículo a reservar!</a>
       </div>
       <div class="col-md-6 text-center">
-        <!-- Ejemplo de imágenes a la derecha -->
-        <img src="{{ asset('img/coches.png') }}" class="img-fluid" alt="Auto 1">
-      </div>
-    </div>
-  </div> 
-  
-  <!-- Sección de estadísticas -->
-  <div class="container-fluid stats-section">
-    <div class="row no-gutters text-center">
-      <div class="col-12 col-sm-3">
-        <div class="stat-box">
-          <i class="fas fa-users" style="color: #9F17BD"></i>
-          <div class="stat-content">
-            <h3>{{ $usuariosClientes }}</h3>
-            <p>Usuarios registrados</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-3">
-        <div class="stat-box">
-          <i class="fas fa-car" style="color: #9F17BD"></i>
-          <div class="stat-content">
-            <h3>{{ number_format($vehiculos, 0, ',', '.') }}</h3>
-            <p>Vehículos registrados</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-3">
-        <div class="stat-box">
-          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
-          <div class="stat-content">
-            <h3>{{ $valoracionVehiculos }}</h3>
-            <p>Valoración de los vehiculos</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-3">
-        <div class="stat-box">
-          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
-          <div class="stat-content">
-            <h3>{{ $valoracionMedia }}</h3>
-            <p>Valoración de la web</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>    
-
-  <div id="alquiler" class="container vehicles-section">
-    <h2>Alquila vehículos</h2>
-    <div class="row">
-      <!-- Filtros laterales -->
-      <div class="col-md-3">
-        <div id="filtros-form" class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 90px;">
-          <h4 class="mb-3">Filtros</h4>
-
-          <!-- Filtro por tipo de vehículo -->
-          <div class="form-group">
-            <label><strong>Tipo de vehículo:</strong></label>
-            <div id="tipoVehiculoFiltro" class="form-check">
-              <!-- Checkboxes insertados aquí -->
-            </div>
-          </div>          
-          
-          <div class="form-group col-m">
-            <label><strong>Ciudad:</strong></label>
-            <div id="lugarFiltro" class="form-check">
-              <!-- Se insertarán dinámicamente -->
-            </div>
-          </div>          
-  
-          <div class="form-group">
-            <label for="marcaFiltro"><strong>Marca:</strong></label>
-            <input type="text" id="marcaFiltro" class="form-control" placeholder="Ej. Toyota">
-          </div>
-  
-          <div class="form-group">
-            <label><strong>Año:</strong></label>
-            <div id="anioFiltroContainer" class="form-check">
-              <!-- Se insertarán dinámicamente -->
-            </div>
-          </div>          
-
-          <div class="form-group">
-            <label for="precioMin"><strong>Precio mín (€):</strong></label>
-            <input type="number" id="precioMin" class="form-control" placeholder="Mín">
-          </div>
-  
-          <div class="form-group">
-            <label for="precioMax"><strong>Precio máx (€):</strong></label>
-            <input type="number" id="precioMax" class="form-control" placeholder="Máx">
-          </div>
-
-          <div class="form-group">
-            <label><strong>Valoración:</strong></label>
-            <div id="valoracionFiltro" class="form-check">
-              <label><input class="form-check-input" type="checkbox" name="valoracion" value="5"> 5 ⭐</label><br>
-              <label><input class="form-check-input" type="checkbox" name="valoracion" value="4"> 4 ⭐</label><br>
-              <label><input class="form-check-input" type="checkbox" name="valoracion" value="3"> 3 ⭐</label><br>
-              <label><input class="form-check-input" type="checkbox" name="valoracion" value="2"> 2 ⭐</label><br>
-              <label><input class="form-check-input" type="checkbox" name="valoracion" value="1"> 1 ⭐</label><br>
-            </div>
-          </div>          
-  
-          <div class="form-group">
-            <label for="perPageInput"><strong>Vehículos/página:</strong></label>
-            <input id="perPageInput" type="number" class="form-control" value="16" min="1">
-          </div>
-
-          <div class="form-group text-center mt-3">
-            <button id="resetFiltrosBtn" class="btn btn-outline-danger btn-block">
-              <i class="fas fa-undo"></i> Limpiar filtros
-            </button>
-          </div>          
-        </div>
-      </div>
-  
-      <!-- Vehículos -->
-      <div class="col-md-9">
-        <div class="row" id="vehiculos-container">
-          <!-- tarjetas dinámicas -->
-        </div>
-        <!-- Paginación -->
-        <div class="d-flex justify-content-center">
-          <div class="btn-group" id="pagination-controls"></div>
-        </div>
-        <div class="text-center text-muted small mt-2" id="pagination-info"></div>
+        <img src="{{ asset('img/coches.png') }}" class="img-fluid" alt="Vehículos">
       </div>
     </div>
   </div>
 
-  <!-- Scripts de Bootstrap -->
+  <!-- Estadísticas -->
+  <div class="container-fluid stats-section">
+    <div class="row no-gutters text-center">
+      <div class="col-sm-3">
+        <div class="stat-box">
+          <i class="fas fa-users" style="color: #9F17BD"></i>
+          <h3>{{ $usuariosClientes }}</h3>
+          <p>Usuarios registrados</p>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="stat-box">
+          <i class="fas fa-car" style="color: #9F17BD"></i>
+          <h3>{{ number_format($vehiculos, 0, ',', '.') }}</h3>
+          <p>Vehículos registrados</p>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="stat-box">
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
+          <h3>{{ $valoracionVehiculos }}</h3>
+          <p>Valoración de los vehículos</p>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="stat-box">
+          <i class="fa-solid fa-star" style="color: #ffc800;"></i>
+          <h3>{{ $valoracionMedia }}</h3>
+          <p>Valoración de la web</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección Alquiler -->
+  <div id="alquiler" class="container vehicles-section">
+    <h2>Alquila vehículos</h2>
+
+    <!-- Botón Chat -->
+    <button id="chatBtn" class="btn btn-primary rounded-circle shadow" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 9999;">
+      <i class="fas fa-comments fa-lg"></i>
+    </button>
+
+    <!-- Ventana Chat -->
+    <div id="chatBox" class="card shadow-lg" style="width: 350px; position: fixed; bottom: 100px; right: 30px; display: none; z-index: 9999;">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="fas fa-robot mr-2"></i>Asistente Virtual</h6>
+        <button id="closeChat" class="btn btn-sm btn-light p-0 rounded-circle" style="width: 24px; height: 24px;">
+          &times;
+        </button>
+      </div>
+      <div class="card-body p-3" style="height: 400px; overflow-y: auto;" id="chatMessages">
+        <div class="alert alert-info p-2 mb-3 small">
+          <strong><i class="fas fa-robot"></i> Asistente:</strong> ¡Hola! Soy tu asistente virtual de Carflow. ¿En qué puedo ayudarte hoy con tu alquiler de vehículos?
+        </div>
+      </div>
+      <div class="card-footer p-3">
+        <form id="chatForm" class="form-inline">
+          <div class="input-group w-100">
+            <input type="text" id="mensajeInput" class="form-control" placeholder="Escribe tu mensaje..." autocomplete="off" autofocus>
+            <div class="input-group-append">
+              <button class="btn btn-success" type="submit">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Contenido de la sección de alquiler -->
+    </div>
+  </div>
+
+  <!-- Script del Chat -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Elementos del chat
+      const chatBtn = document.getElementById('chatBtn');
+      const chatBox = document.getElementById('chatBox');
+      const closeChat = document.getElementById('closeChat');
+      const chatForm = document.getElementById('chatForm');
+      const mensajeInput = document.getElementById('mensajeInput');
+      const chatMessages = document.getElementById('chatMessages');
+
+      // Mostrar/ocultar chat
+      chatBtn.addEventListener('click', function() {
+        chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
+        if (chatBox.style.display === 'block') {
+          mensajeInput.focus();
+        }
+      });
+
+      closeChat.addEventListener('click', function() {
+        chatBox.style.display = 'none';
+      });
+
+      // Enviar mensaje
+      chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = mensajeInput.value.trim();
+        if (!message) return;
+
+        // Mostrar mensaje del usuario
+        addMessage('Tú', message, 'user');
+        mensajeInput.value = '';
+        
+        try {
+          const response = await fetch("{{ route('chat.send') }}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ message: message })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Error en la respuesta del servidor');
+          }
+
+          addMessage('Asistente', data.reply, 'bot');
+        } catch (error) {
+          addMessage('Error', error.message, 'error');
+        }
+      });
+
+      // Función para añadir mensajes
+      function addMessage(sender, text, type) {
+        const messageDiv = document.createElement('div');
+        const icon = type === 'user' ? 'user' : (type === 'error' ? 'exclamation-triangle' : 'robot');
+        
+        messageDiv.className = `alert alert-${type === 'user' ? 'primary' : (type === 'error' ? 'danger' : 'info')} p-3 mb-3 small`;
+        messageDiv.innerHTML = `
+          <strong><i class="fas fa-${icon} mr-1"></i> ${sender}:</strong> ${text}
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    });
+  </script>
+
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ asset('js/home.js') }}"></script>
+
 </body>
 </html>

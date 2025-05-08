@@ -1,33 +1,27 @@
-/**
- * GESTIÓN DE USUARIOS - PANEL DE ADMINISTRACIÓN
- * Este archivo contiene todas las funciones necesarias para gestionar usuarios
- * desde el panel de administración, incluyendo listado, filtrado, y eliminación.
- * El administrador puede buscar usuarios por nombre o filtrar por rol.
- */
-
 // Variables globales para los filtros
 let activeFilters = {};
 
-/**
- * loadUsers() - Carga los usuarios desde la API y los muestra en la tabla
- * 
- * Esta función realiza una petición AJAX al servidor para obtener los usuarios
- * (aplicando los filtros si existen) y los muestra en la tabla del panel de administración.
- * Incluye la información básica de cada usuario y opciones para editar o eliminar.
- */
+// Variables globales para la paginación
+let currentPage = 1;
+let perPage = 10;
+
+// Función de carga de usuarios mediante AJAX para después mostrarlos 
 function loadUsers() {
-    // Mostrar el indicador de carga
     document.getElementById('loading-users').style.display = 'block';
     document.getElementById('users-table-container').style.display = 'none';
 
-    // Construir la URL con los parámetros de filtro
+    // Definición de la URL
     let url = new URL(dataUrl, window.location.origin);
 
-    // Agregar parámetros de filtro con los nombres exactos que espera el controlador
+    // Bloque de control para añadir valores a los filtros
     if (activeFilters.nombre) url.searchParams.append('nombre', activeFilters.nombre);
     if (activeFilters.role) url.searchParams.append('role', activeFilters.role);
 
-    // Realizar petición AJAX para obtener los usuarios
+    // Si las condiciones se cumplen se añaden a la paginación
+    url.searchParams.append('page', currentPage);
+    url.searchParams.append('perPage', perPage);
+
+    // Inicio de la petición
     fetch(url, {
         method: 'GET',
         headers: {
@@ -35,40 +29,42 @@ function loadUsers() {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
+    // Si no hay una respuesta da error
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al cargar los usuarios');
-        }
+        if (!response.ok) throw new Error('Error al cargar los usuarios');
         return response.json();
     })
+    // Si hay respuesta comienza el proceso para mostrar los usuarios
     .then(data => {
-        // Ocultar el indicador de carga
         document.getElementById('loading-users').style.display = 'none';
-        // Mostrar la tabla
         document.getElementById('users-table-container').style.display = 'block';
 
-        // Limpiar la tabla
+        // Definición de la tabla (para rellenar mediante los datos de la consulta hecha en el controlador)
         const tableBody = document.querySelector('#users-table tbody');
         tableBody.innerHTML = '';
 
-        // Función para capitalizar la primera letra
+        // Primera letra en mayusculas
         const capitalizeFirstLetter = text => {
             if (!text) return 'Sin rol asignado';
             return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
         };
 
-        // Rellenar la tabla con los datos
+        // Bloque de control para comprobar si hay usuarios
+        // En caso de que salgan vacíos, mostrar mensaje de error conforme no se han encontrado
         if (data.users.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="5" class="text-center">No se encontraron usuarios con los filtros aplicados</td>`;
+            row.innerHTML = `<td colspan="5" class="text-center">No se encontraron usuarios</td>`;
             tableBody.appendChild(row);
         } else {
+            // Si hay resultados se muestra la tabla con todos los campos que se quieran mostrar
+            // Se puede añadir cualquier campo ya que en la consulta se hace un * para una escalabilidad a la hora de añadir campos aquí
             data.users.forEach(user => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${user.id_usuario}</td>
                     <td>${user.nombre}</td>
                     <td>${user.email}</td>
+                    <td>${user.dni}</td>
                     <td>${capitalizeFirstLetter(user.nombre_rol)}</td>
                     <td>
                         <a href="/admin/users/${user.id_usuario}/edit" class="btn btn-sm btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
@@ -78,20 +74,26 @@ function loadUsers() {
                 tableBody.appendChild(row);
             });
         }
+
+        // Renderizar paginación mediante AJAX(fetch)
+        renderPagination(data.pagination);
     })
+    // Captura del error de la petición
     .catch(error => {
         console.error('Error:', error);
-        document.getElementById('loading-users').innerHTML = `<div class="alert alert-danger">Error al cargar usuarios: ${error.message}</div>`;
+        document.getElementById('loading-users').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
     });
 }
 
-/**
- * applyFilters() - Aplica los filtros para la búsqueda de usuarios
- * 
- * Esta función recoge los valores de los diferentes campos de filtro
- * (nombre y rol) y actualiza la lista de usuarios mostrando solo aquellos
- * que cumplen con los criterios seleccionados.
- */
+// Listener para cuando cambie de página muestre los registros correspondientes
+document.getElementById('perPageSelect').addEventListener('change', function () {
+    perPage = parseInt(this.value);
+    currentPage = 1;
+    loadUsers();
+});
+
+
+// Función para aplicar los filtros sumativamente tanto por rol como por nombre 
 function applyFilters() {
     // Recoger los valores de los filtros
     const nombre = document.getElementById('searchUser').value.trim();
@@ -107,12 +109,7 @@ function applyFilters() {
     loadUsers();
 }
 
-/**
- * clearFilters() - Limpia todos los filtros aplicados y muestra todos los usuarios
- * 
- * Esta función resetea todos los campos de filtro a sus valores predeterminados
- * y vuelve a cargar la lista completa de usuarios sin filtros aplicados.
- */
+// Función para limpiar filtros y volver a mostrar los usuarios
 function clearFilters() {
     document.getElementById('searchUser').value = '';
     document.getElementById('filterRole').value = '';
@@ -124,16 +121,7 @@ function clearFilters() {
     loadUsers();
 }
 
-/**
- * deleteUser(id, nombre) - Elimina un usuario del sistema
- * 
- * @param {number} id - ID del usuario a eliminar
- * @param {string} nombre - Nombre del usuario para mostrar en la confirmación
- * 
- * Esta función muestra un diálogo de confirmación y, si el administrador confirma,
- * realiza una petición DELETE al servidor para eliminar el usuario.
- * Después de eliminar el usuario, actualiza la tabla para reflejar el cambio.
- */
+// Función para eliminar usuarios mediante ajax
 function deleteUser(id, nombre) {
     // Mostrar diálogo de confirmación con detalles del usuario
     Swal.fire({
@@ -227,12 +215,8 @@ function deleteUser(id, nombre) {
 // Variable para almacenar la URL de datos
 let dataUrl;
 
-/**
- * Inicialización cuando el DOM está completamente cargado
- * 
- * Configura los eventos para el filtrado de usuarios y carga
- * la lista inicial de usuarios cuando la página está lista.
- */
+
+// Función para la carga de usuarios al iniciar
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener la URL de datos desde el atributo data-url
     dataUrl = document.getElementById('users-table-container').getAttribute('data-url');
@@ -257,3 +241,44 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilters();
     });
 });
+
+// Función para renderizar la paginación utilizando como parámetro los datos de la función de AJAX
+function renderPagination(pagination) {
+    const summary = document.getElementById('pagination-summary');
+    const indicator = document.getElementById('page-indicator');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    const total = pagination.total;
+    const from = (pagination.current_page - 1) * pagination.per_page + 1;
+    const to = Math.min(from + pagination.per_page - 1, total); // ← este es el fix
+
+    // Si no hay resultados
+    if (total === 0) {
+        summary.textContent = `Mostrando 0 de 0 usuarios`;
+    } else {
+        summary.textContent = `Mostrando ${from} a ${to} de ${total} usuarios`;
+    }
+
+    indicator.textContent = `Página ${pagination.current_page} de ${pagination.last_page}`;
+
+    prevBtn.disabled = pagination.current_page === 1;
+    nextBtn.disabled = pagination.current_page === pagination.last_page;
+
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadUsers();
+        }
+    };
+
+    nextBtn.onclick = () => {
+        if (currentPage < pagination.last_page) {
+            currentPage++;
+            loadUsers();
+        }
+    };
+}
+
+
+

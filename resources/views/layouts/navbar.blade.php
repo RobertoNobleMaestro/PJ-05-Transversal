@@ -33,6 +33,11 @@
                   <i class="fas fa-shopping-cart me-1"></i>
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ route('chat.index') }}">
+                    <i class="fas fa-comments"></i> Chat con gestor
+                </a>
+              </li>
               <!-- Foto de perfil (link al perfil) -->
               <li class="nav-item">
                 <a class="nav-link" href="{{ url('/perfil/' . Auth::user()->id_usuario) }}">
