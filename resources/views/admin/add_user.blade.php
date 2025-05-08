@@ -62,7 +62,14 @@
 
                     <div class="form-group">
                         <label for="licencia_conducir" class="form-label">Licencia de Conducir</label>
-                        <input type="text" class="form-control" id="licencia_conducir" name="licencia_conducir">
+                        <select class="form-control" id="licencia_conducir" name="licencia_conducir">
+                            <option value="">Selecciona una opción</option>
+                            @foreach($licencias as $licencia)
+                                <option value="{{ $licencia }}" {{ $usuario->licencia_conducir == $licencia ? 'selected' : '' }}>
+                                    {{ $licencia }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
             </div>
@@ -74,8 +81,8 @@
             </div>
 
             <div class="btn-container">
-                <a href="{{ route('admin.users') }}" class="cancel-btn">Cancelar</a>
-                <button type="button" class="submit-btn" onclick="createUser()">Enviar</button>
+                <a href="{{ route('admin.users') }}" class="btn btn-cancel">Cancelar</a>
+                <button type="button" class="btn btn-submit" onclick="createUser()">Enviar</button>
             </div>
         </form>
     </div>

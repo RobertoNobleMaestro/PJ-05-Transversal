@@ -36,27 +36,32 @@ class UserController extends Controller
         if ($authCheck && $request->expectsJson()) {
             return $authCheck;
         }
-        
-        // Iniciar la consulta
+    
         $query = User::select('users.*', 'roles.nombre as nombre_rol')
                     ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles');
-        
-        // Aplicar filtros si existen
-        if ($request->has('nombre') && !empty($request->nombre)) {
+    
+        if ($request->filled('nombre')) {
             $query->where('users.nombre', 'like', '%' . $request->nombre . '%');
         }
-        
-        if ($request->has('role') && !empty($request->role)) {
+    
+        if ($request->filled('role')) {
             $query->where('users.id_roles', $request->role);
         }
-        
-        // Ejecutar la consulta
-        $users = $query->get();
-        
+    
+        $perPage = $request->get('perPage', 10);
+        $users = $query->paginate($perPage);
+    
         return response()->json([
-            'users' => $users
+            'users' => $users->items(),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'total' => $users->total(),
+                'per_page' => $users->perPage(),
+            ]
         ]);
     }
+    
     
     public function index(Request $request)
     {
@@ -82,8 +87,10 @@ class UserController extends Controller
         if ($authCheck) {
             return $authCheck;
         }
-        
-        return view('admin.add_user');
+
+        $usuario = new User();
+        $licencias = array('AM','A1','A2','A','B','B+E','C1','C1+E','C','C+E','D1','D1+E','D','D+E');
+        return view('admin.add_user' , compact('usuario', 'licencias'));
     }
 
     public function store(Request $request)
@@ -145,7 +152,9 @@ class UserController extends Controller
         }
         
         $user = User::findOrFail($id_usuario);
-        return view('admin.edit_user', compact('user'));
+
+        $licencias = array('AM','A1','A2','A','B','B+E','C1','C1+E','C','C+E','D1','D1+E','D','D+E');
+        return view('admin.edit_user', compact('user', 'licencias'));
     }
 
     public function update(Request $request, $id_usuario)
@@ -165,7 +174,6 @@ class UserController extends Controller
                 'nombre' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $id_usuario . ',id_usuario',
                 'password' => 'nullable|string|min:8',
-                'DNI' => 'required|string|regex:/^\d{8}[A-Z]$/|max:9',
                 'telefono' => 'required|string|regex:/^\d{9}$/',
                 'fecha_nacimiento' => 'required|date|before_or_equal:'.date('Y-m-d', strtotime('-16 years')),
                 'direccion' => 'required|string|min:5|max:255',
