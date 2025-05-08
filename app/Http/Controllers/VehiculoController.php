@@ -232,7 +232,7 @@ class VehiculoController extends Controller
         $lugares = Lugar::all();
         $tipos = Tipo::all();
         
-        return view('admin.add_vehiculo', compact('lugares', 'tipos'));
+        return view('gestor.add_vehiculo', compact('lugares', 'tipos'));
     }
 
     public function store(Request $request)
@@ -248,7 +248,6 @@ class VehiculoController extends Controller
                 'modelo' => 'required|string|max:255',
                 'año' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'kilometraje' => 'required|integer|min:0',
-                'seguro_incluido' => 'boolean',
                 'id_lugar' => 'required|exists:lugares,id_lugar',
                 'id_tipo' => 'required|exists:tipos,id_tipo',
                 'precio_dia' => 'required|numeric|min:0',
@@ -256,9 +255,6 @@ class VehiculoController extends Controller
                 'matricula' => 'nullable|string|max:20',
             ]);
 
-            // El seguro incluido viene como checkbox, así que si no está marcado, será null
-            $validatedData['seguro_incluido'] = $request->has('seguro_incluido') ? true : false;
-            $validatedData['disponibilidad'] = $request->has('disponibilidad') ? true : false;
 
             Vehiculo::create($validatedData);
             
@@ -308,7 +304,7 @@ class VehiculoController extends Controller
         $lugares = Lugar::all();
         $tipos = Tipo::all();
         
-        return view('admin.edit_vehiculo', compact('vehiculo', 'lugares', 'tipos'));
+        return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipos'));
     }
 
     public function update(Request $request, $id_vehiculos)
@@ -326,7 +322,6 @@ class VehiculoController extends Controller
                 'modelo' => 'required|string|max:255',
                 'año' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'kilometraje' => 'required|integer|min:0',
-                'seguro_incluido' => 'boolean',
                 'id_lugar' => 'required|exists:lugares,id_lugar',
                 'id_tipo' => 'required|exists:tipos,id_tipo',
                 'precio_dia' => 'required|numeric|min:0',
@@ -334,8 +329,6 @@ class VehiculoController extends Controller
                 'matricula' => 'nullable|string|max:20',
             ]);
 
-            // El seguro incluido viene como checkbox, así que si no está marcado, será null
-            $validatedData['seguro_incluido'] = $request->has('seguro_incluido') ? true : false;
             $validatedData['disponibilidad'] = $request->has('disponibilidad') ? true : false;
 
             $vehiculo->update($validatedData);

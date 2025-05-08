@@ -22,7 +22,6 @@ class Vehiculo extends Model
         'precio_dia',
         'disponibilidad',
         'kilometraje',
-        'seguro_incluido',
         'id_lugar',
         'id_tipo'
     ];

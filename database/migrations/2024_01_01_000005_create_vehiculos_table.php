@@ -13,7 +13,6 @@ class CreateVehiculosTable extends Migration
             $table->string('marca');
             $table->string('modelo');
             $table->integer('kilometraje');
-            $table->boolean('seguro_incluido');
             $table->year('año');
             $table->decimal('precio_dia', 8, 2);  // Cambiado de string a decimal para manejar precios
             $table->unsignedBigInteger('id_lugar');

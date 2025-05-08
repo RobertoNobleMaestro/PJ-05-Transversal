@@ -19,14 +19,14 @@ function loadUsers() {
     // Mostrar el indicador de carga
     document.getElementById('loading-users').style.display = 'block';
     document.getElementById('users-table-container').style.display = 'none';
-    
+
     // Construir la URL con los parámetros de filtro
     let url = new URL(dataUrl, window.location.origin);
-    
+
     // Agregar parámetros de filtro con los nombres exactos que espera el controlador
     if (activeFilters.nombre) url.searchParams.append('nombre', activeFilters.nombre);
     if (activeFilters.role) url.searchParams.append('role', activeFilters.role);
-    
+
     // Realizar petición AJAX para obtener los usuarios
     fetch(url, {
         method: 'GET',
@@ -46,26 +46,30 @@ function loadUsers() {
         document.getElementById('loading-users').style.display = 'none';
         // Mostrar la tabla
         document.getElementById('users-table-container').style.display = 'block';
-        
+
         // Limpiar la tabla
         const tableBody = document.querySelector('#users-table tbody');
         tableBody.innerHTML = '';
-        
+
+        // Función para capitalizar la primera letra
+        const capitalizeFirstLetter = text => {
+            if (!text) return 'Sin rol asignado';
+            return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+        };
+
         // Rellenar la tabla con los datos
         if (data.users.length === 0) {
-            // Mostrar mensaje si no hay usuarios con los filtros aplicados
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="5" class="text-center">No se encontraron usuarios con los filtros aplicados</td>`;
             tableBody.appendChild(row);
         } else {
-            // Recorrer cada usuario y crear su fila en la tabla
             data.users.forEach(user => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${user.id_usuario}</td>
                     <td>${user.nombre}</td>
                     <td>${user.email}</td>
-                    <td>${user.nombre_rol || 'Sin rol asignado'}</td>
+                    <td>${capitalizeFirstLetter(user.nombre_rol)}</td>
                     <td>
                         <a href="/admin/users/${user.id_usuario}/edit" class="btn btn-sm btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id_usuario}, '${user.nombre}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
@@ -76,7 +80,6 @@ function loadUsers() {
         }
     })
     .catch(error => {
-        // Manejar errores en la carga de usuarios
         console.error('Error:', error);
         document.getElementById('loading-users').innerHTML = `<div class="alert alert-danger">Error al cargar usuarios: ${error.message}</div>`;
     });

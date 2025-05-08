@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Reserva;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,26 +11,37 @@ class PerfilController extends Controller
 {
     public function usuario($id)
     {
+        if (Auth::id() != $id) {
+            abort(403, 'No tienes permiso para acceder a este perfil.');
+        }
+
         $licencias = ['AM', 'A1', 'A2', 'A', 'B', 'B+E', 'C1', 'C1+E', 'C', 'C+E', 'D1', 'D1+E', 'D', 'D+E'];
         $user = User::findOrFail($id);
-    
+
         $reservas = $user->reservas()
             ->where('estado', 'pagado')
-            ->with('vehiculo.imagenes') // Cargar las imágenes del vehículo
+            ->with('vehiculo.imagenes')
             ->get();
-    
+
         return view('Perfil.index', compact('user', 'licencias', 'reservas'));
     }
-    
 
     public function obtenerDatos($id)
     {
+        if (Auth::id() != $id) {
+            abort(403, 'No tienes permiso para ver estos datos.');
+        }
+
         $user = User::findOrFail($id);
         return response()->json($user);
     }
 
     public function actualizar(Request $request, $id)
     {
+        if (Auth::id() != $id) {
+            abort(403, 'No tienes permiso para actualizar este perfil.');
+        }
+
         $user = User::findOrFail($id);
 
         $request->validate([
@@ -78,6 +88,10 @@ class PerfilController extends Controller
 
     public function uploadFoto(Request $request)
     {
+        if (Auth::id() != $request->id) {
+            abort(403, 'No tienes permiso para actualizar esta imagen.');
+        }
+
         $user = User::findOrFail($request->id);
 
         if ($request->hasFile('foto_perfil')) {
