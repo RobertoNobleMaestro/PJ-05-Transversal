@@ -18,8 +18,9 @@ use App\Http\Controllers\GestorController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\ChatIAController;
-
 Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -141,6 +142,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Historial
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
+});
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+});
+Route::middleware(['auth'])->get('/chat', [ChatViewController::class, 'index'])->name('chat.index');
+
+Route::middleware(['auth', 'role:gestor'])->group(function () {
+    Route::get('/gestor/chats', [ChatViewController::class, 'listarConversaciones'])->name('gestor.chat.listar');
+    Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
+    Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
 
 Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send');
