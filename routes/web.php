@@ -152,3 +152,5 @@ Route::middleware(['auth'])->group(function () {
          Route::get('/gestor', 'dashboard')->name('gestor.index');
     });
 });
+
+Route::post('/chat-ia', [\App\Http\Controllers\ChatIAController::class, 'responder']);
