@@ -141,3 +141,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
+
+Route::post('/chat-ia', [\App\Http\Controllers\ChatIAController::class, 'responder']);
