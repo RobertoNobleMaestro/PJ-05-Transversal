@@ -18,6 +18,7 @@ use App\Http\Controllers\GestorController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
+use App\Http\Controllers\ChatIAController;
 
 Route::redirect('/', '/home');
 
@@ -142,4 +143,4 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
 
-Route::post('/chat-ia', [\App\Http\Controllers\ChatIAController::class, 'responder']);
+Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send');
