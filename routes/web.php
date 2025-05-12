@@ -148,6 +148,7 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
+Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
 // Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
 
