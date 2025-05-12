@@ -101,5 +101,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+<script>
+    const contenedorMensajes = document.getElementById('chat-box');
+    const idReceptor = "{{ $usuario->id_usuario ?? $gestorId }}";
+
+    function escucharMensajes() {
+        const sse = new EventSource(`/chat/stream/${idReceptor}`);
+
+        sse.onmessage = function(event) {
+            const nuevo = JSON.parse(event.data);
+
+            const div = document.createElement('div');
+            div.className = 'message other';
+            div.innerHTML = `<p>${nuevo.message}</p><small>${nuevo.created_at}</small>`;
+            contenedorMensajes.appendChild(div);
+            contenedorMensajes.scrollTop = contenedorMensajes.scrollHeight;
+        };
+
+        setTimeout(() => {
+            sse.close();
+            escucharMensajes();
+        }, 2000);
+    }
+
+    escucharMensajes();
+</script>
+
 </body>
 </html>

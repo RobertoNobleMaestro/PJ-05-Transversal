@@ -2,12 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
@@ -27,31 +22,20 @@ use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\ChatIAController;
+use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
-
-
-Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
+Route::get('/vehiculos/aÃ±o', [HomeController::class, 'obtenerAÃ±o']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
 // Login con Google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
-// Rutas para recuperación de contraseña
-use App\Http\Controllers\Auth\PasswordResetController;
-
-Route::controller(PasswordResetController::class)->middleware('guest')->group(function () {
-    Route::get('/forgot-password', 'showForgotForm')->name('password.request');
-    Route::post('/forgot-password', 'sendResetLink')->name('password.email');
-    Route::get('/reset-password/{token}', 'showResetForm')->name('password.reset');
-    Route::post('/reset-password', 'resetPassword')->name('password.update');
-});
-
-// Autenticación manual
+// AutenticaciÃ³n manual
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/login', 'loginProcess')->name('login.post');
@@ -60,7 +44,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'registerProcess')->name('register.post');
 });
 
-// Webhook de Stripe (público)
+// Webhook de Stripe (pÃºblico)
 Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
 
 
@@ -84,11 +68,11 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/ver-carrito', [CarritoController::class, 'index'])->name('carrito.ver');
     Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');
 
-    // Reservas y vehículos
+    // Reservas y vehÃ­culos
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+    Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
 
     // Valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function ($id) {
@@ -165,5 +149,30 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
+Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
-Route::post('/chat/ia/send', [ChatIAController::class, 'send'])->name('chat.send2');
+// Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
+
+
+
+Route::get('/run-migrations-safe', function () {
+    // Verifica la clave proporcionada
+    if (request('key') !== env('DEPLOY_KEY')) {
+        abort(403, 'Acceso no autorizado');
+    }
+
+    try {
+        // Ejecuta las migraciones
+        Artisan::call('migrate:fresh --seed --force');
+        $output = Artisan::output();
+
+        return response()->json([
+            'message' => 'Migraciones ejecutadas correctamente',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al ejecutar migraciones: ' . $e->getMessage()
+        ], 500);
+    }
+});
