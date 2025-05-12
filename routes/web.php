@@ -44,6 +44,12 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'registerProcess')->name('register.post');
 });
 
+// Rutas de recuperaciÃ³n de contraseÃ±a
+Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
+
 // Webhook de Stripe (pÃºblico)
 Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
 
