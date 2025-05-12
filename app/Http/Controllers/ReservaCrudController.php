@@ -137,6 +137,7 @@ class ReservaCrudController extends Controller
                     'completadas' => Reserva::where('estado', 'completada')->count(),
                     'pendientes' => Reserva::where('estado', 'pendiente')->count(),
                     'canceladas' => Reserva::where('estado', 'cancelada')->count(),
+                    'confirmadas' => Reserva::where('estado', 'confirmada')->count(),
                     'ingresos' => Reserva::where('estado', 'completada')->sum('total_precio') ?? 0
                 ];
             } catch (\Exception $e) {
@@ -145,6 +146,7 @@ class ReservaCrudController extends Controller
                     'completadas' => 0,
                     'pendientes' => 0,
                     'canceladas' => 0,
+                    'confirmadas' => 0,
                     'ingresos' => 0
                 ];
             }
@@ -163,6 +165,7 @@ class ReservaCrudController extends Controller
                     'completadas' => 0,
                     'pendientes' => 0,
                     'canceladas' => 0,
+                    'confirmadas' => 0,
                     'ingresos' => 0
                 ]
             ], 500);

@@ -9,14 +9,13 @@
 
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div> 
     
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
         <div class="sidebar-title">CARFLOW</div>
         <ul class="sidebar-menu">
             <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
-            <li><a href="{{ route('admin.reservas.index') }}" class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Reservas</a></li>
             <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
         </ul>
     </div>
@@ -42,6 +41,11 @@
                 <div class="icon"><i class="fas fa-check-circle"></i></div>
                 <div class="value" id="reservas-completadas">-</div>
                 <div class="label">Completadas</div>
+            </div>
+             <div class="stat-card">
+                <div class="icon"><i class="fas fa-envelope-open-text"></i></i></div>
+                <div class="value" id="reservas-confirmadas">-</div>
+                <div class="label">Confirmadas</div>
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fas fa-clock"></i></div>
