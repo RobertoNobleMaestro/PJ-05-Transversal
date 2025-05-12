@@ -155,11 +155,11 @@
           <div class="form-group">
             <label><strong>Valoración:</strong></label>
             <div id="valoracionFiltro" class="form-check">
-              <label><input type="checkbox" value="5"> 5 ⭐</label><br>
-              <label><input type="checkbox" value="4"> 4 ⭐</label><br>
-              <label><input type="checkbox" value="3"> 3 ⭐</label><br>
-              <label><input type="checkbox" value="2"> 2 ⭐</label><br>
-              <label><input type="checkbox" value="1"> 1 ⭐</label>
+              <label><input type="checkbox" value="5" class="form-check-input"> 5 ⭐</label><br>
+              <label><input type="checkbox" value="4" class="form-check-input"> 4 ⭐</label><br>
+              <label><input type="checkbox" value="3" class="form-check-input"> 3 ⭐</label><br>
+              <label><input type="checkbox" value="2" class="form-check-input"> 2 ⭐</label><br>
+              <label><input type="checkbox" value="1" class="form-check-input"> 1 ⭐</label>
             </div>
           </div>
 
