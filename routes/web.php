@@ -147,4 +147,4 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
 
-Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
+Route::post('/chat/ia/send', [ChatIAController::class, 'send'])->name('chat.send2');

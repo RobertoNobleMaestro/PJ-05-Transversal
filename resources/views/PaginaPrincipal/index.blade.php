@@ -155,7 +155,7 @@
         mensajeInput.value = '';
         
         try {
-          const response = await fetch("{{ route('chat.send') }}", {
+          const response = await fetch("{{ route('chat.send2') }}", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
