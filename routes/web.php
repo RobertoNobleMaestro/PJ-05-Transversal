@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
-
+use App\Http\Controllers\ValoracionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -79,7 +79,10 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
         $vehiculo = App\Models\Vehiculo::findOrFail($id);
         return $vehiculo->valoraciones()->with('usuario')->get();
     });
-
+    Route::post('/valoraciones', [ValoracionController::class, 'store'])->middleware('auth');
+    Route::put('/valoraciones/editar/{id}', [ValoracionController::class, 'update'])->middleware('auth');
+    Route::get('/valoraciones/{id}', [ValoracionController::class, 'show'])->middleware('auth');
+    Route::delete('/valoraciones/{id}', [ValoracionController::class, 'destroy'])->middleware('auth');
     // Pagos y facturas
     Route::get('/finalizar-compra', [PagoController::class, 'checkout'])->name('pago.checkout');
     Route::post('/pago/procesar', [PagoController::class, 'procesar'])->name('pago.procesar');
