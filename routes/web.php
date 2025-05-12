@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
@@ -26,12 +32,24 @@ Route::redirect('/', '/home');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
+
+
 Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
 // Login con Google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+// Rutas para recuperación de contraseña
+use App\Http\Controllers\Auth\PasswordResetController;
+
+Route::controller(PasswordResetController::class)->middleware('guest')->group(function () {
+    Route::get('/forgot-password', 'showForgotForm')->name('password.request');
+    Route::post('/forgot-password', 'sendResetLink')->name('password.email');
+    Route::get('/reset-password/{token}', 'showResetForm')->name('password.reset');
+    Route::post('/reset-password', 'resetPassword')->name('password.update');
+});
 
 // Autenticación manual
 Route::controller(AuthController::class)->group(function () {
@@ -136,7 +154,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
-Route::middleware(['auth:sanctum'])->group(function () {
+// Chat routes
+Route::middleware(['auth'])->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 });
 Route::middleware(['auth'])->get('/chat', [ChatViewController::class, 'index'])->name('chat.index');
@@ -147,4 +166,4 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
 
-Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
+Route::post('/chat/ia/send', [ChatIAController::class, 'send'])->name('chat.send2');
