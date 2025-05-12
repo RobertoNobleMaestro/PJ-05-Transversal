@@ -25,6 +25,9 @@
                 <img src="{{ asset('img/google-icon.svg') }}" alt="Google Icon" style="width:20px; margin-right:10px;">
                 Iniciar sesión con Google
             </a>
+            <a href="{{ route('password.request') }}" class="forgot-password-link" style="display: block; margin-top: 15px; color: #9F17BD; text-decoration: none;">
+                <i class="fas fa-key" style="margin-right: 5px;"></i> ¿Has olvidado la contraseña?
+            </a>
             
         </form>
     </div>
