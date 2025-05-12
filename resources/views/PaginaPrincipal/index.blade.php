@@ -17,16 +17,17 @@
 </head>
 <body>
 
+  <!-- Navbar -->
   @include('layouts.navbar')
 
-  <!-- Breadcrumb -->
+  <!-- Ruta de navegación -->
   <div class="breadcrumb-container">
     <div class="container">
       <small>Inicio &gt; Alquiler coches</small>
     </div>
   </div>
 
-  <!-- Hero -->
+  <!-- Hero Section -->
   <div class="container hero-section">
     <div class="row">
       <div class="col-md-5">
@@ -44,7 +45,7 @@
         <img src="{{ asset('img/coches.png') }}" class="img-fluid" alt="Vehículos">
       </div>
     </div>
-  </div>
+  </div> 
 
   <!-- Estadísticas -->
   <div class="container-fluid stats-section">
@@ -78,38 +79,32 @@
         </div>
       </div>
     </div>
-  </div>
+  </div>    
 
   <!-- Sección Alquiler -->
   <div id="alquiler" class="container vehicles-section">
     <h2>Alquila vehículos</h2>
 
     <!-- Botón Chat -->
-    <button id="chatBtn" class="btn btn-primary rounded-circle shadow" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 9999;">
-      <i class="fas fa-comments fa-lg"></i>
+    <button id="chatBtn" class="btn btn-primary" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+      <i class="fas fa-comments"></i>
     </button>
 
     <!-- Ventana Chat -->
-    <div id="chatBox" class="card shadow-lg" style="width: 350px; position: fixed; bottom: 100px; right: 30px; display: none; z-index: 9999;">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h6 class="mb-0"><i class="fas fa-robot mr-2"></i>Asistente Virtual</h6>
-        <button id="closeChat" class="btn btn-sm btn-light p-0 rounded-circle" style="width: 24px; height: 24px;">
-          &times;
-        </button>
+    <div id="chatBox" class="card shadow" style="width: 300px; position: fixed; bottom: 80px; right: 20px; display: none; z-index: 9999;">
+      <div class="card-header bg-primary text-white p-2">
+        Chat IA
+        <button type="button" id="closeChat" class="close text-white">&times;</button>
       </div>
-      <div class="card-body p-3" style="height: 400px; overflow-y: auto;" id="chatMessages">
-        <div class="alert alert-info p-2 mb-3 small">
-          <strong><i class="fas fa-robot"></i> Asistente:</strong> ¡Hola! Soy tu asistente virtual de Carflow. ¿En qué puedo ayudarte hoy con tu alquiler de vehículos?
-        </div>
+      <div class="card-body p-2" style="height: 300px; overflow-y: auto;" id="chatMessages">
+        <div class="text-muted small">Hola 👋 ¿En qué puedo ayudarte?</div>
       </div>
-      <div class="card-footer p-3">
-        <form id="chatForm" class="form-inline">
-          <div class="input-group w-100">
-            <input type="text" id="mensajeInput" class="form-control" placeholder="Escribe tu mensaje..." autocomplete="off" autofocus>
+      <div class="card-footer p-2">
+        <form id="chatForm">
+          <div class="input-group">
+            <input type="text" id="mensajeInput" name="mensaje" class="form-control" placeholder="Escribe tu mensaje...">
             <div class="input-group-append">
-              <button class="btn btn-success" type="submit">
-                <i class="fas fa-paper-plane"></i>
-              </button>
+              <button class="btn btn-success" type="submit">Enviar</button>
             </div>
           </div>
         </form>
@@ -117,14 +112,85 @@
     </div>
 
     <div class="row">
-      <!-- Contenido de la sección de alquiler -->
+      <!-- Filtros -->
+      <div class="col-md-3">
+        <div id="filtros-form" class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 90px;">
+          <h4 class="mb-3">Filtros</h4>
+
+          <!-- Tipo -->
+          <div class="form-group">
+            <label><strong>Tipo de vehículo:</strong></label>
+            <div id="tipoVehiculoFiltro" class="form-check"></div>
+          </div>
+
+          <!-- Ciudad -->
+          <div class="form-group">
+            <label><strong>Ciudad:</strong></label>
+            <div id="lugarFiltro" class="form-check"></div>
+          </div>
+
+          <!-- Marca -->
+          <div class="form-group">
+            <label><strong>Marca:</strong></label>
+            <input type="text" id="marcaFiltro" class="form-control" placeholder="Ej. Toyota">
+          </div>
+
+          <!-- Año -->
+          <div class="form-group">
+            <label><strong>Año:</strong></label>
+            <div id="anioFiltroContainer" class="form-check"></div>
+          </div>
+
+          <!-- Precio -->
+          <div class="form-group">
+            <label><strong>Precio mín (€):</strong></label>
+            <input type="number" id="precioMin" class="form-control" placeholder="Mín">
+          </div>
+          <div class="form-group">
+            <label><strong>Precio máx (€):</strong></label>
+            <input type="number" id="precioMax" class="form-control" placeholder="Máx">
+          </div>
+
+          <!-- Valoración -->
+          <div class="form-group">
+            <label><strong>Valoración:</strong></label>
+            <div id="valoracionFiltro" class="form-check">
+              <label><input type="checkbox" value="5"> 5 ⭐</label><br>
+              <label><input type="checkbox" value="4"> 4 ⭐</label><br>
+              <label><input type="checkbox" value="3"> 3 ⭐</label><br>
+              <label><input type="checkbox" value="2"> 2 ⭐</label><br>
+              <label><input type="checkbox" value="1"> 1 ⭐</label>
+            </div>
+          </div>
+
+          <!-- Per Page -->
+          <div class="form-group">
+            <label><strong>Vehículos/página:</strong></label>
+            <input type="number" id="perPageInput" class="form-control" value="16" min="1">
+          </div>
+
+          <button id="resetFiltrosBtn" class="btn btn-outline-danger btn-block mt-3">
+            <i class="fas fa-undo"></i> Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- Vehículos y paginación -->
+      <div class="col-md-9">
+        <div class="row" id="vehiculos-container">
+          <!-- tarjetas dinámicas -->
+        </div>
+        <div class="d-flex justify-content-center">
+          <div class="btn-group" id="pagination-controls"></div>
+        </div>
+        <div class="text-center text-muted small mt-2" id="pagination-info"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Script del Chat -->
+  <!-- Chat Script -->
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Elementos del chat
+    document.addEventListener('DOMContentLoaded', () => {
       const chatBtn = document.getElementById('chatBtn');
       const chatBox = document.getElementById('chatBox');
       const closeChat = document.getElementById('closeChat');
@@ -132,64 +198,44 @@
       const mensajeInput = document.getElementById('mensajeInput');
       const chatMessages = document.getElementById('chatMessages');
 
-      // Mostrar/ocultar chat
-      chatBtn.addEventListener('click', function() {
-        chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
-        if (chatBox.style.display === 'block') {
-          mensajeInput.focus();
-        }
-      });
+      chatBtn.onclick = () => chatBox.style.display = 'block';
+      closeChat.onclick = () => chatBox.style.display = 'none';
 
-      closeChat.addEventListener('click', function() {
-        chatBox.style.display = 'none';
-      });
-
-      // Enviar mensaje
-      chatForm.addEventListener('submit', async function(e) {
+      chatForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        const message = mensajeInput.value.trim();
-        if (!message) return;
+        const mensaje = mensajeInput.value.trim();
+        if (!mensaje) return;
 
-        // Mostrar mensaje del usuario
-        addMessage('Tú', message, 'user');
-        mensajeInput.value = '';
-        
-        try {
-          const response = await fetch("{{ route('chat.send2') }}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-              "Accept": "application/json"
-            },
-            body: JSON.stringify({ message: message })
-          });
+        const token = document.querySelector('meta[name="csrf-token"]').content;
 
-          const data = await response.json();
+        const userMsg = document.createElement('div');
+        userMsg.innerText = "Tú: " + mensaje;
+        userMsg.classList.add("text-primary");
+        chatMessages.appendChild(userMsg);
+        mensajeInput.value = "";
 
-          if (!response.ok) {
-            throw new Error(data.error || 'Error en la respuesta del servidor');
-          }
-
-          addMessage('Asistente', data.reply, 'bot');
-        } catch (error) {
-          addMessage('Error', error.message, 'error');
-        }
+        fetch("/chat-ia", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": token
+          },
+          body: JSON.stringify({ mensaje })
+        })
+        .then(res => res.json())
+        .then(data => {
+          const iaMsg = document.createElement('div');
+          iaMsg.innerText = "IA: " + (data.respuesta ?? "Sin respuesta");
+          iaMsg.classList.add("text-success");
+          chatMessages.appendChild(iaMsg);
+        })
+        .catch(error => {
+          const errorMsg = document.createElement('div');
+          errorMsg.innerText = "Error: " + error.message;
+          errorMsg.classList.add("text-danger");
+          chatMessages.appendChild(errorMsg);
+        });
       });
-
-      // Función para añadir mensajes
-      function addMessage(sender, text, type) {
-        const messageDiv = document.createElement('div');
-        const icon = type === 'user' ? 'user' : (type === 'error' ? 'exclamation-triangle' : 'robot');
-        
-        messageDiv.className = `alert alert-${type === 'user' ? 'primary' : (type === 'error' ? 'danger' : 'info')} p-3 mb-3 small`;
-        messageDiv.innerHTML = `
-          <strong><i class="fas fa-${icon} mr-1"></i> ${sender}:</strong> ${text}
-        `;
-        
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
     });
   </script>
 
@@ -200,3 +246,4 @@
 
 </body>
 </html>
+
