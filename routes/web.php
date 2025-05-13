@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
-
+use App\Http\Controllers\ValoracionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -44,6 +44,12 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'registerProcess')->name('register.post');
 });
 
+// Rutas de recuperaciÃ³n de contraseÃ±a
+Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
+
 // Webhook de Stripe (pÃºblico)
 Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
 
@@ -79,7 +85,10 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
         $vehiculo = App\Models\Vehiculo::findOrFail($id);
         return $vehiculo->valoraciones()->with('usuario')->get();
     });
-
+    Route::post('/valoraciones', [ValoracionController::class, 'store'])->middleware('auth');
+    Route::put('/valoraciones/editar/{id}', [ValoracionController::class, 'update'])->middleware('auth');
+    Route::get('/valoraciones/{id}', [ValoracionController::class, 'show'])->middleware('auth');
+    Route::delete('/valoraciones/{id}', [ValoracionController::class, 'destroy'])->middleware('auth');
     // Pagos y facturas
     Route::get('/finalizar-compra', [PagoController::class, 'checkout'])->name('pago.checkout');
     Route::post('/pago/procesar', [PagoController::class, 'procesar'])->name('pago.procesar');
@@ -138,7 +147,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
-Route::middleware(['auth:sanctum'])->group(function () {
+// Chat routes
+Route::middleware(['auth'])->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 });
 Route::middleware(['auth'])->get('/chat', [ChatViewController::class, 'index'])->name('chat.index');
@@ -148,6 +158,7 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
+Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
 // Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
 

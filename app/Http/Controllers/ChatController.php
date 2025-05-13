@@ -44,6 +44,43 @@ class ChatController extends Controller
     
         return response()->json(['message' => 'Mensaje enviado', 'data' => $msg]);
     }
+    public function stream($id_usuario)
+    {
+        if (!Auth::check()) {
+            abort(403);
+        }
     
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+    
+        $authUser = Auth::user();
+        $isGestor = $authUser->rol === 'gestor';
+    
+        $userId = $isGestor ? $id_usuario : $authUser->id_usuario;
+        $gestorId = $isGestor ? $authUser->id_usuario : $id_usuario;
+    
+        $lastId = session("last_message_id_{$gestorId}_{$userId}") ?? 0;
+    
+        $mensaje = \App\Models\Message::where('user_id', $userId)
+            ->where('gestor_id', $gestorId)
+            ->where('sender_type', $isGestor ? 'user' : 'gestor') // El otro emisor
+            ->where('id', '>', $lastId)
+            ->orderBy('id')
+            ->first();
+    
+        if ($mensaje) {
+            session(["last_message_id_{$gestorId}_{$userId}" => $mensaje->id]);
+    
+            echo "data: " . json_encode([
+                'message' => $mensaje->message,
+                'created_at' => $mensaje->created_at->format('H:i d/m/Y')
+            ]) . "\n\n";
+        }
+    
+        flush();
+    }
+    
+
 
 }
