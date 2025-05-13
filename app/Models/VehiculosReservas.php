@@ -8,7 +8,8 @@ class VehiculosReservas extends Model
 {
     protected $table = 'vehiculos_reservas';
     protected $primaryKey = 'id_vehiculos_reservas';
-    public $timestamps = false;
+
+    public $timestamps = true;
 
     protected $fillable = [
         'fecha_ini',
