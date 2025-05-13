@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
         // 2. Luego las tablas que dependen de las bases
         $this->call([
             UserSeeder::class,           // Usuarios (dependen de roles)
-            VehiculoSeeder::class,       // Vehículos (dependen de tipos y lugares)
+            ParkingSeeder::class,        // Parkings (dependen de usuarios y lugares)
+            VehiculoSeeder::class,       // Vehículos (dependen de tipos, lugares y parkings)
         ]);
         
         // 3. Luego las tablas que dependen de vehículos y usuarios

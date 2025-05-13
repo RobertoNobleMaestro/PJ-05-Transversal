@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReservaSeeder extends Seeder
 {
@@ -11,6 +12,7 @@ class ReservaSeeder extends Seeder
     {
         // Insertar reservas base
         DB::table('reservas')->insert([
+            // Reservas en Madrid (id_lugar = 1)
             [
                 'id_reservas' => 1,
                 'fecha_reserva' => '2024-04-07',
@@ -18,109 +20,112 @@ class ReservaSeeder extends Seeder
                 'estado' => 'completada',
                 'id_lugar' => 1,
                 'id_usuario' => 2,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'id_reservas' => 2,
-                'fecha_reserva' => '2024-04-10',
-                'total_precio' => 90.00,
-                'estado' => 'completada',
-                'id_lugar' => 2,
-                'id_usuario' => 2,
-            ],
-            [
-                'id_reservas' => 3,
                 'fecha_reserva' => '2024-04-15',
                 'total_precio' => 220.00,
                 'estado' => 'pendiente',
                 'id_lugar' => 1,
                 'id_usuario' => 3,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 3,
+                'fecha_reserva' => '2024-04-25',
+                'total_precio' => 450.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 1,
+                'id_usuario' => 3,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'id_reservas' => 4,
-                'fecha_reserva' => '2024-04-20',
+                'fecha_reserva' => '2024-05-10',
                 'total_precio' => 180.00,
-                'estado' => 'confirmada',
-                'id_lugar' => 3,
+                'estado' => 'pendiente',
+                'id_lugar' => 1,
                 'id_usuario' => 4,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
             ],
+            
+            // Reservas en Barcelona (id_lugar = 2)
             [
                 'id_reservas' => 5,
+                'fecha_reserva' => '2024-04-10',
+                'total_precio' => 90.00,
+                'estado' => 'completada',
+                'id_lugar' => 2,
+                'id_usuario' => 2,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 6,
                 'fecha_reserva' => '2024-04-22',
                 'total_precio' => 300.00,
                 'estado' => 'cancelada',
                 'id_lugar' => 2,
                 'id_usuario' => 5,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id_reservas' => 6,
-                'fecha_reserva' => '2024-04-25',
-                'total_precio' => 450.00,
+                'id_reservas' => 7,
+                'fecha_reserva' => '2024-05-15',
+                'total_precio' => 210.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 2,
+                'id_usuario' => 4,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reservas en Valencia (id_lugar = 3)
+            [
+                'id_reservas' => 8,
+                'fecha_reserva' => '2024-04-20',
+                'total_precio' => 180.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 3,
+                'id_usuario' => 4,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 9,
+                'fecha_reserva' => '2024-05-01',
+                'total_precio' => 275.00,
                 'estado' => 'pendiente',
-                'id_lugar' => 1,
+                'id_lugar' => 3,
                 'id_usuario' => 3,
-            ],
-        ]);
-        
-        // Insertar las relaciones entre vehículos y reservas
-        DB::table('vehiculos_reservas')->insert([
-            // Vehículos para la reserva 1
-            [
-                'id_vehiculos' => 1,
-                'id_reservas' => 1,
-                'fecha_ini' => '2024-04-07',
-                'fecha_final' => '2024-04-09',
-            ],
-            
-            // Vehículos para la reserva 2
-            [
-                'id_vehiculos' => 2,
-                'id_reservas' => 2,
-                'fecha_ini' => '2024-04-10',
-                'fecha_final' => '2024-04-11',
-            ],
-            
-            // Vehículos para la reserva 3
-            [
-                'id_vehiculos' => 3,
-                'id_reservas' => 3,
-                'fecha_ini' => '2024-04-15',
-                'fecha_final' => '2024-04-18',
-            ],
-            
-            // Vehículos para la reserva 4
-            [
-                'id_vehiculos' => 4,
-                'id_reservas' => 4,
-                'fecha_ini' => '2024-04-20',
-                'fecha_final' => '2024-04-22',
-            ],
-            
-            // Vehículos para la reserva 5 (múltiples vehículos)
-            [
-                'id_vehiculos' => 1,
-                'id_reservas' => 5,
-                'fecha_ini' => '2024-04-22',
-                'fecha_final' => '2024-04-24',
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id_vehiculos' => 2,
-                'id_reservas' => 5,
-                'fecha_ini' => '2024-04-22',
-                'fecha_final' => '2024-04-24',
-            ],
-            
-            // Vehículos para la reserva 6 (múltiples vehículos)
-            [
-                'id_vehiculos' => 3,
-                'id_reservas' => 6,
-                'fecha_ini' => '2024-04-25',
-                'fecha_final' => '2024-04-28',
-            ],
-            [
-                'id_vehiculos' => 4,
-                'id_reservas' => 6,
-                'fecha_ini' => '2024-04-25',
-                'fecha_final' => '2024-04-28',
+                'id_reservas' => 10,
+                'fecha_reserva' => '2024-05-20',
+                'total_precio' => 320.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 3,
+                'id_usuario' => 5,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
         ]);
     }
