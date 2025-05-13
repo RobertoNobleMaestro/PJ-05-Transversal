@@ -47,7 +47,7 @@ class PerfilController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id_usuario . ',id_usuario',
-            'DNI' => 'required|string|max:9|unique:users,DNI,' . $user->id_usuario . ',id_usuario',
+            'dni' => 'required|string|max:9|unique:users,dni,' . $user->id_usuario . ',id_usuario',
             'fecha_nacimiento' => 'required|date',
             'direccion' => 'required|string|max:255',
             'licencia_conducir' => 'required|string|max:9',
@@ -69,7 +69,7 @@ class PerfilController extends Controller
 
         $user->nombre = $request->nombre;
         $user->email = $request->email;
-        $user->DNI = $request->DNI;
+        $user->dni = $request->dni;
         $user->fecha_nacimiento = $request->fecha_nacimiento;
         $user->direccion = $request->direccion;
         $user->licencia_conducir = $request->licencia_conducir;
