@@ -85,10 +85,10 @@
   <div id="alquiler" class="container vehicles-section">
     <h2>Alquila vehículos</h2>
 
-    <!-- Botón Chat -->
+    <!-- Botón Chat
     <button id="chatBtn" class="btn btn-primary" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
       <i class="fas fa-comments"></i>
-    </button>
+    </button> -->
 
     <!-- Ventana Chat -->
     <div id="chatBox" class="card shadow" style="width: 300px; position: fixed; bottom: 80px; right: 20px; display: none; z-index: 9999;">
@@ -188,7 +188,7 @@
     </div>
   </div>
 
-  <!-- Chat Script -->
+  <!-- Chat Script
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const chatBtn = document.getElementById('chatBtn');
@@ -237,7 +237,7 @@
         });
       });
     });
-  </script>
+  </script> -->
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
