@@ -16,13 +16,16 @@
     
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
-        <div style="position: fixed; width:250px;">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href=""><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
-            </ul>            
+                <li><a href="{{ route('gestor.vehiculos') }}"
+                        class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                        Vehículos</a></li>
+                <li><a href="{{ route('gestor.chat.listar') }}"
+                class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
+                    class="fas fa-comments"></i> Chats</a></li>
+            </ul>
         </div>
-    </div>
 
     <!-- Contenido principal -->
     <div class="admin-main">

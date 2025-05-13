@@ -10,13 +10,12 @@
 </head>
 <body>
 <div class="chat-container">
+    <a href="{{ route('gestor.chat.listar') }}" class="btn btn-chat mb-3">Volver</a>
     <h3 class="chat-header">Chat con {{ $usuario->nombre }}</h3>
 
     <div id="chat-box" class="chat-box">
         @foreach($mensajes as $msg)
-            @php
-                $esMio = $msg->sender_type === 'gestor';
-            @endphp
+            @php $esMio = $msg->sender_type === 'gestor'; @endphp
             <div class="message {{ $esMio ? 'me' : 'other' }}">
                 <p>{{ $msg->message }}</p>
                 <small>{{ $msg->created_at->format('H:i d/m/Y') }}</small>
@@ -39,11 +38,42 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const chatBox = document.getElementById('chat-box');
     const form = document.getElementById('chat-form');
     const messageInput = document.getElementById('messageInput');
-    const chatBox = document.getElementById('chat-box');
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const idReceptor = "{{ $usuario->id_usuario ?? $id ?? $gestorId }}";
 
+    let lastMessageId = 0;
+
+    // Iniciar escucha de mensajes SSE
+    function escucharMensajes() {
+        const sse = new EventSource(`/chat/stream/${idReceptor}`);
+
+        sse.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.id > lastMessageId) {
+                lastMessageId = data.id;
+
+                const div = document.createElement('div');
+                div.className = 'message other';
+                div.innerHTML = `<p>${data.message}</p><small>${data.created_at}</small>`;
+                chatBox.appendChild(div);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        };
+
+        // Reconectar automáticamente
+        setTimeout(() => {
+            sse.close();
+            escucharMensajes();
+        }, 2000);
+    }
+
+    escucharMensajes();
+
+    // Envío de mensaje del gestor
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -65,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const msg = data.data;
 
                 const div = document.createElement('div');
-                div.className = 'message me'; // El gestor siempre es "me" aquí
+                div.className = 'message me';
                 div.innerHTML = `<p>${msg.message}</p><small>Ahora</small>`;
                 chatBox.appendChild(div);
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -80,5 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
 </body>
 </html>
