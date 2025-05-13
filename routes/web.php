@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\ValoracionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\ChatIAController;
+use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -33,7 +35,7 @@ Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
-// Autenticación manual
+// AutenticaciÃ³n manual
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/login', 'loginProcess')->name('login.post');
@@ -42,7 +44,13 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'registerProcess')->name('register.post');
 });
 
-// Webhook de Stripe (público)
+// Rutas de recuperaciÃ³n de contraseÃ±a
+Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
+
+// Webhook de Stripe (pÃºblico)
 Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
 
 
@@ -66,18 +74,21 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/ver-carrito', [CarritoController::class, 'index'])->name('carrito.ver');
     Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');
 
-    // Reservas y vehículos
+    // Reservas y vehÃ­culos
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+    Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
 
     // Valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function ($id) {
         $vehiculo = App\Models\Vehiculo::findOrFail($id);
         return $vehiculo->valoraciones()->with('usuario')->get();
     });
-
+    Route::post('/valoraciones', [ValoracionController::class, 'store'])->middleware('auth');
+    Route::put('/valoraciones/editar/{id}', [ValoracionController::class, 'update'])->middleware('auth');
+    Route::get('/valoraciones/{id}', [ValoracionController::class, 'show'])->middleware('auth');
+    Route::delete('/valoraciones/{id}', [ValoracionController::class, 'destroy'])->middleware('auth');
     // Pagos y facturas
     Route::get('/finalizar-compra', [PagoController::class, 'checkout'])->name('pago.checkout');
     Route::post('/pago/procesar', [PagoController::class, 'procesar'])->name('pago.procesar');
@@ -136,7 +147,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
-Route::middleware(['auth:sanctum'])->group(function () {
+// Chat routes
+Route::middleware(['auth'])->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 });
 Route::middleware(['auth'])->get('/chat', [ChatViewController::class, 'index'])->name('chat.index');
@@ -146,5 +158,30 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
+Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
-Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
+// Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');
+
+
+
+Route::get('/run-migrations-safe', function () {
+    // Verifica la clave proporcionada
+    if (request('key') !== env('DEPLOY_KEY')) {
+        abort(403, 'Acceso no autorizado');
+    }
+
+    try {
+        // Ejecuta las migraciones
+        Artisan::call('migrate:fresh --seed --force');
+        $output = Artisan::output();
+
+        return response()->json([
+            'message' => 'Migraciones ejecutadas correctamente',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al ejecutar migraciones: ' . $e->getMessage()
+        ], 500);
+    }
+});

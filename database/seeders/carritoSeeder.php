@@ -24,23 +24,23 @@ class CarritoSeeder extends Seeder
         ]);
 
         // Asociar vehículos a esa reserva
-        DB::table('vehiculos_reservas')->insert([
-            [
-                'id_reservas' => $reservaId,
-                'id_vehiculos' => 1,
-                'fecha_ini' => Carbon::now()->addDays(1),
-                'fecha_final' => Carbon::now()->addDays(3),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id_reservas' => $reservaId,
-                'id_vehiculos' => 2,
-                'fecha_ini' => Carbon::now()->addDays(4),
-                'fecha_final' => Carbon::now()->addDays(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        // DB::table('vehiculos_reservas')->insert([
+        //     [
+        //         'id_reservas' => $reservaId,
+        //         'id_vehiculos' => 1,
+        //         'fecha_ini' => Carbon::now()->addDays(1),
+        //         'fecha_final' => Carbon::now()->addDays(3),
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        //     [
+        //         'id_reservas' => $reservaId,
+        //         'id_vehiculos' => 2,
+        //         'fecha_ini' => Carbon::now()->addDays(4),
+        //         'fecha_final' => Carbon::now()->addDays(6),
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        // ]);
     }
 }

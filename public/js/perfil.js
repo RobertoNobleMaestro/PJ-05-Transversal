@@ -23,7 +23,7 @@ function cargarDatosPerfil() {
             // Mostrar datos en la vista principal
             document.getElementById('nombre_display').textContent = data.nombre;
             document.getElementById('email_display').textContent = data.email;
-            document.getElementById('DNI_info').textContent = data.DNI;
+            document.getElementById('DNI_info').textContent = data.dni;
             const fecha = data.fecha_nacimiento;
             const fechaFormateada = fecha.split("T")[0];
             document.getElementById('fecha_nacimiento_info').textContent = fechaFormateada;
@@ -36,7 +36,7 @@ function cargarDatosPerfil() {
 
             document.getElementById('nombre').value = data.nombre;
             document.getElementById('email').value = data.email;
-            document.getElementById('DNI').value = data.DNI;
+            document.getElementById('DNI').value = data.dni;
             document.getElementById('fecha_nacimiento').value = data.fecha_nacimiento.split('T')[0]; // solo YYYY-MM-DD
             document.getElementById('direccion').value = data.direccion;
             document.getElementById('licencia_conducir').value = data.licencia_conducir;

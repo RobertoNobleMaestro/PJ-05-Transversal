@@ -59,5 +59,37 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+        
+        // Cliente 21 con email específico
+        DB::table('users')->insert([
+            'nombre' => "Cliente 21",
+            'email' => "alegofe04@gmail.com",
+            'DNI' => '00000021C',
+            'telefono' => '615449359',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1995-01-01',
+            'direccion' => "Calle Cliente 21",
+            'foto_perfil' => '/default.png',
+            'licencia_conducir' => 'B',
+            'id_roles' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Cliente con correo gofe007@outlook.com
+        DB::table('users')->insert([
+            'nombre' => "Cliente Outlook",
+            'email' => "gofe007@outlook.com",
+            'DNI' => '00000022C',
+            'telefono' => '615449359',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1995-01-01',
+            'direccion' => "Calle Cliente Outlook",
+            'foto_perfil' => '/default.png',
+            'licencia_conducir' => 'B',
+            'id_roles' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
