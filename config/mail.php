@@ -75,6 +75,30 @@ return [
             'channel' => env('MAIL_LOG_CHANNEL'),
         ],
 
+        'mailgun' => [
+            'transport' => 'mailgun',
+        ],
+
+        'sendgrid' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.sendgrid.net',
+            'port' => 587,
+            'encryption' => 'tls',
+            'username' => 'apikey',
+            'password' => env('SENDGRID_API_KEY'),
+            'timeout' => null,
+        ],
+
+        'brevo' => [
+            'transport' => 'smtp',
+            'host' => 'smtp-relay.sendinblue.com',
+            'port' => 587,
+            'encryption' => 'tls',
+            'username' => env('BREVO_USERNAME'),
+            'password' => env('BREVO_PASSWORD'),
+            'timeout' => null,
+        ],
+
         'array' => [
             'transport' => 'array',
         ],
