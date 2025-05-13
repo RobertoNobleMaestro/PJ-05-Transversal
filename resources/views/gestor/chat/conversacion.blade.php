@@ -10,6 +10,9 @@
 </head>
 <body>
 <div class="chat-container">
+<a href="{{ route('gestor.chat.listar') }}" class="btn btn-chat mb-3">
+                            Volver
+                        </a> 
     <h3 class="chat-header">Chat con {{ $usuario->nombre }}</h3>
 
     <div id="chat-box" class="chat-box">

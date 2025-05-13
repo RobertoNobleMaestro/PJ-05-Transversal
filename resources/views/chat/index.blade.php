@@ -11,7 +11,10 @@
 </head>
 <body>
 <div class="chat-container">
-    <h3 class="chat-header">Chat con el Gestor</h3>
+<a href="{{ route('home') }}" class="btn btn-chat mb-3">
+                            Volver
+                        </a> 
+<h3 class="chat-header">Chat con el Gestor</h3>
 
     <div id="chat-box" class="chat-box">
         @foreach($messages as $msg)
