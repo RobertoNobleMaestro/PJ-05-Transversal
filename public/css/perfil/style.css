@@ -4,6 +4,15 @@ body {
     margin: 0;
     padding: 0;
   }
+  
+  /* Contenedor principal para estar seguro que respeta los márgenes en móvil */
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
   .perfil-box {
     background-color: white;
@@ -49,6 +58,17 @@ body {
     display: flex;
     justify-content: center;
     width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .info-perfil {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .info-perfil > div {
+      width: 100% !important;
+    }
   }
 
   .info-perfil h5 {
@@ -127,6 +147,7 @@ body {
   border: none;
   border-radius: 16px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
 }
 
 .card:hover {
@@ -183,36 +204,123 @@ body {
 .btn-volver i {
   margin-right: 6px;
 }
-  /* Responsive tweaks */
-  @media (max-width: 767px) {
-    .perfil-box {
-      padding: 1.5rem;
-    }
+/* Media Queries para Responsive Design */
+@media (max-width: 992px) {
+  .perfil-box {
+    padding: 1.5rem;
+  }
+  
+  .info-perfil h5 {
+    font-size: 1.5rem;
+  }
+  
+  .btn-editar {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+  
+  .titulo-favoritos {
+    font-size: 1.6rem;
+  }
+}
 
-    .foto-perfil {
-      width: 120px;
-      height: 120px;
-    }
-
-    .info-perfil h5 {
-      font-size: 1.5rem;
-    }
-
-    .info-perfil p {
-      font-size: 0.95rem;
-    }
-
-    .btn-editar {
-      font-size: 1rem;
-      padding: 10px 20px;
-    }
-    /* Responsive tweaks */
+@media (max-width: 768px) {
+  .perfil-box {
+    padding: 1rem;
+  }
+  
+  .foto-perfil {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .row-dashed {
+    border-bottom: none;
+  }
+  
+  .col-md-6 {
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .col-md-6:last-of-type {
+    border-bottom: none;
+  }
+  
+  .linea-favoritos {
+    width: 80%;
+  }
+  
+  .btn-volver {
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  
   .card-img-top {
-    height: 130px;
+    height: 140px;
   }
 
+  .favoritos-section .col-6 {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+@media (max-width: 576px) {
+  .perfil-box {
+    margin-top: 1rem;
+  }
+  
+  .foto-perfil {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+  }
+  
+  .info-perfil h5 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .info-perfil p {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .btn-editar {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+  
   .titulo-favoritos {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+  }
+  
+  .linea-favoritos {
+    width: 90%;
+  }
+  
+  .card-body {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  /* Ajustar el modal para pantallas pequeñas */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+
+  /* Mejorar visualización en pantallas muy pequeñas */
+  .favoritos-section .col-6 {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
 
