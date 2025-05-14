@@ -80,6 +80,9 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
     Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
 
+    // Mostrar mapa 
+    Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'showMapa']);
+
     // Valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function ($id) {
         $vehiculo = App\Models\Vehiculo::findOrFail($id);

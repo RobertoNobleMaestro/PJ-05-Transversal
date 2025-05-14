@@ -20,7 +20,7 @@ class VehiculoController extends Controller
         if (!auth()->check()) {
             return redirect('/login');
         }
-        
+
         // Verificar si el usuario tiene rol de administrador (id_roles = 1)
         if (auth()->user()->id_roles !== 1) {
             if ($request->expectsJson()) {
@@ -28,15 +28,15 @@ class VehiculoController extends Controller
             }
             return redirect('/')->with('error', 'No tienes permiso para acceder a esta sección');
         }
-        
+
         return null; // El usuario es administrador, continuar
     }
-    
+
     public function detalle($id)
     {
         $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva', 'imagenes'])
-        ->findOrFail($id);
-    
+            ->findOrFail($id);
+
 
         $precioUnitario = $vehiculo->vehiculosReservas
             ->where('fecha_final', '>=', now())
@@ -46,7 +46,9 @@ class VehiculoController extends Controller
             'vehiculo' => $vehiculo,
             'precio_unitario' => $precioUnitario,
             'imagenes' => $vehiculo->imagenes
+            
         ]);
+        
     }
 
     // Método para añadir un vehículo al carrito (para clientes)
@@ -109,7 +111,6 @@ class VehiculoController extends Controller
                 'title' => '¡Vehículo añadido al carrito!',
                 'text' => 'El vehículo ha sido añadido a tu carrito con éxito.'
             ]]);
-
         } catch (\Exception $e) {
             return response()->json(['alert' => [
                 'icon' => 'error',
@@ -118,9 +119,9 @@ class VehiculoController extends Controller
             ]]);
         }
     }
-    
+
     // MÉTODOS PARA EL PANEL DE ADMINISTRACIÓN
-    
+
     // Método para obtener vehiculos en formato JSON (para AJAX)
     public function getVehiculos(Request $request)
     {
@@ -132,7 +133,7 @@ class VehiculoController extends Controller
                     'message' => 'Usuario no autenticado'
                 ], 401);
             }
-            
+
             // Verificar que sea administrador
             if (auth()->user()->id_roles !== 1) {
                 return response()->json([
@@ -140,43 +141,43 @@ class VehiculoController extends Controller
                     'message' => 'No tienes permiso para acceder a esta sección'
                 ], 403);
             }
-            
+
             // Determinar la página actual y el tamaño de página
             $page = $request->input('page', 1);
             $perPage = $request->input('per_page', 10); // Por defecto 10 items por página
-            
+
             // Versión simplificada de la consulta para depuración
             $query = Vehiculo::select(
-                'vehiculos.*', 
-                'lugares.nombre as nombre_lugar', 
+                'vehiculos.*',
+                'lugares.nombre as nombre_lugar',
                 'tipos.nombre_tipo'
             )
-            ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-            ->leftJoin('tipos', 'vehiculos.id_tipo', '=', 'tipos.id_tipo');
-            
+                ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
+                ->leftJoin('tipos', 'vehiculos.id_tipo', '=', 'tipos.id_tipo');
+
             // Aplicar filtros básicos
             if ($request->has('tipo') && !empty($request->tipo)) {
                 $query->where('vehiculos.id_tipo', $request->tipo);
             }
-            
+
             if ($request->has('lugar') && !empty($request->lugar)) {
                 $query->where('vehiculos.id_lugar', $request->lugar);
             }
-            
+
             if ($request->has('marca') && !empty($request->marca)) {
                 $query->where('vehiculos.marca', 'like', '%' . $request->marca . '%');
             }
-            
+
             if ($request->has('anio') && !empty($request->anio)) {
                 $query->where('vehiculos.año', $request->anio);
             }
-            
+
             // Paginación
             $paginatedResults = $query->paginate($perPage, ['*'], 'page', $page);
-            
+
             \Illuminate\Support\Facades\Log::info('Consulta de vehículos exitosa. Encontrados: ' . $paginatedResults->total() . ', Mostrando página ' . $page . ' de ' . $paginatedResults->lastPage());
             \Illuminate\Support\Facades\Log::info('Filtros aplicados: ' . json_encode($request->all()));
-            
+
             return response()->json([
                 'status' => 'success',
                 'vehiculos' => $paginatedResults->items(),
@@ -190,11 +191,10 @@ class VehiculoController extends Controller
                     'has_more_pages' => $paginatedResults->hasMorePages()
                 ]
             ]);
-            
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error en getVehiculos: ' . $e->getMessage());
             \Illuminate\Support\Facades\Log::error('Trace: ' . $e->getTraceAsString());
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error al cargar los vehículos: ' . $e->getMessage()
@@ -208,17 +208,17 @@ class VehiculoController extends Controller
         if ($authCheck) {
             return $authCheck;
         }
-        
+
         // Obtener datos para los filtros
         $tipos = Tipo::all();
         $lugares = Lugar::all();
-        
+
         // Obtener años únicos de vehículos para el filtro
         $anios = Vehiculo::select('año')->distinct()->orderBy('año', 'desc')->pluck('año');
-        
+
         // Valoraciones posibles (1-5) para el filtro
         $valoraciones = [1, 2, 3, 4, 5];
-        
+
         return view('admin.vehiculos', compact('tipos', 'lugares', 'anios', 'valoraciones'));
     }
 
@@ -228,10 +228,10 @@ class VehiculoController extends Controller
         if ($authCheck) {
             return $authCheck;
         }
-        
+
         $lugares = Lugar::all();
         $tipos = Tipo::all();
-        
+
         return view('gestor.add_vehiculo', compact('lugares', 'tipos'));
     }
 
@@ -241,7 +241,7 @@ class VehiculoController extends Controller
         if ($authCheck) {
             return $authCheck;
         }
-        
+
         try {
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
@@ -257,7 +257,7 @@ class VehiculoController extends Controller
 
 
             Vehiculo::create($validatedData);
-            
+
             // Si la petición espera JSON (AJAX), devolver respuesta JSON
             if ($request->expectsJson()) {
                 return response()->json([
@@ -265,10 +265,9 @@ class VehiculoController extends Controller
                     'message' => 'Vehículo añadido correctamente'
                 ], 200);
             }
-            
+
             // Si es una petición tradicional, redireccionar
             return redirect()->route('admin.vehiculos')->with('success', 'Vehículo añadido correctamente');
-
         } catch (ValidationException $e) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -277,9 +276,8 @@ class VehiculoController extends Controller
                     'errors' => $e->errors()
                 ], 422);
             }
-            
-            return redirect()->back()->withErrors($e->errors())->withInput();
 
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -288,7 +286,7 @@ class VehiculoController extends Controller
                     'errors' => $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()->with('error', 'Error al crear el vehículo: ' . $e->getMessage())->withInput();
         }
     }
@@ -303,7 +301,7 @@ class VehiculoController extends Controller
         $vehiculo = Vehiculo::findOrFail($id_vehiculos);
         $lugares = Lugar::all();
         $tipos = Tipo::all();
-        
+
         return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipos'));
     }
 
@@ -316,7 +314,7 @@ class VehiculoController extends Controller
 
         try {
             $vehiculo = Vehiculo::findOrFail($id_vehiculos);
-            
+
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
                 'modelo' => 'required|string|max:255',
@@ -332,7 +330,7 @@ class VehiculoController extends Controller
             $validatedData['disponibilidad'] = $request->has('disponibilidad') ? true : false;
 
             $vehiculo->update($validatedData);
-            
+
             // Si la petición espera JSON (AJAX), devolver respuesta JSON
             if ($request->expectsJson()) {
                 return response()->json([
@@ -340,10 +338,9 @@ class VehiculoController extends Controller
                     'message' => 'Vehículo actualizado correctamente'
                 ], 200);
             }
-            
+
             // Si es una petición tradicional, redireccionar
             return redirect()->route('admin.vehiculos')->with('success', 'Vehículo actualizado correctamente');
-            
         } catch (ValidationException $e) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -352,9 +349,8 @@ class VehiculoController extends Controller
                     'errors' => $e->errors()
                 ], 422);
             }
-            
+
             return redirect()->back()->withErrors($e->errors())->withInput();
-            
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -363,7 +359,7 @@ class VehiculoController extends Controller
                     'errors' => $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()->with('error', 'Error al actualizar el vehículo: ' . $e->getMessage())->withInput();
         }
     }
@@ -378,7 +374,7 @@ class VehiculoController extends Controller
         try {
             $vehiculo = Vehiculo::findOrFail($id_vehiculos);
             $vehiculo->delete();
-            
+
             // Si la petición espera JSON (AJAX), devolver respuesta JSON
             if ($request->expectsJson()) {
                 return response()->json([
@@ -386,10 +382,9 @@ class VehiculoController extends Controller
                     'message' => 'Vehículo eliminado correctamente'
                 ], 200);
             }
-            
+
             // Si es una petición tradicional, redireccionar
             return redirect()->route('admin.vehiculos')->with('success', 'Vehículo eliminado correctamente');
-            
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -398,8 +393,26 @@ class VehiculoController extends Controller
                     'errors' => $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()->with('error', 'Error al eliminar el vehículo: ' . $e->getMessage());
         }
+    }
+
+    public function showMapa($id)
+    {
+        // Cosnulta para sacar el vehiculo 
+        $vehiculo = Vehiculo::with('parking')->findOrFail($id);
+
+        // Bloque de control para si no hay vehículo con un parking asignado
+        if (!$vehiculo->parking_id) {
+            return ('No se encuentra párking para este vehículo');
+        }
+
+        // En caso de que haya
+        return view('vehiculos.detalle_vehiculo', [
+            'vehiculo' => $vehiculo,
+            'latitud' => $vehiculo->parking->latitud,
+            'longitud' => $vehiculo->parking->longitud,
+        ]);
     }
 }
