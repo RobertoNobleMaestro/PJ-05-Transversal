@@ -14,7 +14,8 @@ class RoleSeeder extends Seeder
             ['nombre' => 'usuario'],     // ID: 2
             ['nombre' => 'gestor'],      // ID: 3
             ['nombre' => 'mecanico'],    // ID: 4
-            ['nombre' => 'admin_financiero'] // ID: 5
+            ['nombre' => 'admin_financiero'], // ID: 5
+            ['nombre' => 'chofer'] // ID: 6
         ]);
     }
 }

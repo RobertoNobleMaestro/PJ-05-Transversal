@@ -9,17 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Definir como constante las variables globales recogidas del html
     let { latitud, longitud } = window.parkingLocation;
-    
-    // Asegurar que las coordenadas son numéricas
-    latitud = parseFloat(latitud);
-    longitud = parseFloat(longitud);
-    
-    // Verificar si las coordenadas son válidas después de convertirlas
-    if (isNaN(latitud) || isNaN(longitud)) {
-        console.error('Coordenadas inválidas:', latitud, longitud);
-        return; // No continuar si las coordenadas son inválidas
-    }
-    
+        
     console.log('Coordenadas del parking:', latitud, longitud);
 
     // Definir como constante la variable del mapa pasando como parámetro las variables globales
