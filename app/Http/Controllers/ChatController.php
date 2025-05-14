@@ -60,21 +60,19 @@ class ChatController extends Controller
         $userId = $isGestor ? $id_usuario : $authUser->id_usuario;
         $gestorId = $isGestor ? $authUser->id_usuario : $id_usuario;
     
-        $lastId = session("last_message_id_{$gestorId}_{$userId}") ?? 0;
-    
+        // Obtener el último mensaje del otro participante
         $mensaje = \App\Models\Message::where('user_id', $userId)
             ->where('gestor_id', $gestorId)
-            ->where('sender_type', $isGestor ? 'user' : 'gestor') // El otro emisor
-            ->where('id', '>', $lastId)
-            ->orderBy('id')
+            ->where('sender_type', $isGestor ? 'user' : 'gestor')
+            ->orderBy('id', 'desc')
             ->first();
     
+        // Solo envía el mensaje si es más reciente que el último recibido por el frontend
         if ($mensaje) {
-            session(["last_message_id_{$gestorId}_{$userId}" => $mensaje->id]);
-    
             echo "data: " . json_encode([
                 'message' => $mensaje->message,
-                'created_at' => $mensaje->created_at->format('H:i d/m/Y')
+                'created_at' => $mensaje->created_at->format('H:i d/m/Y'),
+                'id' => $mensaje->id,
             ]) . "\n\n";
         }
     

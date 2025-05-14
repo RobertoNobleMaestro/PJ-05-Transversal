@@ -34,7 +34,7 @@
         </div>
         <div class="row w-100 mb-4 row-dashed">
             <div class="col-md-6">
-            <p><strong>DNI:</strong> <span id="DNI_info">{{ $user->DNI }}</span></p>
+            <p><strong>DNI:</strong> <span id="DNI_info">{{ $user->dni }}</span></p>
             </div>
             <div class="col-md-6">
             <p><strong>Fecha de nacimiento:</strong> <span id="fecha_nacimiento_info">{{ $user->fecha_nacimiento }}</span></p>
@@ -132,7 +132,7 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="DNI" class="form-label">DNI</label>
-              <input type="text" class="form-control" id="DNI" name="DNI" value="{{ $user->DNI }}" required>
+              <input type="text" class="form-control" id="DNI" name="DNI" value="{{ $user->dni }}" required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>

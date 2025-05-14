@@ -22,13 +22,14 @@ use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\ChatIAController;
+use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
-Route::get('/vehiculos/aÃ±o', [HomeController::class, 'obtenerAÃ±o']);
+Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
 // Login con Google
@@ -78,7 +79,7 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-    Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
 
     // Mostrar mapa 
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'showMapa']);
@@ -114,6 +115,14 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
     });
 });
+
+
+// Rutas para el espacio privado de los gestores 
+Route::middleware(['auth', 'role:chofer'])->group(function(){
+    Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+});
+
+
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
