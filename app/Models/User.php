@@ -64,6 +64,24 @@ class User extends Authenticatable
     }
     
     /**
+     * Verifica si el usuario es un asalariado (gestor, mecánico o admin financiero)
+     */
+    public function esAsalariado()
+    {
+        // IDs de roles que son asalariados: gestor (3), mecánico (4), admin financiero (5)
+        $rolesAsalariados = [3, 4, 5];
+        return in_array($this->id_roles, $rolesAsalariados);
+    }
+    
+    /**
+     * Obtiene la información como asalariado si el usuario tiene ese rol
+     */
+    public function asalariado()
+    {
+        return $this->hasOne(Asalariado::class, 'id_usuario', 'id_usuario');
+    }
+    
+    /**
      * Envía la notificación de restablecimiento de contraseña al usuario.
      * 
      * Este método es llamado automáticamente por Laravel cuando un usuario

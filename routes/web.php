@@ -22,6 +22,8 @@ use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\ChatIAController;
+use App\Http\Controllers\AdminFinancieroController;
+use App\Http\Controllers\AsalariadoController;
 use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
@@ -113,6 +115,23 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
     });
+});
+
+// Rutas para el Administrador Financiero
+Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
+    Route::get('/admin-financiero', [AdminFinancieroController::class, 'index'])->name('admin.financiero.index');
+    Route::get('/admin-financiero/resumen', [AdminFinancieroController::class, 'resumen'])->name('admin.financiero.resumen');
+    
+    // Rutas para la gestión de asalariados
+    Route::get('/asalariados', [AsalariadoController::class, 'index'])->name('asalariados.index');
+    Route::get('/asalariados/{id}', [AsalariadoController::class, 'show'])->name('asalariados.show');
+    Route::get('/asalariados/{id}/edit', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
+    Route::put('/asalariados/{id}', [AsalariadoController::class, 'update'])->name('asalariados.update');
+    
+    // Rutas antiguas - mantener por compatibilidad
+    Route::get('/admin-financiero/asalariados/{id}', [AdminFinancieroController::class, 'show'])->name('admin.financiero.show');
+    Route::get('/admin-financiero/asalariados/{id}/edit', [AdminFinancieroController::class, 'edit'])->name('admin.financiero.edit');
+    Route::put('/admin-financiero/asalariados/{id}', [AdminFinancieroController::class, 'update'])->name('admin.financiero.update');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

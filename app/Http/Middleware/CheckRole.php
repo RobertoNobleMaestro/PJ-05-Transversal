@@ -16,6 +16,8 @@ class CheckRole
             'admin' => 1,
             'cliente' => 2,
             'gestor' => 3,
+            'mecanico' => 4,
+            'admin_financiero' => 5,
         ];
 
         $userRoleId = $request->user()->id_roles;
@@ -26,11 +28,13 @@ class CheckRole
             ->filter()
             ->toArray();
 
-        // Reglas jerárquicas: admin > gestor > cliente
+        // Reglas jerárquicas: admin > gestor/admin_financiero > mecanico > cliente
         $accessRules = [
-            1 => ['admin', 'gestor', 'cliente'],   // admin puede ver todo
-            3 => ['gestor', 'cliente'],            // gestor solo gestor y cliente
-            2 => ['cliente'],                      // cliente solo su parte
+            1 => ['admin', 'gestor', 'cliente', 'mecanico', 'admin_financiero'],   // admin puede ver todo
+            3 => ['gestor', 'cliente'],                                    // gestor solo gestor y cliente
+            2 => ['cliente'],                                              // cliente solo su parte
+            4 => ['mecanico'],                                             // mecánico solo su parte
+            5 => ['admin_financiero'],                                     // admin financiero solo su parte
         ];
 
         // Obtener los roles que puede acceder este usuario
