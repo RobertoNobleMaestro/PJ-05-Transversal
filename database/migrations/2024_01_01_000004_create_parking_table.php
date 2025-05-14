@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->integer('plazas');
+            $table->decimal('latitud', 10, 8);
+            $table->decimal('longitud', 11, 8);
 
             $table->unsignedBigInteger('id_usuario');
             $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
