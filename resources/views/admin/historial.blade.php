@@ -24,7 +24,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Historial de Reservas</h1>
-            <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -93,7 +93,7 @@
                     <input type="date" class="filter-control" id="filterFechaHasta">
                 </div>
                 
-                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
+                <button id="clearFilters" class="btn-purple">Limpiar</button>
             </div>
         </div>
         

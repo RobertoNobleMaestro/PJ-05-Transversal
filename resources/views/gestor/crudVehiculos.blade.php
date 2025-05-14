@@ -40,7 +40,7 @@
             <h1 class="admin-title">
                 Gestión de Vehículos @if(isset($lugarGestor)) de {{ $lugarGestor->nombre }} @endif
             </h1>
-            <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('gestor.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -76,7 +76,7 @@
                     @endforeach
                 </select>
                 
-                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
+                <button id="clearFilters" class="btn-purple">Limpiar</button>
             </div>
             <a href="{{ route('gestor.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
         </div>
@@ -128,6 +128,37 @@
                         <option value="50">50</option>
                     </select>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar las reservas -->
+<div class="modal fade" id="reservasModal" tabindex="-1" aria-labelledby="reservasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservasModalLabel">Reservas del Vehículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID Reserva</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservasTableBody">
+                        <!-- Las reservas se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>

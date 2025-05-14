@@ -167,6 +167,9 @@ function loadVehiculos() {
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
+                        <button class="btn btn-sm btn-success" title="Ver" onclick="verVehiculo(${vehiculo.id_vehiculos})">
+                            <i class="fas fa-eye"></i>
+                        </button>
                         <a href="/gestor/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
                             <i class="fas fa-edit"></i>
                         </a>
@@ -196,6 +199,62 @@ function loadVehiculos() {
         });
         loadingElement.style.display = 'block';
         loadingElement.innerHTML = `<div class="alert alert-danger">Error al cargar vehículos: ${error.message}</div>`;
+    });
+}
+
+function verVehiculo(idVehiculo) {
+    // Mostrar el modal
+    const reservasModal = new bootstrap.Modal(document.getElementById('reservasModal'));
+    reservasModal.show();
+
+    // Limpiar la tabla de reservas
+    const reservasTableBody = document.getElementById('reservasTableBody');
+    reservasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando reservas...</td></tr>';
+
+    // Obtener el token CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Realizar la petición AJAX para obtener las reservas
+    fetch(`/${idVehiculo}/reservas`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Limpiar la tabla
+        reservasTableBody.innerHTML = '';
+
+        // Verificar si hay reservas
+        if (data.reservas.length === 0) {
+            reservasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay reservas para este vehículo.</td></tr>';
+            return;
+        }
+
+        // Llenar la tabla con las reservas
+        data.reservas.forEach(reserva => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${reserva.id_reserva}</td>
+                <td>${new Date(reserva.fecha_inicio).toLocaleDateString()}</td>
+                <td>${new Date(reserva.fecha_fin).toLocaleDateString()}</td>
+                <td>${reserva.cliente_nombre}</td>
+                <td>${reserva.estado}</td>
+            `;
+            reservasTableBody.appendChild(row);
+        });
+    })
+    .catch(error => {
+        console.error('Error al cargar las reservas:', error);
+        reservasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Error al cargar las reservas.</td></tr>';
     });
 }
 

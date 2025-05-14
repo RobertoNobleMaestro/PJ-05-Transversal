@@ -264,7 +264,23 @@ class VehiculoCrudController extends Controller
         
         return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo'));
     }
-
+    public function getReservas($id)
+    {
+        $reservas = Reserva::where('id_vehiculo', $id)
+            ->with('cliente')
+            ->get()
+            ->map(function ($reserva) {
+                return [
+                    'id_reserva' => $reserva->id_reserva,
+                    'fecha_inicio' => $reserva->fecha_inicio,
+                    'fecha_fin' => $reserva->fecha_fin,
+                    'cliente_nombre' => $reserva->cliente->nombre,
+                    'estado' => $reserva->estado,
+                ];
+            });
+    
+        return response()->json(['reservas' => $reservas]);
+    }
     public function update(Request $request, $id_vehiculos)
     {
         $authCheck = $this->checkGestor($request);

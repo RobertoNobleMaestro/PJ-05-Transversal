@@ -37,10 +37,10 @@
                     <span>Bienvenido, {{ auth()->user()->nombre }}</span>
                 @endif
                     <div class="admin-welcome">
-                    <a href="{{ route('home') }}" class="btn btn-outline-primary"><i class="fa-solid fa-house"></i>
+                    <a href="{{ route('home') }}" class="btn-purple"><i class="fa-solid fa-house"></i>
                         Ver Página Principal</a>
                     <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
-                        Cerrar Sesión</a>
+                        </a>
 
                 </div>
             </div>
@@ -75,7 +75,7 @@
                             </div>
                             <h3>Historial de Reservas</h3>
                             <p>Consulta el historial completo de todas las reservas realizadas en el sistema.</p>
-                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
+                            <a href="{{ route('gestor.historial') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -96,10 +96,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Script para funcionalidad responsive -->
-    @section('scripts')
-        <script src="{{asset('js/crud_gestor.js')}}"></script>
-    @endsection
-
 @endsection
