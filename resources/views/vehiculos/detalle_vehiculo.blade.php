@@ -35,11 +35,15 @@
             </div>
             <div class="col-md-6">
                 <div class="imagen-box text-center">
-                    @foreach($imagenes as $imagen)
-                        <img src="{{ asset('img/vehiculos/' . $imagen->nombre_archivo) }}" alt="Imagen del vehículo"
+                    @if(isset($imagenes) && count($imagenes) > 0)
+                        @foreach($imagenes as $imagen)
+                            <img src="{{ asset('img/vehiculos/' . $imagen->nombre_archivo) }}" alt="Imagen del vehículo"
+                                class="img-fluid">
+                        @endforeach
+                    @else
+                        <img src="{{ asset('img/vehiculos/civic.png') }}" alt="{{ $vehiculo->marca }} {{ $vehiculo->modelo }}"
                             class="img-fluid">
-                    @endforeach
-
+                    @endif
                 </div>
             </div>
             <div class="col-md-6">
@@ -310,10 +314,25 @@
                 latitud: @json($latitud),
                 longitud: @json($longitud)
             };
+            
+            @if(isset($parking) && $parking)
+            window.parkingInfo = {
+                nombre: @json($parking->nombre),
+                plazas: @json($parking->plazas)
+            };
+            @endif
         </script>
         <!-- div con el cual se carga el mapa -->
-        <div id="map">
-        </div>
+        <div id="map" style="height: 400px; margin-bottom: 30px;"></div>
+        @if(isset($parking) && $parking && $parking->latitud && $parking->longitud)
+            <div class="alert alert-success mt-2">
+                <i class="fas fa-map-marker-alt"></i> <strong>Punto de recogida:</strong> {{ $parking->nombre }} ({{ $parking->plazas }} plazas disponibles)
+            </div>
+        @else
+            <div class="alert alert-info mt-2">
+                <i class="fas fa-info-circle"></i> Este vehículo no tiene una ubicación de recogida específica. El mapa muestra una ubicación aproximada.
+            </div>
+        @endif
     </div>
 
 

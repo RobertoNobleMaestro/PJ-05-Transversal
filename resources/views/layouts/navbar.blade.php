@@ -35,7 +35,7 @@
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('chat.index') }}">
-                    <i class="fas fa-comments"></i> Chat con gestor
+                    <i class="fas fa-comments"></i>
                 </a>
               </li>
               <!-- Foto de perfil (link al perfil) -->

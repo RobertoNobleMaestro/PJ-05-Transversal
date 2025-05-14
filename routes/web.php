@@ -28,7 +28,7 @@ Route::redirect('/', '/home');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
-Route::get('/vehiculos/aÃ±o', [HomeController::class, 'obtenerAÃ±o']);
+Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
 // Login con Google
@@ -78,7 +78,7 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-    Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
 
     // Mostrar mapa 
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'showMapa']);
