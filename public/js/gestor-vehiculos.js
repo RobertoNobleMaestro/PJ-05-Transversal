@@ -21,7 +21,6 @@ let totalItems = 0;
 function applyFilters() {
     // Recoger los valores de los filtros
     const tipo = document.getElementById('filterTipo').value;
-    const lugar = document.getElementById('filterLugar').value;
     const marca = document.getElementById('filterMarca').value.trim();
     const anio = document.getElementById('filterAnio').value;
     const valoracion = document.getElementById('filterValoracion').value;
@@ -47,7 +46,6 @@ function applyFilters() {
  */
 function clearFilters() {
     document.getElementById('filterTipo').value = '';
-    document.getElementById('filterLugar').value = '';
     document.getElementById('filterMarca').value = '';
     document.getElementById('filterAnio').value = '';
     document.getElementById('filterValoracion').value = '';
@@ -357,11 +355,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         document.getElementById('filterTipo').addEventListener('change', function() {
-            currentPage = 1;
-            applyFilters();
-        });
-        
-        document.getElementById('filterLugar').addEventListener('change', function() {
             currentPage = 1;
             applyFilters();
         });

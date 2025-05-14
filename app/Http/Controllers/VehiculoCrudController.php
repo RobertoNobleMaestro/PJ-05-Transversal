@@ -10,6 +10,7 @@ use App\Models\Lugar;
 use App\Models\Tipo;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class VehiculoCrudController extends Controller
 {
@@ -82,26 +83,30 @@ class VehiculoCrudController extends Controller
                 ], 403);
             }
     
-            // Configuración de paginación
-            $perPage = $request->input('per_page', 10); // Valor por defecto: 10
-            $page = $request->input('page', 1); // Página actual
+            $gestor = auth()->user();
     
-            // Construcción de la consulta
+            // Obtener el id_lugar del gestor a través de su parking
+            $parking = \App\Models\Parking::where('id_usuario', $gestor->id_usuario)->first();
+    
+            if (!$parking) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No se ha encontrado un lugar asignado a este gestor'
+                ], 400);
+            }
+    
             $vehiculos = Vehiculo::select(
                     'vehiculos.*', 
                     'lugares.nombre as nombre_lugar', 
                     'tipo.nombre as nombre_tipo'
                 )
                 ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
-                ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo');
+                ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
+                ->where('vehiculos.id_lugar', $parking->id_lugar); 
     
-            // Filtros
+            // Aplicar filtros opcionales
             if ($request->filled('tipo')) {
                 $vehiculos->where('vehiculos.id_tipo', $request->tipo);
-            }
-    
-            if ($request->filled('lugar')) {
-                $vehiculos->where('vehiculos.id_lugar', $request->lugar);
             }
     
             if ($request->filled('marca')) {
@@ -112,8 +117,12 @@ class VehiculoCrudController extends Controller
                 $vehiculos->where('vehiculos.año', $request->anio);
             }
     
-            // Aplicar paginación
-            $paginated = $vehiculos->orderBy('vehiculos.id_vehiculos', 'desc')->paginate($perPage, ['*'], 'page', $page);
+            // Paginación
+            $perPage = $request->input('per_page', 10);
+            $page = $request->input('page', 1);
+    
+            $paginated = $vehiculos->orderBy('vehiculos.id_vehiculos', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
     
             return response()->json([
                 'vehiculos' => $paginated->items(),
@@ -135,26 +144,41 @@ class VehiculoCrudController extends Controller
         }
     }
     
-
     public function index(Request $request)
     {
         $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
         }
-        
-        // Obtener datos para los filtros
+    
+        $gestor = Auth::user();
+    
+        // Obtener el parking y lugar del gestor
+        $parking = \App\Models\Parking::where('id_usuario', $gestor->id_usuario)->first();
+    
+        if (!$parking) {
+            return redirect()->back()->with('error', 'No se ha encontrado un parking asignado a este gestor.');
+        }
+    
+        $lugarGestor = Lugar::find($parking->id_lugar); // ← Aquí obtenemos el nombre del lugar
+    
+        $vehiculos = Vehiculo::where('id_lugar', $parking->id_lugar)->get();
+    
         $tipo = Tipo::all();
         $lugares = Lugar::all();
-        
-        // Obtener años únicos de vehículos para el filtro
         $anios = Vehiculo::select('año')->distinct()->orderBy('año', 'desc')->pluck('año');
-        
-        // Valoraciones posibles (1-5) para el filtro
         $valoraciones = [1, 2, 3, 4, 5];
-        
-        return view('gestor.crudVehiculos', compact('tipo', 'lugares', 'anios', 'valoraciones'));
+    
+        return view('gestor.crudVehiculos', compact(
+            'tipo',
+            'lugares',
+            'anios',
+            'valoraciones',
+            'vehiculos',
+            'lugarGestor'
+        ));
     }
+    
 
     public function create(Request $request)
     {

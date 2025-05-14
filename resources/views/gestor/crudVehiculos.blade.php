@@ -4,6 +4,7 @@
 
 
 <link rel="stylesheet" href="{{ asset('css/gestor-pagination.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 
 
 @section('content')
@@ -16,21 +17,29 @@
     
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
+        <div style="position: fixed;width: 220px;">
             <div class="sidebar-title">CARFLOW</div>
-            <ul class="sidebar-menu">
-                <li><a href="{{ route('gestor.vehiculos') }}"
-                        class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
-                        Vehículos</a></li>
-                <li><a href="{{ route('gestor.chat.listar') }}"
-                class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
-                    class="fas fa-comments"></i> Chats</a></li>
-            </ul>
+                <ul class="sidebar-menu">
+                    <li><a href="{{ route('gestor.vehiculos') }}"
+                            class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                            Vehículos</a></li>
+                    <li><a href="{{ route('gestor.chat.listar') }}"
+                    class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
+                        class="fas fa-comments"></i> Chats</a></li>
+                        <li><a href="{{ route('gestor.historial') }}"
+                    class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
+                        class="fas fa-history"></i>Historial</a></li>
+                </ul>
+            </div>            
         </div>
+
 
     <!-- Contenido principal -->
     <div class="admin-main">
         <div class="admin-header">
-            <h1 class="admin-title">Gestión de Vehículos</h1>
+            <h1 class="admin-title">
+                Gestión de Vehículos @if(isset($lugarGestor)) de {{ $lugarGestor->nombre }} @endif
+            </h1>
             <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
@@ -49,13 +58,7 @@
                     @endforeach
                 </select>
                 
-                <!-- Filtro por lugar -->
-                <select class="filter-control" id="filterLugar">
-                    <option value="">Todos los lugares</option>
-                    @foreach($lugares as $lugar)
-                        <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
-                    @endforeach
-                </select>
+
                 
                 <!-- Filtro por año -->
                 <select class="filter-control" id="filterAnio">

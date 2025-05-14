@@ -22,7 +22,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 120,
         'latitud' => 41.3851,
         'longitud' => 2.1734,
-        'id_usuario' => 1,
+        'id_usuario' => 2,
         'id_lugar' => 2,
         'created_at' => now(),
         'updated_at' => now()
@@ -33,7 +33,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 85,
         'latitud' => 41.3780,
         'longitud' => 2.1408,
-        'id_usuario' => 1,
+        'id_usuario' => 2,
         'id_lugar' => 2,
         'created_at' => now(),
         'updated_at' => now()
@@ -44,7 +44,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 150,
         'latitud' => 41.4036,
         'longitud' => 2.1744,
-        'id_usuario' => 1,
+        'id_usuario' => 2,
         'id_lugar' => 2,
         'created_at' => now(),
         'updated_at' => now()
@@ -55,7 +55,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 200,
         'latitud' => 41.3917,
         'longitud' => 2.1469,
-        'id_usuario' => 1,
+        'id_usuario' => 2,
         'id_lugar' => 2,
         'created_at' => now(),
         'updated_at' => now()
@@ -68,7 +68,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 100,
         'latitud' => 40.4168,
         'longitud' => -3.7038,
-        'id_usuario' => 1,
+        'id_usuario' => 3,
         'id_lugar' => 1,
         'created_at' => now(),
         'updated_at' => now()
@@ -79,7 +79,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 180,
         'latitud' => 40.4066,
         'longitud' => -3.6892,
-        'id_usuario' => 1,
+        'id_usuario' => 3,
         'id_lugar' => 1,
         'created_at' => now(),
         'updated_at' => now()
@@ -90,7 +90,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 130,
         'latitud' => 40.4722,
         'longitud' => -3.6827,
-        'id_usuario' => 1,
+        'id_usuario' => 3,
         'id_lugar' => 1,
         'created_at' => now(),
         'updated_at' => now()
@@ -101,7 +101,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 220,
         'latitud' => 40.4531,
         'longitud' => -3.6883,
-        'id_usuario' => 1,
+        'id_usuario' => 3,
         'id_lugar' => 1,
         'created_at' => now(),
         'updated_at' => now()
@@ -112,7 +112,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 90,
         'latitud' => 40.4153,
         'longitud' => -3.6844,
-        'id_usuario' => 1,
+        'id_usuario' => 3,
         'id_lugar' => 1,
         'created_at' => now(),
         'updated_at' => now()
@@ -123,7 +123,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 160,
         'latitud' => 40.4203,
         'longitud' => -3.7058,
-        'id_usuario' => 1,
+        'id_usuario' => 3,
         'id_lugar' => 1,
         'created_at' => now(),
         'updated_at' => now()
@@ -136,7 +136,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 110,
         'latitud' => 39.4510,
         'longitud' => -0.3198,
-        'id_usuario' => 1,
+        'id_usuario' => 4,
         'id_lugar' => 3,
         'created_at' => now(),
         'updated_at' => now()
@@ -147,7 +147,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 170,
         'latitud' => 39.4541,
         'longitud' => -0.3535,
-        'id_usuario' => 1,
+        'id_usuario' => 4,
         'id_lugar' => 3,
         'created_at' => now(),
         'updated_at' => now()
@@ -158,7 +158,7 @@ class ParkingSeeder extends Seeder
         'plazas' => 140,
         'latitud' => 39.4699,
         'longitud' => -0.3763,
-        'id_usuario' => 1,
+        'id_usuario' => 4,
         'id_lugar' => 3,
         'created_at' => now(),
         'updated_at' => now()

@@ -154,7 +154,7 @@
 .crud-table th,
 .crud-table td {
     padding: 1rem;
-    text-align: left;
+    text-align: center !important;
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -280,6 +280,9 @@
 
 .admin-welcome-message {
     border-left: 5px solid var(--sidebar-color);
+    background-color: #9f17bd4a;
+    border: none;
+    color: black;
 }
 
 /* Botón del menú hamburguesa */
