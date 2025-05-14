@@ -33,7 +33,7 @@
     </div>
     <div class="container-derecha">
         <!--contenido con el logo y fondo lila-->
-        <div style="background-color: white; border-radius: 10px; padding: 1px; display: inline-block;">
+        <div style="background-color: white; border-radius: 10px; padding: 1px; display: flex; justify-content: center;">
             <img src="{{ asset('img/logo.png') }}" alt="Logo Carflow" style="max-width: 80%; height: auto;">
         </div>
     </div>
