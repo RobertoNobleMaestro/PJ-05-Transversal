@@ -24,8 +24,12 @@ class CreateVehiculosTable extends Migration
             $table->unsignedBigInteger('parking_id');
             $table->foreign('parking_id')->references('id')->on('parking')->onDelete('cascade');
 
+            $table->date('ultima_fecha_mantenimiento')->nullable();
+            $table->date('proxima_fecha_mantenimiento')->nullable();
+
             $table->timestamps();
         });
+
 
     }
 

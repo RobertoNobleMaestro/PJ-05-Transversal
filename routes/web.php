@@ -21,6 +21,7 @@ use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
+use App\Http\Controllers\TallerController;
 use App\Http\Controllers\ChatIAController;
 use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
@@ -188,3 +189,7 @@ Route::get('/run-migrations-safe', function () {
         ], 500);
     }
 });
+
+
+Route::get('/taller', [TallerController::class, 'index'])->name('taller.index');
+Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('taller.agendar');
