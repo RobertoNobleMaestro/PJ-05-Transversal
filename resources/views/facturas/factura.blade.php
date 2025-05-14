@@ -165,7 +165,7 @@
                 <div class="datos-cliente">
                     <h2>Datos del cliente</h2>
                     <p><strong>{{ $reserva->usuario->nombre }}</strong></p>
-                    <p>DNI/NIF: {{ $reserva->usuario->DNI }}</p>
+                    <p>DNI/NIF: {{ $reserva->usuario->dni }}</p>
                     <p>{{ $reserva->usuario->direccion }}</p>
                     <p>Email: {{ $reserva->usuario->email }}</p>
                     @if($reserva->usuario->telefono)

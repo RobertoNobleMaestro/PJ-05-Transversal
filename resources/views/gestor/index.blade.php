@@ -22,9 +22,6 @@
                 <li><a href="{{ route('gestor.vehiculos') }}"
                         class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                         Vehículos</a></li>
-                <li><a href="{{ route('admin.lugares') }}"
-                        class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i
-                            class="fas fa-map-marker-alt"></i> Lugares</a></li>
                 <li><a href="{{ route('gestor.chat.listar') }}"
                 class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
                     class="fas fa-comments"></i> Chats</a></li>

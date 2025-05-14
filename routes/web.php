@@ -28,7 +28,7 @@ Route::redirect('/', '/home');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
-Route::get('/vehiculos/aÃ±o', [HomeController::class, 'obtenerAÃ±o']);
+Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
 // Login con Google
@@ -43,6 +43,12 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/register', 'register')->name('register');
     Route::post('/register', 'registerProcess')->name('register.post');
 });
+
+// Rutas de recuperaciÃ³n de contraseÃ±a
+Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
 // Webhook de Stripe (pÃºblico)
 Route::post('/webhook/stripe', [PagoController::class, 'webhook'])->name('webhook.stripe');
@@ -72,7 +78,10 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-    Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+
+    // Mostrar mapa 
+    Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'showMapa']);
 
     // Valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function ($id) {
@@ -141,7 +150,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
-Route::middleware(['auth:sanctum'])->group(function () {
+// Chat routes
+Route::middleware(['auth'])->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 });
 Route::middleware(['auth'])->get('/chat', [ChatViewController::class, 'index'])->name('chat.index');
