@@ -34,21 +34,39 @@ class VehiculoController extends Controller
 
     public function detalle($id)
     {
+        // Cargamos el vehículo con todas sus relaciones, incluido el parking
         $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva', 'imagenes'])
             ->findOrFail($id);
-
+        
+        // Cargamos explícitamente el parking para asegurarnos de tener la relación completa
+        if ($vehiculo->parking_id) {
+            $parking = \App\Models\Parking::find($vehiculo->parking_id);
+        } else {
+            $parking = null;
+        }
 
         $precioUnitario = $vehiculo->vehiculosReservas
             ->where('fecha_final', '>=', now())
             ->first()->precio_unitario ?? $vehiculo->precio_unitario;
+    
+        // Solo usamos valores por defecto si realmente no hay parking o coordenadas
+        if ($parking && is_numeric($parking->latitud) && is_numeric($parking->longitud)) {
+            $latitud = (float)$parking->latitud;
+            $longitud = (float)$parking->longitud;
+        } else {
+            // Coordenadas por defecto (Madrid)
+            $latitud = 40.4168;
+            $longitud = -3.7038;
+        }
 
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo,
             'precio_unitario' => $precioUnitario,
-            'imagenes' => $vehiculo->imagenes
-            
+            'imagenes' => $vehiculo->imagenes,
+            'parking' => $parking,
+            'latitud' => $latitud,
+            'longitud' => $longitud
         ]);
-        
     }
 
     // Método para añadir un vehículo al carrito (para clientes)
@@ -400,19 +418,39 @@ class VehiculoController extends Controller
 
     public function showMapa($id)
     {
-        // Cosnulta para sacar el vehiculo 
-        $vehiculo = Vehiculo::with('parking')->findOrFail($id);
+        // Consulta para sacar el vehiculo con todas sus relaciones necesarias
+        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva', 'imagenes'])->findOrFail($id);
 
-        // Bloque de control para si no hay vehículo con un parking asignado
-        if (!$vehiculo->parking_id) {
-            return ('No se encuentra párking para este vehículo');
+        // Cargamos explícitamente el parking para asegurarnos de tener la relación completa
+        if ($vehiculo->parking_id) {
+            $parking = \App\Models\Parking::find($vehiculo->parking_id);
+        } else {
+            $parking = null;
         }
 
-        // En caso de que haya
+        // Calculamos el precio unitario igual que en otros métodos
+        $precioUnitario = $vehiculo->vehiculosReservas
+            ->where('fecha_final', '>=', now())
+            ->first()->precio_unitario ?? $vehiculo->precio_unitario;
+
+        // Solo usamos valores por defecto si realmente no hay parking o coordenadas
+        if ($parking && is_numeric($parking->latitud) && is_numeric($parking->longitud)) {
+            $latitud = (float)$parking->latitud;
+            $longitud = (float)$parking->longitud;
+        } else {
+            // Coordenadas por defecto (Madrid)
+            $latitud = 40.4168;
+            $longitud = -3.7038;
+        }
+
+        // Devolvemos la vista con todos los datos necesarios
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo,
-            'latitud' => $vehiculo->parking->latitud,
-            'longitud' => $vehiculo->parking->longitud,
+            'precio_unitario' => $precioUnitario,
+            'parking' => $parking,
+            'latitud' => $latitud,
+            'longitud' => $longitud,
+            'imagenes' => $vehiculo->imagenes
         ]);
     }
 }
