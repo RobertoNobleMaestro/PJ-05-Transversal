@@ -32,16 +32,37 @@ class VehiculoCrudController extends Controller
     // Método para mostrar detalles de un vehículo (para clientes)
     public function detalle($id)
     {
-        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva'])
+        $vehiculo = Vehiculo::with(['tipo', 'lugar', 'caracteristicas', 'valoraciones', 'vehiculosReservas.reserva', 'imagenes'])
             ->findOrFail($id);
+            
+        // Cargamos explícitamente el parking para asegurarnos de tener la relación completa
+        if ($vehiculo->parking_id) {
+            $parking = \App\Models\Parking::find($vehiculo->parking_id);
+        } else {
+            $parking = null;
+        }
 
         $precioUnitario = $vehiculo->vehiculosReservas
             ->where('fecha_final', '>=', now())
             ->first()->precio_unitario ?? $vehiculo->precio_unitario;
+        
+        // Solo usamos valores por defecto si realmente no hay parking o coordenadas
+        if ($parking && is_numeric($parking->latitud) && is_numeric($parking->longitud)) {
+            $latitud = (float)$parking->latitud;
+            $longitud = (float)$parking->longitud;
+        } else {
+            // Coordenadas por defecto (Madrid)
+            $latitud = 40.4168;
+            $longitud = -3.7038;
+        }
 
         return view('vehiculos.detalle_vehiculo', [
             'vehiculo' => $vehiculo,
-            'precio_unitario' => $precioUnitario
+            'precio_unitario' => $precioUnitario,
+            'imagenes' => $vehiculo->imagenes,
+            'parking' => $parking,
+            'latitud' => $latitud,
+            'longitud' => $longitud
         ]);
     }
     public function getVehiculos(Request $request)

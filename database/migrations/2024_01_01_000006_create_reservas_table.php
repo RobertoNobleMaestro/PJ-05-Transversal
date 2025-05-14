@@ -11,11 +11,15 @@ return new class extends Migration {
             $table->date('fecha_reserva');
             $table->decimal('total_precio', 10, 2);
             $table->string('estado');
+
             $table->unsignedBigInteger('id_lugar');
+            $table->foreign('id_lugar')->references('id_lugar')->on('lugares')->onDelete('cascade');
+
             $table->unsignedBigInteger('id_usuario');
+            $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
+
             $table->string('referencia_pago')->nullable();
-            $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
-            $table->foreign('id_usuario')->references('id_usuario')->on('users');
+
             $table->timestamps();
         });
     }

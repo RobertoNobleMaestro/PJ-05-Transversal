@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('id_vehiculos');
             $table->foreign('id_reservas')->references('id_reservas')->on('reservas');
             $table->foreign('id_vehiculos')->references('id_vehiculos')->on('vehiculos');
+
             $table->timestamps();
         });
     }

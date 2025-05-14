@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,11 +11,6 @@ class User extends Authenticatable
 
     protected $primaryKey = 'id_usuario';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'nombre',
         'email',
@@ -30,55 +24,38 @@ class User extends Authenticatable
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'fecha_nacimiento' => 'date',
     ];
 
-    /**
-     * Get the rol associated with the user.
-     */
     public function role()
     {
         return $this->belongsTo(Role::class, 'id_roles', 'id_roles');
     }
 
-    /**
-     * Get the reservas associated with the user.
-     */
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'id_usuario', 'id_usuario');
     }
 
-    /**
-     * Get the valoraciones associated with the user.
-     */
     public function valoraciones()
     {
         return $this->hasMany(Valoracion::class, 'id_usuario', 'id_usuario');
     }
 
-    /**
-     * Get the pagos associated with the user.
-     */
     public function pagos()
     {
         return $this->hasMany(Pago::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function parkings()
+    {
+        return $this->hasMany(Parking::class, 'id_usuario', 'id_usuario');
     }
 
     public function hasRole($roleName)
