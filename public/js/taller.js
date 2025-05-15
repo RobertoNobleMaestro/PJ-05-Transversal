@@ -7,9 +7,9 @@ $(document).ready(function() {
         },
         "order": [[0, "asc"]],
         "responsive": true,
-        "paging": true,
+        "paging": false,
         "info": true,
-        "searching": true,
+        "searching": false,
         "ordering": true
     });
     

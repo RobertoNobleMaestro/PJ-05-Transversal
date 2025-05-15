@@ -8,6 +8,7 @@ use App\Models\Mantenimiento;
 use Carbon\Carbon;
 use DB;
 
+
 class TallerController extends Controller
 {
     // Método para mostrar la vista de los vehículos
@@ -161,5 +162,146 @@ class TallerController extends Controller
                 'message' => 'Error al obtener horarios: ' . $e->getMessage()
             ], 500);
         }
+    }
+    
+    // Método para obtener historial de mantenimientos con filtro por estado
+    public function getMantenimientos(Request $request)
+    {
+        try {
+            $query = Mantenimiento::with(['vehiculo', 'taller'])
+                ->orderBy('created_at', 'desc');
+            
+            // Filtrar por estado si se especifica
+            if ($request->has('estado') && $request->estado !== 'todos') {
+                $query->where('estado', $request->estado);
+            }
+            
+            $mantenimientos = $query->get();
+            
+            // Formatear datos para la respuesta
+            $resultado = $mantenimientos->map(function($mantenimiento) {
+                $fechaHora = Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
+                
+                // Determinar el color del badge según el estado
+                $colorEstado = [
+                    'pendiente' => 'warning',
+                    'completado' => 'success',
+                    'cancelado' => 'danger'
+                ][$mantenimiento->estado] ?? 'secondary';
+                
+                return [
+                    'id' => $mantenimiento->id,
+                    'vehiculo' => $mantenimiento->vehiculo->marca . ' ' . $mantenimiento->vehiculo->modelo,
+                    'matricula' => $mantenimiento->vehiculo->matricula ?? 'N/A',
+                    'taller' => $mantenimiento->taller->nombre,
+                    'fecha' => $mantenimiento->fecha_programada->format('d/m/Y'),
+                    'hora' => $mantenimiento->hora_programada,
+                    'estado' => $mantenimiento->estado,
+                    'colorEstado' => $colorEstado,
+                    'fechaCompleta' => $fechaHora->format('d/m/Y H:i'),
+                    'esPasado' => $fechaHora->isPast(),
+                    'id_vehiculo' => $mantenimiento->vehiculo_id
+                ];
+            });
+            
+            return response()->json([
+                'success' => true, 
+                'mantenimientos' => $resultado
+            ]);
+            
+        } catch (\Exception $e) {
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener mantenimientos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    // Método para obtener detalle de un mantenimiento específico
+    public function getDetalleMantenimiento($id)
+    {
+        try {
+            $mantenimiento = Mantenimiento::with(['vehiculo', 'taller'])
+                ->findOrFail($id);
+            
+            $fechaHora = Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
+            
+            $detalle = [
+                'id' => $mantenimiento->id,
+                'vehiculo' => [
+                    'id' => $mantenimiento->vehiculo->id_vehiculos,
+                    'marca' => $mantenimiento->vehiculo->marca,
+                    'modelo' => $mantenimiento->vehiculo->modelo,
+                    'matricula' => $mantenimiento->vehiculo->matricula ?? 'N/A',
+                    'año' => $mantenimiento->vehiculo->año,
+                    'kilometraje' => $mantenimiento->vehiculo->kilometraje
+                ],
+                'taller' => [
+                    'id' => $mantenimiento->taller->id,
+                    'nombre' => $mantenimiento->taller->nombre,
+                    'direccion' => $mantenimiento->taller->direccion,
+                    'telefono' => $mantenimiento->taller->telefono
+                ],
+                'fecha_programada' => $mantenimiento->fecha_programada->format('Y-m-d'),
+                'hora_programada' => $mantenimiento->hora_programada,
+                'fechaCompleta' => $fechaHora->format('d/m/Y H:i'),
+                'estado' => $mantenimiento->estado,
+                'fechaCreacion' => $mantenimiento->created_at->format('d/m/Y H:i'),
+                'fechaActualizacion' => $mantenimiento->updated_at->format('d/m/Y H:i'),
+                'esPasado' => $fechaHora->isPast()
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'detalle' => $detalle
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener detalle: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    // Método para actualizar el estado de un mantenimiento
+    public function actualizarEstadoMantenimiento(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'estado' => 'required|in:pendiente,completado,cancelado'
+            ]);
+            
+            $mantenimiento = Mantenimiento::findOrFail($id);
+            $mantenimiento->estado = $request->estado;
+            $mantenimiento->save();
+            
+            // Si el mantenimiento se cancela, hay que actualizar la fecha de próximo mantenimiento del vehículo
+            if ($request->estado === 'cancelado') {
+                $vehiculo = Vehiculo::find($mantenimiento->vehiculo_id);
+                if ($vehiculo) {
+                    $vehiculo->proxima_fecha_mantenimiento = null;
+                    $vehiculo->save();
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado de mantenimiento actualizado a: ' . $request->estado
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar estado: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Método para mostrar la página de historial de mantenimientos
+    public function historial()
+    {
+        return view('Taller.historial');
     }
 }

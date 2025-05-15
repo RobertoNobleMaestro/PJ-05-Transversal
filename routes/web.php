@@ -191,6 +191,13 @@ Route::get('/run-migrations-safe', function () {
 });
 
 
+
 Route::get('/taller', [TallerController::class, 'index'])->name('taller.index');
+Route::get('/taller/historial', [TallerController::class, 'historial'])->name('taller.historial');
+
+Route::get('/taller/mantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.mantenimientos');
+Route::get('/taller/mantenimiento/{id}', [TallerController::class, 'getDetalleMantenimiento'])->name('taller.mantenimiento.detalle');
+Route::put('/taller/mantenimiento/{id}/estado', [TallerController::class, 'actualizarEstadoMantenimiento'])->name('taller.mantenimiento.actualizar-estado');
 Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('taller.agendar');
 Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('taller.horarios');
+Route::get('/taller/getMantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.getMantenimientos');

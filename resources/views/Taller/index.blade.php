@@ -4,6 +4,14 @@
 
 @section('content')
 
+<style>
+    #vehiculos-table th,
+    #vehiculos-table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -12,21 +20,19 @@
     <div class="admin-sidebar" id="sidebar">
         <div class="sidebar-title">CARFLOW</div>
         <ul class="sidebar-menu">
-            <li><a href="{{ route('gestor.vehiculos') }}"
-                   class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}">
-                   <i class="fas fa-car"></i> Vehículos</a></li>
-            <li><a href="{{ route('gestor.chat.listar') }}"
-                   class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}">
-                   <i class="fas fa-comments"></i> Chats</a></li>
+            <li><a href="{{ route('taller.index') }}" class="{{ request()->routeIs('taller.index*') ? 'active' : '' }}">
+                <i class="fas fa-tools"></i> Gestión del Taller</a></li>
+            <li><a href="{{ route('taller.historial') }}" class="{{ request()->routeIs('taller.historial*') ? 'active' : '' }}">
+                <i class="fas fa-tools"></i> Historial Mantenimiento</a></li>
+
         </ul>
     </div>
 
-    <!-- Contenido principal -->
     <div class="admin-main">
         <div class="admin-header">
-            <h1 class="admin-title">Mantenimiento de Vehículos</h1>
+            <h1 class="admin-title">Gestión de Vehículos</h1>
             <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-left"></i> 
             </a>
         </div>
 
@@ -48,13 +54,12 @@
             <table class="crud-table" id="vehiculos-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Marca</th>
                         <th>Modelo</th>
                         <th>Kilometraje</th>
                         <th>Año</th>
-                        <th>Precio por Día</th>
-                        <th>Lugar</th>
+                        <th>Precio/Día</th>
+                        <th>Sede</th>
                         <th>Tipo</th>
                         <th>Parking</th>
                         <th>Últ. Mantenimiento</th>
@@ -65,12 +70,11 @@
                 <tbody>
                     @foreach($vehiculos as $vehiculo)
                         <tr>
-                            <td>{{ $vehiculo->id_vehiculos }}</td>
                             <td>{{ $vehiculo->marca }}</td>
                             <td>{{ $vehiculo->modelo }}</td>
-                            <td>{{ $vehiculo->kilometraje }}</td>
+                            <td>{{ $vehiculo->kilometraje }} kms</td>
                             <td>{{ $vehiculo->año }}</td>
-                            <td>{{ $vehiculo->precio_dia }}</td>
+                            <td>{{ $vehiculo->precio_dia }} €</td>
                             <td>{{ $vehiculo->lugar->nombre }}</td>
                             <td>{{ $vehiculo->tipo->nombre }}</td>
                             <td>{{ $vehiculo->parking->nombre }}</td>
@@ -79,7 +83,7 @@
                             <td>
                                 <button class="btn btn-primary btn-sm btn-agendar-mantenimiento" 
                                         data-id="{{ $vehiculo->id_vehiculos }}">
-                                    <i class="fas fa-calendar-check"></i> Agendar
+                                    <i class="fas fa-calendar-check"></i>
                                 </button>
                             </td>
                         </tr>
@@ -153,6 +157,9 @@
 <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Moment.js para formateo de fechas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.js"></script>
 <!-- Custom JS -->
 <script src="{{ asset('js/taller.js') }}"></script>
 @endsection
