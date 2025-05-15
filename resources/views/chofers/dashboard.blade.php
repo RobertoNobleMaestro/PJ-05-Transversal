@@ -30,7 +30,7 @@
         <!-- Contenido principal -->
         <div class="admin-main">
             <div class="admin-header">
-                <h1 class="admin-title">Espacio Privado de los Chofers de: NOMBRESEDE</h1>
+                <h1 class="admin-title">Espacio Privado de los Chofers de: {{ $sede ?? 'Central' }}</h1>
                 <div class="admin-welcome">
                     @if(auth()->check())
                         <span>Bienvenido, {{ auth()->user()->nombre }}</span>
@@ -42,7 +42,7 @@
 
             <div class="content-section">
                 <div class="alert alert-info admin-welcome-message p-4 mb-4">
-                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al espacio privado de los chofers de: sede!</h3>
+                    <h3 class="mb-3"><i class="fas fa-tachometer-alt"></i> ¡Bienvenido al espacio privado de los chofers de: {{ $sede ?? 'Central' }}!</h3>
                     <p class="mb-0">Desde aquí podrás comunicarte con otros compañeros y ver la disponibilidad de clientes cada día. 
                         Selecciona una de las opciones a continuación para acceder a las diferentes
                         funcionalidades.</p>
