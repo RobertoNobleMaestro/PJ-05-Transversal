@@ -57,7 +57,12 @@
                         <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre }}</option>
                     @endforeach
                 </select>
-                
+                <select class="filter-control" id="filterLugar" hidden>
+                    <option value="">Todos los lugares</option>
+                    @foreach($lugares as $lugar)
+                        <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
+                    @endforeach
+                </select>
 
                 
                 <!-- Filtro por año -->
@@ -158,7 +163,7 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn-purple" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>

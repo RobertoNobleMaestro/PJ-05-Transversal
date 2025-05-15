@@ -102,7 +102,8 @@ class VehiculoCrudController extends Controller
                 )
                 ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
                 ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
-                ->where('vehiculos.id_lugar', $parking->id_lugar); 
+                ->where('vehiculos.id_lugar', $parking->id_lugar)
+                ->withCount('reservas');
     
             // Aplicar filtros opcionales
             if ($request->filled('tipo')) {
@@ -125,7 +126,19 @@ class VehiculoCrudController extends Controller
                 ->paginate($perPage, ['*'], 'page', $page);
     
             return response()->json([
-                'vehiculos' => $paginated->items(),
+                'vehiculos' => collect($paginated->items())->map(function ($vehiculo) {
+                    return [
+                        'id_vehiculos' => $vehiculo->id_vehiculos,
+                        'marca' => $vehiculo->marca,
+                        'modelo' => $vehiculo->modelo,
+                        'año' => $vehiculo->año,
+                        'kilometraje' => $vehiculo->kilometraje,
+                        'precio' => $vehiculo->precio_dia,
+                        'nombre_lugar' => $vehiculo->nombre_lugar ?? 'No asignado',
+                        'nombre_tipo' => $vehiculo->nombre_tipo ?? 'No asignado',
+                        'tiene_reservas' => VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)->exists()
+                    ];
+                }),
                 'pagination' => [
                     'total' => $paginated->total(),
                     'per_page' => $paginated->perPage(),
@@ -135,7 +148,8 @@ class VehiculoCrudController extends Controller
                     'to' => $paginated->lastItem(),
                 ]
             ]);
-    
+            
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -266,21 +280,23 @@ class VehiculoCrudController extends Controller
     }
     public function getReservas($id)
     {
-        $reservas = Reserva::where('id_vehiculo', $id)
-            ->with('cliente')
-            ->get()
-            ->map(function ($reserva) {
-                return [
-                    'id_reserva' => $reserva->id_reserva,
-                    'fecha_inicio' => $reserva->fecha_inicio,
-                    'fecha_fin' => $reserva->fecha_fin,
-                    'cliente_nombre' => $reserva->cliente->nombre,
-                    'estado' => $reserva->estado,
-                ];
-            });
+        $reservas = DB::table('vehiculos_reservas as vr')
+            ->join('reservas as r', 'vr.id_reservas', '=', 'r.id_reservas')
+            ->join('users as u', 'r.id_usuario', '=', 'u.id_usuario')
+            ->where('vr.id_vehiculos', $id)
+            ->select(
+                'r.id_reservas as id_reserva',
+                'vr.fecha_ini as fecha_inicio',
+                'vr.fecha_final as fecha_fin',
+                'u.nombre as cliente_nombre',
+                'r.estado'
+            )
+            ->get();
     
         return response()->json(['reservas' => $reservas]);
     }
+    
+    
     public function update(Request $request, $id_vehiculos)
     {
         $authCheck = $this->checkGestor($request);

@@ -21,6 +21,7 @@ use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
+use App\Http\Controllers\TallerController;
 use App\Http\Controllers\HistorialGestorController;
 use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\ChoferController;
@@ -116,8 +117,8 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::get('/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('gestor.vehiculos.edit');
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
-        Route::get('/{id}/reservas', [VehiculoController::class, 'getReservas']);
     });
+    Route::get('gestor/vehiculos/{id}/crudreservas', [VehiculoCrudController::class, 'getReservas']);
     Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
     Route::get('/gestor/historial/data', [HistorialGestorController::class, 'getHistorialData'])->name('gestor.historial.data');
 });
@@ -208,3 +209,15 @@ Route::get('/run-migrations-safe', function () {
         ], 500);
     }
 });
+
+
+
+Route::get('/taller', [TallerController::class, 'index'])->name('taller.index');
+Route::get('/taller/historial', [TallerController::class, 'historial'])->name('taller.historial');
+
+Route::get('/taller/mantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.mantenimientos');
+Route::get('/taller/mantenimiento/{id}', [TallerController::class, 'getDetalleMantenimiento'])->name('taller.mantenimiento.detalle');
+Route::put('/taller/mantenimiento/{id}/estado', [TallerController::class, 'actualizarEstadoMantenimiento'])->name('taller.mantenimiento.actualizar-estado');
+Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('taller.agendar');
+Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('taller.horarios');
+Route::get('/taller/getMantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.getMantenimientos');
