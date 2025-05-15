@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,5 +26,10 @@ class Lugar extends Model
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'id_lugar', 'id_lugar');
+    }
+
+    public function parkings()
+    {
+        return $this->hasMany(Parking::class, 'id_lugar', 'id_lugar');
     }
 }

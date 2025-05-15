@@ -11,20 +11,30 @@
     <!-- Overlay para menú móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div> 
     
-    <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
-        <div class="sidebar-title">CARFLOW</div>
-        <ul class="sidebar-menu">
-            <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i> Usuarios</a></li>
-            <li><a href="{{ route('admin.historial') }}" class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
-        </ul>
-    </div>
+        <div style="position: fixed;width: 220px;">
+            <div class="sidebar-title">CARFLOW</div>
+                <ul class="sidebar-menu">
+                    <li><a href="{{ route('gestor.vehiculos') }}"
+                            class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                            Vehículos</a></li>
+                    <li><a href="{{ route('gestor.chat.listar') }}"
+                    class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
+                        class="fas fa-comments"></i> Chats</a></li>
+                        <li><a href="{{ route('gestor.historial') }}"
+                    class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
+                        class="fas fa-history"></i>Historial</a></li>
+                </ul>
+            </div>            
+        </div>
 
     <!-- Contenido principal -->
     <div class="admin-main">
         <div class="admin-header">
-            <h1 class="admin-title">Historial de Reservas</h1>
-            <a href="{{ route('admin.index') }}" class="btn-purple">
+            <h1 class="admin-title">
+                Historial de Reservas @if(isset($lugarGestor)) de {{ $lugarGestor->nombre }} @endif
+            </h1>
+            <a href="{{ route('gestor.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -70,7 +80,7 @@
                 <input type="text" class="filter-control" placeholder="Usuario..." id="filterUsuario">
                 
                 <!-- Filtro por lugar -->
-                <select class="filter-control" id="filterLugar">
+                <select hidden class="filter-control" id="filterLugar">
                     <option value="">Todos los lugares</option>
                     @foreach($lugares as $lugar)
                         <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
@@ -103,7 +113,7 @@
             </div>
             <p>Cargando historial de reservas...</p>
         </div>
-        <div id="historial-table-container" style="display: none;" data-url="{{ route('admin.historial.data') }}">
+        <div id="historial-table-container" style="display: none;" data-url="{{ route('gestor.historial.data') }}">
             <table class="crud-table" id="historial-table">
                 <thead>
                     <tr>

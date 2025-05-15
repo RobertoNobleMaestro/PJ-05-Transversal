@@ -157,7 +157,7 @@ body {
 /* Botón de agregar usuario */
 .add-user-btn {
     padding: 10px 20px;
-    background-color: var(--primary-color);
+    background-color: var(--primary-darker);
     color: white;
     border: none;
     border-radius: 5px;
@@ -169,7 +169,7 @@ body {
 }
 
 .add-user-btn:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-darkest);
     color: white;
     transform: translateY(-2px);
 }
@@ -473,4 +473,28 @@ body {
 
 .mb-20 {
     margin-bottom: 20px;
+}
+
+.crud-table td {
+    vertical-align: middle;
+    text-align: center; 
+}
+
+.btn-agendar-mantenimiento {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-agendar-mantenimiento:hover {
+    background-color: var(--primary-dark);
+    color: white;
 }

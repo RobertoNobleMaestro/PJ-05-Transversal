@@ -21,7 +21,10 @@ use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
+use App\Http\Controllers\TallerController;
+use App\Http\Controllers\HistorialGestorController;
 use App\Http\Controllers\ChatIAController;
+use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
@@ -30,6 +33,8 @@ Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
 Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
+
+
 
 // Login con Google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
@@ -78,7 +83,10 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
     Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'detalle'])->name('vehiculo.detalle');
-    Route::post('/vehiculos/{vehiculo}/aÃ±adir-al-carrito', [VehiculoController::class, 'aÃ±adirAlCarrito']);
+    Route::post('/vehiculos/{vehiculo}/añadir-al-carrito', [VehiculoController::class, 'añadirAlCarrito']);
+
+    // Mostrar mapa 
+    Route::get('/vehiculo/detalle_vehiculo/{id}', [VehiculoController::class, 'showMapa']);
 
     // Valoraciones
     Route::get('/api/vehiculos/{id}/valoraciones', function ($id) {
@@ -110,7 +118,21 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
     });
+    Route::get('gestor/vehiculos/{id}/crudreservas', [VehiculoCrudController::class, 'getReservas']);
+    Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
+    Route::get('/gestor/historial/data', [HistorialGestorController::class, 'getHistorialData'])->name('gestor.historial.data');
 });
+
+
+// Rutas para el espacio privado de los chofers 
+Route::middleware(['auth', 'role:chofer'])->group(function(){
+    Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+    Route::get('/api/chofers/sede/{sede}', [ChoferController::class, 'getChoferesPorSede'])->name('api.chofers.sede');
+});
+
+// Ruta para la solicitud de transporte privado (cliente)
+Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
+
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
@@ -136,6 +158,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/{id_lugar}/edit', [LugarController::class, 'edit'])->name('admin.lugares.edit');
         Route::put('/{id_lugar}', [LugarController::class, 'update'])->name('admin.lugares.update');
         Route::delete('/{id_lugar}', [LugarController::class, 'destroy'])->name('admin.lugares.destroy');
+        
     });
 
     // Reservas
@@ -185,3 +208,15 @@ Route::get('/run-migrations-safe', function () {
         ], 500);
     }
 });
+
+
+
+Route::get('/taller', [TallerController::class, 'index'])->name('taller.index');
+Route::get('/taller/historial', [TallerController::class, 'historial'])->name('taller.historial');
+
+Route::get('/taller/mantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.mantenimientos');
+Route::get('/taller/mantenimiento/{id}', [TallerController::class, 'getDetalleMantenimiento'])->name('taller.mantenimiento.detalle');
+Route::put('/taller/mantenimiento/{id}/estado', [TallerController::class, 'actualizarEstadoMantenimiento'])->name('taller.mantenimiento.actualizar-estado');
+Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('taller.agendar');
+Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('taller.horarios');
+Route::get('/taller/getMantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.getMantenimientos');

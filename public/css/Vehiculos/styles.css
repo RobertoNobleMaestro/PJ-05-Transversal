@@ -392,3 +392,9 @@ a:hover{
     transform: scale(1.05);
     color: white !important;
   }
+
+#map {
+    height: 400px; 
+    width: 100%;
+    border-radius: 15px;
+}
