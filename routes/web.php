@@ -126,10 +126,11 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 // Rutas para el espacio privado de los chofers 
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+    Route::get('/api/chofers/sede/{sede}', [ChoferController::class, 'getChoferesPorSede'])->name('api.chofers.sede');
 });
 
 // Ruta para la solicitud de transporte privado (cliente)
-Route::get('/chofers', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
+Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
 
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
