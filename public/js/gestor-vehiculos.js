@@ -28,7 +28,6 @@ function applyFilters() {
     // Actualizar el objeto de filtros activos
     activeFilters = {
         tipo: tipo,
-        lugar: lugar,
         marca: marca,
         anio: anio,
         valoracion: valoracion
@@ -65,7 +64,6 @@ function clearFilters() {
  * se completa la petición y luego actualiza la tabla con los resultados.
  */
 function loadVehiculos() {
-    console.log('Cargando vehículos, página ' + currentPage + '...');
     // Mostrar el indicador de carga
     const loadingElement = document.getElementById('loading-vehiculos');
     const tableContainer = document.getElementById('vehiculos-table-container');
@@ -76,10 +74,7 @@ function loadVehiculos() {
     
     // Obtener el CSRF token para realizar peticiones seguras
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    
-    // Depuración - mostrar los filtros activos
-    console.log('Filtros activos:', activeFilters);
-    
+        
     // Construir la URL con los parámetros de filtro
     let url = new URL(dataUrl, window.location.origin);
     
@@ -87,15 +82,13 @@ function loadVehiculos() {
     // Asegurarnos de que los parámetros de filtro tengan los nombres correctos que espera el controlador
     if (activeFilters.marca) url.searchParams.append('marca', activeFilters.marca);
     if (activeFilters.tipo) url.searchParams.append('tipo', activeFilters.tipo);
-    if (activeFilters.lugar) url.searchParams.append('lugar', activeFilters.lugar);
     if (activeFilters.anio) url.searchParams.append('anio', activeFilters.anio);
     if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion);
     
     // Agregar parámetros de paginación
     url.searchParams.append('page', currentPage);
     url.searchParams.append('per_page', itemsPerPage);
-    
-    console.log('URL de la petición:', url.toString());
+
     
     // Realizar petición AJAX al servidor
     fetch(url, {
@@ -107,16 +100,12 @@ function loadVehiculos() {
         }
     })
     .then(response => {
-        console.log('Estado de la respuesta:', response.status);
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        // Depurar para ver qué datos recibimos
-        console.log('Datos recibidos de la API:', data);
-        
         // Ocultar el indicador de carga
         loadingElement.style.display = 'none';
         
@@ -128,7 +117,7 @@ function loadVehiculos() {
         tableBody.innerHTML = '';
         
         // Verificar si hay vehículos
-        if (data.vehiculos.length === 0) {
+        if (data.vehiculos === 0) {
             // Mostrar mensaje si no hay vehículos
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
@@ -203,19 +192,15 @@ function loadVehiculos() {
 }
 
 function verVehiculo(idVehiculo) {
-    // Mostrar el modal
     const reservasModal = new bootstrap.Modal(document.getElementById('reservasModal'));
     reservasModal.show();
 
-    // Limpiar la tabla de reservas
-    const reservasTableBody = document.getElementById('reservasTableBody');
-    reservasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando reservas...</td></tr>';
+    const reservastabla = document.getElementById('reservasTableBody');
+    reservastabla.innerHTML = '<tr><td colspan="5" class="text-center">Cargando reservas...</td></tr>';
 
-    // Obtener el token CSRF
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    // Realizar la petición AJAX para obtener las reservas
-    fetch(`/${idVehiculo}/reservas`, {
+    fetch(`/gestor/vehiculos/${idVehiculo}/crudreservas`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -230,17 +215,16 @@ function verVehiculo(idVehiculo) {
         return response.json();
     })
     .then(data => {
-        // Limpiar la tabla
-        reservasTableBody.innerHTML = '';
+        reservastabla.innerHTML = '';
 
-        // Verificar si hay reservas
-        if (data.reservas.length === 0) {
-            reservasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay reservas para este vehículo.</td></tr>';
+        const reservas = data.reservas;
+
+        if (!reservas || reservas.length === 0) {
+            reservastabla.innerHTML = '<tr><td colspan="5" class="text-center">No hay reservas para este vehículo.</td></tr>';
             return;
         }
 
-        // Llenar la tabla con las reservas
-        data.reservas.forEach(reserva => {
+        reservas.forEach(reserva => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${reserva.id_reserva}</td>
@@ -249,12 +233,12 @@ function verVehiculo(idVehiculo) {
                 <td>${reserva.cliente_nombre}</td>
                 <td>${reserva.estado}</td>
             `;
-            reservasTableBody.appendChild(row);
+            reservastabla.appendChild(row);
         });
     })
     .catch(error => {
         console.error('Error al cargar las reservas:', error);
-        reservasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Error al cargar las reservas.</td></tr>';
+        reservastabla.innerHTML = '<tr><td colspan="5" class="text-center">Error al cargar las reservas.</td></tr>';
     });
 }
 
@@ -401,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const vehiculosContainer = document.getElementById('vehiculos-table-container');
     if (vehiculosContainer) {
         dataUrl = vehiculosContainer.dataset.url;
-        console.log('URL de datos configurada:', dataUrl);
         
         // Cargar vehículos inicialmente
         loadVehiculos();

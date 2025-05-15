@@ -57,7 +57,12 @@
                         <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre }}</option>
                     @endforeach
                 </select>
-                
+                <select class="filter-control" id="filterLugar" hidden>
+                    <option value="">Todos los lugares</option>
+                    @foreach($lugares as $lugar)
+                        <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
+                    @endforeach
+                </select>
 
                 
                 <!-- Filtro por año -->

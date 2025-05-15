@@ -266,21 +266,23 @@ class VehiculoCrudController extends Controller
     }
     public function getReservas($id)
     {
-        $reservas = Reserva::where('id_vehiculo', $id)
-            ->with('cliente')
-            ->get()
-            ->map(function ($reserva) {
-                return [
-                    'id_reserva' => $reserva->id_reserva,
-                    'fecha_inicio' => $reserva->fecha_inicio,
-                    'fecha_fin' => $reserva->fecha_fin,
-                    'cliente_nombre' => $reserva->cliente->nombre,
-                    'estado' => $reserva->estado,
-                ];
-            });
+        $reservas = DB::table('vehiculos_reservas as vr')
+            ->join('reservas as r', 'vr.id_reservas', '=', 'r.id_reservas')
+            ->join('users as u', 'r.id_usuario', '=', 'u.id_usuario')
+            ->where('vr.id_vehiculos', $id)
+            ->select(
+                'r.id_reservas as id_reserva',
+                'vr.fecha_ini as fecha_inicio',
+                'vr.fecha_final as fecha_fin',
+                'u.nombre as cliente_nombre',
+                'r.estado'
+            )
+            ->get();
     
         return response()->json(['reservas' => $reservas]);
     }
+    
+    
     public function update(Request $request, $id_vehiculos)
     {
         $authCheck = $this->checkGestor($request);
