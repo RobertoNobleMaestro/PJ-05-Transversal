@@ -23,6 +23,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\TallerController;
 use App\Http\Controllers\ChatIAController;
+use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
@@ -115,6 +116,14 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
     });
 });
+
+
+// Rutas para el espacio privado de los gestores 
+Route::middleware(['auth', 'role:chofer'])->group(function(){
+    Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+});
+
+
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 

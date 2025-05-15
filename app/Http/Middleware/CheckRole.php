@@ -16,6 +16,7 @@ class CheckRole
             'admin' => 1,
             'cliente' => 2,
             'gestor' => 3,
+            'chofer' => 6,
         ];
 
         $userRoleId = $request->user()->id_roles;
@@ -31,6 +32,7 @@ class CheckRole
             1 => ['admin', 'gestor', 'cliente'],   // admin puede ver todo
             3 => ['gestor', 'cliente'],            // gestor solo gestor y cliente
             2 => ['cliente'],                      // cliente solo su parte
+            6 => ['chofer']                    // chofer solo su parte
         ];
 
         // Obtener los roles que puede acceder este usuario

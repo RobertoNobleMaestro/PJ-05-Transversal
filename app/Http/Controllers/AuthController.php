@@ -43,7 +43,8 @@ class AuthController extends Controller
                 // Obtener el usuario autenticado
                 $user = Auth::user();
 
-                $redirect = $user->id_roles === 1 ? '/admin' : ($user->id_roles === 3 ? '/gestor' : '/home');
+                $redirect = $user->id_roles === 1 ? '/admin' : ($user->id_roles === 3 ? '/gestor' : ($user->id_roles === 6 ? '/chofers' : '/home'));
+
 
                 // Devolver respuesta exitosa
                 return response()->json([
@@ -169,7 +170,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Muestra el formulario para solicitar un restablecimiento de contraseña
      */

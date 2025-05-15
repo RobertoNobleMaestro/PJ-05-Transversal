@@ -8,6 +8,7 @@ use App\Models\VehiculosReservas;
 use Illuminate\Http\Request;
 use App\Models\Lugar;
 use App\Models\Tipo;
+use App\Models\Parking;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 
@@ -423,7 +424,7 @@ class VehiculoController extends Controller
 
         // Cargamos explícitamente el parking para asegurarnos de tener la relación completa
         if ($vehiculo->parking_id) {
-            $parking = \App\Models\Parking::find($vehiculo->parking_id);
+            $parking = Parking::find($vehiculo->parking_id);
         } else {
             $parking = null;
         }
