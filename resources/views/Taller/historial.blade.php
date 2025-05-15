@@ -20,9 +20,9 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Historial de Mantenimientos</h1>
-            <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i>
-            </a>
+                <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
         </div>
 
         <div class="container mt-4">
@@ -51,7 +51,6 @@
                         <tr>
                             <th>Vehículo</th>
                             <th>Taller</th>
-                            <th>Fecha</th>
                             <th>Fecha Completa</th>
                             <th>Estado</th>
                         </tr>
@@ -92,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr>
                             <td>${m.vehiculo}</td>
                             <td>${m.taller}</td>
-                            <td>${m.fecha}</td>
                             <td>${m.fechaCompleta}</td>
                             <td><span class="badge bg-${m.colorEstado} text-capitalize">${m.estado}</span></td>
                         </tr>
