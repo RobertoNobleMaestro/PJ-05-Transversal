@@ -224,7 +224,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Gestión de Lugares</h1>
-            <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -237,7 +237,7 @@
                 <!-- Filtro por dirección -->
                 <input type="text" class="filter-control" placeholder="Buscar por dirección..." id="filterDireccion">
                 
-                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
+                <button id="clearFilters" class="btn-purple">Limpiar</button>
             </div>
             <a href="{{ route('admin.lugares.create') }}" class="add-user-btn">Añadir Lugar</a>
         </div>

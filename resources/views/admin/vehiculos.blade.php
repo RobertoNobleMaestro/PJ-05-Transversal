@@ -30,7 +30,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Gestión de Vehículos</h1>
-            <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -72,7 +72,7 @@
                     @endforeach
                 </select>
                 
-                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
+                <button id="clearFilters" class="btn-purple">Limpiar</button>
             </div>
             <a href="{{ route('admin.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
         </div>
