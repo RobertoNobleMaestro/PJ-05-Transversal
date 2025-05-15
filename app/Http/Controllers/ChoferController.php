@@ -74,4 +74,9 @@ class ChoferController extends Controller
             
         return response()->json($choferes);
     }
+
+    // Método para mostrar la vista del chat
+    public function showChatView(){
+        return view('chofers.chat');
+    }
 }
