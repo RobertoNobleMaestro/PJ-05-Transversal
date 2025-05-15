@@ -48,12 +48,13 @@
             <table class="crud-table" id="vehiculos-table">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Marca</th>
                         <th>Modelo</th>
                         <th>Kilometraje</th>
                         <th>Año</th>
-                        <th>Precio/Día</th>
-                        <th>Sede</th>
+                        <th>Precio por Día</th>
+                        <th>Lugar</th>
                         <th>Tipo</th>
                         <th>Parking</th>
                         <th>Últ. Mantenimiento</th>
@@ -64,11 +65,12 @@
                 <tbody>
                     @foreach($vehiculos as $vehiculo)
                         <tr>
+                            <td>{{ $vehiculo->id_vehiculos }}</td>
                             <td>{{ $vehiculo->marca }}</td>
                             <td>{{ $vehiculo->modelo }}</td>
-                            <td>{{ $vehiculo->kilometraje }} kms</td>
+                            <td>{{ $vehiculo->kilometraje }}</td>
                             <td>{{ $vehiculo->año }}</td>
-                            <td>{{ $vehiculo->precio_dia }} €</td>
+                            <td>{{ $vehiculo->precio_dia }}</td>
                             <td>{{ $vehiculo->lugar->nombre }}</td>
                             <td>{{ $vehiculo->tipo->nombre }}</td>
                             <td>{{ $vehiculo->parking->nombre }}</td>
@@ -99,14 +101,37 @@
             <div class="modal-body">
                 <form id="formAgendarMantenimiento">
                     <input type="hidden" id="vehiculo-id" name="vehiculo_id">
+                    
+                    <div class="mb-3">
+                        <label for="taller-id" class="form-label">Taller</label>
+                        <select class="form-select" id="taller-id" name="taller_id" required>
+                            <option value="">Seleccione un taller</option>
+                            @foreach($talleres as $taller)
+                                <option value="{{ $taller->id }}">{{ $taller->nombre }} - {{ $taller->direccion }}</option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback">Por favor seleccione un taller.</div>
+                    </div>
+                    
                     <div class="mb-3">
                         <label for="fecha-mantenimiento" class="form-label">Fecha de Mantenimiento</label>
-                        <input type="date" class="form-control" id="fecha-mantenimiento" name="fecha_mantenimiento" required>
+                        <input type="date" class="form-control" id="fecha-mantenimiento" name="fecha_mantenimiento" required min="{{ date('Y-m-d') }}">
+                        <div class="invalid-feedback">La fecha no puede ser anterior a hoy.</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label for="hora-mantenimiento" class="form-label">Hora de Mantenimiento</label>
-                        <input type="time" class="form-control" id="hora-mantenimiento" name="hora_mantenimiento" required>
+                        <select class="form-select" id="hora-mantenimiento" name="hora_mantenimiento" disabled required>
+                            <option value="">Seleccione primero un taller y fecha</option>
+                        </select>
+                        <div class="text-info mt-1" id="disponibilidad-info"></div>
                     </div>
+                    
+                    <div class="alert alert-warning" id="alerta-disponibilidad" style="display: none">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Recuerde que solo se pueden agendar 2 vehículos por hora en cada taller.
+                    </div>
+                    
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">Agendar</button>
                     </div>

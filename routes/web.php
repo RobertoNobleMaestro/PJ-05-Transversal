@@ -193,3 +193,4 @@ Route::get('/run-migrations-safe', function () {
 
 Route::get('/taller', [TallerController::class, 'index'])->name('taller.index');
 Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('taller.agendar');
+Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('taller.horarios');
