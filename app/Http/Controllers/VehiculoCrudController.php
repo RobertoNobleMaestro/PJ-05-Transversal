@@ -102,7 +102,8 @@ class VehiculoCrudController extends Controller
                 )
                 ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
                 ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
-                ->where('vehiculos.id_lugar', $parking->id_lugar); 
+                ->where('vehiculos.id_lugar', $parking->id_lugar)
+                ->withCount('reservas');
     
             // Aplicar filtros opcionales
             if ($request->filled('tipo')) {
@@ -125,7 +126,19 @@ class VehiculoCrudController extends Controller
                 ->paginate($perPage, ['*'], 'page', $page);
     
             return response()->json([
-                'vehiculos' => $paginated->items(),
+                'vehiculos' => collect($paginated->items())->map(function ($vehiculo) {
+                    return [
+                        'id_vehiculos' => $vehiculo->id_vehiculos,
+                        'marca' => $vehiculo->marca,
+                        'modelo' => $vehiculo->modelo,
+                        'año' => $vehiculo->año,
+                        'kilometraje' => $vehiculo->kilometraje,
+                        'precio' => $vehiculo->precio_dia,
+                        'nombre_lugar' => $vehiculo->nombre_lugar ?? 'No asignado',
+                        'nombre_tipo' => $vehiculo->nombre_tipo ?? 'No asignado',
+                        'tiene_reservas' => VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)->exists()
+                    ];
+                }),
                 'pagination' => [
                     'total' => $paginated->total(),
                     'per_page' => $paginated->perPage(),
@@ -135,7 +148,8 @@ class VehiculoCrudController extends Controller
                     'to' => $paginated->lastItem(),
                 ]
             ]);
-    
+            
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

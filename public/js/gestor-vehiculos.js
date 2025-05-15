@@ -156,7 +156,10 @@ function loadVehiculos() {
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
-                        <button class="btn btn-sm btn-success" title="Ver" onclick="verVehiculo(${vehiculo.id_vehiculos})">
+                        <button class="btn btn-sm btn-success" 
+                                title="${vehiculo.tiene_reservas ? 'Ver reservas' : 'Sin reservas'}" 
+                                onclick="verVehiculo(${vehiculo.id_vehiculos})" 
+                                ${vehiculo.tiene_reservas ? '' : 'disabled'}>
                             <i class="fas fa-eye"></i>
                         </button>
                         <a href="/gestor/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
