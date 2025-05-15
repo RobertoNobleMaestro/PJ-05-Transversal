@@ -35,7 +35,7 @@
                     @if(auth()->check())
                         <span>Bienvenido, {{ auth()->user()->nombre }}</span>
                         <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
-                            Cerrar Sesión</a>
+                            </a>
                     @endif
                 </div>
             </div>

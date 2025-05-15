@@ -44,7 +44,7 @@
         </ul>
         <div class="btn-group mt-3" role="group" aria-label="Botones de acción">
           <a href="#alquiler" class="btn btn-light font-weight-bold">Encuentra ya tu vehículo a reservar!</a>
-          <a href="" class="btn btn-light font-weight-bold">Solicita ya tu transporte privado!</a>
+          <a href="{{route('chofers.cliente-pide')}}" class="btn btn-light font-weight-bold">Solicita ya tu transporte privado!</a>
         </div>
 
 
