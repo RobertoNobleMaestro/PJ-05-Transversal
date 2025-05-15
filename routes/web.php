@@ -34,6 +34,8 @@ Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado
 Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
 
+
+
 // Login con Google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
@@ -122,11 +124,14 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 });
 
 
-// Rutas para el espacio privado de los gestores 
+// Rutas para el espacio privado de los chofers 
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+    Route::get('/api/chofers/sede/{sede}', [ChoferController::class, 'getChoferesPorSede'])->name('api.chofers.sede');
 });
 
+// Ruta para la solicitud de transporte privado (cliente)
+Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
 
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
