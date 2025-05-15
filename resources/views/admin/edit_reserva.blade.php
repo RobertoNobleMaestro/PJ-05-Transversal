@@ -101,7 +101,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Editar Reserva #{{ $reserva->id_reservas }}</h1>
-            <a href="{{ route('admin.reservas.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.reservas.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
         </div>

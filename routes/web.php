@@ -21,6 +21,7 @@ use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
+use App\Http\Controllers\HistorialGestorController;
 use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
@@ -31,6 +32,8 @@ Route::get('/home-stats', [HomeController::class, 'stats'])->name('home.stats');
 Route::get('/vehiculos', [HomeController::class, 'listado'])->name('home.listado');
 Route::get('/vehiculos/año', [HomeController::class, 'obtenerAño']);
 Route::get('/vehiculos/ciudades', [HomeController::class, 'obtenerCiudades']);
+
+
 
 // Login con Google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
@@ -113,15 +116,20 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::get('/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('gestor.vehiculos.edit');
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
+        Route::get('/{id}/reservas', [VehiculoController::class, 'getReservas']);
     });
+    Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
+    Route::get('/gestor/historial/data', [HistorialGestorController::class, 'getHistorialData'])->name('gestor.historial.data');
 });
 
 
-// Rutas para el espacio privado de los gestores 
+// Rutas para el espacio privado de los chofers 
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
 });
 
+// Ruta para la solicitud de transporte privado (cliente)
+Route::get('/chofers', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
 
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -148,6 +156,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/{id_lugar}/edit', [LugarController::class, 'edit'])->name('admin.lugares.edit');
         Route::put('/{id_lugar}', [LugarController::class, 'update'])->name('admin.lugares.update');
         Route::delete('/{id_lugar}', [LugarController::class, 'destroy'])->name('admin.lugares.destroy');
+        
     });
 
     // Reservas
