@@ -298,6 +298,62 @@ class TallerController extends Controller
             ], 500);
         }
     }
+    public function destroy($id)
+    {
+        $mantenimiento = Mantenimiento::find($id);
+        if (!$mantenimiento) {
+            return response()->json(['success' => false, 'message' => 'Mantenimiento no encontrado.']);
+        }
+
+        $mantenimiento->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function edit($id)
+    {
+        $mantenimiento = Mantenimiento::findOrFail($id);
+        $vehiculos = Vehiculo::all();
+        $talleres = Taller::all();
+
+        return view('taller.edit', compact('mantenimiento', 'vehiculos', 'talleres'));
+    }
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'vehiculo_id' => 'required|exists:vehiculos,id_vehiculos',
+        'taller_id' => 'required|exists:talleres,id',
+        'fecha_programada' => 'required|date',
+        'hora_programada' => 'required',
+        'estado' => 'required|in:pendiente,completado,cancelado',
+    ]);
+
+    $mantenimiento = Mantenimiento::findOrFail($id);
+    $mantenimiento->update($request->only([
+        'vehiculo_id',
+        'taller_id',
+        'fecha_programada',
+        'hora_programada',
+        'estado'
+    ]));
+
+    if ($request->estado === 'completado') {
+        $vehiculo = $mantenimiento->vehiculo;
+        if ($vehiculo) {
+            $vehiculo->ultima_fecha_mantenimiento = $request->fecha_programada;
+
+            // Sumar 6 meses a ultima_fecha_mantenimiento para proxima_fecha_mantenimiento
+            $vehiculo->proxima_fecha_mantenimiento = Carbon::parse($request->fecha_programada)->addMonths(6);
+
+            $vehiculo->save();
+        }
+    }
+
+    return redirect()->route('taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+}
+
+
+
 
     // Método para mostrar la página de historial de mantenimientos
     public function historial()

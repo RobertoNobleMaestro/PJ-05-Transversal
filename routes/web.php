@@ -221,3 +221,7 @@ Route::put('/taller/mantenimiento/{id}/estado', [TallerController::class, 'actua
 Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('taller.agendar');
 Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('taller.horarios');
 Route::get('/taller/getMantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.getMantenimientos');
+
+Route::get('/taller/{id}/edit', [TallerController::class, 'edit'])->name('taller.edit');
+Route::put('/taller/{id}', [TallerController::class, 'update'])->name('taller.update');
+Route::delete('/taller/{id}', [TallerController::class, 'destroy'])->name('taller.destroy');

@@ -13,20 +13,18 @@
                 <i class="fas fa-tools"></i> Gestión del Taller</a></li>
             <li><a href="{{ route('taller.historial') }}" class="{{ request()->routeIs('taller.historial*') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Historial Mantenimiento</a></li>
-
         </ul>
     </div>
 
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Historial de Mantenimientos</h1>
-                <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
+            <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
+                <i class="fas fa-arrow-left"></i>
+            </a>
         </div>
 
         <div class="container mt-4">
-
             <div class="mb-3">
                 <label for="filtroEstado" class="form-label">Filtrar por Estado:</label>
                 <select id="filtroEstado" class="form-select" style="max-width: 300px;">
@@ -40,8 +38,8 @@
             <style>
                 #tablaMantenimientos th,
                 #tablaMantenimientos td {
-                    text-align: center;       /* Centrar horizontalmente */
-                    vertical-align: middle;   /* Centrar verticalmente */
+                    text-align: center;
+                    vertical-align: middle;
                 }
             </style>
 
@@ -53,10 +51,11 @@
                             <th>Taller</th>
                             <th>Fecha Completa</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Aquí se cargarán los datos dinámicamente -->
+                        <!-- Datos cargados dinámicamente -->
                     </tbody>
                 </table>
             </div>
@@ -93,6 +92,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>${m.taller}</td>
                             <td>${m.fechaCompleta}</td>
                             <td><span class="badge bg-${m.colorEstado} text-capitalize">${m.estado}</span></td>
+                            <td>
+                                <a href="/taller/${m.id}/edit" class="btn-outline-purple" title="Editar" >
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn-outline-purple" onclick="eliminarMantenimiento(${m.id})" title="Eliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -112,5 +119,32 @@ document.addEventListener('DOMContentLoaded', function() {
         cargarMantenimientos(filtroEstado.value);
     });
 });
+
+// Función para eliminar mantenimiento
+function eliminarMantenimiento(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este mantenimiento?')) return;
+
+    fetch(`/taller/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Mantenimiento eliminado correctamente.');
+            document.getElementById('filtroEstado').dispatchEvent(new Event('change'));
+        } else {
+            alert('Error al eliminar el mantenimiento.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al eliminar:', error);
+        alert('Ocurrió un error.');
+    });
+}
 </script>
 @endsection
+
