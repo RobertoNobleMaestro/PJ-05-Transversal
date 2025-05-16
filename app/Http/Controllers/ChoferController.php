@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Grupo;
 
 class ChoferController extends Controller
 {
@@ -16,7 +17,7 @@ class ChoferController extends Controller
     {
         $partes = explode('@', $email);
         $username = $partes[0]; // chofer.barcelona1
-        
+
         $partesSede = explode('.', $username);
         if (count($partesSede) >= 2) {
             $sedeConNumero = $partesSede[1]; // barcelona1
@@ -27,10 +28,10 @@ class ChoferController extends Controller
                 return ucfirst($matches[1]); // Barcelona
             }
         }
-        
+
         return 'Central'; // Valor por defecto si no se puede determinar
     }
-    
+
     /**
      * Muestra el dashboard específico para la sede del chofer logueado
      */
@@ -38,15 +39,15 @@ class ChoferController extends Controller
     {
         $usuarioActual = Auth::user();
         $sede = $this->obtenerSedeDeEmail($usuarioActual->email);
-        
+
         // Obtener todos los choferes de la misma sede
         $choferesDeLaSede = User::where('id_roles', 6) // ID 6 = rol de chofer
             ->where(function ($query) use ($sede) {
                 $query->where('email', 'LIKE', "chofer.{$sede}%@carflow.com")
-                      ->orWhere('email', 'LIKE', "chofer.{$sede}%@%");
+                    ->orWhere('email', 'LIKE', "chofer.{$sede}%@%");
             })
             ->get();
-        
+
         return view('chofers.dashboard', [
             'sede' => $sede,
             'choferesCompaneros' => $choferesDeLaSede
@@ -56,10 +57,11 @@ class ChoferController extends Controller
     /**
      * Muestra la vista para que los clientes soliciten un chofer
      */
-    public function pideCoche(){
+    public function pideCoche()
+    {
         return view('chofers.cliente-pide');
     }
-    
+
     /**
      * API para obtener los choferes de una sede específica
      */
@@ -68,15 +70,62 @@ class ChoferController extends Controller
         $choferes = User::where('id_roles', 6) // ID 6 = rol de chofer
             ->where(function ($query) use ($sede) {
                 $query->where('email', 'LIKE', "chofer.{$sede}%@carflow.com")
-                      ->orWhere('email', 'LIKE', "chofer.{$sede}%@%");
+                    ->orWhere('email', 'LIKE', "chofer.{$sede}%@%");
             })
             ->get(['id_usuario', 'nombre', 'email', 'telefono', 'foto_perfil']);
-            
+
         return response()->json($choferes);
     }
 
     // Método para mostrar la vista del chat
-    public function showChatView(){
-        return view('chofers.chat');
+    public function showChatView()
+    {
+        $usuarioActual = Auth::user();
+        $sede = $this->obtenerSedeDeEmail($usuarioActual->email);
+
+        // Obtener choferes compañeros
+        $choferesDeLaSede = User::where('id_roles', 6)
+            ->where(function ($query) use ($sede) {
+                $query->where('email', 'LIKE', "chofer.{$sede}%@carflow.com")
+                    ->orWhere('email', 'LIKE', "chofer.{$sede}%@%");
+            })
+            ->get();
+
+        // Obtener los grupos donde el usuario actual está asignado
+        $grupos = Grupo::whereHas('usuarios', function ($query) use ($usuarioActual) {
+            $query->where('id_usuario', $usuarioActual->id_usuario);
+        })->get();
+
+        return view('chofers.chat', [
+            'choferesCompaneros' => $choferesDeLaSede,
+            'grupos' => $grupos,
+        ]);
+    }
+
+
+
+    public function storeGrupo(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'imagen_grupo' => 'nullable|image|max:2048',
+            'usuarios' => 'nullable|array'
+        ]);
+
+        $grupo = new Grupo();
+        $grupo->nombre = $request->nombre;
+
+        if ($request->hasFile('imagen_grupo')) {
+            $grupo->imagen_grupo = $request->file('imagen_grupo')->store('grupos', 'public');
+        }
+
+        $grupo->save();
+
+        // Asociar usuarios al grupo (si se seleccionaron)
+        if ($request->has('usuarios')) {
+            User::whereIn('id_usuario', $request->usuarios)->update(['grupo_id' => $grupo->id]);
+        }
+
+        return redirect()->back()->with('success', 'Grupo creado correctamente.');
     }
 }

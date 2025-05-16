@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -62,6 +63,11 @@ class User extends Authenticatable
     {
         return $this->role && $this->role->nombre_rol === $roleName;
     }
+
+    public function grupo()
+{
+    return $this->belongsTo(Grupo::class, 'grupo_id', 'id');
+}
     
     /**
      * Envía la notificación de restablecimiento de contraseña al usuario.

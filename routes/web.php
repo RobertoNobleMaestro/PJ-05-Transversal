@@ -129,6 +129,8 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
     Route::get('/api/chofers/sede/{sede}', [ChoferController::class, 'getChoferesPorSede'])->name('api.chofers.sede');
     Route::get('chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
+    Route::post('/grupos', [ChoferController::class, 'storeGrupo'])->name('grupos.store');
+
 });
 
 // Ruta para la solicitud de transporte privado (cliente)

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('id_usuario');   
+            $table->id('id_usuario');
             $table->string('nombre');
             $table->string('email')->unique();
             $table->string('dni')->unique();
@@ -24,6 +24,11 @@ return new class extends Migration
             $table->enum('licencia_conducir', ['AM', 'A1', 'A2', 'A', 'B', 'B+E', 'C1', 'C1+E', 'C', 'C+E', 'D1', 'D1+E', 'D', 'D+E']);
             $table->unsignedBigInteger('id_roles');
             $table->foreign('id_roles')->references('id_roles')->on('roles');
+
+            $table->unsignedBigInteger('grupo_id')->nullable();
+            $table->foreign('grupo_id')->references('id')->on('grupos')->onDelete('set null');
+
+
             $table->timestamps();
         });
 
