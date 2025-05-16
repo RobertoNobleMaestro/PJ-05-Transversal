@@ -10,25 +10,38 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Estilos personalizados -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #9F17BD;
             --secondary-color: #7952b3;
+            --accent-color: #6610f2;
+            --light-purple: #e6d9f2;
             --light-color: #f8f9fa;
             --dark-color: #212529;
             --sidebar-width: 250px;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
         }
         
         body {
             min-height: 100vh;
-            background-color: #f5f5f5;
+            background-color: #f8f9fc;
+            font-family: 'Poppins', sans-serif;
+            color: #444;
+            line-height: 1.6;
         }
         
         /* Barra de navegación */
         .navbar {
-            background-color: var(--primary-color);
-            padding: 0.5rem 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 0.8rem 1rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
         .navbar-brand {
@@ -74,94 +87,209 @@
         /* Tarjetas */
         .card {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
             overflow: hidden;
+            margin-bottom: 1.5rem;
+            border-top: 3px solid transparent;
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px rgba(159, 23, 189, 0.15);
+            border-top: 3px solid var(--primary-color);
         }
         
         .card-header {
-            background-color: var(--primary-color);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: white;
-            font-weight: 500;
+            font-weight: 600;
             border-bottom: 0;
+            padding: 1rem 1.25rem;
+            letter-spacing: 0.5px;
         }
         
         /* Botones personalizados */
+        .btn {
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-transform: none;
+            letter-spacing: 0.3px;
+        }
+        
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            position: relative;
+            overflow: hidden;
         }
         
         .btn-primary:hover, .btn-primary:focus {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         
         .btn-outline-primary {
             color: var(--primary-color);
-            border-color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            background-color: transparent;
+            font-weight: 500;
         }
         
         .btn-outline-primary:hover {
             background-color: var(--primary-color);
             color: white;
+            box-shadow: 0 4px 10px rgba(159, 23, 189, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: linear-gradient(45deg, var(--info-color), #36b9cc);
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, var(--success-color), #2dce89);
+            border: none;
         }
         
         /* Tablas */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+            background-color: transparent;
+        }
+        
         .table thead th {
-            background-color: rgba(159, 23, 189, 0.1);
+            background-color: rgba(159, 23, 189, 0.05);
             border-bottom: 2px solid var(--primary-color);
-            color: var(--dark-color);
+            color: var(--primary-color);
             font-weight: 600;
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
         }
         
         .table-hover tbody tr:hover {
             background-color: rgba(159, 23, 189, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            border-top: 1px solid #e9ecef;
+            color: #555;
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.01);
         }
         
         /* Formularios */
+        .form-control {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(159, 23, 189, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(159, 23, 189, 0.15);
+            background-color: #fff;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #444;
+        }
+        
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(159, 23, 189, 0.15);
         }
         
         /* Filtros */
         .filter-section {
             background-color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
             margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .filter-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         /* Stats cards */
         .stat-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
             height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 180px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
         }
         
         .stat-card-primary {
-            background-color: var(--primary-color);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         }
         
         .stat-card-success {
-            background-color: #28a745;
-            color: white;
+            background: linear-gradient(135deg, #28a745, #20c997);
         }
         
         .stat-card-info {
-            background-color: #17a2b8;
-            color: white;
+            background: linear-gradient(135deg, #17a2b8, #0dcaf0);
+        }
+        
+        .stat-card-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: #212529;
+        }
+        
+        .stat-card-danger {
+            background: linear-gradient(135deg, #dc3545, #e74a3b);
         }
         
         .stat-value {
@@ -203,11 +331,24 @@
                             <i class="fas fa-users me-1"></i> Asalariados
                         </a>
                     </li>
+                    <!-- Secciones financieras comentadas (versión solo con Asalariados) -->
+                    {{-- 
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('admin-financiero/resumen*') ? 'active' : '' }}" href="{{ route('admin.financiero.resumen') }}">
-                            <i class="fas fa-chart-bar me-1"></i> Resumen
+                        <a class="nav-link {{ request()->is('financial/dashboard*') ? 'active' : '' }}" href="{{ route('financial.dashboard') }}">
+                            <i class="fas fa-chart-bar me-1"></i> Dashboard Financiero
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('financial/vehiculos*') ? 'active' : '' }}" href="{{ route('financial.vehiculos') }}">
+                            <i class="fas fa-car me-1"></i> Rentabilidad Vehículos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('financial/proyecciones*') ? 'active' : '' }}" href="{{ route('financial.proyecciones') }}">
+                            <i class="fas fa-chart-line me-1"></i> Proyecciones
+                        </a>
+                    </li>
+                    --}}
                 </ul>
                 
                 <div class="d-flex align-items-center">

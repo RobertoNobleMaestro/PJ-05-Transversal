@@ -24,6 +24,7 @@ use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\AdminFinancieroController;
 use App\Http\Controllers\AsalariadoController;
+use App\Http\Controllers\FinancialReportController;
 use Illuminate\Support\Facades\Schema;
 Route::redirect('/', '/home');
 
@@ -119,19 +120,20 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 
 // Rutas para el Administrador Financiero
 Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
-    Route::get('/admin-financiero', [AdminFinancieroController::class, 'index'])->name('admin.financiero.index');
-    Route::get('/admin-financiero/resumen', [AdminFinancieroController::class, 'resumen'])->name('admin.financiero.resumen');
+    // Redirecciones desde rutas antiguas a nuevo sistema
+    Route::redirect('/admin-financiero', '/asalariados')->name('admin.financiero.index');
+    Route::redirect('/admin-financiero/resumen', '/asalariados')->name('admin.financiero.resumen');
     
     // Rutas para la gestión de asalariados
     Route::get('/asalariados', [AsalariadoController::class, 'index'])->name('asalariados.index');
-    Route::get('/asalariados/{id}', [AsalariadoController::class, 'show'])->name('asalariados.show');
-    Route::get('/asalariados/{id}/edit', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
-    Route::put('/asalariados/{id}', [AsalariadoController::class, 'update'])->name('asalariados.update');
+    Route::get('/asalariados/{id}/editar', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
+    Route::post('/asalariados/{id}/update', [AsalariadoController::class, 'update'])->name('asalariados.update');
+    Route::get('/asalariados/{id}/detalle', [AsalariadoController::class, 'show'])->name('asalariados.show');
     
-    // Rutas antiguas - mantener por compatibilidad
-    Route::get('/admin-financiero/asalariados/{id}', [AdminFinancieroController::class, 'show'])->name('admin.financiero.show');
-    Route::get('/admin-financiero/asalariados/{id}/edit', [AdminFinancieroController::class, 'edit'])->name('admin.financiero.edit');
-    Route::put('/admin-financiero/asalariados/{id}', [AdminFinancieroController::class, 'update'])->name('admin.financiero.update');
+    // Nuevo sistema de reportes financieros - COMENTADO
+    // Route::get('/financial/dashboard', [FinancialReportController::class, 'dashboard'])->name('financial.dashboard');
+    // Route::get('/financial/vehiculos', [FinancialReportController::class, 'vehiculosRentabilidad'])->name('financial.vehiculos');
+    // Route::get('/financial/proyecciones', [FinancialReportController::class, 'proyecciones'])->name('financial.proyecciones');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
