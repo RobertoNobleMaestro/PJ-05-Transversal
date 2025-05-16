@@ -99,6 +99,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <button class="btn-outline-purple" onclick="eliminarMantenimiento(${m.id})" title="Eliminar">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
+                                <a href="/taller/factura/${m.id}" class="btn-outline-purple" title="Descargar factura" target="_blank">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
                             </td>
                         </tr>
                     `;

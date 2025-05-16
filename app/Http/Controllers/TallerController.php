@@ -7,7 +7,7 @@ use App\Models\Taller;
 use App\Models\Mantenimiento;
 use Carbon\Carbon;
 use DB;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TallerController extends Controller
 {
@@ -198,7 +198,7 @@ class TallerController extends Controller
                     'hora' => $mantenimiento->hora_programada,
                     'estado' => $mantenimiento->estado,
                     'colorEstado' => $colorEstado,
-                    'fechaCompleta' => $fechaHora->format('d/m/Y H:i'),
+                    'fechaCompleta' => $fechaHora->format('d/m/Y H:i:s'),
                     'esPasado' => $fechaHora->isPast(),
                     'id_vehiculo' => $mantenimiento->vehiculo_id
                 ];
@@ -359,5 +359,30 @@ public function update(Request $request, $id)
     public function historial()
     {
         return view('Taller.historial');
+    }
+
+    public function descargarFactura($id)
+    {
+        $mantenimiento = \App\Models\Mantenimiento::with(['vehiculo.tipo'])->findOrFail($id);
+        $vehiculo = $mantenimiento->vehiculo;
+    
+        // Ejemplo de precios por tipo
+        $precios = [
+            'Coche' => 120,
+            'Moto' => 60,
+            'Furgoneta' => 150,
+        ];
+        $precio = $precios[$vehiculo->tipo->nombre ?? 'Coche'] ?? 100;
+    
+        $data = [
+            'mantenimiento' => $mantenimiento,
+            'vehiculo' => $vehiculo,
+            'precio' => $precio,
+            'fecha_hora' => $mantenimiento->fecha_programada->format('d/m/Y') . ' ' . $mantenimiento->hora_programada,
+            'imagen' => $vehiculo->imagen // Ajusta según tu sistema
+        ];
+    
+        $pdf = Pdf::loadView('Taller.factura', $data);
+        return $pdf->download('factura-mantenimiento-'.$vehiculo->matricula.'.pdf');
     }
 }
