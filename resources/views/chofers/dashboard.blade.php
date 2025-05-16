@@ -71,7 +71,7 @@
                             </div>
                             <h3>Chat de Chofers</h3>
                             <p>Comunicate con otros chofers y gestiona los servicios del día a día.</p>
-                            <a href="#" class="btn-admin-card">
+                            <a href="{{route('chofers.chat')}}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
