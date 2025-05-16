@@ -36,12 +36,12 @@
         .izq_grupos h3 a {
             margin-left: 10px;
             font-size: 1rem;
-            color: #4A90E2;
+            color: #8c4ae2;
             text-decoration: none;
         }
 
         .izq_grupos h3 a:hover {
-            color: #357ABD;
+            color: #551475;
         }
 
         /* Columna central - conversación */
@@ -75,6 +75,12 @@
             font-size: 1.2rem;
             cursor: pointer;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .central-convers {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
     </style>
     <!-- Se han movido los estilos CSS a un archivo externo -->
@@ -120,16 +126,20 @@
                         @forelse ($grupos as $grupo)
                             <li class="list-group-item d-flex align-items-center">
                                 @if($grupo->imagen_grupo)
-                                    <img src="{{ asset('img/' . $grupo->imagen_grupo) }}" alt="Imagen Grupo" width="30"
-                                        height="30" class="me-2 rounded-circle">
+                                    <img src="{{ asset('img/' . $grupo->imagen_grupo) }}" alt="Imagen Grupo" width="30" height="30"
+                                        class="me-2 rounded-circle">
                                 @else
                                     <i class="fa-solid fa-users me-2"></i>
                                 @endif
-                                {{ $grupo->nombre }}
+                                <a href="#" class="text-decoration-none text-dark grupo-link" data-nombre="{{ $grupo->nombre }}"
+                                    data-participantes="{{ $grupo->usuarios->count() }}">
+                                    {{ $grupo->nombre }} <i class="fa-solid fa-chevron-right ms-1"></i>
+                                </a>
                             </li>
                         @empty
                             <li class="list-group-item">No perteneces a ningún grupo aún.</li>
                         @endforelse
+
                     </ul>
 
 
@@ -137,7 +147,9 @@
 
                 <!-- div central donde conversar -->
                 <div class="central-convers">
+                    <div id="contenidoGrupo"></div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -156,8 +168,7 @@
                             <label for="nombre" class="form-label">Nombre del grupo</label>
                             <input type="text" name="nombre" class="form-control" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Seleccionar usuarios del grupo</label>
+                        <div class="mb-3"> <label class="form-label">Seleccionar usuarios del grupo</label>
                             <div class="form-check">
                                 @foreach ($choferesCompaneros as $chofer)
                                     <div>
