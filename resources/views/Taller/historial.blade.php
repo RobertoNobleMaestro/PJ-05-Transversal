@@ -26,13 +26,20 @@
 
         <div class="container mt-4">
             <div class="mb-3">
-                <label for="filtroEstado" class="form-label">Filtrar por Estado:</label>
-                <select id="filtroEstado" class="form-select" style="max-width: 300px;">
-                    <option value="todos" selected>Todos</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="completado">Completado</option>
-                    <option value="cancelado">Cancelado</option>
-                </select>
+                <div id="filtros-estado" class="btn-group" role="group" aria-label="Filtros de estado">
+                    <button type="button" class="btn btn-outline-purple active" data-estado="todos">Todos</button>
+                    <button type="button" class="btn btn-outline-purple" data-estado="pendiente">Pendiente</button>
+                    <button type="button" class="btn btn-outline-purple" data-estado="completado">Completado</button>
+                    <button type="button" class="btn btn-outline-purple" data-estado="cancelado">Cancelado</button>
+                </div>
+                <style>
+                    #filtros-estado .btn.active,
+                    #filtros-estado .btn:active {
+                        background-color: #9F17BD;
+                        color: #fff;
+                        border-color: #9F17BD;
+                    }
+                </style>
             </div>
 
             <style>
@@ -68,7 +75,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const tablaBody = document.querySelector('#tablaMantenimientos tbody');
-    const filtroEstado = document.getElementById('filtroEstado');
+    const filtrosEstado = document.getElementById('filtros-estado');
+    let estadoSeleccionado = 'todos';
 
     function cargarMantenimientos(estado = 'todos') {
         fetch(`/taller/getMantenimientos?estado=${estado}`, {
@@ -118,8 +126,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     cargarMantenimientos();
 
-    filtroEstado.addEventListener('change', () => {
-        cargarMantenimientos(filtroEstado.value);
+    filtrosEstado.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Marcar botón activo
+            filtrosEstado.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            // Filtrar
+            estadoSeleccionado = this.getAttribute('data-estado');
+            cargarMantenimientos(estadoSeleccionado);
+        });
     });
 });
 
