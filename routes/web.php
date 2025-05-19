@@ -118,18 +118,20 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     });
 });
 
-// Rutas para el Administrador Financiero
+// Rutas para el administrador financiero
 Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
-    // Redirecciones desde rutas antiguas a nuevo sistema
-    Route::redirect('/admin-financiero', '/asalariados')->name('admin.financiero.index');
-    Route::redirect('/admin-financiero/resumen', '/asalariados')->name('admin.financiero.resumen');
+    Route::get('/admin-financiero', [AsalariadoController::class, 'index'])->name('admin.financiero');
+    Route::get('/admin-financiero/resumen', [AsalariadoController::class, 'index'])->name('admin.financiero.resumen');
     
     // Rutas para la gestión de asalariados
-    Route::get('/asalariados', [AsalariadoController::class, 'index'])->name('asalariados.index');
-    Route::get('/asalariados/{id}/editar', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
-    Route::post('/asalariados/{id}/update', [AsalariadoController::class, 'update'])->name('asalariados.update');
-    Route::get('/asalariados/{id}/detalle', [AsalariadoController::class, 'show'])->name('asalariados.show');
-    
+    Route::prefix('asalariados')->group(function () {
+        Route::get('/', [AsalariadoController::class, 'index'])->name('asalariados.index');
+        Route::get('/data', [AsalariadoController::class, 'getAsalariados'])->name('asalariados.data');
+        Route::get('/{id}/editar', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
+        Route::match(['post', 'put'], '/{id}/update', [AsalariadoController::class, 'update'])->name('asalariados.update');
+        Route::post('/{id}/update-ajax', [AsalariadoController::class, 'updateAjax'])->name('asalariados.update.ajax');
+        Route::get('/{id}/detalle', [AsalariadoController::class, 'show'])->name('asalariados.show');
+    });
     // Nuevo sistema de reportes financieros - COMENTADO
     // Route::get('/financial/dashboard', [FinancialReportController::class, 'dashboard'])->name('financial.dashboard');
     // Route::get('/financial/vehiculos', [FinancialReportController::class, 'vehiculosRentabilidad'])->name('financial.vehiculos');

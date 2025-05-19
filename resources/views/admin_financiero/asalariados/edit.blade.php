@@ -69,9 +69,10 @@
                     <h5 class="mb-0">Datos salariales y asignación</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('asalariados.update', $asalariado->id) }}" class="p-3">
+                    <div id="ajaxResponseMessages"></div>
+                    <form id="editAsalariadoForm" method="POST" action="javascript:void(0)" class="p-3">
                         @csrf
-                        @method('PUT')
+                        <input type="hidden" name="asalariado_id" value="{{ $asalariado->id }}">
 
                         <div class="row mb-3">
                             <label for="salario" class="col-md-4 col-form-label">Salario mensual (€)</label>
@@ -126,8 +127,8 @@
                                 <a href="{{ route('asalariados.index') }}" class="btn btn-outline-secondary me-2">
                                     Cancelar
                                 </a>
-                                <button type="submit" class="btn text-white" style="background-color: #9F17BD;">
-                                    <i class="fas fa-save me-1"></i> Guardar cambios
+                                <button type="submit" id="saveAsalariadoBtn" class="btn text-white" style="background-color: #9F17BD;">
+                                    <i class="fas fa-save me-1"></i> <span id="btnText">Guardar cambios</span>
                                 </button>
                             </div>
                         </div>
@@ -145,5 +146,150 @@
         border-color: #9F17BD;
         box-shadow: 0 0 0 0.25rem rgba(159, 23, 189, 0.25);
     }
+    .alert-ajax {
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        display: none;
+    }
+    .alert-ajax-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .alert-ajax-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .is-loading {
+        position: relative;
+        color: transparent !important;
+    }
+    .is-loading::after {
+        content: '';
+        position: absolute;
+        width: 1em;
+        height: 1em;
+        border: 2px solid #fff;
+        border-left-color: transparent;
+        border-radius: 50%;
+        top: calc(50% - 0.5em);
+        left: calc(50% - 0.5em);
+        animation: spinAround 0.5s infinite linear;
+    }
+    @keyframes spinAround {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('editAsalariadoForm');
+        const saveBtn = document.getElementById('saveAsalariadoBtn');
+        const btnText = document.getElementById('btnText');
+        const responseMessages = document.getElementById('ajaxResponseMessages');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostrar estado de carga
+            saveBtn.classList.add('is-loading');
+            btnText.textContent = 'Guardando...';
+            
+            // Obtener datos del formulario
+            const asalariadoId = form.querySelector('input[name="asalariado_id"]').value;
+            const formData = new FormData(form);
+            
+            // Realizar petición AJAX
+            fetch(`/asalariados/${asalariadoId}/update-ajax`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Eliminar estado de carga
+                saveBtn.classList.remove('is-loading');
+                btnText.textContent = 'Guardar cambios';
+                
+                // Limpiar mensajes previos
+                responseMessages.innerHTML = '';
+                
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.innerHTML = `
+                        ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    responseMessages.appendChild(successAlert);
+                    
+                    // Actualizar datos en la vista sin recargar
+                    // Podríamos actualizar elementos visuales si fuera necesario
+                } else {
+                    // Mostrar mensaje de error
+                    const errorAlert = document.createElement('div');
+                    errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+                    errorAlert.innerHTML = `
+                        ${data.message || 'Ha ocurrido un error'}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    responseMessages.appendChild(errorAlert);
+                    
+                    // Si hay errores de validación, mostrarlos
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const input = form.querySelector(`[name="${field}"]`);
+                            if (input) {
+                                input.classList.add('is-invalid');
+                                
+                                // Buscar o crear el elemento de feedback
+                                let feedback = input.parentNode.querySelector('.invalid-feedback');
+                                if (!feedback) {
+                                    feedback = document.createElement('div');
+                                    feedback.className = 'invalid-feedback';
+                                    input.parentNode.appendChild(feedback);
+                                }
+                                
+                                feedback.innerHTML = `<strong>${data.errors[field][0]}</strong>`;
+                            }
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                saveBtn.classList.remove('is-loading');
+                btnText.textContent = 'Guardar cambios';
+                
+                // Mostrar mensaje de error genérico
+                responseMessages.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        Ha ocurrido un error al procesar la solicitud
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            });
+        });
+        
+        // Limpiar errores al cambiar inputs
+        form.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.innerHTML = '';
+                }
+            });
+        });
+    });
+</script>
 @endsection

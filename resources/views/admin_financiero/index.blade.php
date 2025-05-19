@@ -86,7 +86,7 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h5 class="card-title">Total Asalariados</h5>
-                    <p class="card-text display-4">{{ $asalariados->count() }}</p>
+                    <p class="card-text display-4">{{ isset($asalariados) ? $asalariados->count() : 0 }}</p>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <h5 class="card-title">Gasto Mensual Total</h5>
-                    <p class="card-text display-4">{{ number_format($asalariados->sum('salario'), 2, ',', '.') }} €</p>
+                    <p class="card-text display-4">{{ isset($asalariados) ? number_format($asalariados->sum('salario'), 2, ',', '.') : '0,00' }} €</p>
                 </div>
             </div>
         </div>
@@ -103,7 +103,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Salario Promedio</h5>
                     <p class="card-text display-4">
-                        {{ $asalariados->count() > 0 ? number_format($asalariados->avg('salario'), 2, ',', '.') : 0 }} €
+                        {{ isset($asalariados) && $asalariados->count() > 0 ? number_format($asalariados->avg('salario'), 2, ',', '.') : '0,00' }} €
                     </p>
                 </div>
             </div>
