@@ -82,6 +82,55 @@
             flex-direction: column;
             height: 100%;
         }
+
+        /* Modal personalizado */
+        #infoGrupoModal .modal-header {
+            background-color: #8c4ae2;
+            color: white;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        #infoGrupoModal .modal-body {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        #editNombreBtn {
+            background-color: #551475;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        #editNombreBtn:hover {
+            background-color: #8c4ae2;
+        }
+
+        #contenidoGrupo {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+        }
+
+        #mensajes {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .input-mensaje {
+            display: flex;
+            margin-top: auto;
+            gap: 0.5rem;
+        }
     </style>
     <!-- Se han movido los estilos CSS a un archivo externo -->
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
@@ -109,7 +158,8 @@
             <div class="admin-header">
                 <h1 class="admin-title">Chats de: {{ auth()->user()->nombre }} </h1>
                 <div class="admin-welcome">
-                    <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
+                    <a href="{{ route('chofers.dashboard') }}" class="btn btn-outline-danger"><i
+                            class="fa-solid fa-backward"></i>
                     </a>
                 </div>
             </div>
@@ -124,18 +174,25 @@
 
                     <ul class="list-group">
                         @forelse ($grupos as $grupo)
-                            <li class="list-group-item d-flex align-items-center">
-                                @if($grupo->imagen_grupo)
-                                    <img src="{{ asset('img/' . $grupo->imagen_grupo) }}" alt="Imagen Grupo" width="30" height="30"
-                                        class="me-2 rounded-circle">
-                                @else
-                                    <i class="fa-solid fa-users me-2"></i>
-                                @endif
-                                <a href="#" class="text-decoration-none text-dark grupo-link" data-nombre="{{ $grupo->nombre }}"
-                                    data-participantes="{{ $grupo->usuarios->count() }}">
-                                    {{ $grupo->nombre }} <i class="fa-solid fa-chevron-right ms-1"></i>
+                            <li class="list-group-item">
+                                <a href="#"
+                                    class="text-decoration-none text-dark grupo-link d-flex align-items-center justify-content-between"
+                                    data-nombre="{{ $grupo->nombre }}" data-participantes="{{ $grupo->usuarios->count() }}"
+                                    data-miembros='@json($grupo->usuarios->pluck("nombre"))'>
+                                    <div class="d-flex align-items-center">
+                                        @if($grupo->imagen_grupo)
+                                            <img src="{{ asset('img/' . $grupo->imagen_grupo) }}" alt="Imagen Grupo" width="30"
+                                                height="30" class="me-2 rounded-circle">
+                                        @else
+                                            <i class="fa-solid fa-users me-2"></i>
+                                        @endif
+                                        <span>{{ $grupo->nombre }}</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-muted"></i>
                                 </a>
                             </li>
+
+
                         @empty
                             <li class="list-group-item">No perteneces a ningún grupo aún.</li>
                         @endforelse
@@ -195,6 +252,29 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Información del Grupo -->
+    <div class="modal fade" id="infoGrupoModal" tabindex="-1" aria-labelledby="infoGrupoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 12px;">
+                <div class="modal-header" style="background-color: #8c4ae2; color: white;">
+                    <h5 class="modal-title" id="infoGrupoModalLabel">Información del Grupo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Nombre:</strong> <span id="modalNombreGrupo" style="font-weight: bold;"></span></p>
+                    <p><strong>Miembros:</strong></p>
+                    <ul id="modalMiembrosGrupo" class="ps-3"></ul>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 
     @section('scripts')

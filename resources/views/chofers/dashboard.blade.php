@@ -21,7 +21,7 @@
             <ul class="sidebar-menu">
                 <li><a href="" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i
                             class="fa-solid fa-car"></i> Solicitudes</a></li>
-                <li><a href=""
+                <li><a href="{{route('chofers.chat')}}"
                         class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fa-solid fa-comments"></i>
                         Chat</a></li>
             </ul>
