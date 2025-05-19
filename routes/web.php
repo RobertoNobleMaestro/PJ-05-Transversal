@@ -141,7 +141,6 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
 // Ruta para la solicitud de transporte privado (cliente)
 Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
 
-});
 
 // Rutas para el administrador financiero
 Route::middleware(['auth', 'role:admin_financiero'])->group(function () {

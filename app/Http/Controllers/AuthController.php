@@ -54,11 +54,13 @@ class AuthController extends Controller
                     case 5: // Admin Financiero
                         $redirect = '/asalariados'; // Redirección al CRUD de gestión de asalariados
                         break;
+                    case 6: // Chofer
+                        $redirect = '/chofers';
+                        break;
                     default:
                         $redirect = '/home';
                         break;
                 }
-                $redirect = $user->id_roles === 1 ? '/admin' : ($user->id_roles === 3 ? '/gestor' : ($user->id_roles === 6 ? '/chofers' : '/home'));
 
 
                 // Devolver respuesta exitosa
