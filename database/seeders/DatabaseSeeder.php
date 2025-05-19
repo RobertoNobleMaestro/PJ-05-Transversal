@@ -41,5 +41,10 @@ class DatabaseSeeder extends Seeder
             CarritoSeeder::class,           // Carritos de compra
             ReservaCompletaSeeder::class,   // Reservas completas
         ]);
+        
+        // 5. Subtipo de asalariados (depende de usuarios y parkings)
+        $this->call([
+            AsalariadoSeeder::class,         // Asalariados (trabajadores con salario)
+        ]);
     }
 }

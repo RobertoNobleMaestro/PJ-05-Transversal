@@ -21,7 +21,7 @@
             <ul class="sidebar-menu">
                 <li><a href="" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i
                             class="fa-solid fa-car"></i> Solicitudes</a></li>
-                <li><a href=""
+                <li><a href="{{route('chofers.chat')}}"
                         class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fa-solid fa-comments"></i>
                         Chat</a></li>
             </ul>
@@ -71,7 +71,7 @@
                             </div>
                             <h3>Chat de Chofers</h3>
                             <p>Comunicate con otros chofers y gestiona los servicios del día a día.</p>
-                            <a href="#" class="btn-admin-card">
+                            <a href="{{route('chofers.chat')}}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
