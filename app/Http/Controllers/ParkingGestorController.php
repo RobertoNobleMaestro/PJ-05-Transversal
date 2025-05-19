@@ -68,10 +68,36 @@ public function destroy(Request $request, $id)
     $authCheck = $this->checkGestor($request);
     if ($authCheck) return $authCheck;
 
+    // Buscar el parking a eliminar
     $parking = Parking::where('id_usuario', auth()->user()->id_usuario)->findOrFail($id);
-    $parking->delete();
 
-    return redirect()->route('gestor.parking.index')->with('success', 'Parking eliminado correctamente.');
+    // Buscar otro parking del mismo lugar (distinto del actual)
+    $parkingAlternativo = Parking::where('id_lugar', $parking->id_lugar)
+                                ->where('id', '!=', $parking->id)
+                                ->first();
+
+    if (!$parkingAlternativo) {
+        return redirect()->route('gestor.parking.index')->with('error', 'No se puede eliminar el parking porque no existe otro parking en el mismo lugar para reasignar los vehículos.');
+    }
+
+    DB::beginTransaction();
+
+    try {
+        // Reasignar vehículos al parking alternativo
+        Vehiculo::where('parking_id', $parking->id)
+            ->update(['parking_id' => $parkingAlternativo->id]);
+
+        // Eliminar el parking
+        $parking->delete();
+
+        DB::commit();
+
+        return redirect()->route('gestor.parking.index')->with('success', 'Parking eliminado correctamente y vehículos reasignados.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->route('gestor.parking.index')->with('error', 'Error al eliminar el parking: ' . $e->getMessage());
+    }
 }
+
     
 }
