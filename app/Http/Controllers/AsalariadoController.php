@@ -159,6 +159,26 @@ class AsalariadoController extends Controller
         // Obtener todos los parkings de la misma sede para el filtro
         $parkings = Parking::where('id_lugar', $sedeId)->get();
         
+        // Obtener todos los parkings de la misma sede
+        $parkingsDeSedeIds = Parking::where('id_lugar', $sedeId)->pluck('id')->toArray();
+        
+        // Obtener asalariados para las estadísticas iniciales
+        $asalariados = Asalariado::whereIn('parking_id', $parkingsDeSedeIds)
+            ->join('users', 'asalariados.id_usuario', '=', 'users.id_usuario')
+            ->join('roles', 'users.id_roles', '=', 'roles.id_roles')
+            ->join('parking', 'asalariados.parking_id', '=', 'parking.id')
+            ->select(
+                'asalariados.id',
+                'asalariados.id_usuario',
+                'asalariados.salario',
+                'asalariados.dia_cobro',
+                'asalariados.parking_id',
+                'users.nombre',
+                'roles.nombre as nombre_rol',
+                'parking.nombre as nombre_parking'
+            )
+            ->get();
+        
         // Obtener roles para el filtro
         $roles = ['gestor', 'mecanico', 'admin_financiero'];
         
@@ -169,7 +189,8 @@ class AsalariadoController extends Controller
             'sede' => $sede,
             'parkings' => $parkings,
             'roles' => $roles,
-            'debug' => $debug
+            'debug' => $debug,
+            'asalariados' => $asalariados
         ];
         
         return view('admin_financiero.asalariados.index', $data);

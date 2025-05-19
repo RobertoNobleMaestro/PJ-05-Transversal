@@ -130,7 +130,7 @@
             <div class="card text-white" style="background-color: #9F17BD;">
                 <div class="card-body">
                     <h5 class="card-title">Total Asalariados</h5>
-                    <p class="card-text display-4">{{ count($asalariados) }}</p>
+                    <p class="card-text display-4">{{ $asalariados->count() }}</p>
                 </div>
             </div>
         </div>
@@ -139,9 +139,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Gasto Mensual Total</h5>
                     @php
-                    $totalSalarios = array_reduce($asalariados, function($carry, $item) {
-                        return $carry + $item['salario'];
-                    }, 0);
+                    $totalSalarios = $asalariados->sum('salario');
                     @endphp
                     <p class="card-text display-4">{{ number_format($totalSalarios, 2, ',', '.') }} €</p>
                 </div>
@@ -152,7 +150,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Salario Promedio</h5>
                     @php
-                    $avgSalario = count($asalariados) > 0 ? $totalSalarios / count($asalariados) : 0;
+                    $avgSalario = $asalariados->count() > 0 ? $asalariados->avg('salario') : 0;
                     @endphp
                     <p class="card-text display-4">{{ number_format($avgSalario, 2, ',', '.') }} €</p>
                 </div>
