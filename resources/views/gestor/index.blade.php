@@ -27,6 +27,9 @@
                     <li><a href="{{ route('gestor.historial') }}"
                 class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
                     class="fas fa-history"></i>Historial</a></li>
+                                        <li><a href="{{ route('gestor.parking') }}"
+                class="{{ request()->routeIs('gestor.parking') ? 'active' : '' }}"><i
+                    class="fas fa-parking"></i>Parking</a></li>
             </ul>
         </div>
 
