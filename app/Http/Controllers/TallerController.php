@@ -15,13 +15,40 @@ class TallerController extends Controller
     public function index()
     {
         // Recupera todos los vehículos con sus relaciones (lugar, tipo, parking)
-        $vehiculos = Vehiculo::with(['lugar', 'tipo', 'parking'])->get();
+        $vehiculos = Vehiculo::with(['lugar', 'tipo', 'parking'])->paginate(4);
         
         // Obtener la lista de talleres disponibles
         $talleres = Taller::all();
+        
+        // Catálogos para los filtros
+        $lugares = \App\Models\Lugar::all();
+        $tipos = \App\Models\Tipo::all();
+        $anios = Vehiculo::select('año')->distinct()->orderBy('año', 'desc')->pluck('año');
+        $parkings = \App\Models\Parking::all();
 
-        // Retorna la vista 'Taller.index' pasando los vehículos recuperados
-        return view('Taller.index', compact('vehiculos', 'talleres'));
+        // Retorna la vista 'Taller.index' pasando los vehículos recuperados y catálogos
+        return view('Taller.index', compact('vehiculos', 'talleres', 'lugares', 'tipos', 'anios', 'parkings'));
+    }
+
+    // AJAX: Filtrado sumativo
+    public function filtrarVehiculos(Request $request)
+    {
+        $query = Vehiculo::with(['lugar', 'tipo', 'parking']);
+        if ($request->filled('sede')) {
+            $query->where('id_lugar', $request->sede);
+        }
+        if ($request->filled('año')) {
+            $query->where('año', $request->año);
+        }
+        if ($request->filled('tipo')) {
+            $query->where('id_tipo', $request->tipo);
+        }
+        if ($request->filled('parking')) {
+            $query->where('parking_id', $request->parking);
+        }
+        $vehiculos = $query->paginate(4)->appends($request->except('page'));
+        $html = view('Taller.partials.tabla_vehiculos', compact('vehiculos'))->render();
+        return response()->json(['html' => $html]);
     }
 
     // Método para actualizar la fecha de mantenimiento de un vehículo

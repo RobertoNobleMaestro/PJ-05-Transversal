@@ -215,6 +215,7 @@ Route::get('/run-migrations-safe', function () {
 // Rutas para el espacio privado de los mecánicos
 // Route::middleware(['auth', 'role:mecanico'])->group(function () {
     Route::get('/taller', [TallerController::class, 'index'])->name('taller.index');
+Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->name('taller.filtrar');
     Route::get('/taller/historial', [TallerController::class, 'historial'])->name('taller.historial');
 
     Route::get('/taller/mantenimientos', [TallerController::class, 'getMantenimientos'])->name('taller.mantenimientos');

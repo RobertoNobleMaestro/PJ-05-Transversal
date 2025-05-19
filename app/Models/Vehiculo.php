@@ -6,6 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vehiculo extends Model
 {
+    // ...
+    public function getUltimaMantFormateadaAttribute()
+    {
+        return $this->ultima_fecha_mantenimiento
+            ? \Carbon\Carbon::parse($this->ultima_fecha_mantenimiento)->format('d/m/Y')
+            : null;
+    }
+
+    public function getProximaMantFormateadaAttribute()
+    {
+        return $this->proxima_fecha_mantenimiento
+            ? \Carbon\Carbon::parse($this->proxima_fecha_mantenimiento)->format('d/m/Y')
+            : null;
+    }
+
     use HasFactory;
 
     protected $table = 'vehiculos';

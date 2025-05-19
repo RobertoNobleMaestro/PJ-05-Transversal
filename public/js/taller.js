@@ -8,7 +8,7 @@ $(document).ready(function() {
         "order": [[0, "asc"]],
         "responsive": true,
         "paging": false,
-        "info": true,
+        "info": false,
         "searching": false,
         "ordering": true
     });
