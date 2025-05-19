@@ -24,8 +24,13 @@ use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\TallerController;
 use App\Http\Controllers\HistorialGestorController;
 use App\Http\Controllers\ChatIAController;
+use App\Http\Controllers\AdminFinancieroController;
+use App\Http\Controllers\AsalariadoController;
+use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
+
+
 Route::redirect('/', '/home');
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -127,15 +132,71 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 // Rutas para el espacio privado de los chofers 
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+    
+    // Chat por grupo
+    Route::get('/chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
+    Route::post('/chofers/grupos', [ChoferController::class, 'storeGrupo'])->name('chofers.grupos.store');
+    
+    // Endpoints AJAX para el chat por grupo
+    Route::get('/api/chofers/grupos', [ChoferController::class, 'getUserGrupos'])->name('api.chofers.grupos');
+    Route::post('/api/chofers/mensajes', [ChoferController::class, 'getGrupoMensajes'])->name('api.chofers.mensajes');
+    Route::post('/api/chofers/mensajes/enviar', [ChoferController::class, 'sendGrupoMensaje'])->name('api.chofers.mensajes.enviar');
     Route::get('/api/chofers/sede/{sede}', [ChoferController::class, 'getChoferesPorSede'])->name('api.chofers.sede');
-    Route::get('chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
-    Route::post('/grupos', [ChoferController::class, 'storeGrupo'])->name('grupos.store');
-
 });
 
 // Ruta para la solicitud de transporte privado (cliente)
 Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
 
+// Ruta de depuración para el chat (solo para desarrollo)
+Route::get('/debug/chat', function() {
+    if (!Auth::check()) {
+        return redirect()->route('login')->with('error', 'Debes iniciar sesión para acceder a esta página');
+    }
+    
+    $usuario = Auth::user();
+    
+    // Verificar si hay grupos
+    $grupos = DB::table('grupo_usuario')
+        ->where('id_usuario', $usuario->id_usuario)
+        ->join('grupos', 'grupo_usuario.grupo_id', '=', 'grupos.id')
+        ->select('grupos.*')
+        ->get();
+        
+    return response()->json([
+        'usuario' => [
+            'id' => $usuario->id_usuario,
+            'nombre' => $usuario->nombre,
+            'email' => $usuario->email,
+            'rol' => $usuario->id_roles
+        ],
+        'grupos' => $grupos,
+        'estado_tabla' => [
+            'grupo_usuario_exists' => Schema::hasTable('grupo_usuario'),
+            'grupos_exists' => Schema::hasTable('grupos'),
+            'messages_exists' => Schema::hasTable('messages')
+        ]
+    ]);
+});
+
+// Rutas para el administrador financiero
+Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
+    Route::get('/admin-financiero', [AsalariadoController::class, 'index'])->name('admin.financiero');
+    Route::get('/admin-financiero/resumen', [AsalariadoController::class, 'index'])->name('admin.financiero.resumen');
+    
+    // Rutas para la gestión de asalariados
+    Route::prefix('asalariados')->group(function () {
+        Route::get('/', [AsalariadoController::class, 'index'])->name('asalariados.index');
+        Route::get('/data', [AsalariadoController::class, 'getAsalariados'])->name('asalariados.data');
+        Route::get('/{id}/editar', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
+        Route::match(['post', 'put'], '/{id}/update', [AsalariadoController::class, 'update'])->name('asalariados.update');
+        Route::post('/{id}/update-ajax', [AsalariadoController::class, 'updateAjax'])->name('asalariados.update.ajax');
+        Route::get('/{id}/detalle', [AsalariadoController::class, 'show'])->name('asalariados.show');
+    });
+    // Nuevo sistema de reportes financieros - COMENTADO
+    // Route::get('/financial/dashboard', [FinancialReportController::class, 'dashboard'])->name('financial.dashboard');
+    // Route::get('/financial/vehiculos', [FinancialReportController::class, 'vehiculosRentabilidad'])->name('financial.vehiculos');
+    // Route::get('/financial/proyecciones', [FinancialReportController::class, 'proyecciones'])->name('financial.proyecciones');
+});
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 

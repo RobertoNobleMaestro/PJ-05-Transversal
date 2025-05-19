@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Grupo extends Model
 {
@@ -18,9 +19,10 @@ class Grupo extends Model
     ];
 
     // Relación con la tabla usuarios 
-       public function usuarios(): HasMany
+    public function usuarios(): BelongsToMany
     {
-        return $this->hasMany(User::class, 'grupo_id', 'id');
+        return $this->belongsToMany(User::class, 'grupo_usuario', 'grupo_id', 'id_usuario')
+            ->withTimestamps();
     }
 
     // Relación con la tabla mensajes 

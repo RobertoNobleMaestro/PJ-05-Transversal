@@ -134,6 +134,9 @@
     </style>
     <!-- Se han movido los estilos CSS a un archivo externo -->
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    
+    <!-- Meta tag para CSRF token necesario para las peticiones AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Botón de hamburguesa para menú móvil -->
     <button class="menu-toggle" id="menuToggle">
@@ -214,7 +217,7 @@
     <div class="modal fade" id="crearGrupoModal" tabindex="-1" aria-labelledby="crearGrupoModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{ route('grupos.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('chofers.grupos.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="crearGrupoModalLabel">Crear nuevo grupo</h5>
