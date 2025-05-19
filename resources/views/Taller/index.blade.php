@@ -10,6 +10,62 @@
         text-align: center;
         vertical-align: middle;
     }
+    .custom-modal-content {
+        background: #fff;
+        border-radius: 20px;
+        border: 2px solid #9F17BD;
+        box-shadow: 0 6px 24px rgba(159,23,189,0.08), 0 2px 12px rgba(34,34,34,0.10);
+        padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+        transition: box-shadow 0.25s;
+    }
+    .custom-modal-content:hover {
+        box-shadow: 0 10px 36px rgba(159,23,189,0.17), 0 4px 24px rgba(34,34,34,0.18);
+    }
+    /* ---- MODAL AGENDAR: Inputs y Selects ---- */
+    .custom-modal-content .modal-form-control,
+    .custom-modal-content .modal-form-select {
+        color: #222;
+        border: 2px solid #9F17BD;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: none;
+        transition: border-color 0.2s;
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .custom-modal-content .modal-form-control:focus,
+    .custom-modal-content .modal-form-select:focus {
+        border-color: #7e138f;
+        outline: 0;
+        box-shadow: 0 0 0 0.15rem rgba(159,23,189,0.13);
+    }
+    .custom-modal-content .modal-form-select option {
+        color: #222;
+    }
+    /* ---- MODAL AGENDAR: Botón ---- */
+    .custom-modal-content .btn-agendar-modal {
+        background: linear-gradient(90deg, #9F17BD 70%, #7e138f 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        box-shadow: 0 2px 8px rgba(159,23,189,0.08);
+        transition: background 0.2s, color 0.2s, border 0.2s;
+        padding: 0.65rem 1.5rem;
+        font-size: 1.08rem;
+    }
+    .custom-modal-content .btn-agendar-modal:hover,
+    .custom-modal-content .btn-agendar-modal:focus {
+        background: #fff;
+        color: #9F17BD;
+        border: 2px solid #9F17BD;
+    }
+    .custom-modal-content ::placeholder {
+        color: #9F17BD;
+        opacity: 1;
+    }
+
 </style>
 
 <div class="admin-container">
@@ -137,7 +193,7 @@
 <!-- Modal para agendar mantenimiento -->
 <div class="modal fade" id="modalAgendarMantenimiento" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content custom-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabel">Agendar Mantenimiento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -170,6 +226,16 @@
                         </select>
                         <div class="text-info mt-1" id="disponibilidad-info"></div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="motivo-reserva" class="form-label">Motivo de la reserva</label>
+                        <select class="form-select" id="motivo-reserva" name="motivo_reserva" required>
+                            <option value="">Seleccione el motivo</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="averia">Avería</option>
+                        </select>
+                        <div class="invalid-feedback">Por favor seleccione el motivo de la reserva.</div>
+                    </div>
                     
                     <div class="alert alert-warning" id="alerta-disponibilidad" style="display: none">
                         <i class="fas fa-exclamation-triangle"></i> 
@@ -177,7 +243,7 @@
                     </div>
                     
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Agendar</button>
+                        <button type="submit" class="btn btn-outline-purple flex-grow-1">Agendar</button>
                     </div>
                 </form>
             </div>

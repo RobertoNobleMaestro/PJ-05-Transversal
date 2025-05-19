@@ -113,6 +113,7 @@ class TallerController extends Controller
             $mantenimiento->fecha_programada = $request->fecha_mantenimiento;
             $mantenimiento->hora_programada = $request->hora_mantenimiento;
             $mantenimiento->estado = 'pendiente';
+            $mantenimiento->motivo_reserva = $request->motivo_reserva;
             $mantenimiento->save();
             
             // Guardar fecha actual como última fecha de mantenimiento

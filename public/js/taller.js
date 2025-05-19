@@ -137,6 +137,7 @@ $(document).ready(function() {
                 fecha_mantenimiento: fecha,
                 hora_mantenimiento: hora,
                 taller_id: tallerId,
+                motivo_reserva: $('#motivo-reserva').val(),
                 _token: $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
