@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationControls.innerHTML = '';
 
         const prevBtn = document.createElement('button');
-        prevBtn.className = 'btn btn-outline-secondary';
+        prevBtn.className = 'btn-purple';
         prevBtn.innerHTML = '&laquo;';
         prevBtn.disabled = currentPage === 1;
         prevBtn.addEventListener('click', () => {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationControls.appendChild(pageIndicator);
 
         const nextBtn = document.createElement('button');
-        nextBtn.className = 'btn btn-outline-secondary';
+        nextBtn.className = 'btn-purple';
         nextBtn.innerHTML = '&raquo;';
         nextBtn.disabled = currentPage === totalPages;
         nextBtn.addEventListener('click', () => {

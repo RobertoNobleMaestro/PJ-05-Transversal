@@ -8,6 +8,9 @@
 </head>
 <body>
     <div class="chat-list-container">
+    <a href="{{ route('gestor.index') }}" class="btn btn-chat mb-3">
+                            Volver
+                        </a> 
         <h2 class="chat-list-title">Conversaciones con Usuarios</h2>
 
         @if($usuarios->isEmpty())

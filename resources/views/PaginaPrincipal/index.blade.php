@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,10 +12,11 @@
 
   <!-- CSS personalizado -->
   <link rel="stylesheet" href="{{ asset('css/PaginaPrincipal/style.css') }}">
-  
+
   <!-- CSRF Token para Ajax -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
+
 <body>
 
   <!-- Navbar -->
@@ -32,20 +34,26 @@
     <div class="row">
       <div class="col-md-5">
         <h1>Alquiler de vehículos de todo tipo<br>y con precios asequibles</h1>
-        <p>Encuentra el vehículo perfecto para tus necesidades, con una amplia variedad de opciones y precios competitivos.</p>
+        <p>Encuentra el vehículo perfecto para tus necesidades, con una amplia variedad de opciones y precios
+          competitivos.</p>
         <ul class="list-unstyled mt-4">
           <li><i class="fas fa-check-circle text-success mr-2"></i>Reserva cuando quieras</li>
           <li><i class="fas fa-check-circle text-success mr-2"></i>Todo tipo de vehículos</li>
           <li><i class="fas fa-check-circle text-success mr-2"></i>Seguro incluido</li>
           <li><i class="fas fa-check-circle text-success mr-2"></i>Sin comisiones</li>
         </ul>
-        <a href="#alquiler" class="btn btn-light font-weight-bold">Encuentra ya tu vehículo a reservar!</a>
+        <div class="btn-group mt-3" role="group" aria-label="Botones de acción">
+          <a href="#alquiler" class="btn btn-light font-weight-bold">Encuentra ya tu vehículo a reservar!</a>
+          <a href="{{route('chofers.cliente-pide')}}" class="btn btn-light font-weight-bold">Solicita ya tu transporte privado!</a>
+        </div>
+
+
       </div>
       <div class="col-md-6 text-center">
         <img src="{{ asset('img/coches.png') }}" class="img-fluid" alt="Vehículos">
       </div>
     </div>
-  </div> 
+  </div>
 
   <!-- Estadísticas -->
   <div class="container-fluid stats-section">
@@ -79,7 +87,7 @@
         </div>
       </div>
     </div>
-  </div>    
+  </div>
 
   <!-- Sección Alquiler -->
   <div id="alquiler" class="container vehicles-section">
@@ -91,7 +99,8 @@
     </button>
 
     <!-- Ventana Chat -->
-    <div id="chatBox" class="card shadow" style="width: 300px; position: fixed; bottom: 80px; right: 20px; display: none; z-index: 9999;">
+    <div id="chatBox" class="card shadow"
+      style="width: 300px; position: fixed; bottom: 80px; right: 20px; display: none; z-index: 9999;">
       <div class="card-header bg-primary text-white p-2">
         Chat IA
         <button type="button" id="closeChat" class="close text-white">&times;</button>
@@ -102,7 +111,8 @@
       <div class="card-footer p-2">
         <form id="chatForm">
           <div class="input-group">
-            <input type="text" id="mensajeInput" name="mensaje" class="form-control" placeholder="Escribe tu mensaje...">
+            <input type="text" id="mensajeInput" name="mensaje" class="form-control"
+              placeholder="Escribe tu mensaje...">
             <div class="input-group-append">
               <button class="btn btn-success" type="submit">Enviar</button>
             </div>
@@ -245,5 +255,5 @@
   <script src="{{ asset('js/home.js') }}"></script>
 
 </body>
-</html>
 
+</html>

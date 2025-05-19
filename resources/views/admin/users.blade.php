@@ -26,7 +26,7 @@
         <div class="admin-main">
             <div class="admin-header">
                 <h1 class="admin-title">Gestión de Usuarios</h1>
-                <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.index') }}" class="btn-purple">
                     <i class="fas fa-arrow-left"></i> Volver al Panel
                 </a>
             </div>

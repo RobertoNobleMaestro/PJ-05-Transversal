@@ -115,13 +115,13 @@
 .message.other small {
     display: block;
     font-size: 0.75rem;
-    color: #ffffff;
+    color: #636363;
     margin-top: 0.4rem;
 }
 .message.me small {
     display: block;
     font-size: 0.75rem;
-    color: #718096;
+    color: #ffffff;
     margin-top: 0.4rem;
 }
 

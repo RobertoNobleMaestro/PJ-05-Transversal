@@ -15,19 +15,18 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="admin-container">
-        <!-- Barra lateral lila -->
-        <div class="admin-sidebar" id="sidebar">
+    <div class="admin-sidebar" id="sidebar">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
                 <li><a href="{{ route('gestor.vehiculos') }}"
                         class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                         Vehículos</a></li>
-                <li><a href="{{ route('admin.lugares') }}"
-                        class="{{ request()->routeIs('admin.lugares*') ? 'active' : '' }}"><i
-                            class="fas fa-map-marker-alt"></i> Lugares</a></li>
                 <li><a href="{{ route('gestor.chat.listar') }}"
                 class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
                     class="fas fa-comments"></i> Chats</a></li>
+                    <li><a href="{{ route('gestor.historial') }}"
+                class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
+                    class="fas fa-history"></i>Historial</a></li>
             </ul>
         </div>
 
@@ -38,10 +37,10 @@
                     <span>Bienvenido, {{ auth()->user()->nombre }}</span>
                 @endif
                     <div class="admin-welcome">
-                    <a href="{{ route('home') }}" class="btn btn-outline-primary"><i class="fa-solid fa-house"></i>
+                    <a href="{{ route('home') }}" class="btn-purple"><i class="fa-solid fa-house"></i>
                         Ver Página Principal</a>
                     <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
-                        Cerrar Sesión</a>
+                        </a>
 
                 </div>
             </div>
@@ -69,15 +68,26 @@
                         </div>
                     </div>
 
-                    <!-- Tarjeta de Lugares -->
                     <div class="col-md-6 col-lg-4">
                         <div class="admin-card shadow-sm">
                             <div class="admin-card-icon">
-                                <i class="fas fa-map-marker-alt fa-3x"></i>
+                                <i class="fas fa-history fa-3x"></i>
                             </div>
-                            <h3>Gestión de Lugares</h3>
-                            <p>Administra las ubicaciones de recogida y entrega de vehículos.</p>
-                            <a href="" class="btn-admin-card">
+                            <h3>Historial de Reservas</h3>
+                            <p>Consulta el historial completo de todas las reservas realizadas en el sistema.</p>
+                            <a href="{{ route('gestor.historial') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-comments fa-3x"></i>
+                            </div>
+                            <h3>Chats con clientes</h3>
+                            <p>Aqui podrás ver todas las conversaciones con los clientes.</p>
+                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -86,10 +96,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Script para funcionalidad responsive -->
-    @section('scripts')
-        <script src="{{asset('js/crud_gestor.js')}}"></script>
-    @endsection
-
 @endsection
