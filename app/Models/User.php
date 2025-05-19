@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 
 class User extends Authenticatable
@@ -64,10 +65,11 @@ class User extends Authenticatable
         return $this->role && $this->role->nombre_rol === $roleName;
     }
 
-    public function grupo()
-{
-    return $this->belongsTo(Grupo::class, 'grupo_id', 'id');
-}
+    public function grupos(): BelongsToMany
+    {
+        return $this->belongsToMany(Grupo::class, 'grupo_usuario', 'id_usuario', 'grupo_id')
+            ->withTimestamps();
+    }
     
     /**
      * Verifica si el usuario es un asalariado (gestor, mecánico o admin financiero)
