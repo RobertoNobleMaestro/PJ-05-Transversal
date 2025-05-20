@@ -13,7 +13,6 @@ class Message extends Model
         'gestor_id',
         'message',
         'sender_type',
-        'sender_id',
         'receiver_id',
         'grupo_id',   // Para mensajes de grupo
         'read_at',    // Para marcar como leído

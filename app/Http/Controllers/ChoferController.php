@@ -141,7 +141,8 @@ class ChoferController extends Controller
                 // Añadir mensaje de bienvenida
                 $mensaje = new Message();
                 $mensaje->message = "¡Bienvenidos al grupo de choferes de {$sede}!";
-                $mensaje->sender_id = $usuarioActual->id_usuario;
+                $mensaje->user_id = $usuarioActual->id_usuario;
+                $mensaje->sender_type = 'user';
                 $mensaje->grupo_id = $grupoGeneral->id;
                 $mensaje->save();
             } else {
@@ -180,7 +181,10 @@ class ChoferController extends Controller
         $grupo->fecha_creacion = now();
 
         if ($request->hasFile('imagen_grupo')) {
-            $grupo->imagen_grupo = $request->file('imagen_grupo')->store('grupos', 'public');
+            $imagen = $request->file('imagen_grupo');
+            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+            $imagen->move(public_path('img'), $nombreImagen);
+            $grupo->imagen_grupo = $nombreImagen;
         }
 
         $grupo->save();
@@ -296,9 +300,9 @@ class ChoferController extends Controller
                     'message' => $mensaje->message,
                     'sender_name' => $sender ? $sender->nombre : 'Usuario desconocido',
                     'sender_avatar' => $sender ? $sender->foto_perfil : null,
-                    'created_at' => Carbon::parse($mensaje->created_at)->format('d/m/Y H:i'),
+                    'created_at' => Carbon::parse($mensaje->created_at)->format('H:i'),
                     'is_own' => $isOwn,
-                    'user_id' => $mensaje->user_id // Esto nos ayuda a depurar si es necesario
+                    'user_id' => $mensaje->user_id
                 ];
             });
             
@@ -400,7 +404,7 @@ class ChoferController extends Controller
                     'message' => $mensaje->message,
                     'sender_name' => $usuarioActual->nombre,
                     'sender_avatar' => $usuarioActual->foto_perfil,
-                    'created_at' => Carbon::parse($mensaje->created_at)->format('d/m/Y H:i'),
+                    'created_at' => Carbon::parse($mensaje->created_at)->format('H:i'),
                     'is_own' => true,
                     'debug_info' => [
                         'sender_type' => $mensaje->sender_type,
@@ -517,7 +521,7 @@ class ChoferController extends Controller
                     return [
                         'id' => $grupo->id,
                         'nombre' => $grupo->nombre,
-                        'imagen' => $grupo->imagen_grupo,
+                        'imagen' => $grupo->imagen_grupo ? asset('img/' . $grupo->imagen_grupo) : null,
                         'usuarios_count' => $miembrosCount,
                         'usuarios' => $usuarios,
                         'debug_info' => [
