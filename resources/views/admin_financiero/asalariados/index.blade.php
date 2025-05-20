@@ -2,19 +2,6 @@
 
 @section('content')
 @php
-    // Debug information to find the count() error
-    if (isset($debug) && $debug) {
-        echo '<div class="alert alert-info">Debug Info:<br>';
-        
-        // Print out the variables passed to the view
-        echo 'Variables passed to view:<br>';
-        foreach (get_defined_vars()['__data'] as $key => $value) {
-            echo "$key: " . (is_object($value) ? get_class($value) : gettype($value)) . '<br>';
-        }
-        
-        echo '</div>';
-    }
-    
     // Ensure $asalariados exists and is properly initialized to prevent count() errors
     if (!isset($asalariados)) {
         $asalariados = [];
@@ -27,9 +14,7 @@
             <p class="text-muted">Sede de {{ $sede->nombre }}</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('admin.financiero.resumen') }}" class="btn btn-secondary">
-                <i class="fas fa-chart-bar"></i> Resumen Financiero
-            </a>
+            <!-- Resumen financiero button removed -->
         </div>
     </div>
 

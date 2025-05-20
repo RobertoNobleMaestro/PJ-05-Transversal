@@ -217,9 +217,15 @@ class AuthController extends Controller
     /**
      * Muestra el formulario para restablecer la contraseña
      */
-    public function resetPassword(string $token)
+    public function resetPassword(string $token, Request $request)
     {
-        return view('auth.reset-password', ['token' => $token]);
+        // Get the email from the request query parameters
+        $email = $request->email;
+        
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $email
+        ]);
     }
 
     /**

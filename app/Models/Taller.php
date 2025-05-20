@@ -25,3 +25,5 @@ class Taller extends Model
         return $this->hasMany(Mantenimiento::class, 'taller_id', 'id');
     }
 }
+
+

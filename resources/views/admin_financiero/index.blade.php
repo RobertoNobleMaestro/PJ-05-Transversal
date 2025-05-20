@@ -11,9 +11,6 @@
             <a href="{{ route('asalariados.index') }}" class="btn btn-success me-2">
                 <i class="fas fa-users"></i> Gestión de Asalariados
             </a>
-            <a href="{{ route('admin.financiero.resumen') }}" class="btn btn-primary">
-                <i class="fas fa-chart-bar"></i> Ver Resumen Financiero
-            </a>
         </div>
     </div>
 
