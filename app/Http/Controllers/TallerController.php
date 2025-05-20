@@ -391,7 +391,7 @@ public function update(Request $request, $id)
     // Método para mostrar la página de historial de mantenimientos
     public function historial()
     {
-        return view('Taller.historial');
+        return view('taller.historial');
     }
 
     public function descargarFactura($id)
