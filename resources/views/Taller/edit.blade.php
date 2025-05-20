@@ -118,7 +118,7 @@
 
     <h2>Editar Mantenimiento</h2>
 
-    <form action="{{ route('taller.update', $mantenimiento->id) }}" method="POST">
+    <form action="{{ route('Taller.update', $mantenimiento->id) }}" method="POST">
         @csrf
         @method('PUT')
 
