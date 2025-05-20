@@ -5,7 +5,6 @@
             <th>Modelo</th>
             <th>Kilometraje</th>
             <th>Año</th>
-            <th>Precio/Día</th>
             <th>Sede</th>
             <th>Tipo</th>
             <th>Parking</th>
@@ -21,7 +20,6 @@
                 <td>{{ $vehiculo->modelo }}</td>
                 <td>{{ $vehiculo->kilometraje }} kms</td>
                 <td>{{ $vehiculo->año }}</td>
-                <td>{{ $vehiculo->precio_dia }} €</td>
                 <td>{{ $vehiculo->lugar->nombre ?? '-' }}</td>
                 <td>{{ $vehiculo->tipo->nombre ?? '-' }}</td>
                 <td>{{ $vehiculo->parking->nombre ?? '-' }}</td>

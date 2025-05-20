@@ -118,11 +118,7 @@ class TallerController extends Controller
             
             // Guardar fecha actual como última fecha de mantenimiento
             $vehiculo->ultima_fecha_mantenimiento = now();
-            
-            // Guardar la próxima fecha de mantenimiento (fecha y hora)
-            $fechaHora = $request->fecha_mantenimiento . ' ' . $request->hora_mantenimiento;
-            $vehiculo->proxima_fecha_mantenimiento = $fechaHora;
-            
+            // No modificar proxima_fecha_mantenimiento aquí, solo al completar el mantenimiento
             $vehiculo->save();
             
             // Obtener el nombre del taller para la respuesta
@@ -368,11 +364,19 @@ public function update(Request $request, $id)
     if ($request->estado === 'completado') {
         $vehiculo = $mantenimiento->vehiculo;
         if ($vehiculo) {
-            $vehiculo->ultima_fecha_mantenimiento = $request->fecha_programada;
-
-            // Sumar 6 meses a ultima_fecha_mantenimiento para proxima_fecha_mantenimiento
-            $vehiculo->proxima_fecha_mantenimiento = Carbon::parse($request->fecha_programada)->addMonths(6);
-
+            // Si el estado es cancelado, poner fechas especiales
+            if ($request->estado === 'cancelado') {
+                $vehiculo->ultima_fecha_mantenimiento = Carbon::now()->subMonths(7);
+                $vehiculo->proxima_fecha_mantenimiento = $vehiculo->ultima_fecha_mantenimiento;
+            } else {
+                $vehiculo->ultima_fecha_mantenimiento = $request->fecha_programada;
+                // Actualizar proxima_fecha_mantenimiento según el motivo y estado
+                if ($mantenimiento->motivo_reserva === 'mantenimiento' && $request->estado === 'completado') {
+                    $vehiculo->proxima_fecha_mantenimiento = Carbon::parse($request->fecha_programada)->addMonths(6);
+                } elseif ($mantenimiento->motivo_reserva === 'averia' && $request->estado === 'completado') {
+                    $vehiculo->proxima_fecha_mantenimiento = Carbon::parse($request->fecha_programada)->addMonths(9);
+                }
+            }
             $vehiculo->save();
         }
     }
