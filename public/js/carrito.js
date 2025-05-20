@@ -51,7 +51,7 @@ function cargarCarrito() {
           <p><i class="fas fa-cogs"></i> <strong>Características:</strong> ${detalles}</p>
           <p><i class="fas fa-shield-alt"></i> <strong>Plan:</strong> Básico</p>
             <div class="acciones">
-              <button class="btn-eliminar mt-3" onclick="eliminarReserva(${vehiculo.reserva.id_reserva})">
+              <button class="btn-eliminar mt-3" onclick="eliminarReserva(${vehiculo.id_vehiculos_reservas})">
                 <i class="fas fa-trash-alt" style="color:white"></i> Quitar
               </button>
             </div>        </div>

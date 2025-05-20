@@ -31,9 +31,9 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Gestión de Vehículos</h1>
-            <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> 
-            </a>
+                <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
         </div>
 
         @if(session('success'))

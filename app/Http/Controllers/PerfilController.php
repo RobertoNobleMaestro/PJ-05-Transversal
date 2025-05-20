@@ -54,13 +54,6 @@ class PerfilController extends Controller
         ]);
 
         if ($request->hasFile('foto_perfil')) {
-            if ($user->foto_perfil) {
-                $fotoPath = public_path('img/' . $user->foto_perfil);
-                if (file_exists($fotoPath)) {
-                    unlink($fotoPath);
-                }
-            }
-
             $foto = $request->file('foto_perfil');
             $nombreFoto = uniqid('foto_', true) . '.' . $foto->getClientOriginalExtension();
             $foto->move(public_path('img'), $nombreFoto);

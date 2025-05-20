@@ -128,14 +128,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función de validación de telefono
     function validaTelf() {
         const telf = inputTelf.value.trim();
-        const regex = /^\d{3}\s\d{2}\s\d{2}\s\d{2}$/;
+        const soloNumeros = telf.replace(/\D/g, ''); // Elimina todo lo que no sea número
 
         if (telf === "") {
             error_telf.textContent = "El campo no debe estar vacío";
             inputTelf.classList.add('is-invalid');
             return false;
-        } else if (!regex.test(telf)) {
-            error_telf.textContent = "Formato esperado: 123 45 67 89";
+        } else if (soloNumeros.length !== 9) {
+            error_telf.textContent = "El teléfono debe tener exactamente 9 números";
             inputTelf.classList.add('is-invalid');
             return false;
         } else {

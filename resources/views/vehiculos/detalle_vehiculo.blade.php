@@ -86,7 +86,6 @@
 
         <hr>
         <h4 class="mt-5">CALENDARIO DE RESERVAS</h4>
-        <div id="contador-dias"></div>
         <div id="calendario-reservas" class="mb-5"></div>
 
         <!-- FullCalendar -->
@@ -95,7 +94,6 @@
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const calendarEl = document.getElementById('calendario-reservas');
-                const contadorDias = document.getElementById('contador-dias');
                 const precioDia = {{ $vehiculo->precio_dia }};
                 let reservas = [];
 
@@ -109,13 +107,32 @@
                     contentHeight: 'auto',
                     selectable: false,
 
-                    events: {
-                        url: `/vehiculos/{{ $vehiculo->id_vehiculos }}/reservas`,
-                        failure: () => Swal.fire('Error', 'No se pudieron cargar las reservas.', 'error'),
-                        success: (data) => {
-                            reservas = data;
-                        }
+                    events: function(fetchInfo, successCallback, failureCallback) {
+                        fetch(`/vehiculos/{{ $vehiculo->id_vehiculos }}/reservas`)
+                            .then(response => response.json())
+                            .then(data => {
+                                reservas = data;
+                                console.log(reservas)
+                                const eventosProcesados = data.map(reserva => {
+                                    const esDelUsuario = reserva.user_id === userId;
+                                    return {
+                                        title: esDelUsuario ? 'Reservado por ti' : 'No disponible',
+                                        start: reserva.start,
+                                        end: reserva.end,
+                                        display: 'background', // o 'auto' si quieres texto
+                                        color: esDelUsuario ? '#6f42c1' : 'rgb(0, 0, 0)', // morado si es tuyo, negro transparente si no
+                                        textColor: '#fff'
+                                    };
+                                });
+
+                                successCallback(eventosProcesados);
+                            })
+                            .catch(() => {
+                                Swal.fire('Error', 'No se pudieron cargar las reservas.', 'error');
+                                failureCallback();
+                            });
                     },
+
 
                     headerToolbar: {
                         left: 'prev,next today',
@@ -139,8 +156,6 @@
                             fechaFinManual = null;
                             limpiarSeleccionVisual();
                             pintarDia(clickedDateStr);
-                            contadorDias.textContent = 'Selecciona la fecha de fin';
-                            contadorDias.classList.add('visible');
                             return;
                         }
 
@@ -160,12 +175,11 @@
                                 const resInicio = new Date(reserva.start);
                                 const resFin = new Date(reserva.end);
                                 const diaFecha = new Date(dia);
-                                if (diaFecha >= resInicio && diaFecha < resFin) {
+                                if (diaFecha >= resInicio && diaFecha < resFin && reserva.user_id !== userId) {
                                     Swal.fire('Rango no disponible', 'Algunas fechas ya están reservadas.', 'warning');
                                     limpiarSeleccionVisual();
                                     fechaInicioManual = null;
                                     fechaFinManual = null;
-                                    contadorDias.classList.remove('visible');
                                     return;
                                 }
                             }
@@ -177,8 +191,6 @@
 
                         const totalDias = rangoFechasStr.length;
                         const precioTotal = (totalDias * precioDia).toFixed(2);
-                        contadorDias.textContent = `Has seleccionado ${totalDias} día${totalDias > 1 ? 's' : ''}`;
-                        contadorDias.classList.add('visible');
 
                         // Rellenar modal
                         document.getElementById('modal-fechas').innerText = `${fechaInicioManual} - ${fechaFinManual}`;
@@ -211,7 +223,6 @@
                                     limpiarSeleccionVisual();
                                     fechaInicioManual = null;
                                     fechaFinManual = null;
-                                    contadorDias.classList.remove('visible');
                                 })
                                 .catch(() => {
                                     Swal.fire('Error', 'No se pudo realizar la reserva.', 'error');
@@ -227,7 +238,6 @@
                     limpiarSeleccionVisual();
                     fechaInicioManual = null;
                     fechaFinManual = null;
-                    contadorDias.classList.remove('visible');
                 });
 
 

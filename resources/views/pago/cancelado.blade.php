@@ -18,9 +18,9 @@
                     <i class="fas fa-times-circle cancel-icon" style="font-size: 90px;"></i>
                 </div>
                 <h2 class="mb-4">Pago Cancelado</h2>
-                <p class="cancel-message">El proceso de pago ha sido cancelado. Tu carrito sigue disponible si deseas completar la compra mÃ¡s tarde.</p>
-                <div class="mt-4">
-                    <a href="{{ route('carrito') }}" class="btn btn-primary">
+                <p class="cancel-message">El proceso de pago ha sido cancelado. Tu carrito sigue disponible si deseas completar la compra más tarde.</p>
+                <div class="mt-4 ">
+                    <a href="{{ route('carrito') }}" class="btn-cancelar">
                         <i class="fas fa-shopping-cart mr-2"></i>Volver al carrito
                     </a>
                 </div>

@@ -8,6 +8,7 @@ use App\Models\Vehiculo;
 use Illuminate\Support\Facades\DB;
 use App\Models\VehiculosReservas;
 use App\Models\Valoracion;
+use Carbon\Carbon;
 
 class CarritoController extends Controller
 {
@@ -42,6 +43,9 @@ class CarritoController extends Controller
                     // Eliminar la relación innecesaria
                     unset($vehiculoData['vehiculos_reservas']);
 
+                    // Añadir esta línea:
+                    $vehiculoData['id_vehiculos_reservas'] = $vr->id_vehiculos_reservas;
+
                     // Siempre incluir info de reserva + total_precio
                     $vehiculoData['reserva'] = [
                         'id_reserva' => $reserva->id_reservas,
@@ -70,45 +74,59 @@ class CarritoController extends Controller
         return response()->json($vehiculosConInfo);
     }
 
-    public function eliminarReserva($idReserva)
+    public function eliminarReserva($idVehiculoReserva)
     {
         $user = Auth::user();
 
-        // Iniciar una transacción
         DB::beginTransaction();
 
         try {
-            // Buscar la reserva y verificar que pertenece al usuario
-            $reserva = \App\Models\Reserva::where('id_reservas', $idReserva)
-                ->where('id_usuario', $user->id_usuario)
+            // Buscar la relación vehiculos_reservas y verificar que pertenece a una reserva del usuario
+            $vehiculoReserva = VehiculosReservas::with(['reserva', 'vehiculo'])
+                ->where('id_vehiculos_reservas', $idVehiculoReserva)
                 ->first();
 
-            if (!$reserva) {
+            if (!$vehiculoReserva || !$vehiculoReserva->reserva || $vehiculoReserva->reserva->id_usuario != $user->id_usuario) {
                 return response()->json(['error' => 'Reserva no encontrada o no autorizada'], 404);
             }
 
-            // Obtener el precio total de la reserva
-            $precioTotal = $reserva->total_precio;
-
-            // Eliminar las entradas relacionadas en vehiculos_reservas
-            VehiculosReservas::where('id_reservas', $idReserva)->delete();
-
-            // Restar el precio total de la reserva
-            $reserva->total_precio -= $precioTotal;
+            $reserva = $vehiculoReserva->reserva;
+            $fechaIni = Carbon::parse($vehiculoReserva->fecha_ini);
+            $fechaFin = Carbon::parse($vehiculoReserva->fecha_final);
+            $dias = $fechaIni->diffInDays($fechaFin) + 1;
+            $precioPorDia = $vehiculoReserva->vehiculo->precio_dia;
+            $precioVehiculo = $precioPorDia * $dias;
+            $reserva->total_precio -= $precioVehiculo;
+            if ($reserva->total_precio < 0) $reserva->total_precio = 0;
             $reserva->save();
-            Valoracion::where('id_reservas', $idReserva)->delete();
 
-            // Eliminar la reserva
-            $reserva->delete();
+            // Eliminar la relación vehiculos_reservas
+            $vehiculoReserva->delete();
 
-            // Confirmar la transacción
+            // Si la reserva ya no tiene vehículos asociados, eliminar la reserva y valoraciones
+            $vehiculosRestantes = VehiculosReservas::where('id_reservas', $reserva->id_reservas)->count();
+            if ($vehiculosRestantes == 0) {
+                Valoracion::where('id_reservas', $reserva->id_reservas)->delete();
+                $reserva->delete();
+            }
+
             DB::commit();
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            // Revertir la transacción en caso de error
             DB::rollBack();
-            return response()->json(['error' => 'Error al eliminar la reserva: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error al eliminar el vehículo de la reserva: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function getCartCount()
+    {
+        $user = Auth::user();
+        $count = Vehiculo::whereHas('vehiculosReservas.reserva', function ($query) use ($user) {
+            $query->where('estado', 'pendiente')
+                  ->where('id_usuario', $user->id_usuario);
+        })->count();
+
+        return response()->json(['count' => $count]);
     }
 }
