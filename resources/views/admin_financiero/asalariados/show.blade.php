@@ -39,8 +39,11 @@
                     <p class="text-muted mb-3">{{ $usuario->email }}</p>
                     
                     <div class="d-grid gap-2">
-                        <a href="{{ route('asalariados.edit', $asalariado->id) }}" class="btn text-white" style="background-color: #9F17BD;">
+                        <a href="{{ route('asalariados.edit', $asalariado->id) }}" class="btn text-white mb-2" style="background-color: #9F17BD;">
                             <i class="fas fa-edit"></i> Editar información
+                        </a>
+                        <a href="{{ route('asalariados.ficha.salarial', $asalariado->id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-pdf"></i> Descargar ficha salarial
                         </a>
                     </div>
                 </div>

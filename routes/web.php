@@ -191,6 +191,7 @@ Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
         Route::match(['post', 'put'], '/{id}/update', [AsalariadoController::class, 'update'])->name('asalariados.update');
         Route::post('/{id}/update-ajax', [AsalariadoController::class, 'updateAjax'])->name('asalariados.update.ajax');
         Route::get('/{id}/detalle', [AsalariadoController::class, 'show'])->name('asalariados.show');
+        Route::get('/{id}/ficha-salarial', [AsalariadoController::class, 'descargarFichaSalarial'])->name('asalariados.ficha.salarial');
     });
     // Nuevo sistema de reportes financieros - COMENTADO
     // Route::get('/financial/dashboard', [FinancialReportController::class, 'dashboard'])->name('financial.dashboard');

@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AsalariadoController extends Controller
 {
@@ -381,5 +382,47 @@ class AsalariadoController extends Controller
             'parking' => $parking,
             'sede' => $sede
         ]);
+    }
+    
+    /**
+     * Genera un PDF con la información salarial del asalariado
+     */
+    public function descargarFichaSalarial($id)
+    {
+        // Verificar que el asalariado pertenezca a la misma sede que el admin financiero
+        $adminFinanciero = Auth::user();
+        $asalariadoAdmin = Asalariado::where('id_usuario', $adminFinanciero->id_usuario)->first();
+        $parkingAdmin = Parking::find($asalariadoAdmin->parking_id);
+        $sedeId = $parkingAdmin->id_lugar;
+        
+        // Obtener el asalariado
+        $asalariado = Asalariado::findOrFail($id);
+        $parkingAsalariado = Parking::find($asalariado->parking_id);
+        
+        // Verificar que pertenezca a la misma sede
+        if ($parkingAsalariado->id_lugar != $sedeId) {
+            return redirect()->route('asalariados.index')
+                ->with('error', 'No puedes ver detalles de asalariados de otras sedes');
+        }
+        
+        // Obtener usuario y datos relacionados
+        $usuario = User::find($asalariado->id_usuario);
+        $parking = Parking::find($asalariado->parking_id);
+        $sede = Lugar::find($sedeId);
+        
+        $data = [
+            'asalariado' => $asalariado,
+            'usuario' => $usuario,
+            'parking' => $parking,
+            'sede' => $sede,
+            'fecha_emision' => now()->format('d/m/Y'),
+            'numero_ficha' => 'FS-' . str_pad($asalariado->id, 6, '0', STR_PAD_LEFT)
+        ];
+        
+        // Generar el PDF
+        $pdf = PDF::loadView('admin_financiero.asalariados.ficha_salarial', $data);
+        
+        // Descargar el PDF
+        return $pdf->download('ficha_salarial_' . $usuario->nombre . '.pdf');
     }
 }
