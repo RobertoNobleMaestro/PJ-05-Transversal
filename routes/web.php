@@ -23,6 +23,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatViewController;
 use App\Http\Controllers\TallerController;
 use App\Http\Controllers\HistorialGestorController;
+use App\Http\Controllers\ParkingGestorController;
 use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\AdminFinancieroController;
 use App\Http\Controllers\AsalariadoController;
@@ -82,6 +83,7 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     // Carrito
     Route::get('/carrito', fn() => view('carrito.index'))->name('carrito');
     Route::get('/ver-carrito', [CarritoController::class, 'index'])->name('carrito.ver');
+    Route::get('/carrito/count', [CarritoController::class, 'getCartCount'])->name('carrito.count');
     Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');
 
     // Reservas y vehÃ­culos
@@ -126,6 +128,12 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('gestor/vehiculos/{id}/crudreservas', [VehiculoCrudController::class, 'getReservas']);
     Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
     Route::get('/gestor/historial/data', [HistorialGestorController::class, 'getHistorialData'])->name('gestor.historial.data');
+    Route::prefix('gestor')->middleware('auth')->group(function () {
+    Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
+    Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
+    Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
+});
+
 });
 
 

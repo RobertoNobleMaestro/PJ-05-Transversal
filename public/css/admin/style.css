@@ -518,3 +518,19 @@ body {
     color: white;
     text-decoration: none;
 }
+#map {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+}
+.edit-panel-below {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+.edit-panel-below.show {
+    max-height: 1000px; /* o más si el contenido es largo */
+    opacity: 1;
+    margin-top: 2rem;
+}

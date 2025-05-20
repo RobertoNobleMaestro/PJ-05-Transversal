@@ -221,24 +221,20 @@ a:hover{
 /* Día actual */
 .fc-day-today {
   background-color: #e9d7ff !important;
-  border-radius: 8px !important;
 }
 
 /* Evento */
 .fc-event {
-  background-color: #6f42c1 !important;
   color: #fff !important;
   border: none !important;
   font-weight: 500 !important;
   font-size: 0.85rem !important;
   padding: 2px 6px !important;
-  border-radius: 12px !important;
   text-align: center !important;
 }
 /* Resaltar los días seleccionados */
 .fc-day-selected {
-    background-color: #d0ebff !important;
-    border-radius: 8px !important;
+    background-color: #cab1fa !important;
     animation: fadeIn 0.3s ease-in-out !important;
     position: relative !important;
 }
