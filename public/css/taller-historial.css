@@ -1,0 +1,13 @@
+/* Estilos movidos desde historial.blade.php */
+#filtros-estado .btn.active,
+#filtros-estado .btn:active {
+    background-color: #9F17BD;
+    color: #fff;
+    border-color: #9F17BD;
+}
+
+#tablaMantenimientos th,
+#tablaMantenimientos td {
+    text-align: center;
+    vertical-align: middle;
+}

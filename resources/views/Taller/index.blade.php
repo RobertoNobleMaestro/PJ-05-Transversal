@@ -1,72 +1,10 @@
 @extends('layouts.admin')
 
 @section('title', 'Lista de Vehículos')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/taller-index.css') }}">
+@endpush
 
-@section('content')
-
-<style>
-    #vehiculos-table th,
-    #vehiculos-table td {
-        text-align: center;
-        vertical-align: middle;
-    }
-    .custom-modal-content {
-        background: #fff;
-        border-radius: 20px;
-        border: 2px solid #9F17BD;
-        box-shadow: 0 6px 24px rgba(159,23,189,0.08), 0 2px 12px rgba(34,34,34,0.10);
-        padding: 2.5rem 2.5rem 2.5rem 2.5rem;
-        transition: box-shadow 0.25s;
-    }
-    .custom-modal-content:hover {
-        box-shadow: 0 10px 36px rgba(159,23,189,0.17), 0 4px 24px rgba(34,34,34,0.18);
-    }
-    /* ---- MODAL AGENDAR: Inputs y Selects ---- */
-    .custom-modal-content .modal-form-control,
-    .custom-modal-content .modal-form-select {
-        color: #222;
-        border: 2px solid #9F17BD;
-        background: #fff;
-        border-radius: 6px;
-        box-shadow: none;
-        transition: border-color 0.2s;
-        font-size: 1rem;
-        padding: 0.5rem 0.75rem;
-    }
-    .custom-modal-content .modal-form-control:focus,
-    .custom-modal-content .modal-form-select:focus {
-        border-color: #7e138f;
-        outline: 0;
-        box-shadow: 0 0 0 0.15rem rgba(159,23,189,0.13);
-    }
-    .custom-modal-content .modal-form-select option {
-        color: #222;
-    }
-    /* ---- MODAL AGENDAR: Botón ---- */
-    .custom-modal-content .btn-agendar-modal {
-        background: linear-gradient(90deg, #9F17BD 70%, #7e138f 100%);
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        letter-spacing: .5px;
-        box-shadow: 0 2px 8px rgba(159,23,189,0.08);
-        transition: background 0.2s, color 0.2s, border 0.2s;
-        padding: 0.65rem 1.5rem;
-        font-size: 1.08rem;
-    }
-    .custom-modal-content .btn-agendar-modal:hover,
-    .custom-modal-content .btn-agendar-modal:focus {
-        background: #fff;
-        color: #9F17BD;
-        border: 2px solid #9F17BD;
-    }
-    .custom-modal-content ::placeholder {
-        color: #9F17BD;
-        opacity: 1;
-    }
-
-</style>
 
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
@@ -106,42 +44,11 @@
             </div>
         @endif
 
-        <!-- Filtros sumativos -->
-        <style>
-            .form-select.select-purple, .form-select.select-purple:focus {
-                color: #9F17BD;
-                border-color: #9F17BD;
-                background: #fff;
-                box-shadow: none;
-            }
-            .form-select.select-purple:focus {
-                border-width: 2px;
-                outline: 0;
-                box-shadow: 0 0 0 0.15rem rgba(159,23,189,0.15);
-            }
-            .form-select.select-purple option {
-                color: #222;
-            }
-            .btn-outline-purple {
-                color: #9F17BD;
-                border-color: #9F17BD;
-                background: #fff;
-            }
-            .btn-outline-purple:hover, .btn-outline-purple:focus, .btn-outline-purple.active {
-                background-color: #9F17BD;
-                color: #fff;
-                border-color: #9F17BD;
-            }
-            .filtros-label {
-                font-weight: 600;
-                margin-bottom: .25rem;
-                display: block;
-            }
-        </style>
+
         <div class="row mb-4 g-2 align-items-end">
             <div class="col-md-3">
                 <label for="filtro-sede" class="filtros-label">Sede</label>
-                <select id="filtro-sede" class="form-select select-purple">
+                <select id="filtro-sede" class="form-select select-purple" style="border">
                     <option value="">Todas</option>
                     @foreach($lugares as $lugar)
                         <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
@@ -236,6 +143,10 @@
                         </select>
                         <div class="invalid-feedback">Por favor seleccione el motivo de la reserva.</div>
                     </div>
+                    <div class="mb-3" id="motivo-averia-container" style="display:none;">
+                        <label for="motivo-averia" class="form-label">Motivo de la avería (breve)</label>
+                        <input type="text" class="form-control" id="motivo-averia" name="motivo_averia" maxlength="100" placeholder="Describa brevemente la avería">
+                    </div>
                     
                     <div class="alert alert-warning" id="alerta-disponibilidad" style="display: none">
                         <i class="fas fa-exclamation-triangle"></i> 
@@ -251,13 +162,24 @@
     </div>
 </div>
     
-@endsection
+
 
 @section('scripts')
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function() {
+    // Mostrar/ocultar campo motivo avería
+    $('#motivo-reserva').on('change', function() {
+        if ($(this).val() === 'averia') {
+            $('#motivo-averia-container').show();
+            $('#motivo-averia').prop('required', true);
+        } else {
+            $('#motivo-averia-container').hide();
+            $('#motivo-averia').prop('required', false);
+            $('#motivo-averia').val('');
+        }
+    });
     function getFiltrosData() {
         return {
             sede: $('#filtro-sede').val(),

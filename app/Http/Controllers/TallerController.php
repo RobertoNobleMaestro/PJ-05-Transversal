@@ -224,7 +224,8 @@ class TallerController extends Controller
                     'colorEstado' => $colorEstado,
                     'fechaCompleta' => $fechaHora->format('d/m/Y H:i:s'),
                     'esPasado' => $fechaHora->isPast(),
-                    'id_vehiculo' => $mantenimiento->vehiculo_id
+                    'id_vehiculo' => $mantenimiento->vehiculo_id,
+                    'motivo_reserva' => $mantenimiento->motivo_reserva
                 ];
             });
             

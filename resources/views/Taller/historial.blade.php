@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @section('title', 'Historial de Mantenimientos')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/taller-historial.css') }}">
+@endpush
 
 @section('content')
 <div class="admin-container">
@@ -32,23 +35,10 @@
                     <button type="button" class="btn btn-outline-purple" data-estado="completado">Completado</button>
                     <button type="button" class="btn btn-outline-purple" data-estado="cancelado">Cancelado</button>
                 </div>
-                <style>
-                    #filtros-estado .btn.active,
-                    #filtros-estado .btn:active {
-                        background-color: #9F17BD;
-                        color: #fff;
-                        border-color: #9F17BD;
-                    }
-                </style>
+
             </div>
 
-            <style>
-                #tablaMantenimientos th,
-                #tablaMantenimientos td {
-                    text-align: center;
-                    vertical-align: middle;
-                }
-            </style>
+
 
             <div id="vehiculos-table-container">
                 <table class="crud-table" id="tablaMantenimientos">
@@ -57,6 +47,7 @@
                             <th>Vehículo</th>
                             <th>Taller</th>
                             <th>Fecha Completa</th>
+                            <th>Motivo</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -99,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>${m.vehiculo}</td>
                             <td>${m.taller}</td>
                             <td>${m.fechaCompleta}</td>
+                            <td>${m.motivo_reserva ? (m.motivo_reserva === 'averia' ? 'Avería' : 'Mantenimiento') : ''}</td>
                             <td><span class="badge bg-${m.colorEstado} text-capitalize">${m.estado}</span></td>
                             <td>
                                 <a href="/taller/${m.id}/edit" class="btn-outline-purple" title="Editar" >
