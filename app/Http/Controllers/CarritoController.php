@@ -111,4 +111,15 @@ class CarritoController extends Controller
             return response()->json(['error' => 'Error al eliminar la reserva: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getCartCount()
+    {
+        $user = Auth::user();
+        $count = Vehiculo::whereHas('vehiculosReservas.reserva', function ($query) use ($user) {
+            $query->where('estado', 'pendiente')
+                  ->where('id_usuario', $user->id_usuario);
+        })->count();
+
+        return response()->json(['count' => $count]);
+    }
 }

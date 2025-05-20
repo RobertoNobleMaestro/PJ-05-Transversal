@@ -83,6 +83,7 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     // Carrito
     Route::get('/carrito', fn() => view('carrito.index'))->name('carrito');
     Route::get('/ver-carrito', [CarritoController::class, 'index'])->name('carrito.ver');
+    Route::get('/carrito/count', [CarritoController::class, 'getCartCount'])->name('carrito.count');
     Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');
 
     // Reservas y vehÃ­culos
