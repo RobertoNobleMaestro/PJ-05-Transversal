@@ -180,7 +180,10 @@ class ChoferController extends Controller
         $grupo->fecha_creacion = now();
 
         if ($request->hasFile('imagen_grupo')) {
-            $grupo->imagen_grupo = $request->file('imagen_grupo')->store('img', 'public');
+            $imagen = $request->file('imagen_grupo');
+            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+            $imagen->move(public_path('img'), $nombreImagen);
+            $grupo->imagen_grupo = $nombreImagen;
         }
 
         $grupo->save();
@@ -517,7 +520,7 @@ class ChoferController extends Controller
                     return [
                         'id' => $grupo->id,
                         'nombre' => $grupo->nombre,
-                        'imagen' => $grupo->imagen_grupo,
+                        'imagen' => $grupo->imagen_grupo ? asset('img/' . $grupo->imagen_grupo) : null,
                         'usuarios_count' => $miembrosCount,
                         'usuarios' => $usuarios,
                         'debug_info' => [

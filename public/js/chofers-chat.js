@@ -100,8 +100,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                data-participantes="${grupo.usuarios_count}" 
                                data-miembros='${usuariosStr}'>
                                 <div class="me-2">
-                                    ${grupo.imagen_grupo ? 
-                                    `<img src="/img/${grupo.imagen_grupo}" class="rounded-circle" width="40" height="40" alt="${grupo.nombre}">` : 
+                                    ${grupo.imagen ? 
+                                    `<img src="${grupo.imagen}" class="rounded-circle" width="40" height="40" alt="${grupo.nombre}">` : 
                                     `<div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fa-solid fa-users"></i></div>`}
                                 </div>
                                 <div class="flex-grow-1">
