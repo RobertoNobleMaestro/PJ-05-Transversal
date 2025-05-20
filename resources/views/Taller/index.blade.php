@@ -1,16 +1,10 @@
 @extends('layouts.admin')
 
 @section('title', 'Lista de Vehículos')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/taller-index.css') }}">
+@endpush
 
-@section('content')
-
-<style>
-    #vehiculos-table th,
-    #vehiculos-table td {
-        text-align: center;
-        vertical-align: middle;
-    }
-</style>
 
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
@@ -50,46 +44,55 @@
             </div>
         @endif
 
-        <div id="vehiculos-table-container">
-            <table class="crud-table" id="vehiculos-table">
-                <thead>
-                    <tr>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                        <th>Kilometraje</th>
-                        <th>Año</th>
-                        <th>Precio/Día</th>
-                        <th>Sede</th>
-                        <th>Tipo</th>
-                        <th>Parking</th>
-                        <th>Últ. Mantenimiento</th>
-                        <th>Próx. Mantenimiento</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($vehiculos as $vehiculo)
-                        <tr>
-                            <td>{{ $vehiculo->marca }}</td>
-                            <td>{{ $vehiculo->modelo }}</td>
-                            <td>{{ $vehiculo->kilometraje }} kms</td>
-                            <td>{{ $vehiculo->año }}</td>
-                            <td>{{ $vehiculo->precio_dia }} €</td>
-                            <td>{{ $vehiculo->lugar->nombre }}</td>
-                            <td>{{ $vehiculo->tipo->nombre }}</td>
-                            <td>{{ $vehiculo->parking->nombre }}</td>
-                            <td>{{ $vehiculo->ultima_fecha_mantenimiento }}</td>
-                            <td id="prox-mant-{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->proxima_fecha_mantenimiento }}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm btn-agendar-mantenimiento" 
-                                        data-id="{{ $vehiculo->id_vehiculos }}">
-                                    <i class="fas fa-calendar-check"></i>
-                                </button>
-                            </td>
-                        </tr>
+
+        <div class="row mb-4 g-2 align-items-end">
+            <div class="col-md-3">
+                <label for="filtro-sede" class="filtros-label">Sede</label>
+                <select id="filtro-sede" class="form-select select-purple" style="border">
+                    <option value="">Todas</option>
+                    @foreach($lugares as $lugar)
+                        <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
                     @endforeach
-                </tbody>
-            </table>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="filtro-anio" class="filtros-label">Año</label>
+                <select id="filtro-anio" class="form-select select-purple">
+                    <option value="">Todos</option>
+                    @foreach($anios as $anio)
+                        <option value="{{ $anio }}">{{ $anio }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filtro-tipo" class="filtros-label">Tipo</label>
+                <select id="filtro-tipo" class="form-select select-purple">
+                    <option value="">Todos</option>
+                    @foreach($tipos as $tipo)
+                        <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filtro-parking" class="filtros-label">Parking</label>
+                <select id="filtro-parking" class="form-select select-purple">
+                    <option value="">Todos</option>
+                    @foreach($parkings as $parking)
+                        <option value="{{ $parking->id }}">{{ $parking->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-1 d-flex flex-column justify-content-end">
+                <label class="filtros-label">&nbsp;</label>
+                <button id="btn-limpiar-filtros" class="btn btn-outline-purple h-100 w-100 d-flex align-items-center justify-content-center" title="Limpiar filtros" style="min-height:38px;">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de vehículos -->
+        <div id="vehiculos-table-container">
+            @include('Taller.partials.tabla_vehiculos', ['vehiculos' => $vehiculos])
         </div>
     </div>
 </div>
@@ -97,7 +100,7 @@
 <!-- Modal para agendar mantenimiento -->
 <div class="modal fade" id="modalAgendarMantenimiento" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content custom-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabel">Agendar Mantenimiento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -130,6 +133,20 @@
                         </select>
                         <div class="text-info mt-1" id="disponibilidad-info"></div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="motivo-reserva" class="form-label">Motivo de la reserva</label>
+                        <select class="form-select" id="motivo-reserva" name="motivo_reserva" required>
+                            <option value="">Seleccione el motivo</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="averia">Avería</option>
+                        </select>
+                        <div class="invalid-feedback">Por favor seleccione el motivo de la reserva.</div>
+                    </div>
+                    <div class="mb-3" id="motivo-averia-container" style="display:none;">
+                        <label for="motivo-averia" class="form-label">Motivo de la avería (breve)</label>
+                        <input type="text" class="form-control" id="motivo-averia" name="motivo_averia" maxlength="100" placeholder="Describa brevemente la avería">
+                    </div>
                     
                     <div class="alert alert-warning" id="alerta-disponibilidad" style="display: none">
                         <i class="fas fa-exclamation-triangle"></i> 
@@ -137,19 +154,93 @@
                     </div>
                     
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Agendar</button>
+                        <button type="submit" class="btn btn-outline-purple flex-grow-1">Agendar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+    
 
-@endsection
 
 @section('scripts')
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function() {
+    // Mostrar/ocultar campo motivo avería
+    $('#motivo-reserva').on('change', function() {
+        if ($(this).val() === 'averia') {
+            $('#motivo-averia-container').show();
+            $('#motivo-averia').prop('required', true);
+        } else {
+            $('#motivo-averia-container').hide();
+            $('#motivo-averia').prop('required', false);
+            $('#motivo-averia').val('');
+        }
+    });
+    function getFiltrosData() {
+        return {
+            sede: $('#filtro-sede').val(),
+            año: $('#filtro-anio').val(),
+            tipo: $('#filtro-tipo').val(),
+            parking: $('#filtro-parking').val(),
+            _token: '{{ csrf_token() }}'
+        };
+    }
+    function filtrarVehiculos(pageUrl) {
+        var data = getFiltrosData();
+        var url = pageUrl || '{{ route('taller.filtrar') }}';
+        // Permitir paginar aunque no haya filtros activos
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: data,
+            success: function(response) {
+                $('#vehiculos-table-container').html(response.html);
+                // Reinicializar DataTable solo para responsive y orden
+                if ($.fn.DataTable.isDataTable('#vehiculos-table')) {
+                    $('#vehiculos-table').DataTable().destroy();
+                }
+                $('#vehiculos-table').DataTable({
+                    "pageLength": 10,
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                    },
+                    "order": [[0, "asc"]],
+                    "responsive": true,
+                    "paging": false,
+                    "info": false,
+                    "searching": false,
+                    "ordering": true
+                });
+            }
+        });
+    }
+    $('#filtro-sede, #filtro-anio, #filtro-tipo, #filtro-parking').on('change', function() {
+        filtrarVehiculos();
+    });
+    $('#btn-limpiar-filtros').on('click', function(e) {
+        e.preventDefault();
+        $('#filtro-sede').val('');
+        $('#filtro-anio').val('');
+        $('#filtro-tipo').val('');
+        $('#filtro-parking').val('');
+        filtrarVehiculos();
+    });
+    // Delegación para paginación AJAX
+    $(document).on('click', '.taller-pagination .page-link', function(e) {
+        var $parent = $(this).parent();
+        var href = $(this).attr('href');
+        // Solo ejecutar si el link NO es disabled ni active y tiene href
+        if (!$parent.hasClass('disabled') && !$parent.hasClass('active') && href && href !== '#') {
+            e.preventDefault();
+            filtrarVehiculos(href);
+        }
+    });
+});
+</script>
 <!-- Bootstrap JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- DataTables -->

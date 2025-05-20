@@ -40,6 +40,8 @@ class DatabaseSeeder extends Seeder
             ValoracionSeeder::class,        // Valoraciones (dependen de usuarios y vehículos)
             CarritoSeeder::class,           // Carritos de compra
             ReservaCompletaSeeder::class,   // Reservas completas
+            PiezasSeeder::class,            // Piezas de vehículos
+            AveriasSeeder::class,           // Averías de vehículos
         ]);
         
         // 5. Subtipo de asalariados (depende de usuarios y parkings)

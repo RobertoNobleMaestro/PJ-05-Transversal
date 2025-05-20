@@ -7,7 +7,7 @@ use App\Models\Taller;
 use App\Models\Mantenimiento;
 use Carbon\Carbon;
 use DB;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TallerController extends Controller
 {
@@ -15,13 +15,40 @@ class TallerController extends Controller
     public function index()
     {
         // Recupera todos los vehículos con sus relaciones (lugar, tipo, parking)
-        $vehiculos = Vehiculo::with(['lugar', 'tipo', 'parking'])->get();
+        $vehiculos = Vehiculo::with(['lugar', 'tipo', 'parking'])->paginate(4);
         
         // Obtener la lista de talleres disponibles
         $talleres = Taller::all();
+        
+        // Catálogos para los filtros
+        $lugares = \App\Models\Lugar::all();
+        $tipos = \App\Models\Tipo::all();
+        $anios = Vehiculo::select('año')->distinct()->orderBy('año', 'desc')->pluck('año');
+        $parkings = \App\Models\Parking::all();
 
-        // Retorna la vista 'Taller.index' pasando los vehículos recuperados
-        return view('Taller.index', compact('vehiculos', 'talleres'));
+        // Retorna la vista 'Taller.index' pasando los vehículos recuperados y catálogos
+        return view('Taller.index', compact('vehiculos', 'talleres', 'lugares', 'tipos', 'anios', 'parkings'));
+    }
+
+    // AJAX: Filtrado sumativo
+    public function filtrarVehiculos(Request $request)
+    {
+        $query = Vehiculo::with(['lugar', 'tipo', 'parking']);
+        if ($request->filled('sede')) {
+            $query->where('id_lugar', $request->sede);
+        }
+        if ($request->filled('año')) {
+            $query->where('año', $request->año);
+        }
+        if ($request->filled('tipo')) {
+            $query->where('id_tipo', $request->tipo);
+        }
+        if ($request->filled('parking')) {
+            $query->where('parking_id', $request->parking);
+        }
+        $vehiculos = $query->paginate(4)->appends($request->except('page'));
+        $html = view('Taller.partials.tabla_vehiculos', compact('vehiculos'))->render();
+        return response()->json(['html' => $html]);
     }
 
     // Método para actualizar la fecha de mantenimiento de un vehículo
@@ -86,15 +113,12 @@ class TallerController extends Controller
             $mantenimiento->fecha_programada = $request->fecha_mantenimiento;
             $mantenimiento->hora_programada = $request->hora_mantenimiento;
             $mantenimiento->estado = 'pendiente';
+            $mantenimiento->motivo_reserva = $request->motivo_reserva;
             $mantenimiento->save();
             
             // Guardar fecha actual como última fecha de mantenimiento
             $vehiculo->ultima_fecha_mantenimiento = now();
-            
-            // Guardar la próxima fecha de mantenimiento (fecha y hora)
-            $fechaHora = $request->fecha_mantenimiento . ' ' . $request->hora_mantenimiento;
-            $vehiculo->proxima_fecha_mantenimiento = $fechaHora;
-            
+            // No modificar proxima_fecha_mantenimiento aquí, solo al completar el mantenimiento
             $vehiculo->save();
             
             // Obtener el nombre del taller para la respuesta
@@ -198,9 +222,10 @@ class TallerController extends Controller
                     'hora' => $mantenimiento->hora_programada,
                     'estado' => $mantenimiento->estado,
                     'colorEstado' => $colorEstado,
-                    'fechaCompleta' => $fechaHora->format('d/m/Y H:i'),
+                    'fechaCompleta' => $fechaHora->format('d/m/Y H:i:s'),
                     'esPasado' => $fechaHora->isPast(),
-                    'id_vehiculo' => $mantenimiento->vehiculo_id
+                    'id_vehiculo' => $mantenimiento->vehiculo_id,
+                    'motivo_reserva' => $mantenimiento->motivo_reserva
                 ];
             });
             
@@ -298,10 +323,99 @@ class TallerController extends Controller
             ], 500);
         }
     }
+    public function destroy($id)
+    {
+        $mantenimiento = Mantenimiento::find($id);
+        if (!$mantenimiento) {
+            return response()->json(['success' => false, 'message' => 'Mantenimiento no encontrado.']);
+        }
+
+        $mantenimiento->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function edit($id)
+    {
+        $mantenimiento = Mantenimiento::findOrFail($id);
+        $vehiculos = Vehiculo::all();
+        $talleres = Taller::all();
+
+        return view('taller.edit', compact('mantenimiento', 'vehiculos', 'talleres'));
+    }
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'vehiculo_id' => 'required|exists:vehiculos,id_vehiculos',
+        'taller_id' => 'required|exists:talleres,id',
+        'fecha_programada' => 'required|date',
+        'hora_programada' => 'required',
+        'estado' => 'required|in:pendiente,completado,cancelado',
+    ]);
+
+    $mantenimiento = Mantenimiento::findOrFail($id);
+    $mantenimiento->update($request->only([
+        'vehiculo_id',
+        'taller_id',
+        'fecha_programada',
+        'hora_programada',
+        'estado'
+    ]));
+
+    if ($request->estado === 'completado') {
+        $vehiculo = $mantenimiento->vehiculo;
+        if ($vehiculo) {
+            // Si el estado es cancelado, poner fechas especiales
+            if ($request->estado === 'cancelado') {
+                $vehiculo->ultima_fecha_mantenimiento = Carbon::now()->subMonths(7);
+                $vehiculo->proxima_fecha_mantenimiento = $vehiculo->ultima_fecha_mantenimiento;
+            } else {
+                $vehiculo->ultima_fecha_mantenimiento = $request->fecha_programada;
+                // Actualizar proxima_fecha_mantenimiento según el motivo y estado
+                if ($mantenimiento->motivo_reserva === 'mantenimiento' && $request->estado === 'completado') {
+                    $vehiculo->proxima_fecha_mantenimiento = Carbon::parse($request->fecha_programada)->addMonths(6);
+                } elseif ($mantenimiento->motivo_reserva === 'averia' && $request->estado === 'completado') {
+                    $vehiculo->proxima_fecha_mantenimiento = Carbon::parse($request->fecha_programada)->addMonths(9);
+                }
+            }
+            $vehiculo->save();
+        }
+    }
+
+    return redirect()->route('taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+}
+
+
+
 
     // Método para mostrar la página de historial de mantenimientos
     public function historial()
     {
         return view('Taller.historial');
+    }
+
+    public function descargarFactura($id)
+    {
+        $mantenimiento = \App\Models\Mantenimiento::with(['vehiculo.tipo'])->findOrFail($id);
+        $vehiculo = $mantenimiento->vehiculo;
+    
+        // Ejemplo de precios por tipo
+        $precios = [
+            'Coche' => 120,
+            'Moto' => 60,
+            'Furgoneta' => 150,
+        ];
+        $precio = $precios[$vehiculo->tipo->nombre ?? 'Coche'] ?? 100;
+    
+        $data = [
+            'mantenimiento' => $mantenimiento,
+            'vehiculo' => $vehiculo,
+            'precio' => $precio,
+            'fecha_hora' => $mantenimiento->fecha_programada->format('d/m/Y') . ' ' . $mantenimiento->hora_programada,
+            'imagen' => $vehiculo->imagen // Ajusta según tu sistema
+        ];
+    
+        $pdf = Pdf::loadView('Taller.factura', $data);
+        return $pdf->download('factura-mantenimiento-'.$vehiculo->matricula.'.pdf');
     }
 }

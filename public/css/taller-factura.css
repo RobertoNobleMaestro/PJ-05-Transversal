@@ -1,0 +1,203 @@
+/* Estilos generales para la factura del taller */
+:root {
+    --color-primario: #9F17BD;
+    --color-secundario: #B3B3B3;
+    --morado-claro: #c176d6;
+    --morado-fondo: #f3e5f5;
+}
+html, body {
+    height: 100%;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    min-height: 100vh;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+}
+.container {
+    min-height: unset;
+    height: auto;
+    display: block;
+    align-items: unset;
+    justify-content: unset;
+    background: none;
+}
+.factura-container {
+    width: 100%;
+    max-width: 850px;
+    min-height: unset;
+    height: auto;
+    margin: 30px auto;
+    background: white;
+    padding: 12px 15px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.10);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+}
+.header {
+    text-align: center;
+    border-bottom: 2px solid var(--color-primario);
+    margin-bottom: 12px;
+    padding-bottom: 7px;
+}
+.logo {
+    max-width: 90px;
+    margin-bottom: 2px;
+}
+h1 {
+    color: var(--color-primario);
+    font-size: 18px;
+    margin: 0 0 3px 0;
+}
+h2 {
+    color: var(--color-primario);
+    font-size: 13px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.datos-factura {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.datos-empresa, .datos-cliente {
+    width: 48%;
+    font-size: 11px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 7px;
+}
+th, td {
+    padding: 4px 5px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-secundario);
+    font-size: 11px;
+}
+th {
+    background-color: var(--morado-claro);
+    color: white;
+    font-size: 11px;
+}
+.total {
+    text-align: right;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--color-primario);
+    margin-top: 8px;
+}
+.info-pago {
+    margin-top: 10px;
+    padding: 7px 8px;
+    background-color: var(--morado-fondo);
+    border-left: 3px solid var(--color-primario);
+    border-radius: 4px;
+    font-size: 11px;
+}
+.footer {
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    margin-top: 10px;
+}
+.actions {
+    margin: 20px 0;
+    text-align: center;
+}
+.btn-primary {
+    background-color: black;
+    border-color: black;
+}
+.btn-secondary {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+}
+.btn-secondary:hover {
+    background-color: #6a0080 !important;
+    border-color: #6a0080 !important;
+    color: #fff !important;
+}
+.btn-primary:hover {
+    background-color: #6a0080 !important;
+    border-color: #6a0080 !important;
+    color: #fff !important;
+}
+.btn-secondary:hover,
+.btn-primary:hover {
+    opacity: 0.9;
+}
+@media print {
+    html, body {
+        width: 210mm;
+        height: 297mm;
+        min-height: initial;
+        max-height: 297mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden;
+        font-size: 10px !important;
+        zoom: 0.85;
+        background: white !important;
+    }
+    .container {
+        width: 210mm;
+        height: auto;
+        min-height: unset;
+        max-height: 297mm;
+        align-items: unset;
+        justify-content: unset;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: none !important;
+    }
+    .factura-container {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        min-height: unset;
+        max-height: 100%;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 7px 10px !important;
+        page-break-after: avoid !important;
+        page-break-before: avoid !important;
+        page-break-inside: avoid !important;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow: visible;
+        background: white !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+    table, th, td {
+        page-break-inside: avoid !important;
+    }
+    .header h1 {
+        font-size: 14px !important;
+    }
+    h2 {
+        font-size: 10px !important;
+    }
+    th, td {
+        font-size: 9px !important;
+        padding: 2px 3px !important;
+    }
+    .total {
+        font-size: 10px !important;
+    }
+    .info-pago, .footer {
+        font-size: 9px !important;
+    }
+}

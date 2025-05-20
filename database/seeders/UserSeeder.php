@@ -570,5 +570,89 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        
+        // Mecánicos Adicionales - Especialistas
+        
+        // Mecánico Jefe Barcelona
+        DB::table('users')->insert([
+            'nombre' => 'MecanicoBCN',
+            'email' => 'mecanicobcn@carflow.com',
+            'DNI' => '50000001J',
+            'telefono' => '620000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1975-05-15',
+            'direccion' => 'Calle Industria 123, Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 4, // Rol de mecánico
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánico Jefe Madrid
+        DB::table('users')->insert([
+            'nombre' => 'MecanicoMAD',
+            'email' => 'jefe.mecanico.mad@carflow.com',
+            'DNI' => '60000001J',
+            'telefono' => '630000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1978-07-22',
+            'direccion' => 'Avenida de los Talleres 45, Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 4, // Rol de mecánico
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánico Jefe Valencia
+        DB::table('users')->insert([
+            'nombre' => 'MecanicoVAL',
+            'email' => 'jefe.mecanico.val@carflow.com',
+            'DNI' => '70000001J',
+            'telefono' => '640000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1980-03-10',
+            'direccion' => 'Calle del Taller 78, Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 4, // Rol de mecánico
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánicos Especialistas por ciudad
+        $especialidades = [
+            'Electricidad' => 'Especialista en Sistemas Eléctricos',
+            'Motor' => 'Especialista en Motores',
+            'Transmisión' => 'Especialista en Transmisiones',
+            'Híbridos' => 'Especialista en Vehículos Híbridos',
+            'Diagnóstico' => 'Especialista en Diagnóstico',
+            'Suspensión' => 'Especialista en Suspensión'
+        ];
+        
+        $ciudades = ['Barcelona' => '5', 'Madrid' => '6', 'Valencia' => '7'];
+        $contador = 1;
+        
+        foreach ($especialidades as $clave => $especialidad) {
+            foreach ($ciudades as $ciudad => $prefijo) {
+                $contador_str = str_pad($contador, 6, '0', STR_PAD_LEFT);
+                DB::table('users')->insert([
+                    'nombre' => "Mecánico {$especialidad} - {$ciudad}",
+                    'email' => "mecanico." . strtolower(str_replace(' ', '', $clave)) . ".{$ciudad}@carflow.com",
+                    'DNI' => "{$prefijo}{$contador_str}E",
+                    'telefono' => "6{$prefijo}" . $contador_str,
+                    'password' => Hash::make('asdASD123'),
+                    'fecha_nacimiento' => '198' . rand(0, 9) . '-' . str_pad(rand(1, 12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1, 28), 2, '0', STR_PAD_LEFT),
+                    'direccion' => "Taller de {$ciudad}, Zona {$contador}",
+                    'foto_perfil' => null,
+                    'licencia_conducir' => 'B',
+                    'id_roles' => 4, // Rol de mecánico
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $contador++;
+            }
+        }
     }
 }

@@ -6,6 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vehiculo extends Model
 {
+    // ...
+    public function getUltimaMantFormateadaAttribute()
+    {
+        return $this->ultima_fecha_mantenimiento
+            ? \Carbon\Carbon::parse($this->ultima_fecha_mantenimiento)->format('d/m/Y')
+            : null;
+    }
+
+    public function getProximaMantFormateadaAttribute()
+    {
+        return $this->proxima_fecha_mantenimiento
+            ? \Carbon\Carbon::parse($this->proxima_fecha_mantenimiento)->format('d/m/Y')
+            : null;
+    }
+
     use HasFactory;
 
     protected $table = 'vehiculos';
@@ -21,7 +36,14 @@ class Vehiculo extends Model
         'kilometraje',
         'id_lugar',
         'id_tipo',
-        'parking_id'
+        'parking_id',
+        'ultima_fecha_mantenimiento',    
+        'proxima_fecha_mantenimiento',   
+    ];
+
+    protected $casts = [
+        'ultima_fecha_mantenimiento' => 'date',   
+        'proxima_fecha_mantenimiento' => 'date',  
     ];
 
     public function lugar()
@@ -71,5 +93,21 @@ class Vehiculo extends Model
             'id_vehiculos',
             'id_reservas'
         );
+    }
+
+    // formato de ultima_fecha_mantenimiento
+    public function getUltimaFechaMantenimientoFormattedAttribute()
+    {
+        return $this->ultima_fecha_mantenimiento
+            ? $this->ultima_fecha_mantenimiento->format('d/m/Y')
+            : 'No disponible';
+    }
+
+    //formato de proxima_fecha_mantenimiento
+    public function getProximaFechaMantenimientoFormattedAttribute()
+    {
+        return $this->proxima_fecha_mantenimiento
+            ? $this->proxima_fecha_mantenimiento->format('d/m/Y')
+            : 'No disponible';
     }
 }
