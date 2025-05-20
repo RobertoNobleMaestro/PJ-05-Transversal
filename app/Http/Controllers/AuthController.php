@@ -48,6 +48,7 @@ class AuthController extends Controller
                     1 => '/admin',           // Admin
                     3 => '/gestor',          // Gestor
                     4 => '/taller/historial', // Mecánico
+                    5 => '/asalariados',      //asalariados
                     6 => '/chofers',         // Chofer
                     default => '/home'        // Cliente u otros roles
                 };
