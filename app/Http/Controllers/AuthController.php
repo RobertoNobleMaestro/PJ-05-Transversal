@@ -165,6 +165,8 @@ class AuthController extends Controller
             if ($request->hasFile('imagen')) {
                 $ruta = $request->file('imagen')->store('perfiles', 'public');
                 $user->foto_perfil = $ruta;
+            } else {
+                $user->foto_perfil = '/default.png';
             }
 
             $user->save();
