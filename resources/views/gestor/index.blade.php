@@ -95,6 +95,18 @@
                             </a>
                         </div>
                     </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-parking fa-3x"></i>
+                            </div>
+                            <h3>Gestión de parkings</h3>
+                            <p>Aqui podrás ver y gestionar de los parkings de tu sede.</p>
+                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

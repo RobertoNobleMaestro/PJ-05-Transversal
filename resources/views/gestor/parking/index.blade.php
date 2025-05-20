@@ -14,9 +14,18 @@
         <div style="position: fixed;width: 220px;">
             <div class="sidebar-title">CARFLOW</div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('gestor.vehiculos') }}" class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i> Vehículos</a></li>
-                <li><a href="{{ route('gestor.chat.listar') }}" class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Chats</a></li>
-                <li><a href="{{ route('gestor.historial') }}" class="{{ request()->routeIs('gestor.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i> Historial</a></li>
+                <li><a href="{{ route('gestor.vehiculos') }}"
+                        class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                        Vehículos</a></li>
+                <li><a href="{{ route('gestor.chat.listar') }}"
+                class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
+                    class="fas fa-comments"></i> Chats</a></li>
+                    <li><a href="{{ route('gestor.historial') }}"
+                class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
+                    class="fas fa-history"></i>Historial</a></li>
+                                        <li><a href="{{ route('gestor.parking.index') }}"
+                class="{{ request()->routeIs('gestor.parking.index') ? 'active' : '' }}"><i
+                    class="fas fa-parking"></i>Parking</a></li>
             </ul>
         </div>
     </div>
