@@ -12,21 +12,18 @@ class ReservaController extends Controller
 {
     public function reservasPorVehiculo($id)
     {
-        $reservas = DB::table('vehiculos_reservas')
-            ->where('id_vehiculos', $id)
-            ->get();
-            // $reservas = DB::table('vehiculos_reservas as vr')
-            // ->join('reservas as r', 'vr.id_reservas', '=', 'r.id_reservas')
-            // ->where('vr.id_vehiculos', $id)
-            // ->where('r.estado', 'confirmada')
-            // ->get();
+        $reservas = DB::table('vehiculos_reservas as vr')
+        ->join('reservas as r', 'vr.id_reservas', '=', 'r.id_reservas')
+        ->where('vr.id_vehiculos', $id)
+        ->get();
     
             $eventos = $reservas->map(function ($reserva) {
                 return [
                     'title' => 'Reservado',
                     'start' => $reserva->fecha_ini,
                     'end' => date('Y-m-d', strtotime($reserva->fecha_final . ' +1 day')), // ← aquí el ajuste
-                    'color' => '#dc3545'
+                    'color' => '#dc3545',
+                    'user_id' => $reserva->id_usuario
                 ];
             });
             
