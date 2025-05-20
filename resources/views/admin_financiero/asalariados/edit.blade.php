@@ -43,7 +43,7 @@
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="fw-bold">Rol:</span>
                             <span class="badge {{ $usuario->role->nombre == 'gestor' ? 'bg-primary' : ($usuario->role->nombre == 'mecanico' ? 'bg-warning text-dark' : 'bg-success') }}">
-                                {{ ucfirst($usuario->role->nombre) }}
+                                {{ $usuario->role->formatted_name }}
                             </span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">

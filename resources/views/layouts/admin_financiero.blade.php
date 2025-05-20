@@ -324,7 +324,6 @@ error_reporting(E_ALL);
     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/asalariados') }}">
-                <img src="{{ asset('img/logo.png') }}" alt="Carflow" height="30">
                 Administración Financiera
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

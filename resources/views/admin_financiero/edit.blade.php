@@ -33,7 +33,7 @@
                     <p><strong>Email:</strong> {{ $asalariado->usuario->email }}</p>
                     <p><strong>Teléfono:</strong> {{ $asalariado->usuario->telefono }}</p>
                     <p><strong>DNI:</strong> {{ $asalariado->usuario->dni }}</p>
-                    <p><strong>Rol:</strong> {{ $asalariado->usuario->role->nombre_rol }}</p>
+                    <p><strong>Rol:</strong> {{ $asalariado->usuario->role->formatted_name }}</p>
                 </div>
                 <div class="col-md-8">
                     <form action="{{ route('admin.financiero.update', $asalariado->id) }}" method="POST">

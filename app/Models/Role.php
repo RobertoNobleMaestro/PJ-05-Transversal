@@ -19,5 +19,20 @@ class Role extends Model
     {
         return $this->hasMany(User::class, 'id_roles', 'id_roles');
     }
+    
+    /**
+     * Get the formatted name of the role
+     *
+     * @return string
+     */
+    public function getFormattedNameAttribute()
+    {
+        if ($this->nombre_rol === 'admin_financiero') {
+            return 'Admin Financiero';
+        }
+        
+        // First letter capitalized for other roles
+        return ucfirst($this->nombre_rol);
+    }
 }
 

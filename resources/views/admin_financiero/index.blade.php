@@ -54,7 +54,7 @@
                                         <span class="badge bg-info">Tú</span>
                                     @endif
                                 </td>
-                                <td>{{ $asalariado->usuario->role->nombre_rol }}</td>
+                                <td>{{ $asalariado->usuario->role->formatted_name }}</td>
                                 <td>{{ number_format($asalariado->salario, 2, ',', '.') }} €</td>
                                 <td>Día {{ $asalariado->dia_cobro }}</td>
                                 <td>{{ $asalariado->parking->nombre }}</td>

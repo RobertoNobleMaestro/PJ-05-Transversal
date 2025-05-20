@@ -267,9 +267,9 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${asalariado.nombre}</td>
-                    <td><span class="badge ${rolClass}">${asalariado.nombre_rol}</span></td>
+                    <td><span class="badge ${rolClass}">${asalariado.nombre_rol === 'admin_financiero' ? 'Admin Financiero' : asalariado.nombre_rol.charAt(0).toUpperCase() + asalariado.nombre_rol.slice(1)}</span></td>
                     <td>${formatCurrency(asalariado.salario)}</td>
-                    <td>${asalariado.dia_cobro}</td>
+                    <td>Día ${asalariado.dia_cobro}</td>
                     <td>${asalariado.nombre_parking}</td>
                     <td>
                         <div class="action-buttons">

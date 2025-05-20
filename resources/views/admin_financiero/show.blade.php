@@ -20,7 +20,7 @@
     <div class="card shadow mb-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Información Personal</h5>
-            <span class="badge bg-light text-dark">{{ $asalariado->usuario->role->nombre_rol }}</span>
+            <span class="badge bg-light text-dark">{{ $asalariado->usuario->role->formatted_name }}</span>
         </div>
         <div class="card-body">
             <div class="row">

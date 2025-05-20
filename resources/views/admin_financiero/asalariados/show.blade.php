@@ -48,7 +48,7 @@
                     <div class="d-flex justify-content-between">
                         <span class="fw-bold">Rol:</span>
                         <span class="badge {{ $usuario->role->nombre == 'gestor' ? 'bg-primary' : ($usuario->role->nombre == 'mecanico' ? 'bg-warning text-dark' : 'bg-success') }}">
-                            {{ ucfirst($usuario->role->nombre) }}
+                            {{ ucfirst($usuario->role->nombre) == 'Admin_financiero' ? 'Admin Financiero' : ucfirst($usuario->role->nombre) }}
                         </span>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span class="fw-bold">Día de cobro:</span>
-                            <span>{{ $asalariado->dia_cobro }} de cada mes</span>
+                            <span>Día {{ $asalariado->dia_cobro }} de cada mes</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span class="fw-bold">Parking asignado:</span>
@@ -123,16 +123,16 @@
                                 <div class="card-body">
                                     <ul class="list-unstyled">
                                         <li class="mb-2">
-                                            <i class="fas fa-id-badge text-muted me-2"></i>
-                                            <span class="fw-bold">ID Usuario:</span> {{ $usuario->id_usuario }}
-                                        </li>
-                                        <li class="mb-2">
                                             <i class="fas fa-car text-muted me-2"></i>
                                             <span class="fw-bold">Licencia:</span> {{ $usuario->licencia_conducir ?: 'No disponible' }}
                                         </li>
                                         <li class="mb-2">
                                             <i class="fas fa-building text-muted me-2"></i>
-                                            <span class="fw-bold">ID Parking:</span> {{ $parking->id }}
+                                            <span class="fw-bold">Parking:</span> {{ $parking->nombre }}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <span class="fw-bold">Ciudad:</span> {{ $sede->nombre }}
                                         </li>
                                         <li>
                                             <i class="fas fa-clock text-muted me-2"></i>
