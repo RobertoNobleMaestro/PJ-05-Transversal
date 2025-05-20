@@ -59,7 +59,7 @@ class TallerController extends Controller
 
         // Si no se encuentra el vehículo, redirige con un mensaje de error
         if (!$vehiculo) {
-            return redirect()->route('taller.index')->with('error', 'Vehículo no encontrado');
+            return redirect()->route('Taller.index')->with('error', 'Vehículo no encontrado');
         }
 
         // Valida y guarda la nueva fecha de mantenimiento
@@ -67,7 +67,7 @@ class TallerController extends Controller
         $vehiculo->save();
 
         // Redirige de nuevo a la lista de vehículos con un mensaje de éxito
-        return redirect()->route('taller.index')->with('success', 'Mantenimiento actualizado exitosamente');
+        return redirect()->route('Taller.index')->with('success', 'Mantenimiento actualizado exitosamente');
     }
     
     // Método para manejar peticiones AJAX de programación de mantenimiento
@@ -340,7 +340,7 @@ class TallerController extends Controller
         $vehiculos = Vehiculo::all();
         $talleres = Taller::all();
 
-        return view('taller.edit', compact('mantenimiento', 'vehiculos', 'talleres'));
+        return view('Taller.edit', compact('mantenimiento', 'vehiculos', 'talleres'));
     }
 
 public function update(Request $request, $id)
@@ -382,7 +382,7 @@ public function update(Request $request, $id)
         }
     }
 
-    return redirect()->route('taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+    return redirect()->route('Taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
 }
 
 
