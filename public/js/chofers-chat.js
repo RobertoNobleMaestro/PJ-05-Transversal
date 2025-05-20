@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.messages && data.messages.length > 0) {                
                 // Añadir cada mensaje nuevo
                 data.messages.forEach(mensaje => {
-                    const claseAlineacion = mensaje.is_own ? 'align-self-end bg-primary text-white' : 'align-self-start bg-light';
+                    const claseAlineacion = mensaje.is_own ? 'align-self-end bg-purple text-white' : 'align-self-start bg-light';
                     
                     contenedorMensajes.innerHTML += `
                         <div class="mensaje ${claseAlineacion} p-2 rounded mb-2 mw-75" style="max-width: 75%">
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                             <div>${mensaje.message}</div>
                             <div class="text-end">
-                                <small class="text-muted">${mensaje.created_at}</small>
+                                <small class="${mensaje.is_own ? 'text-white' : 'text-muted'}">${mensaje.created_at}</small>
                             </div>
                         </div>
                     `;
@@ -461,13 +461,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 
                 contenedorMensajes.innerHTML += `
-                    <div class="mensaje align-self-end bg-primary text-white p-2 rounded mb-2" style="max-width: 75%">
+                    <div class="mensaje align-self-end bg-purple text-white p-2 rounded mb-2" style="max-width: 75%">
                         <div class="d-flex align-items-center mb-1">
                             <small class="fw-bold">${mensaje.sender_name}</small>
                         </div>
                         <div>${mensaje.message}</div>
                         <div class="text-end">
-                            <small class="text-muted">${mensaje.created_at}</small>
+                            <small class="text-white">${mensaje.created_at}</small>
                         </div>
                     </div>
                 `;
