@@ -180,7 +180,7 @@ class ChoferController extends Controller
         $grupo->fecha_creacion = now();
 
         if ($request->hasFile('imagen_grupo')) {
-            $grupo->imagen_grupo = $request->file('imagen_grupo')->store('grupos', 'public');
+            $grupo->imagen_grupo = $request->file('imagen_grupo')->store('img', 'public');
         }
 
         $grupo->save();
