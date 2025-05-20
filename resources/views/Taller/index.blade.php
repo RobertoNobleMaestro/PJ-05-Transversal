@@ -16,7 +16,7 @@
         <ul class="sidebar-menu">
             <li><a href="{{ route('taller.index') }}" class="{{ request()->routeIs('taller.index*') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Gestión del Taller</a></li>
-            <li><a href="{{ route('taller.historial') }}" class="{{ request()->routeIs('taller.historial*') ? 'active' : '' }}">
+            <li><a href="{{ route('Taller.historial') }}" class="{{ request()->routeIs('Taller.historial*') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Historial Mantenimiento</a></li>
 
         </ul>

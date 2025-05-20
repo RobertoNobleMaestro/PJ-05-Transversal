@@ -382,7 +382,7 @@ public function update(Request $request, $id)
         }
     }
 
-    return redirect()->route('taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+    return redirect()->route('Taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
 }
 
 
