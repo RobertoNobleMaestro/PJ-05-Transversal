@@ -146,6 +146,10 @@
 #mensajes {
     flex-grow: 1;
     overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .input-mensaje {
@@ -153,3 +157,38 @@
     margin-top: auto;
     gap: 0.5rem;
 }
+
+/* Estilo para el botón de crear grupo */
+#crearGrupoModal .btn-primary {
+    background-color: #8c4ae2 !important;
+    border: none !important;
+}
+
+#crearGrupoModal .btn-primary:hover {
+    background-color: #551475 !important;
+}
+
+/* Estilos para los mensajes del chat */
+.mensaje {
+    max-width: 60%;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 15px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.mensaje-propio {
+    background-color: #8c4ae2;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.mensaje-recibido {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+

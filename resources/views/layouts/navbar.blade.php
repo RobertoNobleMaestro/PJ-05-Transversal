@@ -28,7 +28,7 @@
         <a href="{{ route('home') }}">
           <img src="{{ asset('img/logo.png') }}" alt="Logo Carflow">
         </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon" style="color:#fff;">&#9776;</span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarContent">

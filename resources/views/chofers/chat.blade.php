@@ -122,7 +122,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear grupo</button>
+                        <button type="submit" class="btn btn-primary" style="background-color: #8c4ae2">Crear grupo</button>
                     </div>
                 </form>
             </div>
