@@ -11,7 +11,10 @@
 </head>
 <body>
 <div class="chat-container">
-    <h3 class="chat-header">Chat con el Gestor</h3>
+<a href="{{ route('home') }}" class="btn btn-chat mb-3">
+                            Volver
+                        </a> 
+<h3 class="chat-header">Chat con el Gestor</h3>
 
     <div id="chat-box" class="chat-box">
         @foreach($messages as $msg)
@@ -101,5 +104,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+<script>
+const contenedorMensajes = document.getElementById('chat-box');
+const idReceptor = "{{ $usuario->id_usuario ?? $id ?? $gestorId }}";
+let lastMessageId = 0; 
+
+function escucharMensajes() {
+    const sse = new EventSource(`/chat/stream/${idReceptor}`);
+
+    sse.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        // Solo mostrar si es un mensaje nuevo
+        if (data.id > lastMessageId) {
+            lastMessageId = data.id;
+
+            const div = document.createElement('div');
+            div.className = 'message other';
+            div.innerHTML = `<p>${data.message}</p><small>${data.created_at}</small>`;
+            contenedorMensajes.appendChild(div);
+            contenedorMensajes.scrollTop = contenedorMensajes.scrollHeight;
+        }
+    };
+
+    setTimeout(() => {
+        sse.close();
+        escucharMensajes(); // reconectar
+    }, 2000);
+}
+
+escucharMensajes();
+
+</script>
+
 </body>
 </html>

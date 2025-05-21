@@ -7,6 +7,19 @@
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>Navbar</title>
+    <style>
+            .nav-link {
+            position: relative;
+        }
+
+        #cart-count {
+          position: absolute;
+          top: 0px;
+          right: 0px;
+          font-size: 9px;
+          border-radius: 50%;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -31,11 +44,12 @@
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('carrito') }}">
                   <i class="fas fa-shopping-cart me-1"></i>
+                  <span id="cart-count" class="badge bg-danger"></span>
                 </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('chat.index') }}">
-                    <i class="fas fa-comments"></i> Chat con gestor
+                    <i class="fas fa-comments"></i>
                 </a>
               </li>
               <!-- Foto de perfil (link al perfil) -->
@@ -57,5 +71,22 @@
         </div>
       </div>
     </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('{{ route("carrito.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = document.getElementById('cart-count');
+                    if (data.count > 0) {
+                        cartCount.textContent = data.count;
+                        cartCount.style.display = 'inline-block'; // Mostrar el contador
+                    } else {
+                        cartCount.style.display = 'none'; // Ocultar el contador
+                    }
+                })
+                .catch(error => console.error('Error fetching cart count:', error));
+        });
+    </script>
 </body>
 </html>

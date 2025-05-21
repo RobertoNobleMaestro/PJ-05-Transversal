@@ -1,0 +1,132 @@
+/* Estilos movidos desde index.blade.php */
+#vehiculos-table th,
+#vehiculos-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+.custom-modal-content {
+    background: #fff;
+    border-radius: 20px;
+    border: 2px solid #9F17BD;
+    box-shadow: 0 6px 24px rgba(159,23,189,0.08), 0 2px 12px rgba(34,34,34,0.10);
+    padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+    transition: box-shadow 0.25s;
+}
+.custom-modal-content:hover {
+    box-shadow: 0 10px 36px rgba(159,23,189,0.17), 0 4px 24px rgba(34,34,34,0.18);
+}
+/* ---- MODAL AGENDAR: Inputs y Selects ---- */
+.custom-modal-content .modal-form-control,
+.custom-modal-content .modal-form-select {
+    color: #222;
+    border: 2px solid #9F17BD;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: none;
+    transition: border-color 0.2s;
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+}
+.custom-modal-content .modal-form-control:focus,
+.custom-modal-content .modal-form-select:focus {
+    border-color: #7e138f;
+    outline: 0;
+    box-shadow: 0 0 0 0.15rem rgba(159,23,189,0.13);
+}
+.custom-modal-content .modal-form-select option {
+    color: #222;
+}
+/* ---- MODAL AGENDAR: Botón ---- */
+.custom-modal-content .btn-agendar-modal {
+    background: linear-gradient(90deg, #9F17BD 70%, #7e138f 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    box-shadow: 0 2px 8px rgba(159,23,189,0.08);
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    padding: 0.65rem 1.5rem;
+    font-size: 1.08rem;
+}
+.custom-modal-content .btn-agendar-modal:hover,
+.custom-modal-content .btn-agendar-modal:focus {
+    background: #fff;
+    color: #9F17BD;
+    border: 2px solid #9F17BD;
+}
+.custom-modal-content ::placeholder {
+    color: #9F17BD;
+    opacity: 1;
+}
+.form-select.select-purple, .form-select.select-purple:focus {
+    color: #9F17BD;
+    border-color: #9F17BD 1px solid !important;
+    background: #fff;
+    box-shadow: none;
+}
+
+.form-select:focus, .form-select {
+    border-color: #9F17BD !important;
+    box-shadow: none !important;
+}
+
+/* Bordes morados para los dropdowns de filtros */
+select.form-select,
+select.form-select:focus,
+select.select-purple,
+select.select-purple:focus {
+    border: 2px solid #9F17BD !important;
+    color: #9F17BD !important;
+    background: #f7e6fa !important;
+    box-shadow: 0 0 0 0.15rem rgba(159,23,189,0.13);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+select.form-select:hover,
+select.select-purple:hover {
+    border: 2px solid #9F17BD !important;
+    background: #f2d6f7 !important;
+    color: #7e138f !important;
+}
+select.form-select option,
+select.select-purple option {
+    color: #222;
+}
+.form-select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #9F17BD !important;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 1rem;
+}
+select.form-select:disabled,
+select.select-purple:disabled {
+    background: #e9ecef !important;
+    color: #bfa2c7 !important;
+    border-color: #e0b3f7 !important;
+}
+.form-select.select-purple:focus {
+    border-width: 2px;
+}
+.filtros-label {
+    font-weight: 600;
+    margin-bottom: .25rem;
+    display: block;
+}
+
+.btn-outline-purple:hover, .btn-outline-purple:focus, .btn-outline-purple.active {
+    background-color: #9F17BD;
+    color: #fff;
+    border-color: #9F17BD;
+}
+.filtros-label {
+    font-weight: 600;
+    margin-bottom: .25rem;
+    display: block;
+}
+.select-purple:focus, .select-purple {
+    border: 2px solid #9F17BD !important;
+    color: #9F17BD;
+    background: #fff;
+}

@@ -1,14 +1,26 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Valoracion;
-use App\Models\VehiculosReservas;
 
 class Vehiculo extends Model
 {
+    // ...
+    public function getUltimaMantFormateadaAttribute()
+    {
+        return $this->ultima_fecha_mantenimiento
+            ? \Carbon\Carbon::parse($this->ultima_fecha_mantenimiento)->format('d/m/Y')
+            : null;
+    }
+
+    public function getProximaMantFormateadaAttribute()
+    {
+        return $this->proxima_fecha_mantenimiento
+            ? \Carbon\Carbon::parse($this->proxima_fecha_mantenimiento)->format('d/m/Y')
+            : null;
+    }
+
     use HasFactory;
 
     protected $table = 'vehiculos';
@@ -23,7 +35,15 @@ class Vehiculo extends Model
         'disponibilidad',
         'kilometraje',
         'id_lugar',
-        'id_tipo'
+        'id_tipo',
+        'parking_id',
+        'ultima_fecha_mantenimiento',    
+        'proxima_fecha_mantenimiento',   
+    ];
+
+    protected $casts = [
+        'ultima_fecha_mantenimiento' => 'date',   
+        'proxima_fecha_mantenimiento' => 'date',  
     ];
 
     public function lugar()
@@ -34,6 +54,11 @@ class Vehiculo extends Model
     public function tipo()
     {
         return $this->belongsTo(Tipo::class, 'id_tipo', 'id_tipo');
+    }
+
+    public function parking()
+    {
+        return $this->belongsTo(Parking::class, 'parking_id', 'id');
     }
 
     public function imagenes()
@@ -48,23 +73,41 @@ class Vehiculo extends Model
 
     public function reservas()
     {
-        return $this->belongsToMany(Reserva::class, 'vehiculos_reservas', 'id_vehiculos', 'id_reservas');
+        return $this->belongsToMany(Reserva::class, 'vehiculos_reservas', 'id_vehiculos', 'id_reservas')
+                    ->withPivot('fecha_ini', 'fecha_final')
+                    ->withTimestamps();
     }
+
     public function vehiculosReservas()
     {
         return $this->hasMany(VehiculosReservas::class, 'id_vehiculos', 'id_vehiculos');
     }
-    
+
     public function valoraciones()
     {
         return $this->hasManyThrough(
-            Valoracion::class,              // Modelo final
-            VehiculosReservas::class,       // Modelo intermedio
-            'id_vehiculos',                 // FK en VehiculosReservas que apunta a este modelo (Vehiculo)
-            'id_reservas',                  // FK en Valoracion que apunta a Reservas
-            'id_vehiculos',                 // Local Key en este modelo (Vehiculo)
-            'id_reservas'                   // Local Key en VehiculosReservas que apunta a Valoraciones
+            Valoracion::class,
+            VehiculosReservas::class,
+            'id_vehiculos',
+            'id_reservas',
+            'id_vehiculos',
+            'id_reservas'
         );
     }
 
+    // formato de ultima_fecha_mantenimiento
+    public function getUltimaFechaMantenimientoFormattedAttribute()
+    {
+        return $this->ultima_fecha_mantenimiento
+            ? $this->ultima_fecha_mantenimiento->format('d/m/Y')
+            : 'No disponible';
+    }
+
+    //formato de proxima_fecha_mantenimiento
+    public function getProximaFechaMantenimientoFormattedAttribute()
+    {
+        return $this->proxima_fecha_mantenimiento
+            ? $this->proxima_fecha_mantenimiento->format('d/m/Y')
+            : 'No disponible';
+    }
 }

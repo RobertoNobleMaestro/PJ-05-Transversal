@@ -238,6 +238,8 @@ a:hover {
 /* Validaciones JS */
 .error_message{
     color: red;
+    margin-bottom: 15px !important;
+
 }
 
 .is-invalid{
@@ -417,9 +419,6 @@ a:hover {
     background-color: rgba(220, 53, 69, 0.05) !important;
 }
 
-.is-invalid ~ label {
-    color: #dc3545;
-}
 
 /* Estilos para el botón de completar registro */
 .btn-completar-registro {

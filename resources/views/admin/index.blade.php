@@ -21,9 +21,6 @@
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i
                             class="fas fa-users"></i> Usuarios</a></li>
-                <li><a href="{{ route('admin.reservas.index') }}"
-                        class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i
-                            class="fas fa-calendar-alt"></i> Reservas</a></li>
                 <li><a href="{{ route('admin.historial') }}"
                         class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i>
                         Historial</a></li>
@@ -38,7 +35,7 @@
                     @if(auth()->check())
                         <span>Bienvenido, {{ auth()->user()->nombre }}</span>
                         <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
-                            Cerrar Sesión</a>
+                            </a>
                     @endif
                 </div>
             </div>
@@ -61,21 +58,6 @@
                             <h3>Gestión de Usuarios</h3>
                             <p>Administra los usuarios del sistema, sus roles y permisos.</p>
                             <a href="{{ route('admin.users') }}" class="btn-admin-card">
-                                Acceder <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                        </div>
-                    </div>
-
-
-                    <!-- Tarjeta de Reservas -->
-                    <div class="col-md-6 col-lg-4">
-                        <div class="admin-card shadow-sm">
-                            <div class="admin-card-icon">
-                                <i class="fas fa-calendar-alt fa-3x"></i>
-                            </div>
-                            <h3>Gestión de Reservas</h3>
-                            <p>Administra las reservas actuales, crea nuevas reservas o modifica las existentes.</p>
-                            <a href="{{ route('admin.reservas.index') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>

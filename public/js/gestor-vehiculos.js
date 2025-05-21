@@ -1,27 +1,12 @@
-/**
- * GESTIÓN DE VEHÍCULOS - PANEL DE ADMINISTRACIÓN
- * Este archivo contiene todas las funciones necesarias para administrar el listado de vehículos.
- * Incluye funcionalidades para filtrar, cargar y eliminar vehículos desde la interfaz de administración.
- */
-
-// Variables globales para los filtros y paginación
 let activeFilters = {};
 let currentPage = 1;
 let itemsPerPage = 10;
 let totalPages = 1;
 let totalItems = 0;
 
-/**
- * applyFilters() - Aplica los filtros seleccionados por el administrador
- * 
- * Esta función captura los valores de todos los campos de filtro del formulario
- * y actualiza el objeto activeFilters. Luego llama a loadVehiculos() para 
- * mostrar los resultados filtrados.
- */
 function applyFilters() {
     // Recoger los valores de los filtros
     const tipo = document.getElementById('filterTipo').value;
-    const lugar = document.getElementById('filterLugar').value;
     const marca = document.getElementById('filterMarca').value.trim();
     const anio = document.getElementById('filterAnio').value;
     const valoracion = document.getElementById('filterValoracion').value;
@@ -29,7 +14,6 @@ function applyFilters() {
     // Actualizar el objeto de filtros activos
     activeFilters = {
         tipo: tipo,
-        lugar: lugar,
         marca: marca,
         anio: anio,
         valoracion: valoracion
@@ -38,16 +22,8 @@ function applyFilters() {
     // Cargar vehículos con los filtros aplicados
     loadVehiculos();
 }
-
-/**
- * clearFilters() - Restablece todos los filtros a sus valores predeterminados
- * 
- * Esta función limpia todos los campos de filtro y reinicia el objeto activeFilters.
- * Luego recarga el listado completo de vehículos sin aplicar ningún filtro.
- */
 function clearFilters() {
     document.getElementById('filterTipo').value = '';
-    document.getElementById('filterLugar').value = '';
     document.getElementById('filterMarca').value = '';
     document.getElementById('filterAnio').value = '';
     document.getElementById('filterValoracion').value = '';
@@ -58,16 +34,7 @@ function clearFilters() {
     // Cargar vehículos sin filtros
     loadVehiculos();
 }
-
-/**
- * loadVehiculos() - Carga la lista de vehículos desde el servidor
- * 
- * Esta función realiza una petición AJAX al servidor para obtener los vehículos,
- * aplicando los filtros que estén activos. Muestra un indicador de carga mientras
- * se completa la petición y luego actualiza la tabla con los resultados.
- */
 function loadVehiculos() {
-    console.log('Cargando vehículos, página ' + currentPage + '...');
     // Mostrar el indicador de carga
     const loadingElement = document.getElementById('loading-vehiculos');
     const tableContainer = document.getElementById('vehiculos-table-container');
@@ -76,30 +43,18 @@ function loadVehiculos() {
     loadingElement.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div><p>Cargando vehículos...</p>';
     tableContainer.style.display = 'none';
     
-    // Obtener el CSRF token para realizar peticiones seguras
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    
-    // Depuración - mostrar los filtros activos
-    console.log('Filtros activos:', activeFilters);
-    
-    // Construir la URL con los parámetros de filtro
+        
     let url = new URL(dataUrl, window.location.origin);
-    
-    // Agregar todos los filtros activos a la URL
-    // Asegurarnos de que los parámetros de filtro tengan los nombres correctos que espera el controlador
     if (activeFilters.marca) url.searchParams.append('marca', activeFilters.marca);
     if (activeFilters.tipo) url.searchParams.append('tipo', activeFilters.tipo);
-    if (activeFilters.lugar) url.searchParams.append('lugar', activeFilters.lugar);
     if (activeFilters.anio) url.searchParams.append('anio', activeFilters.anio);
     if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion);
     
-    // Agregar parámetros de paginación
     url.searchParams.append('page', currentPage);
     url.searchParams.append('per_page', itemsPerPage);
+
     
-    console.log('URL de la petición:', url.toString());
-    
-    // Realizar petición AJAX al servidor
     fetch(url, {
         method: 'GET',
         headers: {
@@ -109,29 +64,20 @@ function loadVehiculos() {
         }
     })
     .then(response => {
-        console.log('Estado de la respuesta:', response.status);
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        // Depurar para ver qué datos recibimos
-        console.log('Datos recibidos de la API:', data);
-        
-        // Ocultar el indicador de carga
         loadingElement.style.display = 'none';
         
-        // Mostrar la tabla
         tableContainer.style.display = 'block';
         
-        // Limpiar la tabla
         const tableBody = document.querySelector('#vehiculos-table tbody');
         tableBody.innerHTML = '';
         
-        // Verificar si hay vehículos
-        if (data.vehiculos.length === 0) {
-            // Mostrar mensaje si no hay vehículos
+        if (data.vehiculos === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
                 <td colspan="9" class="text-center">
@@ -140,7 +86,6 @@ function loadVehiculos() {
             `;
             tableBody.appendChild(emptyRow);
             
-            // Actualizar la información de paginación con 0 resultados
             updatePaginationControls({
                 total: 0,
                 per_page: itemsPerPage,
@@ -150,15 +95,9 @@ function loadVehiculos() {
             return;
         }
         
-        // Recorrer la lista de vehículos y crear filas en la tabla
         data.vehiculos.forEach(vehiculo => {
             const row = document.createElement('tr');
-            
-            // Determinar el color de texto según la disponibilidad
-            // Formatear el precio para mostrar
             const precio = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(vehiculo.precio);
-            
-            // Crear la fila con los datos del vehículo
             row.innerHTML = `
                 <td>${vehiculo.id_vehiculos}</td>
                 <td>${vehiculo.marca}</td>
@@ -169,6 +108,12 @@ function loadVehiculos() {
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
+                        <button class="btn btn-sm btn-success" 
+                                title="${vehiculo.tiene_reservas ? 'Ver reservas' : 'Sin reservas'}" 
+                                onclick="verVehiculo(${vehiculo.id_vehiculos})" 
+                                ${vehiculo.tiene_reservas ? '' : 'disabled'}>
+                            <i class="fas fa-eye"></i>
+                        </button>
                         <a href="/gestor/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
                             <i class="fas fa-edit"></i>
                         </a>
@@ -201,16 +146,57 @@ function loadVehiculos() {
     });
 }
 
-/**
- * deleteVehiculo(id, nombre) - Elimina un vehículo del sistema
- * 
- * @param {number} id - ID del vehículo a eliminar
- * @param {string} nombre - Nombre del vehículo (marca + modelo) para mostrar en la confirmación
- * 
- * Esta función muestra un diálogo de confirmación antes de eliminar el vehículo.
- * Si el usuario confirma, realiza una petición DELETE al servidor y muestra el
- * resultado de la operación.
- */
+function verVehiculo(idVehiculo) {
+    const reservasModal = new bootstrap.Modal(document.getElementById('reservasModal'));
+    reservasModal.show();
+
+    const reservastabla = document.getElementById('reservasTableBody');
+    reservastabla.innerHTML = '<tr><td colspan="5" class="text-center">Cargando reservas...</td></tr>';
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    fetch(`/gestor/vehiculos/${idVehiculo}/crudreservas`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        reservastabla.innerHTML = '';
+
+        const reservas = data.reservas;
+
+        if (!reservas || reservas.length === 0) {
+            reservastabla.innerHTML = '<tr><td colspan="5" class="text-center">No hay reservas para este vehículo.</td></tr>';
+            return;
+        }
+
+        reservas.forEach(reserva => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${reserva.id_reserva}</td>
+                <td>${new Date(reserva.fecha_inicio).toLocaleDateString()}</td>
+                <td>${new Date(reserva.fecha_fin).toLocaleDateString()}</td>
+                <td>${reserva.cliente_nombre}</td>
+                <td>${reserva.estado}</td>
+            `;
+            reservastabla.appendChild(row);
+        });
+    })
+    .catch(error => {
+        console.error('Error al cargar las reservas:', error);
+        reservastabla.innerHTML = '<tr><td colspan="5" class="text-center">Error al cargar las reservas.</td></tr>';
+    });
+}
+
 function deleteVehiculo(id, nombre) {
     // Mostrar diálogo de confirmación usando SweetAlert2
     Swal.fire({
@@ -284,23 +270,7 @@ function deleteVehiculo(id, nombre) {
     });
 }
 
-// Variable para almacenar la URL de datos
 let dataUrl;
-
-/**
- * Inicialización cuando el DOM está completamente cargado
- * 
- * Este bloque configura los eventos iniciales y prepara la interfaz
- * cuando la página se carga por completo.
- */
-/**
- * updatePaginationControls(pagination) - Actualiza los controles de paginación
- * 
- * @param {Object} pagination - Información de paginación del servidor
- * 
- * Esta función actualiza los botones y textos de paginación
- * para reflejar el estado actual de la paginación.
- */
 function updatePaginationControls(pagination) {
     // Guardar valores en variables globales
     totalItems = pagination.total;
@@ -325,13 +295,6 @@ function updatePaginationControls(pagination) {
     nextButton.disabled = currentPage >= totalPages;
 }
 
-/**
- * goToPage(page) - Navega a una página específica
- * 
- * @param {number} page - Número de página a mostrar
- * 
- * Esta función actualiza la página actual y recarga los datos.
- */
 function goToPage(page) {
     if (page < 1 || page > totalPages) return;
     
@@ -344,7 +307,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const vehiculosContainer = document.getElementById('vehiculos-table-container');
     if (vehiculosContainer) {
         dataUrl = vehiculosContainer.dataset.url;
-        console.log('URL de datos configurada:', dataUrl);
         
         // Cargar vehículos inicialmente
         loadVehiculos();
@@ -357,11 +319,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         document.getElementById('filterTipo').addEventListener('change', function() {
-            currentPage = 1;
-            applyFilters();
-        });
-        
-        document.getElementById('filterLugar').addEventListener('change', function() {
             currentPage = 1;
             applyFilters();
         });

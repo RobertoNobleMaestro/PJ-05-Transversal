@@ -4,6 +4,7 @@
 
 
 <link rel="stylesheet" href="{{ asset('css/gestor-pagination.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 
 
 @section('content')
@@ -16,19 +17,30 @@
     
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
-        <div style="position: fixed; width:250px;">
+        <div style="position: fixed;width: 220px;">
             <div class="sidebar-title">CARFLOW</div>
-            <ul class="sidebar-menu">
-                <li><a href=""><i class="fas fa-map-marker-alt"></i> Lugares</a></li>
-            </ul>            
+                <ul class="sidebar-menu">
+                    <li><a href="{{ route('gestor.vehiculos') }}"
+                            class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
+                            Vehículos</a></li>
+                    <li><a href="{{ route('gestor.chat.listar') }}"
+                    class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
+                        class="fas fa-comments"></i> Chats</a></li>
+                        <li><a href="{{ route('gestor.historial') }}"
+                    class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
+                        class="fas fa-history"></i>Historial</a></li>
+                </ul>
+            </div>            
         </div>
-    </div>
+
 
     <!-- Contenido principal -->
     <div class="admin-main">
         <div class="admin-header">
-            <h1 class="admin-title">Gestión de Vehículos</h1>
-            <a href="{{ route('gestor.index') }}" class="btn btn-outline-secondary">
+            <h1 class="admin-title">
+                Gestión de Vehículos @if(isset($lugarGestor)) de {{ $lugarGestor->nombre }} @endif
+            </h1>
+            <a href="{{ route('gestor.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
@@ -45,14 +57,13 @@
                         <option value="{{ $tipo->id_tipo }}">{{ $tipo->nombre }}</option>
                     @endforeach
                 </select>
-                
-                <!-- Filtro por lugar -->
-                <select class="filter-control" id="filterLugar">
+                <select class="filter-control" id="filterLugar" hidden>
                     <option value="">Todos los lugares</option>
                     @foreach($lugares as $lugar)
                         <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
                     @endforeach
                 </select>
+
                 
                 <!-- Filtro por año -->
                 <select class="filter-control" id="filterAnio">
@@ -70,7 +81,7 @@
                     @endforeach
                 </select>
                 
-                <button id="clearFilters" class="btn btn-outline-secondary">Limpiar</button>
+                <button id="clearFilters" class="btn-purple">Limpiar</button>
             </div>
             <a href="{{ route('gestor.vehiculos.create') }}" class="add-user-btn">Añadir Vehículo</a>
         </div>
@@ -122,6 +133,37 @@
                         <option value="50">50</option>
                     </select>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar las reservas -->
+<div class="modal fade" id="reservasModal" tabindex="-1" aria-labelledby="reservasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservasModalLabel">Reservas del Vehículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID Reserva</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservasTableBody">
+                        <!-- Las reservas se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-purple" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>

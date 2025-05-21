@@ -14,13 +14,23 @@ class CreateVehiculosTable extends Migration
             $table->string('modelo');
             $table->integer('kilometraje');
             $table->year('año');
-            $table->decimal('precio_dia', 8, 2);  // Cambiado de string a decimal para manejar precios
+            $table->decimal('precio_dia', 8, 2);
+
             $table->unsignedBigInteger('id_lugar');
             $table->unsignedBigInteger('id_tipo');
             $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
             $table->foreign('id_tipo')->references('id_tipo')->on('tipo');
-            $table->timestamps(); 
+
+            $table->unsignedBigInteger('parking_id');
+            $table->foreign('parking_id')->references('id')->on('parking')->onDelete('cascade');
+
+            $table->date('ultima_fecha_mantenimiento')->nullable();
+            $table->date('proxima_fecha_mantenimiento')->nullable();
+
+            $table->timestamps();
         });
+
+
     }
 
     public function down()

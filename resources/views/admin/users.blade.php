@@ -16,9 +16,6 @@
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i
                             class="fas fa-users"></i> Usuarios</a></li>
-                <li><a href="{{ route('admin.reservas.index') }}"
-                        class="{{ request()->routeIs('admin.reservas*') ? 'active' : '' }}"><i
-                            class="fas fa-calendar-alt"></i> Reservas</a></li>
                 <li><a href="{{ route('admin.historial') }}"
                         class="{{ request()->routeIs('admin.historial*') ? 'active' : '' }}"><i class="fas fa-history"></i>
                         Historial</a></li>
@@ -29,7 +26,7 @@
         <div class="admin-main">
             <div class="admin-header">
                 <h1 class="admin-title">Gestión de Usuarios</h1>
-                <a href="{{ route('admin.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.index') }}" class="btn-purple">
                     <i class="fas fa-arrow-left"></i> Volver al Panel
                 </a>
             </div>
