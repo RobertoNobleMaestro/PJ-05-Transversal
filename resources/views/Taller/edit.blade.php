@@ -118,7 +118,7 @@
 
     <h2>Editar Mantenimiento</h2>
 
-    <form action="{{ route('taller.update', $mantenimiento->id) }}" method="POST">
+    <form action="{{ route('Taller.update', $mantenimiento->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -165,7 +165,7 @@
 
         <div class="d-flex gap-2 justify-content-end mt-4">
             <button type="submit" class="btn btn-outline-purple flex-grow-1" style="min-width:0;">Guardar cambios</button>
-            <a href="{{ route('taller.historial') }}" class="btn btn-outline-purple flex-grow-1 text-center" style="min-width:0;">Cancelar</a>
+            <a href="{{ route('Taller.historial') }}" class="btn btn-outline-purple flex-grow-1 text-center" style="min-width:0;">Cancelar</a>
         </div>
     </form>
 </div>
