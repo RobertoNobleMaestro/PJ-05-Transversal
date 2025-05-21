@@ -59,9 +59,22 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="parking_id" class="form-label">Parking</label>
+                    <select class="form-control" id="parking_id" name="parking_id" required>
+                        <option value="">Seleccionar parking</option>
+                        @foreach($parkings as $parking)
+                            <option value="{{ $parking->id }}" {{ $vehiculo->parking_id == $parking->id ? 'selected' : '' }}>{{ $parking->nombre }} ({{ $parking->lugar->nombre ?? 'Sin lugar' }})</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         </div>
-
+        <div class="form-group">
+            <label for="imagenes" class="form-label">Imágenes del vehículo</label>
+            <input type="file" class="form-control" id="imagenes" name="imagenes[]" multiple accept="image/*">
+        </div>
         <div class="btn-container">
             <a href="{{ route('gestor.vehiculos') }}" class="btn btn-cancel">Cancelar</a>
             <button type="button" class="btn btn-submit" onclick="updateVehiculo({{ $vehiculo->id_vehiculos }})">Actualizar</button>

@@ -98,11 +98,14 @@ class VehiculoCrudController extends Controller
             $vehiculos = Vehiculo::select(
                     'vehiculos.*', 
                     'lugares.nombre as nombre_lugar', 
-                    'tipo.nombre as nombre_tipo'
+                    'tipo.nombre as nombre_tipo',
+                    'parking.nombre as nombre_parking'
                 )
                 ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
                 ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
+                ->leftJoin('parking', 'vehiculos.parking_id', '=', 'parking.id')
                 ->where('vehiculos.id_lugar', $parking->id_lugar)
+                ->with(['imagenes'])
                 ->withCount('reservas');
     
             // Aplicar filtros opcionales
@@ -118,6 +121,11 @@ class VehiculoCrudController extends Controller
                 $vehiculos->where('vehiculos.año', $request->anio);
             }
     
+            // Filtro por parking
+            if ($request->filled('parking_id')) {
+                $vehiculos->where('vehiculos.parking_id', $request->parking_id);
+            }
+    
             // Paginación
             $perPage = $request->input('per_page', 10);
             $page = $request->input('page', 1);
@@ -127,6 +135,10 @@ class VehiculoCrudController extends Controller
     
             return response()->json([
                 'vehiculos' => collect($paginated->items())->map(function ($vehiculo) {
+                    $imagen = null;
+                    if ($vehiculo->imagenes && $vehiculo->imagenes->count() > 0) {
+                        $imagen = asset('img/vehiculos/' . $vehiculo->imagenes[0]->nombre_archivo);
+                    }
                     return [
                         'id_vehiculos' => $vehiculo->id_vehiculos,
                         'marca' => $vehiculo->marca,
@@ -136,7 +148,9 @@ class VehiculoCrudController extends Controller
                         'precio' => $vehiculo->precio_dia,
                         'nombre_lugar' => $vehiculo->nombre_lugar ?? 'No asignado',
                         'nombre_tipo' => $vehiculo->nombre_tipo ?? 'No asignado',
-                        'tiene_reservas' => VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)->exists()
+                        'nombre_parking' => $vehiculo->nombre_parking ?? 'No asignado',
+                        'tiene_reservas' => VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)->exists(),
+                        'imagen' => $imagen,
                     ];
                 }),
                 'pagination' => [
@@ -177,6 +191,7 @@ class VehiculoCrudController extends Controller
         $lugarGestor = Lugar::find($parking->id_lugar); // ← Aquí obtenemos el nombre del lugar
     
         $vehiculos = Vehiculo::where('id_lugar', $parking->id_lugar)->get();
+        $parkings = \App\Models\Parking::where('id_lugar', $parking->id_lugar)->get();
     
         $tipo = Tipo::all();
         $lugares = Lugar::all();
@@ -189,7 +204,8 @@ class VehiculoCrudController extends Controller
             'anios',
             'valoraciones',
             'vehiculos',
-            'lugarGestor'
+            'lugarGestor',
+            'parkings'
         ));
     }
     
@@ -200,11 +216,19 @@ class VehiculoCrudController extends Controller
         if ($authCheck) {
             return $authCheck;
         }
-        
-        $lugares = Lugar::all();
+
+        $gestor = Auth::user();
+        $parking = \App\Models\Parking::where('id_usuario', $gestor->id_usuario)->first();
+
+        if (!$parking) {
+            return redirect()->back()->with('error', 'No se ha encontrado un parking asignado a este gestor.');
+        }
+
+        $lugares = Lugar::where('id_lugar', $parking->id_lugar)->get();
         $tipo = Tipo::all();
-        
-        return view('gestor.add_vehiculo', compact('lugares', 'tipo'));
+        $parkings = \App\Models\Parking::where('id_lugar', $parking->id_lugar)->get();
+
+        return view('gestor.add_vehiculo', compact('lugares', 'tipo', 'parkings'));
     }
 
     public function store(Request $request)
@@ -224,13 +248,27 @@ class VehiculoCrudController extends Controller
                 'id_tipo' => 'required|exists:tipo,id_tipo',
                 'precio_dia' => 'required|numeric|min:0',
                 'matricula' => 'nullable|string|max:20',
+                'parking_id' => 'required|exists:parking,id',
+                'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096'
             ]);
 
-
-
-            Vehiculo::create($validatedData);
+            // Guardar el vehículo y obtener la instancia
+            $vehiculo = Vehiculo::create($validatedData);
             
-            // Si la petición espera JSON (AJAX), devolver respuesta JSON
+            if ($request->hasFile('imagenes')) {
+                foreach ($request->file('imagenes') as $imagen) {
+                    if ($imagen instanceof \Illuminate\Http\UploadedFile && $imagen->isValid()) {
+                        $nombreArchivo = uniqid('vehiculo_', true) . '.' . $imagen->getClientOriginalExtension();
+                        $imagen->move(public_path('img/vehiculos'), $nombreArchivo);
+
+                        \App\Models\ImagenVehiculo::create([
+                            'nombre_archivo' => $nombreArchivo,
+                            'id_vehiculo' => $vehiculo->id_vehiculos
+                        ]);
+                    }
+                }
+            }
+            
             if ($request->expectsJson()) {
                 return response()->json([
                     'status' => 'success',
@@ -273,10 +311,18 @@ class VehiculoCrudController extends Controller
         }
 
         $vehiculo = Vehiculo::findOrFail($id_vehiculos);
-        $lugares = Lugar::all();
+        $gestor = Auth::user();
+        $parking = \App\Models\Parking::where('id_usuario', $gestor->id_usuario)->first();
+
+        if (!$parking) {
+            return redirect()->back()->with('error', 'No se ha encontrado un parking asignado a este gestor.');
+        }
+
+        $lugares = Lugar::where('id_lugar', $parking->id_lugar)->get();
         $tipo = Tipo::all();
-        
-        return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo'));
+        $parkings = \App\Models\Parking::where('id_lugar', $parking->id_lugar)->get();
+
+        return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo', 'parkings'));
     }
     public function getReservas($id)
     {
@@ -307,6 +353,17 @@ class VehiculoCrudController extends Controller
         try {
             $vehiculo = Vehiculo::findOrFail($id_vehiculos);
 
+            // Eliminar imágenes anteriores de la base de datos
+            $imagenesAnteriores = \App\Models\ImagenVehiculo::where('id_vehiculo', $vehiculo->id_vehiculos)->get();
+            foreach ($imagenesAnteriores as $img) {
+                // Eliminar archivo físico si existe
+                $ruta = public_path('img/vehiculos/' . $img->nombre_archivo);
+                if (file_exists($ruta)) {
+                    @unlink($ruta);
+                }
+                $img->delete();
+            }
+
             $validatedData = $request->validate([
                 'marca' => 'required|string|max:255',
                 'modelo' => 'required|string|max:255',
@@ -316,9 +373,26 @@ class VehiculoCrudController extends Controller
                 'id_tipo' => 'required|exists:tipo,id_tipo',
                 'precio_dia' => 'required|numeric|min:0',
                 'matricula' => 'nullable|string|max:20',
+                'parking_id' => 'required|exists:parking,id',
+                'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096'
             ]);
 
             $vehiculo->update($validatedData);
+            
+            // Ahora guarda las nuevas imágenes (si las hay)
+            if ($request->hasFile('imagenes')) {
+                foreach ($request->file('imagenes') as $imagen) {
+                    if ($imagen instanceof \Illuminate\Http\UploadedFile && $imagen->isValid()) {
+                        $nombreArchivo = uniqid('vehiculo_', true) . '.' . $imagen->getClientOriginalExtension();
+                        $imagen->move(public_path('img/vehiculos'), $nombreArchivo);
+
+                        \App\Models\ImagenVehiculo::create([
+                            'nombre_archivo' => $nombreArchivo,
+                            'id_vehiculo' => $vehiculo->id_vehiculos
+                        ]);
+                    }
+                }
+            }
             
             // Si la petición espera JSON (AJAX), devolver respuesta JSON
             if ($request->expectsJson()) {

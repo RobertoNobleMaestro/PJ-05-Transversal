@@ -9,14 +9,16 @@ function applyFilters() {
     const tipo = document.getElementById('filterTipo').value;
     const marca = document.getElementById('filterMarca').value.trim();
     const anio = document.getElementById('filterAnio').value;
-    const valoracion = document.getElementById('filterValoracion').value;
+    // const valoracion = document.getElementById('filterValoracion').value; // Comentado
+    const parking = document.getElementById('filterParking').value;
     
     // Actualizar el objeto de filtros activos
     activeFilters = {
         tipo: tipo,
         marca: marca,
         anio: anio,
-        valoracion: valoracion
+        // valoracion: valoracion, // Comentado
+        parking_id: parking
     };
     
     // Cargar vehículos con los filtros aplicados
@@ -26,7 +28,7 @@ function clearFilters() {
     document.getElementById('filterTipo').value = '';
     document.getElementById('filterMarca').value = '';
     document.getElementById('filterAnio').value = '';
-    document.getElementById('filterValoracion').value = '';
+    // document.getElementById('filterValoracion').value = ''; // Comentado
     
     // Reiniciar el objeto de filtros activos
     activeFilters = {};
@@ -49,7 +51,8 @@ function loadVehiculos() {
     if (activeFilters.marca) url.searchParams.append('marca', activeFilters.marca);
     if (activeFilters.tipo) url.searchParams.append('tipo', activeFilters.tipo);
     if (activeFilters.anio) url.searchParams.append('anio', activeFilters.anio);
-    if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion);
+    // if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion); // Comentado
+    if (activeFilters.parking_id) url.searchParams.append('parking_id', activeFilters.parking_id);
     
     url.searchParams.append('page', currentPage);
     url.searchParams.append('per_page', itemsPerPage);
@@ -96,16 +99,21 @@ function loadVehiculos() {
         }
         
         data.vehiculos.forEach(vehiculo => {
+            console.log(vehiculo);
             const row = document.createElement('tr');
             const precio = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(vehiculo.precio);
             row.innerHTML = `
-                <td>${vehiculo.id_vehiculos}</td>
+                <td>
+                    ${vehiculo.imagen 
+                        ? `<img src="${vehiculo.imagen}" alt="Imagen" style="width:80px; height:60px; object-fit:cover; border-radius:4px; border:2px solid #6d117e;">`
+                        : '<span class="text-muted">Sin imagen</span>'}
+                </td>
                 <td>${vehiculo.marca}</td>
                 <td>${vehiculo.modelo}</td>
                 <td>${vehiculo.año}</td>
                 <td>${vehiculo.kilometraje} km</td>
-                <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
+                <td>${vehiculo.nombre_parking || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
                         <button class="btn btn-sm btn-success" 
@@ -328,7 +336,12 @@ document.addEventListener('DOMContentLoaded', function() {
             applyFilters();
         });
         
-        document.getElementById('filterValoracion').addEventListener('change', function() {
+        // document.getElementById('filterValoracion').addEventListener('change', function() {
+        //     currentPage = 1;
+        //     applyFilters();
+        // });
+        
+        document.getElementById('filterParking').addEventListener('change', function() {
             currentPage = 1;
             applyFilters();
         });

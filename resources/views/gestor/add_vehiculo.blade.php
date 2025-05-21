@@ -8,7 +8,7 @@
 
 <div class="add-user-container">
     <h1 class="form-title">Añadir Nuevo Vehículo</h1>
-    <form id="addVehiculoForm" data-url="{{ route('gestor.vehiculos.store') }}">
+    <form id="addVehiculoForm" data-url="{{ route('gestor.vehiculos.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="form-grid">
             <div>
@@ -58,7 +58,22 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="parking_id" class="form-label">Parking</label>
+                    <select class="form-control" id="parking_id" name="parking_id" required>
+                        <option value="">Seleccionar parking</option>
+                        @foreach($parkings as $parking)
+                            <option value="{{ $parking->id }}">{{ $parking->nombre }} ({{ $parking->lugar->nombre ?? 'Sin lugar' }})</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
+        </div>
+
+        <div class="form-group">
+            <label for="imagenes" class="form-label">Imágenes del vehículo</label>
+            <input type="file" class="form-control" id="imagenes" name="imagenes[]" multiple accept="image/*">
         </div>
 
         <div class="btn-container">

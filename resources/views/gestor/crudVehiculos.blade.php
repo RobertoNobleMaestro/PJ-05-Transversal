@@ -77,10 +77,17 @@
                 </select>
                 
                 <!-- Filtro por valoracion -->
-                <select class="filter-control" id="filterValoracion">
+                <!-- <select class="filter-control" id="filterValoracion">
                     <option value="">Todas las valoraciones</option>
                     @foreach($valoraciones as $val)
                         <option value="{{ $val }}">{{ $val }}+ estrellas</option>
+                    @endforeach
+                </select> -->
+                
+                <select class="filter-control" id="filterParking">
+                    <option value="">Todos los parkings</option>
+                    @foreach($parkings as $parking)
+                        <option value="{{ $parking->id }}">{{ $parking->nombre }}</option>
                     @endforeach
                 </select>
                 
@@ -99,13 +106,13 @@
             <table class="crud-table" id="vehiculos-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>Imagen</th>
                         <th>Marca</th>
                         <th>Modelo</th>
                         <th>Año</th>
                         <th>Kilometraje</th>
-                        <th>Lugar</th>
                         <th>Tipo</th>
+                        <th>Parking</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>

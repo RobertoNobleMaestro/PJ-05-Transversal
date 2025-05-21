@@ -90,7 +90,7 @@
                             </div>
                             <h3>Chats con clientes</h3>
                             <p>Aqui podrás ver todas las conversaciones con los clientes.</p>
-                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
+                            <a href="{{ route('gestor.historial') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -102,7 +102,7 @@
                             </div>
                             <h3>Gestión de parkings</h3>
                             <p>Aqui podrás ver y gestionar de los parkings de tu sede.</p>
-                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
+                            <a href="{{ route('gestor.parking.index') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
