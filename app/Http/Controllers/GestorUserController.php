@@ -85,6 +85,14 @@ class GestorUserController extends Controller
             $query->where('users.id_roles', $request->role);
         }
     
+        if ($request->filled('parking_id')) {
+            $query->where('parking.id', $request->parking_id);
+        }
+    
+        if ($request->filled('email')) {
+            $query->where('users.email', 'like', '%' . $request->email . '%');
+        }
+    
         $perPage = $request->get('perPage', 10);
         $users = $query->paginate($perPage);
     
@@ -115,6 +123,7 @@ class GestorUserController extends Controller
             return view('gestor.user.index', [
                 'users' => collect([]),
                 'roles' => $roles,
+                'parkings' => collect([]),
                 'message' => 'No se ha encontrado un parking asignado a este gestor.'
             ]);
         }
@@ -124,10 +133,13 @@ class GestorUserController extends Controller
             return view('gestor.user.index', [
                 'users' => collect([]),
                 'roles' => $roles,
+                'parkings' => collect([]),
                 'message' => 'No se ha encontrado el parking del gestor.'
             ]);
         }
         $id_lugar = $parkingGestor->id_lugar;
+
+        $parkings = \App\Models\Parking::where('id_lugar', $id_lugar)->get();
 
         $users = User::select('users.*', 'roles.nombre as nombre_rol', 'parking.id as parking_id', 'parking.nombre as parking_nombre')
                     ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
@@ -136,7 +148,7 @@ class GestorUserController extends Controller
                     ->where('parking.id_lugar', $id_lugar)
                     ->get();
 
-        return view('gestor.user.index', compact('users', 'roles'));
+        return view('gestor.user.index', compact('users', 'roles', 'parkings'));
     }
 
     public function create(Request $request)

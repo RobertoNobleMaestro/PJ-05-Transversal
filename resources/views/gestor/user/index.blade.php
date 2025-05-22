@@ -42,20 +42,32 @@
             </div>
 
             <div class="filter-section">
-                <div class="filter-group">
-                    <input type="text" class="search-input" placeholder="Buscar por nombre..." id="searchUser">
-                    <select class="filter-control" id="filterRole">
-                        <option value="">Todos los roles</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id_roles }}">{{ ucwords(str_replace('_', ' ', $role->nombre)) }}</option>
-                        @endforeach
-                    </select>
-                    <select class="filter-control" id="perPageSelect">
-                        <option value="5">5 por página</option>
-                        <option value="10" selected>10 por página</option>
-                        <option value="20">20 por página</option>
-                    </select>
-                    <button id="clearFilters" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <input type="text" id="searchUser" class="form-control" placeholder="Buscar por nombre">
+                    </div>
+                    <div class="col-md-2">
+                        <select id="filterRole" class="form-control">
+                            <option value="">Todos los roles</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->id_roles }}">{{ $role->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="filterParking" class="form-control">
+                            <option value="">Todos los parkings</option>
+                            @foreach($parkings as $parking)
+                                <option value="{{ $parking->id }}">{{ $parking->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" id="searchEmail" class="form-control" placeholder="Buscar por email">
+                    </div>
+                    <div class="col-md-2">
+                        <button id="clearFilters" class="btn btn-secondary">Limpiar Filtros</button>
+                    </div>
                 </div>
 
                 <a href="{{ route('gestor.user.create') }}" class="add-user-btn">Añadir Usuario</a>

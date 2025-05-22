@@ -16,6 +16,8 @@ function loadUsers() {
     // Bloque de control para añadir valores a los filtros
     if (activeFilters.nombre) url.searchParams.append('nombre', activeFilters.nombre);
     if (activeFilters.role) url.searchParams.append('role', activeFilters.role);
+    if (activeFilters.parking_id) url.searchParams.append('parking_id', activeFilters.parking_id);
+    if (activeFilters.email) url.searchParams.append('email', activeFilters.email);
 
     // Si las condiciones se cumplen se añaden a la paginación
     url.searchParams.append('page', currentPage);
@@ -91,24 +93,29 @@ function loadUsers() {
     });
 }
 
-// Listener para cuando cambie de página muestre los registros correspondientes
-document.getElementById('perPageSelect').addEventListener('change', function () {
-    perPage = parseInt(this.value);
-    currentPage = 1;
-    loadUsers();
-});
-
+const perPageSelect = document.getElementById('perPageSelect');
+if (perPageSelect) {
+    perPageSelect.addEventListener('change', function () {
+        perPage = parseInt(this.value);
+        currentPage = 1;
+        loadUsers();
+    });
+}
 
 // Función para aplicar los filtros sumativamente tanto por rol como por nombre 
 function applyFilters() {
     // Recoger los valores de los filtros
     const nombre = document.getElementById('searchUser').value.trim();
     const role = document.getElementById('filterRole').value;
+    const parking = document.getElementById('filterParking').value;
+    const email = document.getElementById('searchEmail').value.trim();
     
     // Actualizar el objeto de filtros activos
     activeFilters = {
         nombre: nombre,
-        role: role
+        role: role,
+        parking_id: parking,
+        email: email
     };
     
     // Cargar usuarios con los filtros aplicados
@@ -119,6 +126,8 @@ function applyFilters() {
 function clearFilters() {
     document.getElementById('searchUser').value = '';
     document.getElementById('filterRole').value = '';
+    document.getElementById('filterParking').value = '';
+    document.getElementById('searchEmail').value = '';
     
     // Reiniciar el objeto de filtros activos
     activeFilters = {};
@@ -244,6 +253,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.getElementById('filterRole').addEventListener('change', function() {
+        applyFilters();
+    });
+
+    document.getElementById('filterParking').addEventListener('change', function() {
+        applyFilters();
+    });
+
+    document.getElementById('searchEmail').addEventListener('input', function() {
         applyFilters();
     });
 });

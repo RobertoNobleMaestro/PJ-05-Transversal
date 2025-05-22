@@ -16,7 +16,7 @@ class AsalariadoSeeder extends Seeder
     public function run(): void
     {
         // Obtener todos los usuarios que son asalariados (roles 3, 4 y 5)
-        $usuarios = User::whereIn('id_roles', [3, 4, 5])->get();
+        $usuarios = User::whereIn('id_roles', [3, 4, 5, 6])->get();
         
         // Obtener todos los parkings disponibles
         $parkings = Parking::all();
