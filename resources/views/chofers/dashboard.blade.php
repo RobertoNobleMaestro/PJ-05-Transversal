@@ -57,7 +57,7 @@
                             </div>
                             <h3>Solicitudes de Transporte Privado</h3>
                             <p>Consulta las solicitudes de los usuarios para el servicio de transporte privado.</p>
-                            <a href="#" class="btn-admin-card">
+                            <a href="{{ route('chofers.solicitudes') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>

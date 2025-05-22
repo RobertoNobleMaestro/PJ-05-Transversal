@@ -29,6 +29,7 @@ use App\Http\Controllers\AdminFinancieroController;
 use App\Http\Controllers\AsalariadoController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
+use App\Http\Controllers\SolicitudController;
 use Illuminate\Support\Facades\Schema;
 
 
@@ -141,6 +142,9 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
     
+    // Solicitudes de transporte
+    Route::get('/chofers/solicitudes', [ChoferController::class, 'solicitudes'])->name('chofers.solicitudes');
+    
     // Chat por grupo
     Route::get('/chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
     Route::post('/chofers/grupos', [ChoferController::class, 'storeGrupo'])->name('chofers.grupos.store');
@@ -154,6 +158,7 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
 
 // Ruta para la solicitud de transporte privado (cliente)
 Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
+Route::get('/api/choferes-cercanos', [SolicitudController::class, 'getChoferesCercanos'])->name('api.choferes.cercanos');
 
 // Ruta de depuración para el chat (solo para desarrollo)
 Route::get('/debug/chat', function() {
