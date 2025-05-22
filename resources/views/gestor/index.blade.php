@@ -110,6 +110,18 @@
                             </a>
                         </div>
                     </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-users fa-3x"></i>
+                            </div>
+                            <h3>Gestión de Usuarios</h3>
+                            <p>Administra los usuarios del sistema, sus roles y permisos.</p>
+                            <a href="{{ route('gestor.user.index') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

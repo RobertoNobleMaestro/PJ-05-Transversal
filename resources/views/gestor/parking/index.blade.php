@@ -26,6 +26,9 @@
                                         <li><a href="{{ route('gestor.parking.index') }}"
                 class="{{ request()->routeIs('gestor.parking.index') ? 'active' : '' }}"><i
                     class="fas fa-parking"></i>Parking</a></li>
+                    <li><a href="{{ route('gestor.user.index') }}"
+                class="{{ request()->routeIs('gestor.user.index') ? 'active' : '' }}"><i
+                    class="fas fa-user"></i>Usuarios</a></li>
             </ul>
         </div>
     </div>
