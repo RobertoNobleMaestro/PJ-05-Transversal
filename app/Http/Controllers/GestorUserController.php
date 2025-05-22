@@ -118,6 +118,17 @@ class GestorUserController extends Controller
         $gestor = auth()->user();
         $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
         $roles = Role::whereIn('nombre', ['Mecánico', 'admin_financiero', 'chofer'])->get();
+        // Mapear nombre amigable para admin_financiero
+        $roles->transform(function($role) {
+            if (strtolower($role->nombre) === 'admin_financiero') {
+                $role->nombre = 'Administrador financiero';
+            } elseif (strtolower($role->nombre) === 'mecanico') {
+                $role->nombre = 'Mecánico';
+            } elseif (strtolower($role->nombre) === 'chofer') {
+                $role->nombre = 'Chofer';
+            }
+            return $role;
+        });
 
         if (!$asalariadoGestor || !$asalariadoGestor->parking_id) {
             return view('gestor.user.index', [
@@ -159,6 +170,17 @@ class GestorUserController extends Controller
         $usuario = new User();
         $licencias = ['AM','A1','A2','A','B','B+E','C1','C1+E','C','C+E','D1','D1+E','D','D+E'];
         $roles = Role::whereIn('nombre', ['Mecánico', 'admin_financiero', 'chofer'])->get();
+        // Mapear nombre amigable para admin_financiero
+        $roles->transform(function($role) {
+            if (strtolower($role->nombre) === 'admin_financiero') {
+                $role->nombre = 'Administrador financiero';
+            } elseif (strtolower($role->nombre) === 'mecanico') {
+                $role->nombre = 'Mecánico';
+            } elseif (strtolower($role->nombre) === 'chofer') {
+                $role->nombre = 'Chofer';
+            }
+            return $role;
+        });
 
         // Parkings del lugar del gestor
         $gestor = auth()->user();
@@ -250,6 +272,17 @@ class GestorUserController extends Controller
         $asalariado = Asalariado::where('id_usuario', $user->id_usuario)->firstOrFail();
         $licencias = ['AM','A1','A2','A','B','B+E','C1','C1+E','C','C+E','D1','D1+E','D','D+E'];
         $roles = Role::whereIn('nombre', ['Mecánico', 'admin_financiero', 'chofer'])->get();
+        // Mapear nombre amigable para admin_financiero
+        $roles->transform(function($role) {
+            if (strtolower($role->nombre) === 'admin_financiero') {
+                $role->nombre = 'Administrador financiero';
+            } elseif (strtolower($role->nombre) === 'mecanico') {
+                $role->nombre = 'Mecánico';
+            } elseif (strtolower($role->nombre) === 'chofer') {
+                $role->nombre = 'Chofer';
+            }
+            return $role;
+        });
 
         // Parkings del lugar del gestor
         $gestor = auth()->user();
