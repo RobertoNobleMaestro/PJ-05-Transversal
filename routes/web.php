@@ -16,6 +16,7 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GestorController;
+use App\Http\Controllers\GestorUserController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
@@ -253,6 +254,15 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats', [ChatViewController::class, 'listarConversaciones'])->name('gestor.chat.listar');
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
+    Route::prefix('gestor')->middleware(['auth', 'role:gestor'])->group(function () {
+    Route::get('/users', [GestorUserController::class, 'index'])->name('gestor.user.index');
+    Route::get('/users/data', [GestorUserController::class, 'getUsers'])->name('gestor.user.data');
+    Route::get('/users/create', [GestorUserController::class, 'create'])->name('gestor.user.create');
+    Route::post('/users', [GestorUserController::class, 'store'])->name('gestor.user.store');
+    Route::get('/users/{id}/edit', [GestorUserController::class, 'edit'])->name('gestor.user.edit');
+    Route::post('/users/{id}', [GestorUserController::class, 'update'])->name('gestor.user.update');
+    Route::delete('/users/{id}', [GestorUserController::class, 'destroy'])->name('gestor.user.destroy');
+    });
 });
 Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 

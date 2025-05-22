@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('plazas');
             $table->decimal('latitud', 10, 8);
             $table->decimal('longitud', 11, 8);
-
+            $table->decimal('precio_parking', 10, 2);
             $table->unsignedBigInteger('id_usuario');
             $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
 
