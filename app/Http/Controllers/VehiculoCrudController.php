@@ -249,7 +249,14 @@ class VehiculoCrudController extends Controller
                 'precio_dia' => 'required|numeric|min:0',
                 'matricula' => 'nullable|string|max:20',
                 'parking_id' => 'required|exists:parking,id',
-                'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096'
+                'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+                // Características
+                'techo' => 'required|in:0,1',
+                'transmision' => 'required|string|max:255',
+                'num_puertas' => 'required|integer|min:2|max:6',
+                'etiqueta_medioambiental' => 'required|string|max:255',
+                'aire_acondicionado' => 'required|in:0,1',
+                'capacidad_maletero' => 'required|integer|min:0',
             ]);
 
             // Guardar el vehículo y obtener la instancia
@@ -268,6 +275,17 @@ class VehiculoCrudController extends Controller
                     }
                 }
             }
+
+            // Guardar características
+            \App\Models\Caracteristica::create([
+                'id_vehiculos' => $vehiculo->id_vehiculos,
+                'techo' => $request->techo,
+                'transmision' => $request->transmision,
+                'num_puertas' => $request->num_puertas,
+                'etiqueta_medioambiental' => $request->etiqueta_medioambiental,
+                'aire_acondicionado' => $request->aire_acondicionado,
+                'capacidad_maletero' => $request->capacidad_maletero,
+            ]);
             
             if ($request->expectsJson()) {
                 return response()->json([
@@ -374,7 +392,14 @@ class VehiculoCrudController extends Controller
                 'precio_dia' => 'required|numeric|min:0',
                 'matricula' => 'nullable|string|max:20',
                 'parking_id' => 'required|exists:parking,id',
-                'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096'
+                'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+                // Características
+                'techo' => 'required|in:0,1',
+                'transmision' => 'required|string|max:255',
+                'num_puertas' => 'required|integer|min:2|max:6',
+                'etiqueta_medioambiental' => 'required|string|max:255',
+                'aire_acondicionado' => 'required|in:0,1',
+                'capacidad_maletero' => 'required|integer|min:0',
             ]);
 
             $vehiculo->update($validatedData);
@@ -392,6 +417,29 @@ class VehiculoCrudController extends Controller
                         ]);
                     }
                 }
+            }
+
+            // Actualizar o crear características
+            $caracteristicas = \App\Models\Caracteristica::where('id_vehiculos', $vehiculo->id_vehiculos)->first();
+            if ($caracteristicas) {
+                $caracteristicas->update([
+                    'techo' => $request->techo,
+                    'transmision' => $request->transmision,
+                    'num_puertas' => $request->num_puertas,
+                    'etiqueta_medioambiental' => $request->etiqueta_medioambiental,
+                    'aire_acondicionado' => $request->aire_acondicionado,
+                    'capacidad_maletero' => $request->capacidad_maletero,
+                ]);
+            } else {
+                \App\Models\Caracteristica::create([
+                    'id_vehiculos' => $vehiculo->id_vehiculos,
+                    'techo' => $request->techo,
+                    'transmision' => $request->transmision,
+                    'num_puertas' => $request->num_puertas,
+                    'etiqueta_medioambiental' => $request->etiqueta_medioambiental,
+                    'aire_acondicionado' => $request->aire_acondicionado,
+                    'capacidad_maletero' => $request->capacidad_maletero,
+                ]);
             }
             
             // Si la petición espera JSON (AJAX), devolver respuesta JSON
