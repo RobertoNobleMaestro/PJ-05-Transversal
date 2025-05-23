@@ -160,6 +160,17 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
 Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
 Route::get('/api/choferes-cercanos', [SolicitudController::class, 'getChoferesCercanos'])->name('api.choferes.cercanos');
 
+// Rutas para solicitudes
+Route::middleware(['auth'])->group(function () {
+    // Rutas para choferes
+    Route::get('/api/solicitudes/chofer', [SolicitudController::class, 'getSolicitudesChofer']);
+    Route::post('/api/solicitudes/{id}/aceptar', [SolicitudController::class, 'aceptarSolicitud']);
+    Route::post('/api/solicitudes/{id}/rechazar', [SolicitudController::class, 'rechazarSolicitud']);
+});
+
+// Ruta para crear solicitudes (sin autenticación)
+Route::post('/api/solicitudes/crear', [SolicitudController::class, 'crearSolicitud']);
+
 // Ruta de depuración para el chat (solo para desarrollo)
 Route::get('/debug/chat', function() {
     if (!Auth::check()) {

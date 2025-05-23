@@ -140,6 +140,9 @@
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .precio-chofer p {
@@ -151,6 +154,21 @@
     color: #8c37c1;
     font-size: 1.1rem;
     margin-top: 5px;
+}
+
+.btn-solicitar {
+    background-color: #8c37c1;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-solicitar:hover {
+    background-color: #462478;
 }
 
 /* Color lila para mensajes propios */

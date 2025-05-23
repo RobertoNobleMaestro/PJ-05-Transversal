@@ -214,6 +214,7 @@ function actualizarListaChoferes(choferes) {
                 <p>Distancia: ${chofer.distancia.toFixed(2)} km</p>
                 <div class="precio-chofer d-none" id="precio-chofer-${chofer.id}">
                     <p class="fw-bold">Precio total: <span class="precio-total">0</span> €</p>
+                    <button onclick="solicitarViaje(${chofer.id})" class="btn-solicitar">Solicitar</button>
                 </div>
             </div>
             <button onclick="seleccionarChofer(${chofer.id}, ${chofer.latitud}, ${chofer.longitud})" class="btn-seleccionar">
@@ -235,4 +236,84 @@ function seleccionarChofer(choferId, choferLat, choferLng) {
     
     // TODO: Implementar la lógica adicional de selección
     console.log("Chofer seleccionado:", choferId);
+}
+
+function solicitarViaje(choferId) {
+    if (!destinoSeleccionado) {
+        mostrarAlerta('warning', 'Destino no seleccionado', 'Por favor, introduce primero tu destino.');
+        return;
+    }
+
+    // Obtener el precio del elemento
+    const precioElement = document.getElementById(`precio-chofer-${choferId}`);
+    const precio = parseFloat(precioElement.querySelector('.precio-total').textContent);
+
+    // Obtener el token CSRF
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (!token) {
+        console.error('No se encontró el token CSRF');
+        mostrarAlerta('error', 'Error de seguridad', 'No se pudo procesar la solicitud. Por favor, recarga la página.');
+        return;
+    }
+
+    // Obtener el ID del cliente del elemento data-cliente-id
+    const clienteId = document.querySelector('[data-cliente-id]').dataset.clienteId;
+    if (!clienteId) {
+        mostrarAlerta('error', 'Error', 'No se pudo identificar al cliente. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+
+    // Mostrar confirmación antes de solicitar el viaje
+    Swal.fire({
+        title: '¿Confirmar solicitud?',
+        text: '¿Deseas solicitar este viaje?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#8c37c1',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, solicitar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Realizar la petición al servidor
+            fetch('/api/solicitudes/crear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token.content,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    id_chofer: choferId,
+                    latitud_origen: userLat,
+                    longitud_origen: userLng,
+                    latitud_destino: destinoLat,
+                    longitud_destino: destinoLng,
+                    precio: precio,
+                    id_cliente: clienteId
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || 'Error en la respuesta del servidor');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta('success', '¡Solicitud enviada!', 'El chofer ha sido notificado de tu solicitud.');
+                } else {
+                    throw new Error(data.message || 'Error al crear la solicitud');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error', 'No se pudo procesar tu solicitud. Por favor, inténtalo de nuevo.');
+            });
+        }
+    });
 }

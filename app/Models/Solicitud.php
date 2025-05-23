@@ -9,26 +9,27 @@ class Solicitud extends Model
 {
     use HasFactory;
 
+    protected $table = 'solicitudes';
+
     protected $fillable = [
-        'id_usuario_solicitado',
-        'latitud_solicitante',
-        'longitud_solicitante',
-        'chofer_id',
-        'estado_solicitud',
+        'id_chofer',
+        'id_cliente',
+        'latitud_origen',
+        'longitud_origen',
         'latitud_destino',
         'longitud_destino',
-        'id_lugar',
-        'precio'
+        'precio',
+        'estado'
     ];
 
-    public function usuario()
+    public function cliente()
     {
-        return $this->belongsTo(User::class, 'id_usuario_solicitado');
+        return $this->belongsTo(User::class, 'id_cliente');
     }
 
     public function chofer()
     {
-        return $this->belongsTo(Chofer::class, 'chofer_id');
+        return $this->belongsTo(Chofer::class, 'id_chofer');
     }
 
     public function lugar()

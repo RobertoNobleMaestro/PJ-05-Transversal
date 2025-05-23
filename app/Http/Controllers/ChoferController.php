@@ -557,4 +557,9 @@ class ChoferController extends Controller
             ], 500);
         }
     }
+
+    public function solicitudes()
+    {
+        return view('chofers.solicitudes');
+    }
 }

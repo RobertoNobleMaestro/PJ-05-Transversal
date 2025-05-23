@@ -13,16 +13,14 @@ return new class extends Migration
     {
         Schema::create('solicitudes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_usuario_solicitado')->references('id_usuario')->on('users');
-            $table->decimal('latitud_solicitante', 10, 8);
-            $table->decimal('longitud_solicitante', 11, 8);
-            $table->foreignId('chofer_id')->nullable()->constrained('choferes');
-            $table->enum('estado_solicitud', ['pendiente', 'aceptada', 'en_progreso', 'completada', 'cancelada']);
+            $table->foreignId('id_chofer')->references('id')->on('choferes');
+            $table->foreignId('id_cliente')->references('id_usuario')->on('users');
+            $table->decimal('latitud_origen', 10, 8);
+            $table->decimal('longitud_origen', 11, 8);
             $table->decimal('latitud_destino', 10, 8);
             $table->decimal('longitud_destino', 11, 8);
-            $table->unsignedBigInteger('id_lugar')->nullable();
-            $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
             $table->decimal('precio', 10, 2);
+            $table->enum('estado', ['pendiente', 'aceptada', 'rechazada', 'completada', 'cancelada'])->default('pendiente');
             $table->timestamps();
         });
     }

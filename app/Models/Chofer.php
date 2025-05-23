@@ -9,20 +9,22 @@ class Chofer extends Model
 {
     use HasFactory;
 
+    protected $table = 'choferes';
+
     protected $fillable = [
-        'id',
+        'id_usuario',
         'latitud',
         'longitud',
         'estado'
     ];
 
-    public function user()
+    public function usuario()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'id_usuario');
     }
 
     public function solicitudes()
     {
-        return $this->hasMany(Solicitud::class, 'chofer_id');
+        return $this->hasMany(Solicitud::class, 'id_chofer');
     }
 }
