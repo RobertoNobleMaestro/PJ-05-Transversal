@@ -155,7 +155,7 @@ class TallerController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al agendar mantenimiento: ' . $e->getMessage()
+                'message' => 'Error al agendar mantenimiento'
             ], 500);
         }
     }

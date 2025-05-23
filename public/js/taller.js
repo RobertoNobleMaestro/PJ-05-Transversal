@@ -106,28 +106,54 @@ $(document).ready(function() {
         });
     }
     
+    // --- VALIDACIÓN VISUAL AVANZADA ---
+    function mostrarErrorCampo($campo, mensaje) {
+        $campo.addClass('is-invalid');
+        $campo.next('.invalid-feedback').show().text(mensaje);
+    }
+    function limpiarErrorCampo($campo) {
+        $campo.removeClass('is-invalid');
+        $campo.next('.invalid-feedback').hide();
+    }
+    // Ocultar feedback al abrir modal
+    $('#modalAgendarMantenimiento').on('show.bs.modal', function() {
+        $('#formAgendarMantenimiento .is-invalid').removeClass('is-invalid');
+        $('#formAgendarMantenimiento .invalid-feedback').hide();
+    });
+    // Validar en blur
+    $('#formAgendarMantenimiento').on('blur change', 'input, select', function() {
+        const $campo = $(this);
+        if ($campo.prop('required') && !$campo.val()) {
+            mostrarErrorCampo($campo, $campo.next('.invalid-feedback').text());
+        } else {
+            limpiarErrorCampo($campo);
+        }
+    });
     // Enviar formulario de mantenimiento
     $('#formAgendarMantenimiento').submit(function(e) {
         e.preventDefault();
-        
+        let valido = true;
+        // Validar todos los campos requeridos
+        $(this).find('input, select').each(function() {
+            const $campo = $(this);
+            if ($campo.prop('required') && !$campo.val()) {
+                mostrarErrorCampo($campo, $campo.next('.invalid-feedback').text());
+                valido = false;
+            } else {
+                limpiarErrorCampo($campo);
+            }
+        });
+        if (!valido) return;
         const vehiculoId = $('#vehiculo-id').val();
         const fecha = $('#fecha-mantenimiento').val();
         const hora = $('#hora-mantenimiento').val();
         const tallerId = $('#taller-id').val();
-        
-        // Validar formulario
-        if (!fecha || !hora || !tallerId) {
-            mostrarAlerta('Debe completar todos los campos', 'error');
-            return;
-        }
-        
         // Verificar que la fecha no sea anterior a hoy
         const hoy = new Date().toISOString().split('T')[0];
-        if (fecha < hoy) {
-            mostrarAlerta('No se puede agendar mantenimiento en una fecha pasada', 'error');
+        if (fecha && fecha < hoy) {
+            mostrarErrorCampo($('#fecha-mantenimiento'), 'La fecha no puede ser anterior a hoy.');
             return;
         }
-        
         // Enviar solicitud AJAX
         var dataAjax = {
                 id_vehiculo: vehiculoId,
@@ -171,11 +197,48 @@ $(document).ready(function() {
     
     // Función para mostrar alertas
     function mostrarAlerta(mensaje, tipo) {
-        Swal.fire({
-            title: tipo === 'success' ? 'Éxito' : 'Error',
-            text: mensaje,
-            icon: tipo,
-            confirmButtonText: 'Aceptar'
-        });
+        if (tipo === 'error') {
+            let titulo = '¡Atención! Ocurrió un problema';
+            let subtitulo = '';
+            // Personalización según el error
+            if (mensaje.includes('campos') || mensaje.includes('completar')) {
+                titulo = 'Faltan datos obligatorios';
+                subtitulo = 'Por favor, completa todos los campos requeridos para agendar el mantenimiento.';
+            } else if (mensaje.includes('fecha pasada') || mensaje.includes('anterior a hoy')) {
+                titulo = 'Fecha inválida';
+                subtitulo = 'La fecha seleccionada no puede ser anterior a hoy. Selecciona una fecha válida.';
+            } else if (mensaje.includes('hora')) {
+                titulo = 'Hora no seleccionada';
+                subtitulo = 'Debes seleccionar una hora disponible para el mantenimiento.';
+            } else if (mensaje.includes('motivo')) {
+                titulo = 'Motivo de reserva requerido';
+                subtitulo = 'Por favor selecciona el motivo de la reserva.';
+            }
+            Swal.fire({
+                title: `<span style='color:#4B1668;font-weight:bold;'>${titulo}</span>`,
+                html: `<div style='font-size:1.1em;color:#4B1668;font-weight:600;'><i class='fas fa-exclamation-triangle fa-lg me-2' style='color:#4B1668;'></i><span style='color:#111;'>${mensaje}</span></div><div style='font-size:0.97em;color:#333;margin-top:8px;'>${subtitulo}</div>`,
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#4B1668',
+                background: '#f8f4fa',
+                customClass: {
+                    title: '',
+                    popup: 'border border-2' + ' border-purple-strong rounded-4'
+                }
+            });
+        } else {
+            Swal.fire({
+                title: `<span style='color:#4B1668;font-weight:bold;'>Éxito</span>`,
+                html: `<div style='font-size:1.1em;color:#4B1668;font-weight:600;'><i class='fas fa-check-circle fa-lg me-2' style='color:#4B1668;'></i><span style='color:#111;'>${mensaje}</span></div>`,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#4B1668',
+                background: '#f8f4fa',
+                customClass: {
+                    title: '',
+                    popup: 'border border-2' + ' border-purple-strong rounded-4'
+                }
+            });
+        }
     }
 }); 

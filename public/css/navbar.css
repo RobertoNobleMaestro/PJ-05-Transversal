@@ -46,7 +46,7 @@
 }
 
 .navbar-custom .navbar-nav .nav-item img {
-    border: 2px solid #000000; /* Borde de la imagen de perfil */
+    border: 2px solid #6f42c1; /* Borde de la imagen de perfil (morado) */
     transition: border-color 0.3s ease; /* Transición suave del borde */
 }
 

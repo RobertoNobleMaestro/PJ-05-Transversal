@@ -445,46 +445,37 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
       </div>
       <form id="formEditarMantenimiento" onsubmit="enviarFormularioEdicion(event)">
         <div class="modal-body">
-          <div class="row">
-            <div class="col-md-6">
-              <input type="hidden" id="edit_id" name="id">
-              <div class="mb-3">
+            <input type="hidden" id="edit_id" name="id">
+            <div class="mb-3">
                 <label for="edit_vehiculo_id" class="form-label">Vehículo</label>
                 <select id="edit_vehiculo_id" name="vehiculo_id" class="form-select" required>
-                  @foreach($vehiculos as $vehiculo)
-                    <option value="{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->modelo }} - {{ $vehiculo->placa }}</option>
-                  @endforeach
+                    @foreach($vehiculos as $vehiculo)
+                        <option value="{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->modelo }} - {{ $vehiculo->placa }}</option>
+                    @endforeach
                 </select>
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label for="edit_taller_id" class="form-label">Taller</label>
                 <select id="edit_taller_id" name="taller_id" class="form-select" required>
-                  @foreach($talleres as $taller)
-                    <option value="{{ $taller->id }}">{{ $taller->nombre }}</option>
-                  @endforeach
+                    @foreach($talleres as $taller)
+                        <option value="{{ $taller->id }}">{{ $taller->nombre }}</option>
+                    @endforeach
                 </select>
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label for="edit_fecha_programada" class="form-label">Fecha</label>
                 <input type="date" id="edit_fecha_programada" name="fecha_programada" class="form-control" required>
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label for="edit_hora_programada" class="form-label">Hora</label>
                 <input type="time" id="edit_hora_programada" name="hora_programada" class="form-control" required>
-              </div>
-              <div class="mb-3">
-                <label for="edit_motivo_reserva" class="form-label">Motivo de la reserva</label>
-                <select id="edit_motivo_reserva" name="motivo_reserva" class="form-select" required>
-                  <option value="mantenimiento">Mantenimiento</option>
-                  <option value="averia">Avería</option>
-                </select>
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label for="edit_estado" class="form-label">Estado</label>
                 <select id="edit_estado" name="estado" class="form-select" required>
-                  <option value="pendiente">Pendiente</option>
-                  <option value="completado">Completado</option>
-                  <option value="cancelado">Cancelado</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="completado">Completado</option>
+                    <option value="cancelado">Cancelado</option>
                 </select>
               </div>
             </div>
@@ -505,8 +496,8 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary btn-sm btn-agendar-mantenimiento" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-sm btn-agendar-mantenimiento">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
         </div>
       </form>
     </div>
