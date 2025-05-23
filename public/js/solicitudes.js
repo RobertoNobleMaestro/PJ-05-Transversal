@@ -1,137 +1,136 @@
-// Función para cargar las solicitudes pendientes
-function cargarSolicitudes() {
-    fetch('/api/solicitudes/chofer', {
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                actualizarListaSolicitudes(data.solicitudes);
-            } else {
-                console.error('Error al cargar solicitudes:', data.message);
-                Swal.fire('Error', 'No se pudieron cargar las solicitudes', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire('Error', 'No se pudieron cargar las solicitudes', 'error');
-        });
+let mapa = null;
+
+function formatearPrecio(precio) {
+    return precio.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
 }
 
-// Función para actualizar la lista de solicitudes
-function actualizarListaSolicitudes(solicitudes) {
-    const listaSolicitudes = document.getElementById('lista-solicitudes');
-    listaSolicitudes.innerHTML = '';
+function crearInfoItem(label, valor) {
+    return `
+        <div class="info-item">
+            <div class="info-label">${label}</div>
+            <div class="info-value">${valor}</div>
+        </div>
+    `;
+}
 
-    if (solicitudes.length === 0) {
-        listaSolicitudes.innerHTML = '<p>No hay solicitudes pendientes.</p>';
-        return;
+function mostrarModal() {
+    const modal = document.getElementById('modalVisualizador');
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modalVisualizador');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    if (mapa) {
+        mapa.remove();
+        mapa = null;
+    }
+}
+
+function inicializarMapa(solicitud) {
+    if (mapa) {
+        mapa.remove();
+        mapa = null;
     }
 
-    solicitudes.forEach(solicitud => {
-        const solicitudElement = document.createElement('div');
-        solicitudElement.className = 'card solicitud-card';
-        solicitudElement.innerHTML = `
-            <div class="solicitud-header">
-                <h5 class="card-title">Solicitud de ${solicitud.cliente.nombre}</h5>
-                <p class="card-subtitle mb-2 text-muted">Cliente: ${solicitud.cliente.nombre}</p>
-            </div>
-            <div class="solicitud-body">
-                <p><strong>Origen:</strong> ${solicitud.latitud_origen}, ${solicitud.longitud_origen}</p>
-                <p><strong>Destino:</strong> ${solicitud.latitud_destino}, ${solicitud.longitud_destino}</p>
-                <p><strong>Precio:</strong> ${solicitud.precio}€</p>
-                <div class="d-flex gap-2">
-                    <button onclick="aceptarSolicitud(${solicitud.id})" class="btn btn-aceptar">
-                        <i class="fas fa-check"></i> Aceptar
-                    </button>
-                    <button onclick="rechazarSolicitud(${solicitud.id})" class="btn btn-rechazar">
-                        <i class="fas fa-times"></i> Rechazar
-                    </button>
-                </div>
-            </div>
-        `;
-        listaSolicitudes.appendChild(solicitudElement);
+    try {
+        mapa = L.map('mapa');
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(mapa);
+
+        const iconoOrigen = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const iconoDestino = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const origen = [parseFloat(solicitud.latitud_origen), parseFloat(solicitud.longitud_origen)];
+        const destino = [parseFloat(solicitud.latitud_destino), parseFloat(solicitud.longitud_destino)];
+
+        L.marker(origen, { icon: iconoOrigen })
+            .addTo(mapa)
+            .bindPopup('Punto de Recogida');
+
+        L.marker(destino, { icon: iconoDestino })
+            .addTo(mapa)
+            .bindPopup('Destino');
+
+        const bounds = L.latLngBounds([origen, destino]);
+        mapa.fitBounds(bounds.pad(0.1));
+
+        return true;
+    } catch (error) {
+        console.error('Error al inicializar el mapa:', error);
+        return false;
+    }
+}
+
+function mostrarDetallesSolicitud(solicitud) {
+    const infoPanel = document.getElementById('infoPanel');
+    infoPanel.innerHTML = `
+        <h6 style="margin-bottom: 1rem; font-weight: 600;">Información del Servicio</h6>
+        ${crearInfoItem('Cliente', solicitud.cliente.nombre)}
+        ${crearInfoItem('Precio', formatearPrecio(solicitud.precio))}
+        ${crearInfoItem('Punto de Recogida', `${solicitud.latitud_origen}, ${solicitud.longitud_origen}`)}
+        ${crearInfoItem('Destino', `${solicitud.latitud_destino}, ${solicitud.longitud_destino}`)}
+    `;
+
+    mostrarModal();
+
+    // Esperar a que el modal esté visible antes de inicializar el mapa
+    requestAnimationFrame(() => {
+        inicializarMapa(solicitud);
+        // Forzar una actualización del tamaño del mapa
+        setTimeout(() => {
+            if (mapa) {
+                mapa.invalidateSize();
+            }
+        }, 100);
     });
 }
 
-// Función para aceptar una solicitud
-function aceptarSolicitud(id) {
-    Swal.fire({
-        title: '¿Aceptar solicitud?',
-        text: '¿Estás seguro de que deseas aceptar esta solicitud?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, aceptar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/api/solicitudes/${id}/aceptar`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('¡Éxito!', 'Solicitud aceptada correctamente', 'success');
-                    cargarSolicitudes();
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error', 'No se pudo aceptar la solicitud', 'error');
-            });
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Botones para ver el mapa
+    document.querySelectorAll('.ver-mapa').forEach(button => {
+        button.addEventListener('click', function() {
+            const solicitud = JSON.parse(this.getAttribute('data-solicitud'));
+            mostrarDetallesSolicitud(solicitud);
+        });
+    });
+
+    // Cerrar modal con el botón
+    document.getElementById('cerrarModal').addEventListener('click', cerrarModal);
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('modalVisualizador').addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarModal();
         }
     });
-}
 
-// Función para rechazar una solicitud
-function rechazarSolicitud(id) {
-    Swal.fire({
-        title: '¿Rechazar solicitud?',
-        text: '¿Estás seguro de que deseas rechazar esta solicitud?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, rechazar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/api/solicitudes/${id}/rechazar`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('¡Éxito!', 'Solicitud rechazada correctamente', 'success');
-                    cargarSolicitudes();
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error', 'No se pudo rechazar la solicitud', 'error');
-            });
+    // Cerrar modal con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('modalVisualizador').style.display === 'block') {
+            cerrarModal();
         }
     });
-}
+});
 
-// Cargar solicitudes al cargar la página
-document.addEventListener('DOMContentLoaded', cargarSolicitudes); 
+

@@ -9,6 +9,8 @@ use App\Models\Grupo;
 use App\Models\Message;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Chofer;
+use App\Models\Solicitud;
 
 class ChoferController extends Controller
 {
@@ -560,6 +562,20 @@ class ChoferController extends Controller
 
     public function solicitudes()
     {
-        return view('chofers.solicitudes');
+        $chofer = Chofer::where('id_usuario', Auth::id())->first();
+        
+        if (!$chofer) {
+            return redirect()->back()->with('error', 'Chofer no encontrado');
+        }
+
+        $solicitudes = Solicitud::with(['cliente', 'chofer'])
+            ->where('id_chofer', $chofer->id)
+            ->where('estado', 'pendiente')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('chofers.solicitudes', [
+            'solicitudes' => $solicitudes
+        ]);
     }
 }

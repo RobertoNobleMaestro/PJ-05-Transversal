@@ -9,6 +9,7 @@ use App\Models\Solicitud;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class SolicitudController extends Controller
 {
@@ -167,6 +168,73 @@ class SolicitudController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al rechazar la solicitud'
+            ], 500);
+        }
+    }
+
+    public function obtenerRuta(Request $request)
+    {
+        try {
+            $origen_lat = $request->query('origen_lat');
+            $origen_lng = $request->query('origen_lng');
+            $destino_lat = $request->query('destino_lat');
+            $destino_lng = $request->query('destino_lng');
+
+            if (!$origen_lat || !$origen_lng || !$destino_lat || !$destino_lng) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Faltan coordenadas necesarias'
+                ], 400);
+            }
+
+            $apiKey = env('OPENROUTE_API_KEY', '5b3ce3597851110001cf6248e4c8c0c0c0c84c0c0c0c0c0c0c0c0c0c0c0c0c0');
+            
+            $url = 'https://api.openrouteservice.org/v2/directions/driving-car';
+            $params = [
+                'start' => "$origen_lng,$origen_lat",
+                'end' => "$destino_lng,$destino_lat"
+            ];
+
+            Log::info('Intentando obtener ruta de OpenRouteService', [
+                'url' => $url,
+                'params' => $params
+            ]);
+
+            $response = Http::withOptions([
+                'verify' => false
+            ])->withHeaders([
+                'Authorization' => $apiKey,
+                'Accept' => 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+            ])->get($url, $params);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('Respuesta exitosa de OpenRouteService', ['data' => $data]);
+                return response()->json([
+                    'success' => true,
+                    'route' => [
+                        'coordinates' => $data['features'][0]['geometry']['coordinates']
+                    ]
+                ]);
+            }
+
+            Log::error('Error en respuesta de OpenRouteService', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener la ruta: ' . $response->body()
+            ], 500);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener ruta: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
             ], 500);
         }
     }

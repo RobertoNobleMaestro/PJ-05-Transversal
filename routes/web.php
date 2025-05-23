@@ -166,6 +166,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/solicitudes/chofer', [SolicitudController::class, 'getSolicitudesChofer']);
     Route::post('/api/solicitudes/{id}/aceptar', [SolicitudController::class, 'aceptarSolicitud']);
     Route::post('/api/solicitudes/{id}/rechazar', [SolicitudController::class, 'rechazarSolicitud']);
+    Route::get('/api/solicitudes/ruta', [SolicitudController::class, 'obtenerRuta']);
 });
 
 // Ruta para crear solicitudes (sin autenticación)
@@ -319,3 +320,12 @@ Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->n
     
 // });
 Route::get('/taller/factura/{id}', [TallerController::class, 'descargarFactura'])->name('Taller.factura');
+
+// Rutas para el sistema de transporte
+Route::get('/cliente/pide', function () {
+    return view('chofers.cliente-pide');
+})->name('cliente.pide');
+
+Route::get('/solicitudes', function () {
+    return view('chofers.solicitudes');
+})->name('solicitudes');
