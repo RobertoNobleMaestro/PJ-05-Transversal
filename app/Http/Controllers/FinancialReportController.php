@@ -709,4 +709,248 @@ class FinancialReportController extends Controller
             'roiProyectado' => $roiProyectado
         ]);
     }*/
+    
+    /**
+     * Mostrar la página de estimación de presupuesto
+     */
+    public function presupuestoEstimado(Request $request)
+    {
+        // Verificar que el usuario sea admin financiero
+        if (!Auth::check() || Auth::user()->id_roles !== 5) {
+            return redirect('/')->with('error', 'No tienes permiso para acceder a esta sección');
+        }
+
+        // Obtener la sede del administrador financiero
+        $adminFinanciero = Auth::user();
+        $adminAsalariado = $adminFinanciero->asalariado;
+        
+        if (!$adminAsalariado || !$adminAsalariado->parking) {
+            return redirect('/')->with('error', 'No tienes una sede asignada. Contacta con el administrador del sistema.');
+        }
+        
+        $sedeId = $adminAsalariado->parking->id_lugar;
+        $sede = Lugar::find($sedeId);
+        
+        // Obtener todos los parkings asociados a esta sede
+        $parkingsIds = Parking::where('id_lugar', $sedeId)->pluck('id')->toArray();
+
+        // Procesar parámetros de filtro
+        $añoActual = $request->input('año', Carbon::now()->year);
+        $periodoTipo = $request->input('periodo', 'anual');
+        $periodoValor = $request->input('valor', null);
+        
+        // Datos fijos y variables para el cálculo del presupuesto
+        
+        // 1. Costos de personal (salarios)
+        $totalSalarios = Asalariado::whereIn('parking_id', $parkingsIds)->sum('salario');
+        $numEmpleados = Asalariado::whereIn('parking_id', $parkingsIds)->count();
+        
+        // 2. Costos de materiales de reparación (estimado basado en vehículos)
+        // Obtener vehículos asociados a estos parkings
+        $vehiculos = Vehiculo::whereIn('parking_id', $parkingsIds)->get();
+        $numVehiculos = $vehiculos->count();
+        
+        // Calculamos un promedio de costo de mantenimiento por vehículo
+        // Asumimos que cada vehículo necesita entre 50€ y 200€ mensuales dependiendo de su antigüedad
+        $costoMaterialesTotal = 0;
+        foreach ($vehiculos as $vehiculo) {
+            $edad = Carbon::now()->year - $vehiculo->año;
+            // A mayor edad, mayor costo de mantenimiento
+            $costoMantenimiento = 50 + ($edad * 10); // Base de 50€ + 10€ por cada año de antigüedad
+            $costoMantenimiento = min($costoMantenimiento, 200); // Máximo de 200€ mensuales
+            $costoMaterialesTotal += $costoMantenimiento;
+        }
+        
+        // 3. Costos de mantenimiento de parkings (valor simulado con variabilidad)
+        $costoBaseParkingMensual = 300; // 300€ por parking en promedio
+        $variabilidadMantenimiento = [
+            1 => 0.9,  // Enero (10% menos, temporada baja)
+            2 => 0.95, // Febrero
+            3 => 1.0,  // Marzo
+            4 => 1.1,  // Abril
+            5 => 1.2,  // Mayo (temporada alta, más gastos)
+            6 => 1.25, // Junio
+            7 => 1.3,  // Julio (pico de temporada)
+            8 => 1.3,  // Agosto (pico de temporada)
+            9 => 1.2,  // Septiembre
+            10 => 1.1, // Octubre
+            11 => 1.0, // Noviembre
+            12 => 1.1  // Diciembre (incremento por festividades)
+        ];
+        
+        // Calcular costos de mantenimiento de parkings según el periodo
+        $costoMantenimientoParkings = 0;
+        $numMeses = 0;
+        
+        if ($periodoTipo === 'anual') {
+            // Sumar los 12 meses con sus variabilidades
+            foreach ($variabilidadMantenimiento as $mes => $factor) {
+                $costoMantenimientoParkings += $costoBaseParkingMensual * count($parkingsIds) * $factor;
+            }
+            $numMeses = 12;
+        } elseif ($periodoTipo === 'trimestral' && $periodoValor) {
+            // Calcular para el trimestre seleccionado
+            $mesInicio = ($periodoValor - 1) * 3 + 1;
+            for ($i = 0; $i < 3; $i++) {
+                $mes = $mesInicio + $i;
+                $costoMantenimientoParkings += $costoBaseParkingMensual * count($parkingsIds) * $variabilidadMantenimiento[$mes];
+            }
+            $numMeses = 3;
+        } elseif ($periodoTipo === 'mensual' && $periodoValor) {
+            // Calcular para el mes seleccionado
+            $costoMantenimientoParkings += $costoBaseParkingMensual * count($parkingsIds) * $variabilidadMantenimiento[$periodoValor];
+            $numMeses = 1;
+        }
+        
+        // 4. Otros gastos operativos (suministros, seguros, etc.)
+        $otrosGastosMensuales = 500 * count($parkingsIds); // 500€ por sede al mes
+        $otrosGastosTotales = $otrosGastosMensuales * $numMeses;
+        
+        // Calcular gastos totales para el período
+        $gastosSalarios = $totalSalarios * $numMeses;
+        $gastosMateriales = $costoMaterialesTotal * $numMeses;
+        
+        $gastosTotales = $gastosSalarios + $gastosMateriales + $costoMantenimientoParkings + $otrosGastosTotales;
+        
+        // Obtener ingresos actuales para comparar
+        $query = DB::table('reservas')
+            ->join('vehiculos_reservas', 'reservas.id_reservas', '=', 'vehiculos_reservas.id_reservas')
+            ->whereIn('vehiculos_reservas.id_vehiculos', $vehiculos->pluck('id_vehiculos')->toArray())
+            ->where('reservas.estado', '=', 'completada')
+            ->whereYear('reservas.created_at', $añoActual);
+            
+        // Aplicar filtros según tipo de período
+        switch ($periodoTipo) {
+            case 'mensual':
+                if ($periodoValor) {
+                    $query->whereMonth('reservas.created_at', $periodoValor);
+                }
+                break;
+            case 'trimestral':
+                if ($periodoValor) {
+                    $mesInicio = ($periodoValor - 1) * 3 + 1;
+                    $mesFin = $periodoValor * 3;
+                    $query->whereRaw("MONTH(reservas.created_at) BETWEEN $mesInicio AND $mesFin");
+                }
+                break;
+        }
+        
+        $ingresosTotales = $query->sum('reservas.total_precio');
+        
+        // Calcular el margen actual y determinar la zona financiera
+        $margen = $ingresosTotales > 0 ? (($ingresosTotales - $gastosTotales) / $gastosTotales) * 100 : -100;
+        
+        // Determinar la zona financiera
+        $zonaFinanciera = '';
+        $colorZona = '';
+        
+        if ($margen < 0) {
+            $zonaFinanciera = 'Zona Roja';
+            $colorZona = 'danger';
+            $descripcionZona = 'Los gastos superan a los ingresos. Se recomienda reducir costos y aumentar ingresos urgentemente.';
+        } elseif ($margen >= 0 && $margen < 30) {
+            $zonaFinanciera = 'Zona Amarilla';
+            $colorZona = 'warning';
+            $descripcionZona = 'El margen de beneficio es bajo. Se recomienda buscar eficiencias operativas.';
+        } else {
+            $zonaFinanciera = 'Zona Verde';
+            $colorZona = 'success';
+            $descripcionZona = 'Buen margen de beneficio. La operación es financieramente saludable.';
+        }
+        
+        // Calcular presupuesto estimado para alcanzar zona verde (60% margen mínimo)
+        $presupuestoObjetivo = $gastosTotales * 1.6; // 60% más que los gastos
+        $incrementoNecesario = $presupuestoObjetivo - $ingresosTotales;
+        
+        // Datos para el selector de filtros
+        $periodos = [
+            'anual' => 'Anual',
+            'trimestral' => 'Trimestral',
+            'mensual' => 'Mensual'
+        ];
+        
+        $años = [];
+        for ($i = Carbon::now()->year - 2; $i <= Carbon::now()->year; $i++) {
+            $años[$i] = $i;
+        }
+        
+        $trimestres = [
+            1 => '1er Trimestre (Ene-Mar)',
+            2 => '2do Trimestre (Abr-Jun)',
+            3 => '3er Trimestre (Jul-Sep)',
+            4 => '4to Trimestre (Oct-Dic)'
+        ];
+        
+        $mesesOpciones = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril', 5 => 'Mayo', 6 => 'Junio',
+            7 => 'Julio', 8 => 'Agosto', 9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
+        
+        // Preparar datos para los gráficos
+        $datosCategorias = [
+            'Salarios de personal' => $gastosSalarios,
+            'Materiales de reparación' => $gastosMateriales,
+            'Mantenimiento de parkings' => $costoMantenimientoParkings,
+            'Otros gastos operativos' => $otrosGastosTotales
+        ];
+        
+        $labels = array_keys($datosCategorias);
+        $valores = array_values($datosCategorias);
+        
+        // Preparar datos para el histórico de gastos si es anual
+        $gastosMensuales = [];
+        
+        if ($periodoTipo === 'anual') {
+            for ($mes = 1; $mes <= 12; $mes++) {
+                $nombreMes = Carbon::create($añoActual, $mes, 1)->locale('es')->isoFormat('MMMM');
+                
+                // Calcular gastos mensuales
+                $gastoSalarioMes = $totalSalarios;
+                $gastoMaterialesMes = $costoMaterialesTotal;
+                $gastoMantenimientoMes = $costoBaseParkingMensual * count($parkingsIds) * $variabilidadMantenimiento[$mes];
+                $otrosGastosMes = $otrosGastosMensuales;
+                
+                $totalMes = $gastoSalarioMes + $gastoMaterialesMes + $gastoMantenimientoMes + $otrosGastosMes;
+                
+                $gastosMensuales[] = [
+                    'mes' => $nombreMes,
+                    'total' => $totalMes,
+                    'salarios' => $gastoSalarioMes,
+                    'materiales' => $gastoMaterialesMes,
+                    'mantenimiento' => $gastoMantenimientoMes,
+                    'otros' => $otrosGastosMes
+                ];
+            }
+        }
+        
+        return view('financiero.presupuesto', [
+            'sede' => $sede,
+            'gastosSalarios' => $gastosSalarios,
+            'gastosMateriales' => $gastosMateriales,
+            'gastosParkings' => $costoMantenimientoParkings,
+            'otrosGastos' => $otrosGastosTotales,
+            'gastosTotales' => $gastosTotales,
+            'ingresosTotales' => $ingresosTotales,
+            'margen' => $margen,
+            'zonaFinanciera' => $zonaFinanciera,
+            'colorZona' => $colorZona,
+            'descripcionZona' => $descripcionZona,
+            'presupuestoObjetivo' => $presupuestoObjetivo,
+            'incrementoNecesario' => $incrementoNecesario,
+            'numEmpleados' => $numEmpleados,
+            'numVehiculos' => $numVehiculos,
+            'numParkings' => count($parkingsIds),
+            'categorias' => json_encode($labels),
+            'valores' => json_encode($valores),
+            'gastosMensuales' => $gastosMensuales,
+            // Filtros
+            'periodoTipo' => $periodoTipo,
+            'periodoValor' => $periodoValor,
+            'añoSeleccionado' => $añoActual,
+            'periodos' => $periodos,
+            'años' => $años,
+            'trimestres' => $trimestres,
+            'meses' => $mesesOpciones
+        ]);
+    }
 }

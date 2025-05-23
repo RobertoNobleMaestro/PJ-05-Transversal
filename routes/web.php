@@ -193,6 +193,7 @@ Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
     Route::get('/admin-financiero/resumen', [AsalariadoController::class, 'index'])->name('admin.financiero.resumen');
     Route::get('/financial/gastos-ingresos', [FinancialReportController::class, 'gastosIngresos'])->name('financial.gastos-ingresos');
     Route::get('/financial/balance', [FinancialReportController::class, 'balance'])->name('financial.balance');
+    Route::get('/financial/presupuesto', [FinancialReportController::class, 'presupuestoEstimado'])->name('financial.presupuesto');
     
     // Rutas para la gestión de asalariados
     Route::prefix('asalariados')->group(function () {

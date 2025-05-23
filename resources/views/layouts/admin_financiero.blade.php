@@ -346,6 +346,11 @@ error_reporting(E_ALL);
                             <i class="fas fa-balance-scale me-1"></i> Balance
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('financial/presupuesto*') ? 'active' : '' }}" href="{{ route('financial.presupuesto') }}">
+                            <i class="fas fa-chart-pie me-1"></i> Presupuesto
+                        </a>
+                    </li>
                     <!-- Secciones financieras comentadas (versión solo con Asalariados) -->
                     {{-- 
                     <li class="nav-item">
