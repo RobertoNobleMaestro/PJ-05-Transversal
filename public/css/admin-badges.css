@@ -12,6 +12,10 @@
     background-color: #f59e0b;
     color: white;
 }
+.badge-pagado {
+    background-color: #10b981;
+    color: white;
+}
 
 .badge-confirmada {
     background-color: #10b981;

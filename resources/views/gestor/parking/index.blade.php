@@ -90,7 +90,9 @@
 
 </div>
 <script>
-window.parkingsBladeData = @json($parkings);
+    window.parkingsBladeData = @json($parkings);
+    window.sessionSuccess = @json(session('success'));
+    window.sessionError = @json(session('error'));
 </script>
 <script src="{{ asset('js/gestor-parking.js') }}"></script>
 

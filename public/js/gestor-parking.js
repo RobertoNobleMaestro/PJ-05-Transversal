@@ -1,6 +1,24 @@
 let mapInstance;
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Mostrar notificación si hay mensaje de éxito o error
+    if (window.sessionSuccess) {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: window.sessionSuccess,
+            confirmButtonColor: '#9F17BD'
+        });
+    }
+    if (window.sessionError) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: window.sessionError,
+            confirmButtonColor: '#9F17BD'
+        });
+    }
+
     mapInstance = L.map('map').setView([40.4168, -3.7038], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
