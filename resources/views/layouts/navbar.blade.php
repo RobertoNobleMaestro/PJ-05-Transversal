@@ -47,11 +47,11 @@
                   <span id="cart-count" class="badge bg-danger"></span>
                 </a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('chat.index') }}">
                     <i class="fas fa-comments"></i>
                 </a>
-              </li>
+              </li> -->
               <!-- Foto de perfil (link al perfil) -->
               <li class="nav-item">
                 <a class="nav-link" href="{{ url('/perfil/' . Auth::user()->id_usuario) }}">

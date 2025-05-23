@@ -23,10 +23,7 @@
                     <li><a href="{{ route('gestor.vehiculos') }}"
                             class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                             Vehículos</a></li>
-                    <li><a href="{{ route('gestor.chat.listar') }}"
-                    class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
-                        class="fas fa-comments"></i> Chats</a></li>
-                        <li><a href="{{ route('gestor.historial') }}"
+                    <li><a href="{{ route('gestor.historial') }}"
                     class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
                         class="fas fa-history"></i>Historial</a></li>
                                             <li><a href="{{ route('gestor.parking.index') }}"

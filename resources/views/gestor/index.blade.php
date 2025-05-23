@@ -21,10 +21,7 @@
                 <li><a href="{{ route('gestor.vehiculos') }}"
                         class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                         Vehículos</a></li>
-                <li><a href="{{ route('gestor.chat.listar') }}"
-                class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
-                    class="fas fa-comments"></i> Chats</a></li>
-                    <li><a href="{{ route('gestor.historial') }}"
+                <li><a href="{{ route('gestor.historial') }}"
                 class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
                     class="fas fa-history"></i>Historial</a></li>
                                         <li><a href="{{ route('gestor.parking.index') }}"
@@ -81,18 +78,6 @@
                             </div>
                             <h3>Historial de Reservas</h3>
                             <p>Consulta el historial completo de todas las reservas realizadas en el sistema.</p>
-                            <a href="{{ route('gestor.historial') }}" class="btn-admin-card">
-                                Acceder <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="admin-card shadow-sm">
-                            <div class="admin-card-icon">
-                                <i class="fas fa-comments fa-3x"></i>
-                            </div>
-                            <h3>Chats con clientes</h3>
-                            <p>Aqui podrás ver todas las conversaciones con los clientes.</p>
                             <a href="{{ route('gestor.historial') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
