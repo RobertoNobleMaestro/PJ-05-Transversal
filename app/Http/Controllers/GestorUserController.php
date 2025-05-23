@@ -40,6 +40,36 @@ class GestorUserController extends Controller
         }
     
         $gestor = auth()->user();
+        // Si es admin, mostrar todos los usuarios asalariados y todos los roles
+        if ($gestor->id_roles == 1) {
+            $query = User::select('users.*', 'roles.nombre as nombre_rol', 'parking.id as parking_id', 'parking.nombre as parking_nombre')
+                        ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
+                        ->join('asalariados', 'asalariados.id_usuario', '=', 'users.id_usuario')
+                        ->join('parking', 'asalariados.parking_id', '=', 'parking.id');
+            if ($request->filled('nombre')) {
+                $query->where('users.nombre', 'like', '%' . $request->nombre . '%');
+            }
+            if ($request->filled('role')) {
+                $query->where('users.id_roles', $request->role);
+            }
+            if ($request->filled('parking_id')) {
+                $query->where('parking.id', $request->parking_id);
+            }
+            if ($request->filled('email')) {
+                $query->where('users.email', 'like', '%' . $request->email . '%');
+            }
+            $perPage = $request->get('perPage', 10);
+            $users = $query->paginate($perPage);
+            return response()->json([
+                'users' => $users->items(),
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'total' => $users->total(),
+                    'per_page' => $users->perPage(),
+                ]
+            ]);
+        }
         $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
 
         if (!$asalariadoGestor || !$asalariadoGestor->parking_id) {
@@ -116,9 +146,20 @@ class GestorUserController extends Controller
         }
         
         $gestor = auth()->user();
+        // Si es admin, mostrar todos los roles
+        if ($gestor->id_roles == 1) {
+            $roles = Role::all();
+            $parkings = \App\Models\Parking::all();
+            $users = User::select('users.*', 'roles.nombre as nombre_rol', 'parking.id as parking_id', 'parking.nombre as parking_nombre')
+                        ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
+                        ->join('asalariados', 'asalariados.id_usuario', '=', 'users.id_usuario')
+                        ->join('parking', 'asalariados.parking_id', '=', 'parking.id')
+                        ->get();
+            return view('gestor.user.index', compact('users', 'roles', 'parkings'));
+        }
+
         $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
         $roles = Role::whereIn('nombre', ['Mecánico', 'admin_financiero', 'chofer'])->get();
-        // Mapear nombre amigable para admin_financiero
         $roles->transform(function($role) {
             if (strtolower($role->nombre) === 'admin_financiero') {
                 $role->nombre = 'Administrador financiero';
@@ -129,6 +170,16 @@ class GestorUserController extends Controller
             }
             return $role;
         });
+        // Si es admin, mostrar todos los usuarios y parkings
+        if ($gestor->id_roles == 1) {
+            $parkings = \App\Models\Parking::all();
+            $users = User::select('users.*', 'roles.nombre as nombre_rol', 'parking.id as parking_id', 'parking.nombre as parking_nombre')
+                        ->leftJoin('roles', 'users.id_roles', '=', 'roles.id_roles')
+                        ->join('asalariados', 'asalariados.id_usuario', '=', 'users.id_usuario')
+                        ->join('parking', 'asalariados.parking_id', '=', 'parking.id')
+                        ->get();
+            return view('gestor.user.index', compact('users', 'roles', 'parkings'));
+        }
 
         if (!$asalariadoGestor || !$asalariadoGestor->parking_id) {
             return view('gestor.user.index', [

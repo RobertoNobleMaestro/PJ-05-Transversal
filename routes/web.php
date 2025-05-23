@@ -242,7 +242,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 
     // Historial
-    Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
+    Route::get('/admin/historial', [ReservaCrudController::class, 'adminHistorial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
 // Chat routes

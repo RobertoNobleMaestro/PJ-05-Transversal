@@ -20,7 +20,7 @@ class VehiculoCrudController extends Controller
             return redirect('/login');
         }
         
-        if (auth()->user()->id_roles !== 3) {
+        if (auth()->user()->id_roles !== 3 && auth()->user()->id_roles !== 1) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'No tienes permiso para acceder a esta sección'], 403);
             }
@@ -74,6 +74,66 @@ class VehiculoCrudController extends Controller
                     'status' => 'error',
                     'message' => 'Usuario no autenticado'
                 ], 401);
+            }
+            $user = auth()->user();
+            if ($user->id_roles == 1) {
+                // Admin: ver todos los vehículos
+                $vehiculos = Vehiculo::select(
+                        'vehiculos.*', 
+                        'lugares.nombre as nombre_lugar', 
+                        'tipo.nombre as nombre_tipo',
+                        'parking.nombre as nombre_parking'
+                    )
+                    ->leftJoin('lugares', 'vehiculos.id_lugar', '=', 'lugares.id_lugar')
+                    ->leftJoin('tipo', 'vehiculos.id_tipo', '=', 'tipo.id_tipo')
+                    ->leftJoin('parking', 'vehiculos.parking_id', '=', 'parking.id')
+                    ->with(['imagenes'])
+                    ->withCount('reservas');
+                if ($request->filled('tipo')) {
+                    $vehiculos->where('vehiculos.id_tipo', $request->tipo);
+                }
+                if ($request->filled('marca')) {
+                    $vehiculos->where('vehiculos.marca', 'like', '%' . $request->marca . '%');
+                }
+                if ($request->filled('anio')) {
+                    $vehiculos->where('vehiculos.año', $request->anio);
+                }
+                if ($request->filled('parking_id')) {
+                    $vehiculos->where('vehiculos.parking_id', $request->parking_id);
+                }
+                $perPage = $request->input('per_page', 10);
+                $page = $request->input('page', 1);
+                $paginated = $vehiculos->orderBy('vehiculos.id_vehiculos', 'desc')
+                    ->paginate($perPage, ['*'], 'page', $page);
+                return response()->json([
+                    'vehiculos' => collect($paginated->items())->map(function ($vehiculo) {
+                        $imagen = null;
+                        if ($vehiculo->imagenes && $vehiculo->imagenes->count() > 0) {
+                            $imagen = asset('img/vehiculos/' . $vehiculo->imagenes[0]->nombre_archivo);
+                        }
+                        return [
+                            'id_vehiculos' => $vehiculo->id_vehiculos,
+                            'marca' => $vehiculo->marca,
+                            'modelo' => $vehiculo->modelo,
+                            'año' => $vehiculo->año,
+                            'kilometraje' => $vehiculo->kilometraje,
+                            'precio' => $vehiculo->precio_dia,
+                            'nombre_lugar' => $vehiculo->nombre_lugar ?? 'No asignado',
+                            'nombre_tipo' => $vehiculo->nombre_tipo ?? 'No asignado',
+                            'nombre_parking' => $vehiculo->nombre_parking ?? 'No asignado',
+                            'tiene_reservas' => \App\Models\VehiculosReservas::where('id_vehiculos', $vehiculo->id_vehiculos)->exists(),
+                            'imagen' => $imagen,
+                        ];
+                    }),
+                    'pagination' => [
+                        'total' => $paginated->total(),
+                        'per_page' => $paginated->perPage(),
+                        'current_page' => $paginated->currentPage(),
+                        'last_page' => $paginated->lastPage(),
+                        'from' => $paginated->firstItem(),
+                        'to' => $paginated->lastItem(),
+                    ]
+                ]);
             }
     
             if (auth()->user()->id_roles !== 3) {
@@ -178,6 +238,17 @@ class VehiculoCrudController extends Controller
         if ($authCheck) {
             return $authCheck;
         }
+        $user = auth()->user();
+        if ($user->id_roles == 1) {
+            $vehiculos = Vehiculo::all();
+            $tipo = \App\Models\Tipo::all();
+            $lugares = \App\Models\Lugar::all();
+            $anios = Vehiculo::select('año')->distinct()->orderBy('año', 'desc')->pluck('año');
+            $valoraciones = [1, 2, 3, 4, 5];
+            $parkings = \App\Models\Parking::all();
+            $lugarGestor = null;
+            return view('gestor.crudVehiculos', compact('tipo', 'lugares', 'anios', 'valoraciones', 'vehiculos', 'lugarGestor', 'parkings'));
+        }
     
         $gestor = Auth::user();
     
@@ -215,6 +286,13 @@ class VehiculoCrudController extends Controller
         $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
+        }
+        $user = auth()->user();
+        if ($user->id_roles == 1) {
+            $lugares = \App\Models\Lugar::all();
+            $tipo = \App\Models\Tipo::all();
+            $parkings = \App\Models\Parking::all();
+            return view('gestor.add_vehiculo', compact('lugares', 'tipo', 'parkings'));
         }
 
         $gestor = Auth::user();
@@ -326,6 +404,14 @@ class VehiculoCrudController extends Controller
         $authCheck = $this->checkGestor($request);
         if ($authCheck) {
             return $authCheck;
+        }
+        $user = auth()->user();
+        if ($user->id_roles == 1) {
+            $vehiculo = Vehiculo::findOrFail($id_vehiculos);
+            $lugares = \App\Models\Lugar::all();
+            $tipo = \App\Models\Tipo::all();
+            $parkings = \App\Models\Parking::all();
+            return view('gestor.edit_vehiculo', compact('vehiculo', 'lugares', 'tipo', 'parkings'));
         }
 
         $vehiculo = Vehiculo::findOrFail($id_vehiculos);
