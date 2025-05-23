@@ -116,11 +116,10 @@ function loadVehiculos() {
                 <td>${vehiculo.nombre_parking || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
-                        <button class="btn btn-sm btn-success" 
-                                title="${vehiculo.tiene_reservas ? 'Ver reservas' : 'Sin reservas'}" 
-                                onclick="verVehiculo(${vehiculo.id_vehiculos})" 
-                                ${vehiculo.tiene_reservas ? '' : 'disabled'}>
-                            <i class="fas fa-eye"></i>
+                        <button class="btn btn-sm btn-info" 
+                                title="Ver características" 
+                                onclick="verCaracteristicasVehiculo(${vehiculo.id_vehiculos})">
+                            <i class="fas fa-list"></i>
                         </button>
                         <a href="/gestor/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
                             <i class="fas fa-edit"></i>
@@ -375,3 +374,32 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('No se encontró el contenedor de vehículos');
     }
 });
+
+window.verCaracteristicasVehiculo = function(id) {
+    fetch(`/gestor/vehiculos/${id}/caracteristicas`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const c = data.caracteristicas;
+                let html = `
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Techo:</b> ${c.techo == 1 ? 'Sí' : 'No'}</li>
+                        <li class="list-group-item"><b>Transmisión:</b> ${c.transmision}</li>
+                        <li class="list-group-item"><b>Nº Puertas:</b> ${c.num_puertas}</li>
+                        <li class="list-group-item"><b>Etiqueta Medioambiental:</b> ${c.etiqueta_medioambiental}</li>
+                        <li class="list-group-item"><b>Aire acondicionado:</b> ${c.aire_acondicionado == 1 ? 'Sí' : 'No'}</li>
+                        <li class="list-group-item"><b>Capacidad maletero:</b> ${c.capacidad_maletero} L</li>
+                    </ul>
+                `;
+                document.getElementById('caracteristicasBody').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('caracteristicasModal')).show();
+            } else {
+                document.getElementById('caracteristicasBody').innerHTML = '<div class="alert alert-danger">No se encontraron características.</div>';
+                new bootstrap.Modal(document.getElementById('caracteristicasModal')).show();
+            }
+        })
+        .catch(() => {
+            document.getElementById('caracteristicasBody').innerHTML = '<div class="alert alert-danger">Error al cargar las características.</div>';
+            new bootstrap.Modal(document.getElementById('caracteristicasModal')).show();
+        });
+}

@@ -528,4 +528,20 @@ class VehiculoCrudController extends Controller
             return redirect()->back()->with('error', 'Error al eliminar el vehículo: ' . $e->getMessage());
         }
     }
+
+    public function caracteristicas($id)
+    {
+        $caracteristicas = \App\Models\Caracteristica::where('id_vehiculos', $id)->first();
+        if ($caracteristicas) {
+            return response()->json([
+                'status' => 'success',
+                'caracteristicas' => $caracteristicas
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No se encontraron características'
+            ]);
+        }
+    }
 }

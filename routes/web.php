@@ -125,6 +125,7 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::get('/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('gestor.vehiculos.edit');
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
+        Route::get('/{id_vehiculos}/caracteristicas', [VehiculoCrudController::class, 'caracteristicas'])->name('gestor.vehiculos.caracteristicas');
     });
     Route::get('gestor/vehiculos/{id}/crudreservas', [VehiculoCrudController::class, 'getReservas']);
     Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
