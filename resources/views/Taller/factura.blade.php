@@ -215,8 +215,7 @@
     <div class="container">
         <div class="factura-container">
             <div class="header">
-                <img src="{{ asset('img/logo.png') }}" class="logo">
-                <h1>FACTURA</h1>
+                <h1>FACTURA CARFLOW</h1>
                 <p><strong>Número:</strong> {{ $numero_factura ?? ('MT-' . str_pad($mantenimiento->id, 6, '0', STR_PAD_LEFT)) }}</p>
                 <p><strong>Fecha de emisión:</strong> {{ $fecha_emision ?? \Carbon\Carbon::now()->format('d/m/Y H:i') }}</p>
             </div>

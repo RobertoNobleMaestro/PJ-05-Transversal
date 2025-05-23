@@ -371,44 +371,47 @@ function enviarFormularioEdicion(event) {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <form id="formEditarMantenimiento" onsubmit="enviarFormularioEdicion(event)">
-        <div class="modal-body">
+        <div class="modal-body px-4">
+            <div id="errores-validacion-edicion" class="mb-3" style="display:none;"></div>
             <input type="hidden" id="edit_id" name="id">
             <div class="mb-3">
-                <label for="edit_vehiculo_id" class="form-label">Vehículo</label>
-                <select id="edit_vehiculo_id" name="vehiculo_id" class="form-select" required>
+                <label for="edit_vehiculo_id" class="form-label fw-semibold text-purple">Vehículo</label>
+                <select id="edit_vehiculo_id" name="vehiculo_id" class="form-select shadow-sm border-purple text-purple" style="border-width:2px;" required>
                     @foreach($vehiculos as $vehiculo)
                         <option value="{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->modelo }} - {{ $vehiculo->placa }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="mb-3">
-                <label for="edit_taller_id" class="form-label">Taller</label>
-                <select id="edit_taller_id" name="taller_id" class="form-select" required>
+                <label for="edit_taller_id" class="form-label fw-semibold text-purple">Taller</label>
+                <select id="edit_taller_id" name="taller_id" class="form-select shadow-sm border-purple text-purple" style="border-width:2px;" required>
                     @foreach($talleres as $taller)
                         <option value="{{ $taller->id }}">{{ $taller->nombre }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="mb-3">
-                <label for="edit_fecha_programada" class="form-label">Fecha</label>
-                <input type="date" id="edit_fecha_programada" name="fecha_programada" class="form-control" required>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="edit_fecha_programada" class="form-label fw-semibold text-purple">Fecha</label>
+                    <input type="date" id="edit_fecha_programada" name="fecha_programada" class="form-control shadow-sm border-purple text-purple" style="border-width:2px;" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="edit_hora_programada" class="form-label fw-semibold text-purple">Hora</label>
+                    <input type="time" id="edit_hora_programada" name="hora_programada" class="form-control shadow-sm border-purple text-purple" style="border-width:2px;" required>
+                </div>
             </div>
             <div class="mb-3">
-                <label for="edit_hora_programada" class="form-label">Hora</label>
-                <input type="time" id="edit_hora_programada" name="hora_programada" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="edit_estado" class="form-label">Estado</label>
-                <select id="edit_estado" name="estado" class="form-select" required>
+                <label for="edit_estado" class="form-label fw-semibold text-purple">Estado</label>
+                <select id="edit_estado" name="estado" class="form-select shadow-sm border-purple text-purple" style="border-width:2px;" required>
                     <option value="pendiente">Pendiente</option>
                     <option value="completado">Completado</option>
                     <option value="cancelado">Cancelado</option>
                 </select>
             </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <div class="modal-footer d-flex justify-content-between px-4 pb-4">
+          <button type="button" class="btn btn-secondary btn-agendar-mantenimiento" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-agendar-mantenimiento">Guardar cambios</button>
         </div>
       </form>
     </div>

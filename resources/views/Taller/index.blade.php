@@ -111,7 +111,7 @@
                     
                     <div class="mb-3">
                         <label for="taller-id" class="form-label">Taller</label>
-                        <select class="form-select" id="taller-id" name="taller_id" required>
+                        <select class="form-select" id="taller-id" name="taller_id">
                             <option value="">Seleccione un taller</option>
                             @foreach($talleres as $taller)
                                 <option value="{{ $taller->id }}">{{ $taller->nombre }} - {{ $taller->direccion }}</option>
@@ -122,13 +122,13 @@
                     
                     <div class="mb-3">
                         <label for="fecha-mantenimiento" class="form-label">Fecha de Mantenimiento</label>
-                        <input type="date" class="form-control" id="fecha-mantenimiento" name="fecha_mantenimiento" required min="{{ date('Y-m-d') }}">
+                        <input type="date" class="form-control" id="fecha-mantenimiento" name="fecha_mantenimiento" min="{{ date('Y-m-d') }}">
                         <div class="invalid-feedback">La fecha no puede ser anterior a hoy.</div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="hora-mantenimiento" class="form-label">Hora de Mantenimiento</label>
-                        <select class="form-select" id="hora-mantenimiento" name="hora_mantenimiento" disabled required>
+                        <select class="form-select" id="hora-mantenimiento" name="hora_mantenimiento" disabled>
                             <option value="">Seleccione primero un taller y fecha</option>
                         </select>
                         <div class="text-info mt-1" id="disponibilidad-info"></div>
@@ -136,7 +136,7 @@
 
                     <div class="mb-3">
                         <label for="motivo-reserva" class="form-label">Motivo de la reserva</label>
-                        <select class="form-select" id="motivo-reserva" name="motivo_reserva" required>
+                        <select class="form-select" id="motivo-reserva" name="motivo_reserva" >
                             <option value="">Seleccione el motivo</option>
                             <option value="mantenimiento">Mantenimiento</option>
                             <option value="averia">Avería</option>
@@ -154,7 +154,7 @@
                     </div>
                     
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-outline-purple flex-grow-1">Agendar</button>
+                        <button type="submit" class="btn btn-agendar-mantenimiento">Agendar</button>
                     </div>
                 </form>
             </div>
