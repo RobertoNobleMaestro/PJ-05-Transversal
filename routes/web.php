@@ -296,6 +296,7 @@ Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->n
     Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('Taller.agendar');
     Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('Taller.horarios');
     Route::get('/taller/getMantenimientos', [TallerController::class, 'getMantenimientos'])->name('Taller.getMantenimientos');
+    Route::get('/taller/getMantenimiento/{id}', [TallerController::class, 'getMantenimiento'])->name('Taller.getMantenimiento');
 
     Route::get('/taller/{id}/edit', [TallerController::class, 'edit'])->name('Taller.edit');
     Route::put('/taller/{id}', [TallerController::class, 'update'])->name('Taller.update');
