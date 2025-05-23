@@ -336,6 +336,16 @@ error_reporting(E_ALL);
                             <i class="fas fa-users me-1"></i> Asalariados
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('financial/gastos-ingresos*') ? 'active' : '' }}" href="{{ route('financial.gastos-ingresos') }}">
+                            <i class="fas fa-money-bill-wave me-1"></i> Gastos e Ingresos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('financial/balance*') ? 'active' : '' }}" href="{{ route('financial.balance') }}">
+                            <i class="fas fa-balance-scale me-1"></i> Balance
+                        </a>
+                    </li>
                     <!-- Secciones financieras comentadas (versión solo con Asalariados) -->
                     {{-- 
                     <li class="nav-item">

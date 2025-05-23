@@ -48,5 +48,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AsalariadoSeeder::class,         // Asalariados (trabajadores con salario)
         ]);
+        
+        // 6. Datos financieros (activos y pasivos)
+        $this->call([
+            ActivoSeeder::class,             // Activos financieros
+            PasivoSeeder::class,            // Pasivos financieros
+        ]);
     }
 }

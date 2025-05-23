@@ -28,6 +28,7 @@ use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\AdminFinancieroController;
 use App\Http\Controllers\AsalariadoController;
 use App\Http\Controllers\FinancialReportController;
+use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
 
@@ -190,6 +191,8 @@ Route::get('/debug/chat', function() {
 Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
     Route::get('/admin-financiero', [AsalariadoController::class, 'index'])->name('admin.financiero');
     Route::get('/admin-financiero/resumen', [AsalariadoController::class, 'index'])->name('admin.financiero.resumen');
+    Route::get('/financial/gastos-ingresos', [FinancialReportController::class, 'gastosIngresos'])->name('financial.gastos-ingresos');
+    Route::get('/financial/balance', [FinancialReportController::class, 'balance'])->name('financial.balance');
     
     // Rutas para la gestión de asalariados
     Route::prefix('asalariados')->group(function () {
@@ -205,6 +208,16 @@ Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
     // Route::get('/financial/dashboard', [FinancialReportController::class, 'dashboard'])->name('financial.dashboard');
     // Route::get('/financial/vehiculos', [FinancialReportController::class, 'vehiculosRentabilidad'])->name('financial.vehiculos');
     // Route::get('/financial/proyecciones', [FinancialReportController::class, 'proyecciones'])->name('financial.proyecciones');
+    Route::get('/admin-financiero/balance', [BalanceController::class, 'index'])->name('admin.financiero.balance');
+    Route::get('/admin-financiero/balance/chart', [BalanceController::class, 'getChartData'])->name('admin.financiero.balance.chart');
+    
+    // Rutas para Activos
+    Route::get('/admin-financiero/activos/create', [BalanceController::class, 'createActivo'])->name('admin.financiero.activo.create');
+    Route::post('/admin-financiero/activos', [BalanceController::class, 'storeActivo'])->name('admin.financiero.activo.store');
+    
+    // Rutas para Pasivos
+    Route::get('/admin-financiero/pasivos/create', [BalanceController::class, 'createPasivo'])->name('admin.financiero.pasivo.create');
+    Route::post('/admin-financiero/pasivos', [BalanceController::class, 'storePasivo'])->name('admin.financiero.pasivo.store');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
