@@ -74,6 +74,28 @@
         color: #c82333;
         font-size: 0.98rem;
     }
+    /* Dos columnas en el modal de edición */
+    #modalEditarMantenimiento .modal-body .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #modalEditarMantenimiento .modal-body .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+    #edit-piezas-list {
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid #e0d7f7;
+        border-radius: 8px;
+        padding: 8px 6px 8px 8px;
+        background: #faf7ff;
+    }
+    #edit-piezas-list .d-flex {
+        margin-bottom: 6px;
+    }
 </style>
 @endpush
 
@@ -164,7 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>${m.vehiculo}</td>
                             <td>${m.taller}</td>
                             <td>${m.fechaCompleta}</td>
-                            <td>${m.motivo_reserva ? (m.motivo_reserva === 'averia' ? 'Avería' : 'Mantenimiento') : ''}</td>
+                            <td>${m.motivo_reserva ? (m.motivo_reserva === 'averia' ? 'Avería' : 'Mantenimiento') : ''}
+${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-muted small'>${m.motivo_averia}</span>` : ''}</td>
                             <td><span class="badge bg-${m.colorEstado} text-capitalize">${m.estado}</span></td>
                             <td>
                                 <button class="btn-outline-purple" title="Editar" onclick="abrirModalEditar(${m.id})">
@@ -252,7 +275,6 @@ let datosVehiculos = [];
 let datosTalleres = [];
 
 function abrirModalEditar(id) {
-    // Obtener datos del mantenimiento
     fetch(`/taller/getMantenimiento/${id}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -263,14 +285,44 @@ function abrirModalEditar(id) {
     .then(data => {
         if(data.success) {
             const m = data.mantenimiento;
-            // Rellenar campos del formulario
             document.getElementById('edit_id').value = m.id;
             document.getElementById('edit_vehiculo_id').value = m.vehiculo_id;
             document.getElementById('edit_taller_id').value = m.taller_id;
             document.getElementById('edit_fecha_programada').value = m.fecha_programada;
             document.getElementById('edit_hora_programada').value = m.hora_programada;
             document.getElementById('edit_estado').value = m.estado;
-            // Mostrar modal
+            document.getElementById('edit_motivo_reserva').value = m.motivo_reserva || 'mantenimiento';
+
+            // Mostrar/ocultar y seleccionar pieza si corresponde
+            if (m.motivo_reserva === 'averia') {
+                document.getElementById('edit-pieza-container').style.display = '';
+                // Limpiar selección previa
+                document.querySelectorAll('.edit-pieza-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.d-flex').querySelector('.edit-cantidad-pieza').value = '';
+                    cb.closest('.d-flex').querySelector('.edit-cantidad-pieza').disabled = true;
+                });
+                // Marcar seleccionadas las piezas recibidas y poner cantidad
+                if (Array.isArray(m.piezas)) {
+                    m.piezas.forEach(pz => {
+                        const cb = document.getElementById('pieza_' + pz.id);
+                        if (cb) {
+                            cb.checked = true;
+                            const inputCantidad = cb.closest('.d-flex').querySelector('.edit-cantidad-pieza');
+                            inputCantidad.disabled = false;
+                            inputCantidad.value = pz.cantidad;
+                        }
+                    });
+                }
+            } else {
+                document.getElementById('edit-pieza-container').style.display = 'none';
+                document.querySelectorAll('.edit-pieza-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.d-flex').querySelector('.edit-cantidad-pieza').value = '';
+                    cb.closest('.d-flex').querySelector('.edit-cantidad-pieza').disabled = true;
+                });
+            }
+
             var modal = new bootstrap.Modal(document.getElementById('modalEditarMantenimiento'));
             modal.show();
         } else {
@@ -278,6 +330,18 @@ function abrirModalEditar(id) {
         }
     });
 }
+
+// Mostrar/ocultar campo de pieza según motivo de reserva
+document.getElementById('edit_motivo_reserva').addEventListener('change', function() {
+    if (this.value === 'averia') {
+        document.getElementById('edit-pieza-container').style.display = '';
+        document.getElementById('edit_pieza_id').required = true;
+    } else {
+        document.getElementById('edit-pieza-container').style.display = 'none';
+        document.getElementById('edit_pieza_id').required = false;
+        document.getElementById('edit_pieza_id').value = '';
+    }
+});
 
 // Enviar formulario de edición por AJAX
 function mostrarErroresValidacion(errors) {
@@ -359,6 +423,15 @@ function enviarFormularioEdicion(event) {
     });
 }
 
+// Habilitar/deshabilitar input de cantidad según selección de pieza
+$(document).on('change', '.edit-pieza-checkbox', function() {
+    const inputCantidad = $(this).closest('.d-flex').find('.edit-cantidad-pieza');
+    if ($(this).is(':checked')) {
+        inputCantidad.prop('disabled', false).val(1);
+    } else {
+        inputCantidad.prop('disabled', true).val('');
+    }
+});
 
 </script>
 
@@ -372,43 +445,68 @@ function enviarFormularioEdicion(event) {
       </div>
       <form id="formEditarMantenimiento" onsubmit="enviarFormularioEdicion(event)">
         <div class="modal-body">
-            <input type="hidden" id="edit_id" name="id">
-            <div class="mb-3">
+          <div class="row">
+            <div class="col-md-6">
+              <input type="hidden" id="edit_id" name="id">
+              <div class="mb-3">
                 <label for="edit_vehiculo_id" class="form-label">Vehículo</label>
                 <select id="edit_vehiculo_id" name="vehiculo_id" class="form-select" required>
-                    @foreach($vehiculos as $vehiculo)
-                        <option value="{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->modelo }} - {{ $vehiculo->placa }}</option>
-                    @endforeach
+                  @foreach($vehiculos as $vehiculo)
+                    <option value="{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->modelo }} - {{ $vehiculo->placa }}</option>
+                  @endforeach
                 </select>
-            </div>
-            <div class="mb-3">
+              </div>
+              <div class="mb-3">
                 <label for="edit_taller_id" class="form-label">Taller</label>
                 <select id="edit_taller_id" name="taller_id" class="form-select" required>
-                    @foreach($talleres as $taller)
-                        <option value="{{ $taller->id }}">{{ $taller->nombre }}</option>
-                    @endforeach
+                  @foreach($talleres as $taller)
+                    <option value="{{ $taller->id }}">{{ $taller->nombre }}</option>
+                  @endforeach
                 </select>
-            </div>
-            <div class="mb-3">
+              </div>
+              <div class="mb-3">
                 <label for="edit_fecha_programada" class="form-label">Fecha</label>
                 <input type="date" id="edit_fecha_programada" name="fecha_programada" class="form-control" required>
-            </div>
-            <div class="mb-3">
+              </div>
+              <div class="mb-3">
                 <label for="edit_hora_programada" class="form-label">Hora</label>
                 <input type="time" id="edit_hora_programada" name="hora_programada" class="form-control" required>
-            </div>
-            <div class="mb-3">
+              </div>
+              <div class="mb-3">
+                <label for="edit_motivo_reserva" class="form-label">Motivo de la reserva</label>
+                <select id="edit_motivo_reserva" name="motivo_reserva" class="form-select" required>
+                  <option value="mantenimiento">Mantenimiento</option>
+                  <option value="averia">Avería</option>
+                </select>
+              </div>
+              <div class="mb-3">
                 <label for="edit_estado" class="form-label">Estado</label>
                 <select id="edit_estado" name="estado" class="form-select" required>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="completado">Completado</option>
-                    <option value="cancelado">Cancelado</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="completado">Completado</option>
+                  <option value="cancelado">Cancelado</option>
                 </select>
+              </div>
             </div>
+            <div class="col-md-6">
+              <div class="mb-3" id="edit-pieza-container" style="display:none;">
+                <label for="edit_pieza_id" class="form-label">Pieza afectada</label>
+                <div id="edit-piezas-list">
+                  @foreach($piezas as $pieza)
+                  <div class="d-flex align-items-center mb-1">
+                    <input type="checkbox" class="form-check-input me-2 edit-pieza-checkbox" name="pieza_id[]" value="{{ $pieza->id }}" id="pieza_{{ $pieza->id }}">
+                    <label for="pieza_{{ $pieza->id }}" class="me-2">{{ $pieza->nombre }}</label>
+                    <input type="number" min="1" max="99" name="cantidad_pieza[{{ $pieza->id }}]" class="form-control form-control-sm edit-cantidad-pieza" style="width:70px;" placeholder="Cantidad" disabled>
+                  </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-primary btn-sm btn-agendar-mantenimiento" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm btn-agendar-mantenimiento">Guardar cambios</button>
         </div>
       </form>
     </div>

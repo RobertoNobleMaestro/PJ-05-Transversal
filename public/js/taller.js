@@ -129,17 +129,21 @@ $(document).ready(function() {
         }
         
         // Enviar solicitud AJAX
-        $.ajax({
-            url: '/taller/agendar-mantenimiento',
-            type: 'POST',
-            data: {
+        var dataAjax = {
                 id_vehiculo: vehiculoId,
                 fecha_mantenimiento: fecha,
                 hora_mantenimiento: hora,
                 taller_id: tallerId,
                 motivo_reserva: $('#motivo-reserva').val(),
                 _token: $('meta[name="csrf-token"]').attr('content')
-            },
+        };
+        if ($('#motivo-reserva').val() === 'averia') {
+            dataAjax.motivo_averia = $('#motivo-averia').val();
+        }
+        $.ajax({
+            url: '/taller/agendar-mantenimiento',
+            type: 'POST',
+            data: dataAjax,
             success: function(response) {
                 if (response.success) {
                     // Actualizar la fecha en la tabla
