@@ -30,6 +30,7 @@ use App\Http\Controllers\AsalariadoController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\ChoferController;
+use App\Http\Controllers\SolicitudController;
 use Illuminate\Support\Facades\Schema;
 
 
@@ -142,6 +143,9 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
     
+    // Solicitudes de transporte
+    Route::get('/chofers/solicitudes', [ChoferController::class, 'solicitudes'])->name('chofers.solicitudes');
+    
     // Chat por grupo
     Route::get('/chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
     Route::post('/chofers/grupos', [ChoferController::class, 'storeGrupo'])->name('chofers.grupos.store');
@@ -155,6 +159,19 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
 
 // Ruta para la solicitud de transporte privado (cliente)
 Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
+Route::get('/api/choferes-cercanos', [SolicitudController::class, 'getChoferesCercanos'])->name('api.choferes.cercanos');
+
+// Rutas para solicitudes
+Route::middleware(['auth'])->group(function () {
+    // Rutas para choferes
+    Route::get('/api/solicitudes/chofer', [SolicitudController::class, 'getSolicitudesChofer']);
+    Route::post('/api/solicitudes/{id}/aceptar', [SolicitudController::class, 'aceptarSolicitud']);
+    Route::post('/api/solicitudes/{id}/rechazar', [SolicitudController::class, 'rechazarSolicitud']);
+    Route::get('/api/solicitudes/ruta', [SolicitudController::class, 'obtenerRuta']);
+});
+
+// Ruta para crear solicitudes (sin autenticación)
+Route::post('/api/solicitudes/crear', [SolicitudController::class, 'crearSolicitud']);
 
 // Ruta de depuración para el chat (solo para desarrollo)
 Route::get('/debug/chat', function() {
@@ -318,3 +335,12 @@ Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->n
     
 // });
 Route::get('/taller/factura/{id}', [TallerController::class, 'descargarFactura'])->name('Taller.factura');
+
+// Rutas para el sistema de transporte
+Route::get('/cliente/pide', function () {
+    return view('chofers.cliente-pide');
+})->name('cliente.pide');
+
+Route::get('/solicitudes', function () {
+    return view('chofers.solicitudes');
+})->name('solicitudes');
