@@ -59,7 +59,7 @@ class TallerController extends Controller
 
         // Si no se encuentra el vehículo, redirige con un mensaje de error
         if (!$vehiculo) {
-            return redirect()->route('taller.index')->with('error', 'Vehículo no encontrado');
+            return redirect()->route('Taller.index')->with('error', 'Vehículo no encontrado');
         }
 
         // Valida y guarda la nueva fecha de mantenimiento
@@ -67,7 +67,7 @@ class TallerController extends Controller
         $vehiculo->save();
 
         // Redirige de nuevo a la lista de vehículos con un mensaje de éxito
-        return redirect()->route('taller.index')->with('success', 'Mantenimiento actualizado exitosamente');
+        return redirect()->route('Taller.index')->with('success', 'Mantenimiento actualizado exitosamente');
     }
     
     // Método para manejar peticiones AJAX de programación de mantenimiento
@@ -327,11 +327,11 @@ class TallerController extends Controller
     {
         $mantenimiento = Mantenimiento::find($id);
         if (!$mantenimiento) {
-            return response()->json(['success' => false, 'message' => 'Mantenimiento no encontrado.']);
+            return response()->json(['success' => false, 'message' => 'Mantenimiento no encontrado.'], 200, ['Content-Type' => 'application/json']);
         }
 
         $mantenimiento->delete();
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true], 200, ['Content-Type' => 'application/json']);
     }
 
     public function edit($id)
@@ -340,18 +340,30 @@ class TallerController extends Controller
         $vehiculos = Vehiculo::all();
         $talleres = Taller::all();
 
-        return view('taller.edit', compact('mantenimiento', 'vehiculos', 'talleres'));
+        return view('Taller.edit', compact('mantenimiento', 'vehiculos', 'talleres'));
     }
 
 public function update(Request $request, $id)
 {
-    $request->validate([
-        'vehiculo_id' => 'required|exists:vehiculos,id_vehiculos',
-        'taller_id' => 'required|exists:talleres,id',
-        'fecha_programada' => 'required|date',
-        'hora_programada' => 'required',
-        'estado' => 'required|in:pendiente,completado,cancelado',
-    ]);
+    // Validación con manejo para AJAX
+    try {
+        $validated = $request->validate([
+            'vehiculo_id' => 'required|exists:vehiculos,id_vehiculos',
+            'taller_id' => 'required|exists:talleres,id',
+            'fecha_programada' => 'required|date',
+            'hora_programada' => 'required',
+            'estado' => 'required|in:pendiente,completado,cancelado',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+                'message' => 'Errores de validación.'
+            ], 422);
+        }
+        throw $e;
+    }
 
     $mantenimiento = Mantenimiento::findOrFail($id);
     $mantenimiento->update($request->only([
@@ -382,7 +394,12 @@ public function update(Request $request, $id)
         }
     }
 
-    return redirect()->route('taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+    // RESPUESTA SEGÚN EL TIPO DE PETICIÓN
+    if ($request->expectsJson() || $request->ajax()) {
+        return response()->json(['success' => true]);
+    } else {
+        return redirect()->route('Taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+    }
 }
 
 
@@ -391,10 +408,36 @@ public function update(Request $request, $id)
     // Método para mostrar la página de historial de mantenimientos
     public function historial()
     {
-        return view('Taller.historial');
+        // Recupera todos los vehículos y talleres para el modal de edición
+        $vehiculos = \App\Models\Vehiculo::all();
+        $talleres = \App\Models\Taller::all();
+        return view('taller.historial', compact('vehiculos', 'talleres'));
     }
 
-    public function descargarFactura($id)
+    public function getMantenimiento($id)
+{
+    try {
+        $mantenimiento = Mantenimiento::findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'mantenimiento' => [
+                'id' => $mantenimiento->id,
+                'vehiculo_id' => $mantenimiento->vehiculo_id,
+                'taller_id' => $mantenimiento->taller_id,
+                'fecha_programada' => $mantenimiento->fecha_programada instanceof \Carbon\Carbon ? $mantenimiento->fecha_programada->format('Y-m-d') : $mantenimiento->fecha_programada,
+                'hora_programada' => $mantenimiento->hora_programada,
+                'estado' => $mantenimiento->estado,
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener mantenimiento: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function descargarFactura($id)
     {
         $mantenimiento = \App\Models\Mantenimiento::with(['vehiculo.tipo'])->findOrFail($id);
         $vehiculo = $mantenimiento->vehiculo;

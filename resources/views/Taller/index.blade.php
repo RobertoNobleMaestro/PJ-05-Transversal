@@ -14,9 +14,9 @@
     <div class="admin-sidebar" id="sidebar">
         <div class="sidebar-title">CARFLOW</div>
         <ul class="sidebar-menu">
-            <li><a href="{{ route('taller.index') }}" class="{{ request()->routeIs('taller.index*') ? 'active' : '' }}">
+            <li><a href="{{ route('Taller.index') }}" class="{{ request()->routeIs('Taller.index*') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Gestión del Taller</a></li>
-            <li><a href="{{ route('taller.historial') }}" class="{{ request()->routeIs('taller.historial*') ? 'active' : '' }}">
+            <li><a href="{{ route('Taller.historial') }}" class="{{ request()->routeIs('Taller.historial*') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i> Historial Mantenimiento</a></li>
 
         </ul>
@@ -191,7 +191,7 @@ $(function() {
     }
     function filtrarVehiculos(pageUrl) {
         var data = getFiltrosData();
-        var url = pageUrl || '{{ route('taller.filtrar') }}';
+        var url = pageUrl || '{{ route('Taller.filtrar') }}';
         // Permitir paginar aunque no haya filtros activos
         $.ajax({
             url: url,
