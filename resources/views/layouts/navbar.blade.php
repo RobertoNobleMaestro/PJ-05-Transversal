@@ -32,7 +32,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
-          <ul class="navbar-nav ml-auto align-items-center">
+          <ul class="navbar-nav align-items-center flex-row justify-content-end">
             @auth
               <!-- Cerrar sesión -->
               <li class="nav-item">

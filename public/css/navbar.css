@@ -60,6 +60,7 @@
         padding: 10px; /* Espaciado interno */
         border-radius: 5px; /* Bordes redondeados */
         margin-top: 10px; /* Espaciado superior */
+        z-index: 9999;
     }
 
     .navbar-custom .navbar-nav .nav-item {
@@ -74,9 +75,11 @@
 /* Estilos para pantallas pequeñas (móviles) */
 @media (max-width: 575.98px) {
     .navbar-custom .navbar-brand img {
-        height: 30px; /* Altura del logo en pantallas pequeñas */
+        height: 30px; 
     }
-
+    a img {
+        width: 180px;
+    }
     .navbar-custom .navbar-toggler-icon {
         font-size: 24px; /* Tamaño del ícono del toggler */
     }
