@@ -459,6 +459,25 @@ public function update(Request $request, $id)
         }
     }
 
+    if ($request->estado === 'completado' && $mantenimiento->motivo_reserva === 'averia') {
+        // Buscar la avería asociada
+        $averia = \App\Models\Averia::where('vehiculo_id', $mantenimiento->vehiculo_id)
+            ->where('descripcion', $mantenimiento->motivo_averia)
+            ->orderByDesc('fecha')->first();
+        if ($averia) {
+            $piezas = $averia->piezas()->withPivot('cantidad')->get();
+            foreach ($piezas as $pieza) {
+                \App\Models\GastoTaller::create([
+                    'pieza_id' => $pieza->id,
+                    'cantidad' => $pieza->pivot->cantidad,
+                    'precio_pieza' => round($pieza->precio * 0.20, 2),
+                    'mantenimiento_id' => $mantenimiento->id,
+                    'averia_id' => $averia->id,
+                ]);
+            }
+        }
+    }
+
     // RESPUESTA SEGÚN EL TIPO DE PETICIÓN
     if ($request->expectsJson() || $request->ajax()) {
         return response()->json(['success' => true]);
