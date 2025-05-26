@@ -176,6 +176,10 @@ $(document).ready(function() {
             text: mensaje,
             icon: tipo,
             confirmButtonText: 'Aceptar'
+        }).then(function() {
+            if (tipo === 'success') {
+                location.reload();
+            }
         });
     }
 }); 

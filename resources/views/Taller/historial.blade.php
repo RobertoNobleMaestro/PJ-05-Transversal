@@ -393,13 +393,13 @@ function enviarFormularioEdicion(event) {
             if (data.success) {
                 var modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarMantenimiento'));
                 modal.hide();
-                cargarMantenimientos(estadoSeleccionado);
                 Swal.fire({
                     icon: 'success',
                     title: '¡Actualizado!',
                     text: 'Mantenimiento actualizado correctamente.',
-                    timer: 1800,
-                    showConfirmButton: false
+                    confirmButtonText: 'Aceptar'
+                }).then(function() {
+                    location.reload();
                 });
             } else if (data.errors) {
                 mostrarErroresValidacion(data.errors);
@@ -408,13 +408,13 @@ function enviarFormularioEdicion(event) {
             // Si el status es 200 pero no es JSON, asumimos éxito
             var modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarMantenimiento'));
             modal.hide();
-            cargarMantenimientos(estadoSeleccionado);
             Swal.fire({
                 icon: 'success',
                 title: '¡Actualizado!',
                 text: 'Mantenimiento actualizado correctamente.',
-                timer: 1800,
-                showConfirmButton: false
+                confirmButtonText: 'Aceptar'
+            }).then(function() {
+                location.reload();
             });
         }
     })
