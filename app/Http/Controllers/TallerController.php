@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Averia;
 use App\Models\Pieza;
+use App\Models\Factura;
+use App\Models\GastoTaller;
 
 class TallerController extends Controller
 {
@@ -332,7 +334,32 @@ class TallerController extends Controller
                     $vehiculo->save();
                 }
             }
-            
+
+            // --- LÓGICA DE GASTOS TALLER ---
+            if ($request->estado === 'completado' && $mantenimiento->motivo_reserva === 'averia') {
+                // Buscar la avería asociada
+                $averia = Averia::where('vehiculo_id', $mantenimiento->vehiculo_id)
+                    ->where('descripcion', $mantenimiento->motivo_averia)
+                    ->orderByDesc('fecha')->first();
+                
+                // Calcular totales y detalle
+                $piezas = [];
+                if ($averia) {
+                    $piezas = $averia->piezas()->withPivot('cantidad')->get();
+                    foreach ($piezas as $pieza) {
+                        $gasto = new GastoTaller();
+                        $gasto->pieza_id = $pieza->id;
+                        $gasto->cantidad = $pieza->pivot->cantidad;
+                        $gasto->precio_pieza = round($pieza->precio * 0.20, 2); // 20% del precio unitario
+                        $gasto->mantenimiento_id = $mantenimiento->id;
+                        $gasto->averia_id = $averia ? $averia->id : null;
+                        // No asignar factura_id
+                        $gasto->save();
+                    }
+                }
+            }
+            // --- FIN LÓGICA DE GASTOS TALLER ---
+
             return response()->json([
                 'success' => true,
                 'message' => 'Estado de mantenimiento actualizado a: ' . $request->estado
@@ -517,6 +544,20 @@ public function descargarFactura($id)
                 $piezas = $averia->piezas()->withPivot('cantidad')->get();
                 foreach ($piezas as $pieza) {
                     $subtotal_piezas += $pieza->precio * $pieza->pivot->cantidad;
+                    // Insertar gasto si no existe ya para este mantenimiento, avería y pieza
+                    $existe = \App\Models\GastoTaller::where('pieza_id', $pieza->id)
+                        ->where('mantenimiento_id', $mantenimiento->id)
+                        ->where('averia_id', $averia->id)
+                        ->first();
+                    if (!$existe) {
+                        \App\Models\GastoTaller::create([
+                            'pieza_id' => $pieza->id,
+                            'cantidad' => $pieza->pivot->cantidad,
+                            'precio_pieza' => $pieza->precio,
+                            'mantenimiento_id' => $mantenimiento->id,
+                            'averia_id' => $averia->id,
+                        ]);
+                    }
                 }
             }
         }
