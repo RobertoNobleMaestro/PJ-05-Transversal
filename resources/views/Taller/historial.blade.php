@@ -515,3 +515,4 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
 
 @endsection
 
+{{-- comentario para poder hacer commit --}}
