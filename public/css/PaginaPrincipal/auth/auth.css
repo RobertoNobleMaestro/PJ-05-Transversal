@@ -358,13 +358,14 @@ a:hover {
     .container-izquierda{
         border-radius: 0px;
         padding: 20px;
-        width: 400px;
+        width: 100%;
         
     }
     .container-derecha{
         border-radius: 0px;
         height: fit-content;
         padding: 20px;
+        width: 100%;
     }
 }
 
