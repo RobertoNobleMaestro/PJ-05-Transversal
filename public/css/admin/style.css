@@ -534,3 +534,42 @@ body {
     opacity: 1;
     margin-top: 2rem;
 }
+
+/* Paginación para mantenimientos */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.pagination .page-item {
+    margin: 0 3px;
+}
+.pagination .page-link {
+    color: #6f42c1;
+    background: #faf7ff;
+    border: 1.5px solid #e0d7f7;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+    outline: none;
+}
+.pagination .page-link:hover {
+    background: linear-gradient(90deg, #9F17BD 0%, #9F17BD 100%);
+    color: #fff;
+    border-color: #a084e8;
+}
+.pagination .page-item.active .page-link {
+    background: linear-gradient(90deg, #9F17BD 0%, #9F17BD 100%);
+    color: #fff;
+    border-color: #9F17BD;
+    cursor: default;
+}

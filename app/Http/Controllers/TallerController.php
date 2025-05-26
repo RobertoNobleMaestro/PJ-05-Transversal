@@ -222,20 +222,19 @@ class TallerController extends Controller
             if ($request->has('estado') && $request->estado !== 'todos') {
                 $query->where('estado', $request->estado);
             }
-            
-            $mantenimientos = $query->get();
-            
+            // Filtrar por motivo si se especifica
+            if ($request->has('motivo') && in_array($request->motivo, ['mantenimiento', 'averia'])) {
+                $query->where('motivo_reserva', $request->motivo);
+            }
+            $mantenimientos = $query->paginate(4);
             // Formatear datos para la respuesta
-            $resultado = $mantenimientos->map(function($mantenimiento) {
+            $mantenimientos->getCollection()->transform(function($mantenimiento) {
                 $fechaHora = Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
-                
-                // Determinar el color del badge según el estado
                 $colorEstado = [
                     'pendiente' => 'warning',
                     'completado' => 'success',
                     'cancelado' => 'danger'
                 ][$mantenimiento->estado] ?? 'secondary';
-                
                 return [
                     'id' => $mantenimiento->id,
                     'vehiculo' => $mantenimiento->vehiculo->marca . ' ' . $mantenimiento->vehiculo->modelo,
@@ -252,10 +251,9 @@ class TallerController extends Controller
                     'motivo_averia' => $mantenimiento->motivo_averia
                 ];
             });
-            
             return response()->json([
-                'success' => true, 
-                'mantenimientos' => $resultado
+                'success' => true,
+                'mantenimientos' => $mantenimientos
             ]);
             
         } catch (\Exception $e) {

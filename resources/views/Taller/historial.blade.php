@@ -3,8 +3,10 @@
 @section('title', 'Historial de Mantenimientos')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/taller-historial.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/style.css') }}">
 <!-- SweetAlert2 -->
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
     /* Modal personalizado para que combine con la página */
     .modal-content {
@@ -129,10 +131,15 @@
                     <button type="button" class="btn btn-outline-purple" data-estado="completado">Completado</button>
                     <button type="button" class="btn btn-outline-purple" data-estado="cancelado">Cancelado</button>
                 </div>
-
+                <!-- Filtros por motivo y papelera -->
+                <div id="filtros-motivo" class="btn-group ms-2" role="group" aria-label="Filtros de motivo">
+                    <button type="button" class="btn btn-outline-purple" data-motivo="mantenimiento">Mantenimiento</button>
+                    <button type="button" class="btn btn-outline-purple" data-motivo="averia">Avería</button>
+                    <button type="button" class="btn btn-outline-purple" id="btn-limpiar-filtros" title="Limpiar filtros">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             </div>
-
-
 
             <div id="vehiculos-table-container">
                 <table class="crud-table" id="tablaMantenimientos">
@@ -150,6 +157,9 @@
                         <!-- Datos cargados dinámicamente -->
                     </tbody>
                 </table>
+                <div class="pagination-container">
+                    <ul class="pagination" id="pagination-mantenimientos"></ul>
+                </div>
             </div>
         </div>
     </div>
@@ -160,27 +170,60 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.all.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tablaBody = document.querySelector('#tablaMantenimientos tbody');
-    const filtrosEstado = document.getElementById('filtros-estado');
-    let estadoSeleccionado = 'todos';
-
-    function cargarMantenimientos(estado = 'todos') {
-        fetch(`/taller/getMantenimientos?estado=${estado}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+// --- Definición global ---
+function renderPagination(pagination, estado, motivo) {
+    const pagContainer = document.getElementById('pagination-mantenimientos');
+    pagContainer.innerHTML = '';
+    if (!pagination || pagination.last_page <= 1) return;
+    // Previous
+    const prev = document.createElement('li');
+    prev.className = 'page-item' + (pagination.current_page === 1 ? ' disabled' : '');
+    prev.innerHTML = `<a class="page-link" href="#" data-page="${pagination.current_page - 1}">&laquo;</a>`;
+    pagContainer.appendChild(prev);
+    // Pages
+    for (let i = 1; i <= pagination.last_page; i++) {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (i === pagination.current_page ? ' active' : '');
+        li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+        pagContainer.appendChild(li);
+    }
+    // Next
+    const next = document.createElement('li');
+    next.className = 'page-item' + (pagination.current_page === pagination.last_page ? ' disabled' : '');
+    next.innerHTML = `<a class="page-link" href="#" data-page="${pagination.current_page + 1}">&raquo;</a>`;
+    pagContainer.appendChild(next);
+    // Event listeners
+    pagContainer.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(this.getAttribute('data-page'));
+            if (!isNaN(page) && page >= 1 && page <= pagination.last_page && page !== pagination.current_page) {
+                cargarMantenimientos(estado, motivo, page);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                tablaBody.innerHTML = '';
-                if(data.mantenimientos.length === 0) {
-                    tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">No hay mantenimientos para mostrar.</td></tr>`;
-                    return;
-                }
-                data.mantenimientos.forEach(m => {
+        });
+    });
+}
+
+function cargarMantenimientos(estado = 'todos', motivo = '', page = 1) {
+    const tablaBody = document.querySelector('#tablaMantenimientos tbody');
+    let url = `/taller/getMantenimientos?estado=${estado}`;
+    if (motivo) url += `&motivo=${motivo}`;
+    if (page && page > 1) url += `&page=${page}`;
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        tablaBody.innerHTML = '';
+        if(data.success) {
+            const mantenimientos = data.mantenimientos.data;
+            if(mantenimientos.length === 0) {
+                tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">No hay mantenimientos para mostrar.</td></tr>`;
+            } else {
+                mantenimientos.forEach(m => {
                     tablaBody.innerHTML += `
                         <tr>
                             <td>${m.vehiculo}</td>
@@ -191,7 +234,7 @@ ${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-mute
                             <td><span class="badge bg-${m.colorEstado} text-capitalize">${m.estado}</span></td>
                             <td>
                                 <button class="btn-outline-purple" title="Editar" onclick="abrirModalEditar(${m.id})">
-    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn-outline-purple" onclick="eliminarMantenimiento(${m.id})" title="Eliminar">
                                     <i class="fas fa-trash-alt"></i>
@@ -203,28 +246,56 @@ ${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-mute
                         </tr>
                     `;
                 });
-            } else {
-                tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
             }
-        })
-        .catch(err => {
+            renderPagination(data.mantenimientos, estado, motivo);
+        } else {
             tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
-            console.error(err);
-        });
-    }
+            renderPagination({current_page:1,last_page:1}, estado, motivo);
+        }
+    })
+    .catch(err => {
+        tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
+        renderPagination({current_page:1,last_page:1}, estado, motivo);
+        console.error(err);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const filtrosEstado = document.getElementById('filtros-estado');
+    const filtrosMotivo = document.getElementById('filtros-motivo');
+    let estadoSeleccionado = 'todos';
+    let motivoSeleccionado = '';
 
     cargarMantenimientos();
 
     filtrosEstado.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', function() {
-            // Marcar botón activo
             filtrosEstado.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            // Filtrar
             estadoSeleccionado = this.getAttribute('data-estado');
-            cargarMantenimientos(estadoSeleccionado);
+            cargarMantenimientos(estadoSeleccionado, motivoSeleccionado);
         });
     });
+
+    if (filtrosMotivo) {
+        filtrosMotivo.querySelectorAll('button[data-motivo]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                filtrosMotivo.querySelectorAll('button[data-motivo]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                motivoSeleccionado = this.getAttribute('data-motivo');
+                cargarMantenimientos(estadoSeleccionado, motivoSeleccionado);
+            });
+        });
+        document.getElementById('btn-limpiar-filtros').addEventListener('click', function() {
+            // Limpiar selección visual
+            filtrosEstado.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            filtrosEstado.querySelector('button[data-estado="todos"]').classList.add('active');
+            filtrosMotivo.querySelectorAll('button[data-motivo]').forEach(b => b.classList.remove('active'));
+            estadoSeleccionado = 'todos';
+            motivoSeleccionado = '';
+            cargarMantenimientos();
+        });
+    }
 });
 
 // Función para eliminar mantenimiento
@@ -240,17 +311,23 @@ function eliminarMantenimiento(id) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             fetch(`/taller/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': csrfToken
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    cargarMantenimientos(estadoSeleccionado);
+            .then(async response => {
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    data = { success: false, message: 'Respuesta inesperada del servidor.' };
+                }
+                if (response.ok && data.success) {
+                    // Refrescar la página tras eliminar correctamente
                     Swal.fire({
                         icon: 'success',
                         title: '¡Eliminado!',
@@ -258,13 +335,17 @@ function eliminarMantenimiento(id) {
                         timer: 1800,
                         showConfirmButton: false
                     });
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    Swal.fire('Error', 'No se pudo eliminar el mantenimiento.', 'error');
+                    let msg = data && data.message ? data.message : `Error HTTP: ${response.status}`;
+                    Swal.fire('Error', msg, 'error');
                 }
             })
             .catch(error => {
-                console.error('Error al eliminar:', error);
-                Swal.fire('Error', 'Ocurrió un error.', 'error');
+                // console.error('Error al eliminar:', error);
+                // Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
             });
         }
     });
