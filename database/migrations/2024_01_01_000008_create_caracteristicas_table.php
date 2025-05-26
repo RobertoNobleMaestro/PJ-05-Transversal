@@ -9,7 +9,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('caracteristicas', function (Blueprint $table) {
             $table->id('id_caracteristicas');
-            $table->boolean('techo');
+            $table->boolean('techo')->default(false);
             $table->string('transmision');
             $table->unsignedBigInteger('id_vehiculos');
             $table->integer('num_puertas');

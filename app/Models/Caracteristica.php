@@ -13,8 +13,12 @@ class Caracteristica extends Model
     protected $primaryKey = 'id_caracteristicas';
 
     protected $fillable = [
-        'nombre',
-        'valor',
+        'techo',
+        'transmision',
+        'num_puertas',
+        'etiqueta_medioambiental',
+        'aire_acondicionado',
+        'capacidad_maletero',
         'id_vehiculos'
     ];
 

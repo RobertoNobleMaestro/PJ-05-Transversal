@@ -9,14 +9,16 @@ function applyFilters() {
     const tipo = document.getElementById('filterTipo').value;
     const marca = document.getElementById('filterMarca').value.trim();
     const anio = document.getElementById('filterAnio').value;
-    const valoracion = document.getElementById('filterValoracion').value;
+    // const valoracion = document.getElementById('filterValoracion').value; // Comentado
+    const parking = document.getElementById('filterParking').value;
     
     // Actualizar el objeto de filtros activos
     activeFilters = {
         tipo: tipo,
         marca: marca,
         anio: anio,
-        valoracion: valoracion
+        // valoracion: valoracion, // Comentado
+        parking_id: parking
     };
     
     // Cargar vehículos con los filtros aplicados
@@ -26,7 +28,7 @@ function clearFilters() {
     document.getElementById('filterTipo').value = '';
     document.getElementById('filterMarca').value = '';
     document.getElementById('filterAnio').value = '';
-    document.getElementById('filterValoracion').value = '';
+    // document.getElementById('filterValoracion').value = ''; // Comentado
     
     // Reiniciar el objeto de filtros activos
     activeFilters = {};
@@ -49,7 +51,8 @@ function loadVehiculos() {
     if (activeFilters.marca) url.searchParams.append('marca', activeFilters.marca);
     if (activeFilters.tipo) url.searchParams.append('tipo', activeFilters.tipo);
     if (activeFilters.anio) url.searchParams.append('anio', activeFilters.anio);
-    if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion);
+    // if (activeFilters.valoracion) url.searchParams.append('valoracion', activeFilters.valoracion); // Comentado
+    if (activeFilters.parking_id) url.searchParams.append('parking_id', activeFilters.parking_id);
     
     url.searchParams.append('page', currentPage);
     url.searchParams.append('per_page', itemsPerPage);
@@ -96,23 +99,27 @@ function loadVehiculos() {
         }
         
         data.vehiculos.forEach(vehiculo => {
+            console.log(vehiculo);
             const row = document.createElement('tr');
             const precio = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(vehiculo.precio);
             row.innerHTML = `
-                <td>${vehiculo.id_vehiculos}</td>
+                <td>
+                    ${vehiculo.imagen 
+                        ? `<img src="${vehiculo.imagen}" alt="Imagen" style="width:80px; height:60px; object-fit:cover; border-radius:4px; border:2px solid #6d117e;">`
+                        : '<span class="text-muted">Sin imagen</span>'}
+                </td>
                 <td>${vehiculo.marca}</td>
                 <td>${vehiculo.modelo}</td>
                 <td>${vehiculo.año}</td>
                 <td>${vehiculo.kilometraje} km</td>
-                <td>${vehiculo.nombre_lugar || 'No asignado'}</td>
                 <td>${vehiculo.nombre_tipo || 'No asignado'}</td>
+                <td>${vehiculo.nombre_parking || 'No asignado'}</td>
                 <td>
                     <div class="btn-group">
-                        <button class="btn btn-sm btn-success" 
-                                title="${vehiculo.tiene_reservas ? 'Ver reservas' : 'Sin reservas'}" 
-                                onclick="verVehiculo(${vehiculo.id_vehiculos})" 
-                                ${vehiculo.tiene_reservas ? '' : 'disabled'}>
-                            <i class="fas fa-eye"></i>
+                        <button class="btn btn-sm btn-info" 
+                                title="Ver características" 
+                                onclick="verCaracteristicasVehiculo(${vehiculo.id_vehiculos})">
+                            <i class="fas fa-list"></i>
                         </button>
                         <a href="/gestor/vehiculos/${vehiculo.id_vehiculos}/edit" class="btn btn-sm btn-primary" title="Editar">
                             <i class="fas fa-edit"></i>
@@ -328,7 +335,12 @@ document.addEventListener('DOMContentLoaded', function() {
             applyFilters();
         });
         
-        document.getElementById('filterValoracion').addEventListener('change', function() {
+        // document.getElementById('filterValoracion').addEventListener('change', function() {
+        //     currentPage = 1;
+        //     applyFilters();
+        // });
+        
+        document.getElementById('filterParking').addEventListener('change', function() {
             currentPage = 1;
             applyFilters();
         });
@@ -362,3 +374,32 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('No se encontró el contenedor de vehículos');
     }
 });
+
+window.verCaracteristicasVehiculo = function(id) {
+    fetch(`/gestor/vehiculos/${id}/caracteristicas`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const c = data.caracteristicas;
+                let html = `
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Techo:</b> ${c.techo == 1 ? 'Sí' : 'No'}</li>
+                        <li class="list-group-item"><b>Transmisión:</b> ${c.transmision}</li>
+                        <li class="list-group-item"><b>Nº Puertas:</b> ${c.num_puertas}</li>
+                        <li class="list-group-item"><b>Etiqueta Medioambiental:</b> ${c.etiqueta_medioambiental}</li>
+                        <li class="list-group-item"><b>Aire acondicionado:</b> ${c.aire_acondicionado == 1 ? 'Sí' : 'No'}</li>
+                        <li class="list-group-item"><b>Capacidad maletero:</b> ${c.capacidad_maletero} L</li>
+                    </ul>
+                `;
+                document.getElementById('caracteristicasBody').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('caracteristicasModal')).show();
+            } else {
+                document.getElementById('caracteristicasBody').innerHTML = '<div class="alert alert-danger">No se encontraron características.</div>';
+                new bootstrap.Modal(document.getElementById('caracteristicasModal')).show();
+            }
+        })
+        .catch(() => {
+            document.getElementById('caracteristicasBody').innerHTML = '<div class="alert alert-danger">Error al cargar las características.</div>';
+            new bootstrap.Modal(document.getElementById('caracteristicasModal')).show();
+        });
+}

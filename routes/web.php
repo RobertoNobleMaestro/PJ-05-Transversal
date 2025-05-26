@@ -16,6 +16,7 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GestorController;
+use App\Http\Controllers\GestorUserController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
@@ -124,6 +125,7 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::get('/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('gestor.vehiculos.edit');
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
+        Route::get('/{id_vehiculos}/caracteristicas', [VehiculoCrudController::class, 'caracteristicas'])->name('gestor.vehiculos.caracteristicas');
     });
     Route::get('gestor/vehiculos/{id}/crudreservas', [VehiculoCrudController::class, 'getReservas']);
     Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
@@ -132,6 +134,7 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
     Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
     Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
+    Route::get('/gestor/parking/create', [App\Http\Controllers\ParkingGestorController::class, 'create'])->name('gestor.parking.create');
 });
 
 });
@@ -240,7 +243,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 
     // Historial
-    Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
+    Route::get('/admin/historial', [ReservaCrudController::class, 'adminHistorial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
 // Chat routes
@@ -253,6 +256,15 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats', [ChatViewController::class, 'listarConversaciones'])->name('gestor.chat.listar');
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
+    Route::prefix('gestor')->middleware(['auth', 'role:gestor'])->group(function () {
+    Route::get('/users', [GestorUserController::class, 'index'])->name('gestor.user.index');
+    Route::get('/users/data', [GestorUserController::class, 'getUsers'])->name('gestor.user.data');
+    Route::get('/users/create', [GestorUserController::class, 'create'])->name('gestor.user.create');
+    Route::post('/users', [GestorUserController::class, 'store'])->name('gestor.user.store');
+    Route::get('/users/{id}/edit', [GestorUserController::class, 'edit'])->name('gestor.user.edit');
+    Route::post('/users/{id}', [GestorUserController::class, 'update'])->name('gestor.user.update');
+    Route::delete('/users/{id}', [GestorUserController::class, 'destroy'])->name('gestor.user.destroy');
+    });
 });
 Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
