@@ -123,16 +123,25 @@
 
         <div class="container mt-4">
             <div class="mb-3">
-                <div id="filtros-estado" class="btn-group" role="group" aria-label="Filtros de estado">
-                    <button type="button" class="btn btn-outline-purple active" data-estado="todos">Todos</button>
-                    <button type="button" class="btn btn-outline-purple" data-estado="pendiente">Pendiente</button>
-                    <button type="button" class="btn btn-outline-purple" data-estado="completado">Completado</button>
-                    <button type="button" class="btn btn-outline-purple" data-estado="cancelado">Cancelado</button>
+                <div class="d-flex flex-wrap align-items-end gap-2">
+                    <div id="filtros-estado" class="btn-group me-2 mb-2" role="group" aria-label="Filtros de estado">
+                        <button type="button" class="btn btn-outline-purple active" data-estado="todos">Todos</button>
+                        <button type="button" class="btn btn-outline-purple" data-estado="pendiente">Pendiente</button>
+                        <button type="button" class="btn btn-outline-purple" data-estado="completado">Completado</button>
+                        <button type="button" class="btn btn-outline-purple" data-estado="cancelado">Cancelado</button>
+                    </div>
+                    <div id="filtros-tipo" class="btn-group me-2 mb-2" role="group" aria-label="Filtros de tipo">
+                        <button type="button" class="btn btn-outline-purple active" data-tipo="">Todos</button>
+                        <button type="button" class="btn btn-outline-purple" data-tipo="mantenimiento">Mantenimiento</button>
+                        <button type="button" class="btn btn-outline-purple" data-tipo="averia">Avería</button>
+                    </div>
+                    <div class="mb-2 d-flex align-items-stretch" style="height:38px;">
+                        <button id="btn-limpiar-filtros" class="btn btn-outline-purple d-flex align-items-center justify-content-center" title="Limpiar filtros" style="height:100%;width:38px;padding:0;">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                    </div>
                 </div>
-
             </div>
-
-
 
             <div id="vehiculos-table-container">
                 <table class="crud-table" id="tablaMantenimientos">
@@ -163,10 +172,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     const tablaBody = document.querySelector('#tablaMantenimientos tbody');
     const filtrosEstado = document.getElementById('filtros-estado');
+    const filtrosTipo = document.getElementById('filtros-tipo');
+    const btnLimpiarFiltros = document.getElementById('btn-limpiar-filtros');
     let estadoSeleccionado = 'todos';
+    let tipoSeleccionado = '';
 
-    function cargarMantenimientos(estado = 'todos') {
-        fetch(`/taller/getMantenimientos?estado=${estado}`, {
+    function cargarMantenimientos(estado = 'todos', tipo = '') {
+        const params = new URLSearchParams({
+            estado: estado,
+            tipo: tipo
+        });
+        fetch(`/taller/getMantenimientos?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -181,6 +197,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 data.mantenimientos.forEach(m => {
+                    if (tipo && m.motivo_reserva !== tipo) {
+                        return;
+                    }
                     tablaBody.innerHTML += `
                         <tr>
                             <td>${m.vehiculo}</td>
@@ -213,17 +232,34 @@ ${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-mute
         });
     }
 
+    // Inicial
     cargarMantenimientos();
 
     filtrosEstado.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', function() {
-            // Marcar botón activo
             filtrosEstado.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            // Filtrar
             estadoSeleccionado = this.getAttribute('data-estado');
-            cargarMantenimientos(estadoSeleccionado);
+            cargarMantenimientos(estadoSeleccionado, tipoSeleccionado);
         });
+    });
+    filtrosTipo.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            filtrosTipo.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            tipoSeleccionado = this.getAttribute('data-tipo');
+            cargarMantenimientos(estadoSeleccionado, tipoSeleccionado);
+        });
+    });
+    btnLimpiarFiltros.addEventListener('click', function(e) {
+        e.preventDefault();
+        estadoSeleccionado = 'todos';
+        tipoSeleccionado = '';
+        filtrosEstado.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        filtrosEstado.querySelector('button[data-estado="todos"]').classList.add('active');
+        filtrosTipo.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        filtrosTipo.querySelector('button[data-tipo=""]').classList.add('active');
+        cargarMantenimientos();
     });
 });
 
@@ -250,7 +286,7 @@ function eliminarMantenimiento(id) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    cargarMantenimientos(estadoSeleccionado);
+                    cargarMantenimientos(estadoSeleccionado, tipoSeleccionado);
                     Swal.fire({
                         icon: 'success',
                         title: '¡Eliminado!',
