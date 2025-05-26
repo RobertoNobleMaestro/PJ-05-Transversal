@@ -146,4 +146,39 @@ window.confirmarEliminacion = function(parkingId) {
             form.submit();
         }
     });
+}
+
+window.openCreatePanel = function() {
+    const parkingId = document.getElementById('parkingId');
+    const nombre = document.getElementById('nombre');
+    const plazas = document.getElementById('plazas');
+    const latitud = document.getElementById('latitud');
+    const longitud = document.getElementById('longitud');
+    const form = document.getElementById('editParkingForm');
+    const panel = document.getElementById('editPanel');
+
+    if (!parkingId || !nombre || !plazas || !latitud || !longitud || !form || !panel) {
+        alert('Error: No se encontraron los campos del formulario. Revisa los IDs en el HTML.');
+        return;
+    }
+
+    parkingId.value = '';
+    nombre.value = '';
+    plazas.value = '';
+    latitud.value = '';
+    longitud.value = '';
+
+    form.action = '/gestor/parking';
+    form.method = 'POST';
+
+    let methodInput = form.querySelector('input[name=\"_method\"]');
+    if (methodInput) methodInput.remove();
+
+    form.querySelector('.btn.btn-submit').textContent = 'Crear';
+
+    panel.classList.add('show');
+    panel.style.display = 'block';
+    setTimeout(() => {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
 } 

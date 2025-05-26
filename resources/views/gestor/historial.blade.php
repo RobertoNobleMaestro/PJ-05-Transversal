@@ -10,7 +10,9 @@
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div> 
-    
+    <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
     <div class="admin-sidebar" id="sidebar">
         <div style="position: fixed;width: 220px;">
             <div class="sidebar-title">CARFLOW</div>
@@ -117,21 +119,23 @@
             <p>Cargando historial de reservas...</p>
         </div>
         <div id="historial-table-container" style="display: none;" data-url="{{ route('gestor.historial.data') }}">
-            <table class="crud-table" id="historial-table">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Fecha</th>
-                        <th>Lugar</th>
-                        <th>Estado</th>
-                        <th>Total</th>
-                        <th>Vehículos</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los datos se cargarán aquí mediante AJAX -->
-                </tbody>
-            </table>
+            <div class="crud-table-container">
+                <table class="crud-table" id="historial-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Lugar</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                            <th>Vehículos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán aquí mediante AJAX -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

@@ -14,7 +14,9 @@
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+    <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
         <div style="position: fixed;width: 220px;">
@@ -41,7 +43,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">
-                Gestión de Vehículos @if(isset($lugarGestor)) de {{ $lugarGestor->nombre }} @endif
+                Gestión de Vehículos
             </h1>
             <a href="{{ route('gestor.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
@@ -103,23 +105,25 @@
             <p>Cargando vehículos...</p>
         </div>
         <div id="vehiculos-table-container" style="display: none;" data-url="{{ route('gestor.vehiculos.data') }}">
-            <table class="crud-table" id="vehiculos-table">
-                <thead>
-                    <tr>
-                        <th>Imagen</th>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                        <th>Año</th>
-                        <th>Kilometraje</th>
-                        <th>Tipo</th>
-                        <th>Parking</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los datos se cargarán aquí mediante AJAX -->
-                </tbody>
-            </table>
+            <div class="crud-table-container">
+                <table class="crud-table" id="vehiculos-table">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Año</th>
+                            <th>Kilometraje</th>
+                            <th>Tipo</th>
+                            <th>Parking</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán aquí mediante AJAX -->
+                    </tbody>
+                </table>
+            </div>
             <!-- Paginación -->
             <div class="pagination-container mt-4" id="pagination-controls">
                 <div class="pagination-info">

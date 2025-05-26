@@ -134,6 +134,7 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
     Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
     Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
+    Route::get('/gestor/parking/create', [App\Http\Controllers\ParkingGestorController::class, 'create'])->name('gestor.parking.create');
 });
 
 });

@@ -7,9 +7,12 @@
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 
     <div class="admin-container">
-        <!-- Overlay para menu00fa mu00f3vil -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
+        <!-- Botón de hamburguesa para menú móvil -->
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
         <!-- Barra lateral -->
         <div class="admin-sidebar" id="sidebar">
             <div class="sidebar-title">CARFLOW</div>
@@ -39,7 +42,7 @@
             </div>
 
             <div class="filter-section">
-                <div class="row mb-3">
+                <div class="row mb-3" style="gap: 10px;">
                     <div class="col-md-3">
                         <input type="text" id="searchUser" class="form-control" placeholder="Buscar por nombre">
                     </div>
@@ -78,38 +81,38 @@
                 <p>Cargando usuarios...</p>
             </div>
             <div id="users-table-container" style="display: none;" data-url="{{ route('gestor.user.data') }}">
-                <table class="crud-table" id="users-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>DNI</th>
-                            <th>Rol</th>
-                            <th>Parking</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- datos mediante AJAX -->
-                    </tbody>
-                </table>
-                    <!-- Paginación -->
-                    <div class="pagination-container mt-4" id="pagination-controls">
-                        <div class="pagination-info">
-                            <span id="pagination-summary">Mostrando 0 de 0 usuarios</span>
-                        </div>
-                        <div class="pagination-buttons">
-                            <button id="prev-page" class="btn btn-sm btn-outline-primary" >
-                                <i class="fas fa-chevron-left"></i> Anterior
-                            </button>
-                            <span id="page-indicator" class="mx-2">Página 1 de 1</span>
-                            <button id="next-page" class="btn btn-sm btn-outline-primary" >
-                                Siguiente <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
+                <div class="crud-table-container">
+                    <table class="crud-table" id="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>DNI</th>
+                                <th>Rol</th>
+                                <th>Parking</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- datos mediante AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Paginación -->
+                <div class="pagination-container mt-4" id="pagination-controls">
+                    <div class="pagination-info">
+                        <span id="pagination-summary">Mostrando 0 de 0 usuarios</span>
                     </div>
-
+                    <div class="pagination-buttons">
+                        <button id="prev-page" class="btn btn-sm btn-outline-primary" >
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <span id="page-indicator" class="mx-2">Página 1 de 1</span>
+                        <button id="next-page" class="btn btn-sm btn-outline-primary" >
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

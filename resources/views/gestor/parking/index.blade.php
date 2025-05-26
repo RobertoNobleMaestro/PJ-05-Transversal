@@ -10,7 +10,9 @@
 
 <div class="admin-container">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
+    <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
     <div class="admin-sidebar" id="sidebar">
         <div style="position: fixed;width: 220px;">
             <div class="sidebar-title">CARFLOW</div>
@@ -32,13 +34,18 @@
     </div>
 
     <div class="admin-main">
-        <div class="admin-header">
-            <h1 class="admin-title">
-                Parkings @if(isset($lugarGestor)) en {{ $lugarGestor->nombre }} @endif
+        <div class="admin-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <h1 class="admin-title mb-0">
+                Gestión de Parkings @if(isset($lugarGestor)) en {{ $lugarGestor->nombre }} @endif
             </h1>
-            <a href="{{ route('gestor.index') }}" class="btn-purple">
-                <i class="fas fa-arrow-left"></i> Volver al Panel
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('gestor.parking.create') }}" class="btn-purple">
+                    <i class="fas fa-plus"></i> Añadir Parking
+                </a>
+                <a href="{{ route('gestor.index') }}" class="btn-purple">
+                    <i class="fas fa-arrow-left"></i> Volver al Panel
+                </a>
+            </div>
         </div>
 
         <!-- Mapa -->
@@ -54,22 +61,22 @@
 
                 <div class="form-group">
                     <label for="nombre">Nombre del Parking</label>
-                    <input type="text" class="form-control" name="nombre" id="nombre" required>
+                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{ old('nombre', $parking->nombre ?? '') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="plazas">Cantidad de Plazas</label>
-                    <input type="number" class="form-control" name="plazas" id="plazas" required>
+                    <input type="number" name="plazas" id="plazas" class="form-control" value="{{ old('plazas', $parking->plazas ?? '') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="latitud">Latitud</label>
-                    <input type="text" class="form-control" name="latitud" id="latitud" required>
+                    <input type="text" name="latitud" id="latitud" class="form-control" value="{{ old('latitud', $parking->latitud ?? '') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="longitud">Longitud</label>
-                    <input type="text" class="form-control" name="longitud" id="longitud" required>
+                    <input type="text" name="longitud" id="longitud" class="form-control" value="{{ old('longitud', $parking->longitud ?? '') }}" required>
                 </div>
 
                 <div class="form-actions mt-3">
@@ -92,4 +99,11 @@
     window.sessionError = @json(session('error'));
 </script>
 <script src="{{ asset('js/gestor-parking.js') }}"></script>
+<script>
+@if(session('openCreatePanel'))
+    window.addEventListener('DOMContentLoaded', function() {
+        openCreatePanel();
+    });
+@endif
+</script>
 

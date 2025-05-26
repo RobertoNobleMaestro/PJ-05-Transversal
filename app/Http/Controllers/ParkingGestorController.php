@@ -102,4 +102,31 @@ class ParkingGestorController extends Controller
             return redirect()->route('gestor.parking.index')->with('error', 'Error al eliminar el parking: ' . $e->getMessage());
         }
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'plazas' => 'required|integer|min:1',
+            'latitud' => 'required|numeric',
+            'longitud' => 'required|numeric',
+        ]);
+
+        $parking = new \App\Models\Parking();
+        $parking->nombre = $request->nombre;
+        $parking->plazas = $request->plazas;
+        $parking->latitud = $request->latitud;
+        $parking->longitud = $request->longitud;
+        $parking->id_usuario = auth()->user()->id_usuario; // O el campo que corresponda
+        // Si tienes id_lugar, añádelo aquí
+        $parking->save();
+
+        return redirect()->route('gestor.parking.index')->with('success', 'Parking creado correctamente.');
+    }
+
+    public function create()
+    {
+        // Redirige a index con un flag en la sesión
+        return redirect()->route('gestor.parking.index')->with('openCreatePanel', true);
+    }
 }
