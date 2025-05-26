@@ -470,3 +470,22 @@ a:hover {
     padding: 0 20px;
 }
 
+@media (max-width: 900px) {
+    .contenedor-principal {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+    .vehiculos-lista, .resumen-carrito {
+        width: 100%;
+        max-width: 100%;
+    }
+    .vehiculo-item img {
+        width: 100%;
+        max-width: 250px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
+}
+
