@@ -215,6 +215,8 @@ class TallerController extends Controller
     public function getMantenimientos(Request $request)
     {
         try {
+            $perPage = $request->input('per_page', 4);
+            $page = $request->input('page', 1);
             $query = Mantenimiento::with(['vehiculo', 'taller'])
                 ->orderBy('created_at', 'desc');
             
@@ -222,11 +224,13 @@ class TallerController extends Controller
             if ($request->has('estado') && $request->estado !== 'todos') {
                 $query->where('estado', $request->estado);
             }
-            // Filtrar por motivo si se especifica
-            if ($request->has('motivo') && in_array($request->motivo, ['mantenimiento', 'averia'])) {
-                $query->where('motivo_reserva', $request->motivo);
+            // Filtrar por motivo_reserva si se especifica
+            if ($request->has('tipo') && in_array($request->tipo, ['mantenimiento', 'averia'])) {
+                $query->where('motivo_reserva', $request->tipo);
             }
-            $mantenimientos = $query->paginate(4);
+            
+            $mantenimientos = $query->paginate($perPage, ['*'], 'page', $page);
+            
             // Formatear datos para la respuesta
             $mantenimientos->getCollection()->transform(function($mantenimiento) {
                 $fechaHora = Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
@@ -252,8 +256,13 @@ class TallerController extends Controller
                 ];
             });
             return response()->json([
-                'success' => true,
-                'mantenimientos' => $mantenimientos
+                'success' => true, 
+                'mantenimientos' => $resultado,
+                'pagination' => [
+                    'current_page' => $mantenimientos->currentPage(),
+                    'last_page' => $mantenimientos->lastPage(),
+                    'total' => $mantenimientos->total(),
+                ]
             ]);
             
         } catch (\Exception $e) {

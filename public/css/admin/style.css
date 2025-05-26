@@ -573,3 +573,45 @@ body {
     border-color: #9F17BD;
     cursor: default;
 }
+
+/* Paginación morada personalizada */
+#paginacion-morada {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+    gap: 6px;
+}
+
+#paginacion-morada li {
+    display: inline;
+}
+
+#paginacion-morada li button {
+    background-color: transparent;
+    border: 1px solid #9F17BD;
+    color: #9F17BD;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#paginacion-morada li[data-active="true"] button {
+    background-color: #9F17BD;
+    color: white;
+    font-weight: bold;
+}
+
+#paginacion-morada li button:hover:not(:disabled):not([aria-disabled="true"]) {
+    background-color: #9F17BD;
+    color: white;
+}
+
+#paginacion-morada li[data-disabled="true"] button {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
