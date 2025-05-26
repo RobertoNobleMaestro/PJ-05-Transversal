@@ -159,6 +159,7 @@
                         <!-- Datos cargados dinámicamente -->
                     </tbody>
                 </table>
+                <div id="paginacion-mantenimientos" class="custom-pagination mt-3 d-flex justify-content-center"></div>
             </div>
         </div>
     </div>
@@ -176,11 +177,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnLimpiarFiltros = document.getElementById('btn-limpiar-filtros');
     let estadoSeleccionado = 'todos';
     let tipoSeleccionado = '';
+    let paginaActual = 1;
+    let totalPaginas = 1;
 
-    function cargarMantenimientos(estado = 'todos', tipo = '') {
+    function cargarMantenimientos(estado = 'todos', tipo = '', pagina = 1) {
         const params = new URLSearchParams({
             estado: estado,
-            tipo: tipo
+            tipo: tipo,
+            page: pagina
         });
         fetch(`/taller/getMantenimientos?${params.toString()}`, {
             headers: {
@@ -194,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tablaBody.innerHTML = '';
                 if(data.mantenimientos.length === 0) {
                     tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">No hay mantenimientos para mostrar.</td></tr>`;
+                    document.getElementById('paginacion-mantenimientos').innerHTML = '';
                     return;
                 }
                 data.mantenimientos.forEach(m => {
@@ -222,13 +227,44 @@ ${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-mute
                         </tr>
                     `;
                 });
+                // Paginación
+                paginaActual = data.pagina_actual || 1;
+                totalPaginas = data.total_paginas || 1;
+                renderizarPaginacion();
             } else {
                 tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
+                document.getElementById('paginacion-mantenimientos').innerHTML = '';
             }
         })
         .catch(err => {
             tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
+            document.getElementById('paginacion-mantenimientos').innerHTML = '';
             console.error(err);
+        });
+    }
+
+    function renderizarPaginacion() {
+        const paginacion = document.getElementById('paginacion-mantenimientos');
+        let html = '';
+        if (totalPaginas > 1) {
+            html += `<ul class="pagination custom-pagination-list mb-0">`;
+            html += `<li class="page-item${paginaActual === 1 ? ' disabled' : ''}"><a class="page-link" href="#" data-page="${paginaActual - 1}">&laquo;</a></li>`;
+            for (let i = 1; i <= totalPaginas; i++) {
+                html += `<li class="page-item${i === paginaActual ? ' active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+            }
+            html += `<li class="page-item${paginaActual === totalPaginas ? ' disabled' : ''}"><a class="page-link" href="#" data-page="${paginaActual + 1}">&raquo;</a></li>`;
+            html += `</ul>`;
+        }
+        paginacion.innerHTML = html;
+        // Eventos
+        paginacion.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = parseInt(this.getAttribute('data-page'));
+                if (!isNaN(page) && page >= 1 && page <= totalPaginas && page !== paginaActual) {
+                    cargarMantenimientos(estadoSeleccionado, tipoSeleccionado, page);
+                }
+            });
         });
     }
 
@@ -286,22 +322,23 @@ function eliminarMantenimiento(id) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    cargarMantenimientos(estadoSeleccionado, tipoSeleccionado);
                     Swal.fire({
                         icon: 'success',
                         title: '¡Eliminado!',
                         text: 'Mantenimiento eliminado correctamente.',
                         timer: 1800,
                         showConfirmButton: false
+                    }).then(function() {
+                        location.reload();
                     });
                 } else {
                     Swal.fire('Error', 'No se pudo eliminar el mantenimiento.', 'error');
                 }
             })
-            .catch(error => {
-                console.error('Error al eliminar:', error);
-                Swal.fire('Error', 'Ocurrió un error.', 'error');
-            });
+            // .catch(error => {
+            //     console.error('Error al eliminar:', error);
+            //     Swal.fire('Error', 'Ocurrió un error.', 'error');
+            // });
         }
     });
 }

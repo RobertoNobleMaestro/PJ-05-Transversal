@@ -534,3 +534,46 @@ body {
     opacity: 1;
     margin-top: 2rem;
 }
+
+/* Paginación personalizada para mantenimientos */
+.custom-pagination {
+    margin-top: 18px;
+    margin-bottom: 10px;
+}
+.custom-pagination-list {
+    display: flex;
+    gap: 4px;
+    padding-left: 0;
+    list-style: none;
+}
+.custom-pagination-list .page-item {
+    display: inline;
+}
+.custom-pagination-list .page-link {
+    color: var(--primary-color);
+    background: #fff;
+    border: 1.5px solid #e0d7f7;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+    margin: 0 1px;
+    text-decoration: none;
+}
+.custom-pagination-list .page-link:hover {
+    background: linear-gradient(90deg, #a084e8 0%, #6f42c1 100%);
+    color: #fff;
+    border-color: #6f42c1;
+}
+.custom-pagination-list .page-item.active .page-link {
+    background: linear-gradient(90deg, #6f42c1 0%, #a084e8 100%);
+    color: #fff;
+    border-color: #6f42c1;
+    font-weight: bold;
+}
+.custom-pagination-list .page-item.disabled .page-link {
+    color: #bbb;
+    background: #f3f0fa;
+    border-color: #e0d7f7;
+    cursor: not-allowed;
+}
