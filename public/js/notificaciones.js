@@ -51,7 +51,7 @@ function mostrarModalNotificacion() {
                                         </div>
                                         <div class="col-6">
                                             <p>${solicitud.cliente_nombre}</p>
-                                            <p>${solicitud.chofer_nombre}</p>
+                                            <p>${solicitud.chofer ? solicitud.chofer.usuario.nombre : 'No asignado'}</p>
                                             <p>${solicitud.precio}€</p>
                                         </div>
                                     </div>
@@ -100,7 +100,7 @@ function procesarPago(solicitudId) {
     $('#modalNotificacionAceptacion').modal('hide');
 
     // Redirigir a la página de pago
-    window.location.href = `/pago/procesar/${solicitudId}`;
+    window.location.href = `/notificacion/pago/${solicitudId}`;
 }
 
 // Función para cancelar la solicitud

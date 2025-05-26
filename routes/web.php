@@ -31,6 +31,7 @@ use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\NotificacionPagoController;
 use Illuminate\Support\Facades\Schema;
 
 
@@ -118,6 +119,12 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/pago/exito/{id_reserva}', [PagoController::class, 'exito'])->name('pago.exito');
     Route::get('/pago/cancelado', [PagoController::class, 'cancelado'])->name('pago.cancelado');
     Route::get('/facturas/descargar/{id_reserva}', [FacturaController::class, 'descargarFactura'])->name('facturas.descargar');
+
+    // Rutas para pago de notificaciones
+    Route::get('/notificacion/pago/{id_solicitud}', [NotificacionPagoController::class, 'checkout'])->name('notificacion.pago.checkout');
+    Route::get('/notificacion/pago/exito/{id_solicitud}', [NotificacionPagoController::class, 'exito'])->name('notificacion.pago.exito');
+    Route::get('/notificacion/pago/cancelado', [NotificacionPagoController::class, 'cancelado'])->name('notificacion.pago.cancelado');
+    Route::post('/notificacion/pago/webhook', [NotificacionPagoController::class, 'webhook'])->name('notificacion.pago.webhook');
 });
 
 Route::middleware(['auth', 'role:gestor'])->group(function () {
