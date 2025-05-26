@@ -52,6 +52,13 @@
                     <i class="fas fa-comments"></i>
                 </a>
               </li>
+              <!-- Notificaciones de solicitudes de transporte -->
+              <li class="nav-item">
+                <a class="nav-link" href="#" onclick="event.preventDefault(); mostrarModalNotificacion();">
+                  <i class="fas fa-bell"></i>
+                  <span id="notification-count" class="badge bg-danger"></span>
+                </a>
+              </li>
               <!-- Foto de perfil (link al perfil) -->
               <li class="nav-item">
                 <a class="nav-link" href="{{ url('/perfil/' . Auth::user()->id_usuario) }}">
@@ -72,21 +79,86 @@
       </div>
     </nav>
 
+    <!-- Modal de Notificación de Aceptación -->
+    <div class="modal fade" id="modalNotificacionAceptacion" tabindex="-1" aria-labelledby="modalNotificacionAceptacionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="margin-top: 60px;">
+            <div class="modal-content" style="background: linear-gradient(135deg, #8c37c1, #6f42c1); color: white;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="modalNotificacionAceptacionLabel">
+                        <i class="fas fa-bell me-2"></i>Notificaciones
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="contenido-notificaciones">
+                        <!-- El contenido se cargará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function actualizarContadores() {
+            // Cargar contador del carrito
             fetch('{{ route("carrito.count") }}')
                 .then(response => response.json())
                 .then(data => {
                     const cartCount = document.getElementById('cart-count');
                     if (data.count > 0) {
                         cartCount.textContent = data.count;
-                        cartCount.style.display = 'inline-block'; // Mostrar el contador
+                        cartCount.style.display = 'inline-block';
                     } else {
-                        cartCount.style.display = 'none'; // Ocultar el contador
+                        cartCount.style.display = 'none';
                     }
                 })
                 .catch(error => console.error('Error fetching cart count:', error));
+
+            // Cargar contador de notificaciones
+            fetch('{{ route("notificaciones.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const notificationCount = document.getElementById('notification-count');
+                    if (data.count > 0) {
+                        notificationCount.textContent = data.count;
+                        notificationCount.style.display = 'inline-block';
+                    } else {
+                        notificationCount.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching notification count:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar contadores inicialmente
+            actualizarContadores();
+
+            // Actualizar contadores cada 30 segundos
+            setInterval(actualizarContadores, 30000);
+
+            // Escuchar el evento de solicitud aceptada
+            window.Echo.private('solicitud.{{ Auth::id() }}')
+                .listen('SolicitudAceptada', (e) => {
+                    actualizarContadores();
+                });
         });
+    </script>
+
+    <!-- Scripts -->
+    <script src="{{ asset('js/notificaciones.js') }}"></script>
+    <script>
+        // Inicializar Echo para las notificaciones en tiempo real
+        const Echo = {
+            private: function(channel) {
+                return {
+                    listen: function(event, callback) {
+                        // Implementación básica para evitar errores
+                        console.log('Escuchando canal:', channel, 'evento:', event);
+                    }
+                };
+            }
+        };
+        window.Echo = Echo;
     </script>
 </body>
 </html>

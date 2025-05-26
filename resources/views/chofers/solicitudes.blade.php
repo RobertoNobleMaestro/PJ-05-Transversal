@@ -74,17 +74,12 @@
             overflow-y: auto;
         }
 
-        #mapaPanel {
-            flex: 1;
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #dee2e6;
-        }
-
         #mapa {
-            width: 100%;
+            flex: 1;
+            min-width: 0;
             height: 100%;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
         }
 
         .info-item {
@@ -127,6 +122,16 @@
         #cerrarModal:hover {
             background: #f8f9fa;
         }
+
+        #loading-solicitudes {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        #loading-solicitudes p {
+            margin-top: 1rem;
+            color: #666;
+        }
     </style>
 
     <div class="admin-container">
@@ -150,7 +155,7 @@
                 </a>
             </div>
 
-            <div id="loading-solicitudes" class="text-center d-none">
+            <div id="loading-solicitudes" class="text-center">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
@@ -167,30 +172,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($solicitudes as $solicitud)
-                            <tr>
-                                <td>{{ $solicitud->cliente->nombre }}</td>
-                                <td>{{ number_format($solicitud->precio, 2) }} €</td>
-                                <td>
-                                    <button type="button" class="btn-action btn-info ver-mapa" 
-                                            data-solicitud='{{ json_encode($solicitud) }}'>
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button type="button" class="btn-action btn-aceptar"
-                                            onclick="aceptarSolicitud({{ $solicitud->id }})">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button type="button" class="btn-action btn-rechazar"
-                                            onclick="rechazarSolicitud({{ $solicitud->id }})">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="text-center">No hay solicitudes pendientes</td>
-                            </tr>
-                        @endforelse
+                        <!-- Las solicitudes se cargarán dinámicamente aquí -->
                     </tbody>
                 </table>
             </div>
@@ -199,17 +181,9 @@
 
     <!-- Modal Visualizador -->
     <div id="modalVisualizador">
-        <div id="modalContenido">
-            <div id="modalHeader">
-                <h5>Detalles de la Solicitud</h5>
-                <button id="cerrarModal">&times;</button>
-            </div>
-            <div id="modalBody">
-                <div id="infoPanel"></div>
-                <div id="mapaPanel">
-                    <div id="mapa"></div>
-                </div>
-            </div>
+        <div id="modalContenido" style="display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; background: white; border-radius: 0; box-shadow: none;">
+            <button id="cerrarModal" style="position: absolute; top: 20px; right: 30px; z-index: 1000;">&times;</button>
+            <div id="mapa" style="width: 90vw; height: 90vh; border-radius: 12px; border: 1px solid #dee2e6;"></div>
         </div>
     </div>
 @endsection
@@ -217,10 +191,12 @@
 @section('styles')
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
 @endsection
 
 @section('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script src="{{ asset('js/solicitudes.js') }}"></script>
 @endsection
 
