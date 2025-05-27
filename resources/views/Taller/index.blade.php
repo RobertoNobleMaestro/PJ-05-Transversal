@@ -25,9 +25,17 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">Gestión de Vehículos</h1>
-                <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
+            <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <!-- Botón hamburguesa solo visible en móvil para sidebar -->
+            <button id="toggle-sidebar" class="btn btn-outline-purple d-md-none ms-2" type="button" style="font-size:1.5rem;">
+                <i class="fas fa-bars"></i>
+            </button>
+            <!-- Botón hamburguesa solo visible en móvil para filtros -->
+            <button id="toggle-filtros" class="btn btn-outline-purple d-md-none ms-2" type="button" style="font-size:1.5rem;">
+                <i class="fas fa-sliders-h"></i>
+            </button>
         </div>
 
         @if(session('success'))
@@ -44,8 +52,8 @@
             </div>
         @endif
 
-
-        <div class="row mb-4 g-2 align-items-end">
+        <!-- Filtros envueltos en un contenedor para mostrar/ocultar -->
+        <div id="filtros-container" class="row mb-4 g-2 align-items-end">
             <div class="col-md-3">
                 <label for="filtro-sede" class="filtros-label">Sede</label>
                 <select id="filtro-sede" class="form-select select-purple" style="border">
@@ -169,6 +177,26 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function() {
+    // Mostrar/ocultar sidebar en móvil
+    $('#toggle-sidebar').on('click', function() {
+        $('#sidebar').addClass('show-sidebar-mobile');
+        $('#sidebarOverlay').addClass('active');
+    });
+    // Cerrar sidebar al hacer click en overlay
+    $('#sidebarOverlay').on('click', function() {
+        $('#sidebar').removeClass('show-sidebar-mobile');
+        $('#sidebarOverlay').removeClass('active');
+        // También cerrar filtros si están abiertos
+        $('#filtros-container').removeClass('show-filtros-mobile');
+    });
+    // Cerrar sidebar al hacer click fuera en móvil
+    $(document).on('click touchstart', function(e) {
+        if ($(window).width() < 768) {
+            if (!$(e.target).closest('#sidebar, #toggle-sidebar').length) {
+                $('#sidebar').removeClass('show-sidebar-mobile');
+            }
+        }
+    });
     // Mostrar/ocultar campo motivo avería
     $('#motivo-reserva').on('change', function() {
         if ($(this).val() === 'averia') {
@@ -180,10 +208,20 @@ $(function() {
             $('#motivo-averia').val('');
         }
     });
-
-    // Envío AJAX para agendar mantenimiento y recargar la página al éxito
-    // (Eliminado porque el correcto está en public/js/taller.js)
-
+    // Hamburguesa para filtros responsive
+    $('#toggle-filtros').on('click', function() {
+        $('#filtros-container').toggleClass('show-filtros-mobile');
+        if ($('#filtros-container').hasClass('show-filtros-mobile')) {
+            $('#sidebarOverlay').addClass('active');
+        } else {
+            $('#sidebarOverlay').removeClass('active');
+        }
+    });
+    // Overlay para cerrar filtros en móvil
+    $('#sidebarOverlay').on('click', function() {
+        $('#filtros-container').removeClass('show-filtros-mobile');
+        $('#sidebarOverlay').removeClass('active');
+    });
     function getFiltrosData() {
         return {
             sede: $('#filtro-sede').val(),
@@ -243,6 +281,15 @@ $(function() {
             filtrarVehiculos(href);
         }
     });
+    // Ocultar filtros al hacer click fuera en móvil
+    $(document).on('click touchstart', function(e) {
+        if ($(window).width() < 768) {
+            if (!$(e.target).closest('#filtros-container, #toggle-filtros').length) {
+                $('#filtros-container').removeClass('show-filtros-mobile');
+                $('#sidebarOverlay').removeClass('active');
+            }
+        }
+    });
 });
 </script>
 <!-- Bootstrap JS Bundle with Popper -->
@@ -257,4 +304,108 @@ $(function() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.js"></script>
 <!-- Custom JS -->
 <script src="{{ asset('js/taller.js') }}"></script>
+<style>
+/* Filtros ocultos en móvil por defecto */
+#filtros-container {
+    transition: max-height 0.3s, opacity 0.3s;
+    overflow: hidden;
+}
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.3);
+    z-index: 99;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+@media (max-width: 767.98px) {
+    #filtros-container {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        margin-bottom: 0 !important;
+    }
+    #filtros-container.show-filtros-mobile {
+        max-height: 1000px;
+        opacity: 1;
+        pointer-events: auto;
+        margin-bottom: 1.5rem !important;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        padding: 1rem 0.5rem;
+        z-index: 100;
+        position: relative;
+    }
+    #toggle-filtros {
+        display: inline-block !important;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 260px;
+        height: 100vh;
+        background: #9F17BD !important;
+        z-index: 120;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.08);
+        transition: left 0.3s;
+        overflow-y: auto;
+        color: #fff !important;
+    }
+    .admin-sidebar.show-sidebar-mobile {
+        left: 0;
+    }
+    #sidebarOverlay.active {
+        display: block;
+    }
+    .admin-sidebar.show-sidebar-mobile, .admin-sidebar.show-sidebar-mobile * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        color: #fff !important;
+    }
+    .admin-sidebar .sidebar-title,
+    .admin-sidebar .sidebar-menu,
+    .admin-sidebar .sidebar-menu a,
+    .admin-sidebar .sidebar-menu i {
+        color: #fff !important;
+        fill: #fff !important;
+    }
+}
+@media (min-width: 768px) {
+    #filtros-container {
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        margin-bottom: 1.5rem !important;
+    }
+    #toggle-filtros {
+        display: none !important;
+    }
+    .sidebar-overlay {
+        display: none !important;
+    }
+    .admin-sidebar {
+        position: static;
+        width: 220px;
+        height: auto;
+        box-shadow: none;
+        left: 0 !important;
+        background: #9F17BD !important;
+        color: #fff !important;
+    }
+}
+</style>
 @endsection
