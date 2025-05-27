@@ -60,6 +60,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ActivoSeeder::class,             // Activos financieros
             PasivoSeeder::class,            // Pasivos financieros
+            GastosMantenimientoSeeder::class, // Gastos de mantenimiento para vehículos y parkings
         ]);
     }
 }
