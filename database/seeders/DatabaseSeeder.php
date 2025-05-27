@@ -48,6 +48,7 @@ class DatabaseSeeder extends Seeder
         // 5. Subtipo de asalariados (depende de usuarios y parkings)
         $this->call([
             AsalariadoSeeder::class,         // Asalariados (trabajadores con salario)
+            AsalariadosSeeder::class,        // Nuevos asalariados de prueba
         ]);
         
         // 6. Datos financieros (activos y pasivos)

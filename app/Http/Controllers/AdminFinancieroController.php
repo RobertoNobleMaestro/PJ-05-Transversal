@@ -862,49 +862,19 @@ class AdminFinancieroController extends Controller
         // 1. Obtener todos los datos para el gráfico comparativo
         
         // Obtener ingresos (reservas y pagos)
+        $ingresos = 0;
         
-        // Para Madrid Centro, establecemos valores fijos según los requisitos
-        if ($sede->nombre == 'Madrid Centro') {
-            // Valores fijos para la sede Madrid Centro
-            $ingresosReservas = 15000; // 15.000€ por alquiler de vehículos
-            $ingresosPagos = 6000;     // 6.000€ por servicios de taxi
-            $ingresos = $ingresosReservas + $ingresosPagos; // Total: 21.000€
-            
-            // Guardamos datos detallados para usar en la vista
-            $detalleIngresos = [
-                'alquiler' => [
-                    'valor' => $ingresosReservas,
-                    'porcentaje' => round(($ingresosReservas / $ingresos) * 100, 1)
-                ],
-                'taxi' => [
-                    'valor' => $ingresosPagos,
-                    'porcentaje' => round(($ingresosPagos / $ingresos) * 100, 1)
-                ]
-            ];
-        } else {
-            // Para otras sedes, calculamos los ingresos de la base de datos
-            $ingresosReservas = Reserva::where('estado', 'completada')
-                ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-                ->sum('total_precio');
-            
-            $ingresosPagos = Pago::where('estado_pago', 'completado')
-                ->whereBetween('fecha_pago', [$fechaInicio, $fechaFin])
-                ->sum('total_precio');
-            
-            $ingresos = $ingresosReservas + $ingresosPagos;
-            
-            // Estructura para mantener consistencia
-            $detalleIngresos = [
-                'alquiler' => [
-                    'valor' => $ingresosReservas,
-                    'porcentaje' => $ingresos > 0 ? round(($ingresosReservas / $ingresos) * 100, 1) : 0
-                ],
-                'taxi' => [
-                    'valor' => $ingresosPagos,
-                    'porcentaje' => $ingresos > 0 ? round(($ingresosPagos / $ingresos) * 100, 1) : 0
-                ]
-            ];
-        }
+        // Ingresos por reservas
+        $ingresosReservas = Reserva::where('estado', 'completada')
+            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+            ->sum('total_precio');
+        
+        // Ingresos por pagos (otros servicios)
+        $ingresosPagos = Pago::where('estado_pago', 'completado')
+            ->whereBetween('fecha_pago', [$fechaInicio, $fechaFin])
+            ->sum('total_precio');
+        
+        $ingresos = $ingresosReservas + $ingresosPagos;
         
         // Obtener categorías de gastos para este período
         $gastos = [];
@@ -960,9 +930,6 @@ class AdminFinancieroController extends Controller
             'anios' => $anios,
             'meses' => $meses,
             'ingresos' => $ingresos,
-            'ingresosReservas' => $ingresosReservas,
-            'ingresosPagos' => $ingresosPagos,
-            'detalleIngresos' => $detalleIngresos,
             'gastos' => $gastos,
             'totalGastos' => $totalGastos,
             'balance' => abs($balance),

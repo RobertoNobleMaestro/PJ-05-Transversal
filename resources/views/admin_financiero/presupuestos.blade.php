@@ -101,32 +101,6 @@
                                     </h3>
                                     <small>{{ $esPositivo ? 'Beneficio' : 'Pérdida' }}</small>
                                 </div>
-                                
-                                @if($sede->nombre == 'Madrid Centro')
-                                <div class="mt-3 p-2 border rounded bg-light">
-                                    <h5 class="border-bottom pb-2">Detalle de Ingresos</h5>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div>
-                                            <i class="fas fa-car-side text-primary me-2"></i>
-                                            <strong>Alquiler de Vehículos</strong>
-                                        </div>
-                                        <div>
-                                            <span class="text-success fw-bold">{{ number_format($ingresosReservas, 2, ',', '.') }} €</span>
-                                            <span class="badge bg-info ms-2">{{ $detalleIngresos['alquiler']['porcentaje'] }}% del total</span>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <i class="fas fa-taxi text-warning me-2"></i>
-                                            <strong>Servicios de Taxi</strong>
-                                        </div>
-                                        <div>
-                                            <span class="text-success fw-bold">{{ number_format($ingresosPagos, 2, ',', '.') }} €</span>
-                                            <span class="badge bg-info ms-2">{{ $detalleIngresos['taxi']['porcentaje'] }}% del total</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endif
                             </div>
                             <div class="alert {{ $esPositivo ? 'alert-success' : 'alert-danger' }}">
                                 <i class="fas {{ $esPositivo ? 'fa-thumbs-up' : 'fa-exclamation-triangle' }} me-2"></i>
@@ -150,33 +124,8 @@
                     <h6 class="m-0 font-weight-bold text-white">Asignación de Presupuestos Mensuales</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.financiero.presupuestos.guardar') }}" method="POST" id="presupuestosForm">
+                    <form action="{{ route('admin.financiero.presupuestos.guardar') }}" method="POST">
                         @csrf
-                        
-                        @if(!$esPositivo)
-                        <div class="alert alert-danger mb-4">
-                            <i class="fas fa-ban me-2"></i>
-                            <strong>No es posible asignar presupuestos</strong> debido a que el balance es negativo. 
-                            Primero debes generar un balance positivo reduciendo gastos o aumentando ingresos.
-                        </div>
-                        @else
-                        <div class="card bg-success text-white mb-4">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h5 class="mb-0"><i class="fas fa-money-bill me-2"></i> Presupuesto disponible</h5>
-                                        <p class="mb-0">Balance positivo a repartir en las diferentes categorías</p>
-                                    </div>
-                                    <div class="col-md-6 text-end">
-                                        <h3 class="mb-0" id="saldoDisponible">{{ number_format($balance, 2, ',', '.') }} €</h3>
-                                        <input type="hidden" id="saldoDisponibleValor" value="{{ $balance }}">
-                                        <input type="hidden" id="balanceOriginal" value="{{ $balance }}">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                        
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered table-hover align-middle">
                                 <thead class="table-light text-center">
@@ -230,14 +179,10 @@
                                             </td>
                                             <td>
                                                 <div class="input-group">
-                                                    <input type="number" class="form-control presupuesto-input" 
-                                                        name="presupuestos[{{ $categoria }}]" 
+                                                    <input type="number" class="form-control" name="presupuestos[{{ $categoria }}]" 
                                                         step="0.01" min="0" 
-                                                        data-categoria="{{ $categoria }}"
-                                                        data-valor-original="{{ $presupuestoActual ?: 0 }}"
                                                         value="{{ old('presupuestos.' . $categoria, $presupuestoActual ?: $valor) }}"
-                                                        aria-label="Presupuesto para {{ $categoria }}"
-                                                        {{ !$esPositivo ? 'disabled' : '' }}>
+                                                        aria-label="Presupuesto para {{ $categoria }}">
                                                     <span class="input-group-text">€</span>
                                                 </div>
                                             </td>
@@ -258,7 +203,7 @@
                                             {{ number_format($totalPresupuestosActuales, 2, ',', '.') }} €
                                         </th>
                                         <th>
-                                            <button type="submit" class="btn btn-success w-100" {{ !$esPositivo ? 'disabled' : '' }} id="guardarPresupuestosBtn">
+                                            <button type="submit" class="btn btn-success w-100">
                                                 <i class="fas fa-save me-2"></i> Guardar Presupuestos
                                             </button>
                                         </th>
@@ -277,75 +222,6 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Funcionalidad para gestionar el saldo disponible
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.getElementById('saldoDisponibleValor')) {
-            const presupuestoInputs = document.querySelectorAll('.presupuesto-input');
-            const saldoDisponibleElement = document.getElementById('saldoDisponible');
-            const saldoDisponibleValorElement = document.getElementById('saldoDisponibleValor');
-            const balanceOriginalElement = document.getElementById('balanceOriginal');
-            const guardarBtn = document.getElementById('guardarPresupuestosBtn');
-            
-            // Valores iniciales
-            let balanceOriginal = parseFloat(balanceOriginalElement.value);
-            let saldoDisponible = balanceOriginal;
-            
-            // Función para actualizar el saldo disponible
-            function actualizarSaldoDisponible() {
-                let totalAsignado = 0;
-                
-                // Calcular el total asignado en los inputs
-                presupuestoInputs.forEach(input => {
-                    const valorOriginal = parseFloat(input.getAttribute('data-valor-original')) || 0;
-                    const valorActual = parseFloat(input.value) || 0;
-                    const diferencia = valorActual - valorOriginal;
-                    
-                    // Solo sumar al total si hay un aumento respecto al valor original
-                    if (diferencia > 0) {
-                        totalAsignado += diferencia;
-                    }
-                });
-                
-                // Calcular el saldo disponible restante
-                saldoDisponible = balanceOriginal - totalAsignado;
-                
-                // Actualizar la visualización
-                saldoDisponibleValorElement.value = saldoDisponible;
-                saldoDisponibleElement.textContent = new Intl.NumberFormat('es-ES', { 
-                    style: 'currency', 
-                    currency: 'EUR'
-                }).format(saldoDisponible);
-                
-                // Cambiar el color del saldo según su valor
-                if (saldoDisponible < 0) {
-                    saldoDisponibleElement.parentElement.parentElement.parentElement.classList.remove('bg-success');
-                    saldoDisponibleElement.parentElement.parentElement.parentElement.classList.add('bg-danger');
-                    guardarBtn.disabled = true;
-                } else {
-                    saldoDisponibleElement.parentElement.parentElement.parentElement.classList.remove('bg-danger');
-                    saldoDisponibleElement.parentElement.parentElement.parentElement.classList.add('bg-success');
-                    guardarBtn.disabled = false;
-                }
-            }
-            
-            // Añadir event listeners a todos los inputs
-            presupuestoInputs.forEach(input => {
-                input.addEventListener('input', actualizarSaldoDisponible);
-            });
-            
-            // Validar el formulario antes de enviar
-            document.getElementById('presupuestosForm').addEventListener('submit', function(event) {
-                if (saldoDisponible < 0) {
-                    event.preventDefault();
-                    alert('No puedes asignar más presupuesto del disponible. Ajusta los valores para continuar.');
-                }
-            });
-            
-            // Calcular el saldo inicial
-            actualizarSaldoDisponible();
-        }
-    });
-    
     document.addEventListener('DOMContentLoaded', function() {
         // Datos para el gráfico de balance
         const balanceCtx = document.getElementById('balanceChart').getContext('2d');

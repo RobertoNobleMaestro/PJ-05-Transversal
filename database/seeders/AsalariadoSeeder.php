@@ -50,8 +50,8 @@ class AsalariadoSeeder extends Seeder
             // Añadir variación aleatoria al salario base (±200€)
             $salario = $salarioBase + rand(-200, 200);
             
-            // Fecha de contratación aleatoria entre 30 y 365 días atrás
-            $hiredate = now()->subDays(rand(30, 365));
+            // Día de contratación (1-28) - hiredate es un campo entero, no una fecha
+            $hiredate = rand(1, 28); // Día del mes aleatorio
             
             // Insertar el registro
             DB::table('asalariados')->insert([
