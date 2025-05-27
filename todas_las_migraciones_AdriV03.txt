@@ -1,0 +1,1109 @@
+﻿# TODAS LAS MIGRACIONES DEL PROYECTO CARFLOW (RAMA AdriV0.3)
+
+Este archivo contiene todas las migraciones del proyecto organizadas por nombre de archivo.
+
+
+## 2024_01_01_000001_create_roles_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id('id_roles');
+            $table->string('nombre');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('roles');
+    }
+};
+
+``n
+
+## 2024_01_01_000002_create_grupos_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('grupos', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+            $table->timestamp('fecha_creacion')->useCurrent(); 
+            $table->string('imagen_grupo')->nullable(); 
+            $table->timestamps();
+
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('grupos');
+    }
+};
+
+``n
+
+## 2024_01_01_000002_create_users_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id('id_usuario');
+            $table->string('nombre');
+            $table->string('email')->unique();
+            $table->string('dni')->unique();
+            $table->string('telefono');
+            $table->string('password');
+            $table->date('fecha_nacimiento');
+            $table->string('foto_perfil')->nullable();
+            $table->string('direccion');
+            $table->enum('licencia_conducir', ['AM', 'A1', 'A2', 'A', 'B', 'B+E', 'C1', 'C1+E', 'C', 'C+E', 'D1', 'D1+E', 'D', 'D+E']);
+            $table->unsignedBigInteger('id_roles');
+            $table->foreign('id_roles')->references('id_roles')->on('roles');
+
+            $table->unsignedBigInteger('grupo_id')->nullable();
+            $table->foreign('grupo_id')->references('id')->on('grupos')->onDelete('set null');
+
+
+            $table->timestamps();
+        });
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
+    }
+};
+
+``n
+
+## 2024_01_01_000003_create_lugares_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('lugares', function (Blueprint $table) {
+            $table->id('id_lugar');
+            $table->string('nombre');
+            $table->string('direccion');
+            $table->decimal('latitud', 10, 8);
+            $table->decimal('longitud', 11, 8);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('lugares');
+    }
+};
+
+``n
+
+## 2024_01_01_000004_create_parking_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('parking', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+            $table->integer('plazas');
+            $table->decimal('latitud', 10, 8);
+            $table->decimal('longitud', 11, 8);
+
+            $table->unsignedBigInteger('id_usuario');
+            $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
+
+            $table->unsignedBigInteger('id_lugar');
+            $table->foreign('id_lugar')->references('id_lugar')->on('lugares')->onDelete('cascade');
+
+            $table->timestamps();
+        });
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('parking');
+    }
+};
+
+``n
+
+## 2024_01_01_000004_create_tipo_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('tipo', function (Blueprint $table) {
+            $table->id('id_tipo');
+            $table->string('nombre');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('tipo');
+    }
+};
+
+``n
+
+## 2024_01_01_000005_create_vehiculos_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateVehiculosTable extends Migration
+{
+    public function up()
+    {
+        Schema::create('vehiculos', function (Blueprint $table) {
+            $table->id('id_vehiculos');
+            $table->string('marca');
+            $table->string('modelo');
+            $table->integer('kilometraje');
+            $table->year('aÃ±o');
+            $table->decimal('precio_dia', 8, 2);
+
+            $table->unsignedBigInteger('id_lugar');
+            $table->unsignedBigInteger('id_tipo');
+            $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
+            $table->foreign('id_tipo')->references('id_tipo')->on('tipo');
+
+            $table->unsignedBigInteger('parking_id');
+            $table->foreign('parking_id')->references('id')->on('parking')->onDelete('cascade');
+
+            $table->date('ultima_fecha_mantenimiento')->nullable();
+            $table->date('proxima_fecha_mantenimiento')->nullable();
+
+            $table->timestamps();
+        });
+
+
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('vehiculos');
+    }
+}
+
+``n
+
+## 2024_01_01_000006_create_reservas_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('reservas', function (Blueprint $table) {
+            $table->id('id_reservas');
+            $table->date('fecha_reserva');
+            $table->decimal('total_precio', 10, 2);
+            $table->string('estado');
+
+            $table->unsignedBigInteger('id_lugar');
+            $table->foreign('id_lugar')->references('id_lugar')->on('lugares')->onDelete('cascade');
+
+            $table->unsignedBigInteger('id_usuario');
+            $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
+
+            $table->string('referencia_pago')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('reservas');
+    }
+};
+``n
+
+## 2024_01_01_000007_create_imagen_vehiculo_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('imagen_vehiculo', function (Blueprint $table) {
+            $table->id('id_imagen_vehiculo');
+            $table->string('nombre_archivo');
+            $table->unsignedBigInteger('id_vehiculo');
+            $table->foreign('id_vehiculo')->references('id_vehiculos')->on('vehiculos');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('imagen_vehiculo');
+    }
+};
+
+``n
+
+## 2024_01_01_000008_create_caracteristicas_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('caracteristicas', function (Blueprint $table) {
+            $table->id('id_caracteristicas');
+            $table->boolean('techo');
+            $table->string('transmision');
+            $table->unsignedBigInteger('id_vehiculos');
+            $table->integer('num_puertas');
+            $table->string('etiqueta_medioambiental');
+            $table->boolean('aire_acondicionado');
+            $table->integer('capacidad_maletero');
+            $table->foreign('id_vehiculos')->references('id_vehiculos')->on('vehiculos');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('caracteristicas');
+    }
+};
+
+``n
+
+## 2024_01_01_000008_create_choferes_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('choferes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('id_usuario')->references('id_usuario')->on('users');
+            $table->decimal('latitud', 10, 8);
+            $table->decimal('longitud', 11, 8);
+            $table->enum('estado', ['disponible', 'ocupado', 'inactivo']);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('choferes');
+    }
+};
+
+``n
+
+## 2024_01_01_000009_create_solicitudes_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('solicitudes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('id_chofer')->references('id')->on('choferes');
+            $table->foreignId('id_cliente')->references('id_usuario')->on('users');
+            $table->decimal('latitud_origen', 10, 8);
+            $table->decimal('longitud_origen', 11, 8);
+            $table->decimal('latitud_destino', 10, 8);
+            $table->decimal('longitud_destino', 11, 8);
+            $table->decimal('precio', 10, 2);
+            $table->enum('estado', ['pendiente', 'aceptada', 'rechazada', 'completada', 'cancelada'])->default('pendiente');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('solicitudes');
+    }
+};
+
+``n
+
+## 2024_01_01_000009_create_vehiculos_reservas_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('vehiculos_reservas', function (Blueprint $table) {
+            $table->id('id_vehiculos_reservas');
+            $table->date('fecha_ini');
+            $table->date('fecha_final');
+            $table->unsignedBigInteger('id_reservas');
+            $table->unsignedBigInteger('id_vehiculos');
+            $table->foreign('id_reservas')->references('id_reservas')->on('reservas');
+            $table->foreign('id_vehiculos')->references('id_vehiculos')->on('vehiculos');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('vehiculos_reservas');
+    }
+};
+
+``n
+
+## 2024_01_01_000010_create_pago_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('pago', function (Blueprint $table) {
+            $table->id('id_pago');
+            $table->string('estado_pago');
+            $table->date('fecha_pago');
+            $table->string('referencia_externa');
+            $table->decimal('total_precio', 10, 2);
+            $table->string('moneda');
+            $table->unsignedBigInteger('id_usuario');
+            $table->unsignedBigInteger('id_reservas');
+            $table->unsignedBigInteger('id_lugar')->nullable();
+            $table->foreign('id_usuario')->references('id_usuario')->on('users');
+            $table->foreign('id_reservas')->references('id_reservas')->on('reservas');
+            $table->foreign('id_lugar')->references('id_lugar')->on('lugares');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('pago');
+    }
+};
+
+``n
+
+## 2024_01_01_000010_create_pagos_choferes_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('pagos_choferes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('chofer_id')->constrained('choferes');
+            $table->foreignId('solicitud_id')->constrained('solicitudes');
+            $table->decimal('importe_total', 10, 2);
+            $table->decimal('importe_empresa', 10, 2);
+            $table->decimal('importe_chofer', 10, 2);
+            $table->enum('estado_pago', ['pendiente', 'pagado', 'cancelado']);
+            $table->date('fecha_pago');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('pagos_choferes');
+    }
+}; 
+``n
+
+## 2024_01_01_000011_create_metodos_de_pago_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('metodos_de_pago', function (Blueprint $table) {
+            $table->id('id_metodoPago');
+            $table->string('nombre');
+            $table->unsignedBigInteger('id_pago');
+            $table->foreign('id_pago')->references('id_pago')->on('pago');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('metodos_de_pago');
+    }
+};
+
+``n
+
+## 2024_01_01_000012_create_valoraciones_table.php
+
+`php
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('valoraciones', function (Blueprint $table) {
+            $table->id('id_valoraciones');
+            $table->text('comentario');
+            $table->tinyInteger('valoracion');
+            $table->unsignedBigInteger('id_reservas');
+            $table->unsignedBigInteger('id_usuario');
+            $table->foreign('id_reservas')->references('id_reservas')->on('reservas');
+            $table->foreign('id_usuario')->references('id_usuario')->on('users');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('valoraciones');
+    }
+};
+
+``n
+
+## 2024_05_14_000000_create_asalariados_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('asalariados', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('id_usuario');
+            $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
+            $table->decimal('salario', 10, 2); // Salario mensual
+            $table->integer('dia_cobro')->default(5); // DÃ­a del mes para el pago (por defecto dÃ­a 5)
+            $table->unsignedBigInteger('parking_id')->nullable(); // Parking asignado al asalariado
+            $table->foreign('parking_id')->references('id')->on('parking')->onDelete('set null');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('asalariados');
+    }
+};
+
+``n
+
+## 2025_05_07_161253_create_cache_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration');
+        });
+
+        Schema::create('cache_locks', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->integer('expiration');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('cache');
+        Schema::dropIfExists('cache_locks');
+    }
+};
+
+``n
+
+## 2025_05_07_170000_create_messages_table.php
+
+`php
+<?php
+
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('messages', function (Blueprint $table) {
+            $table->id();
+
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id_usuario')->on('users')->onDelete('cascade');
+
+            $table->unsignedBigInteger('gestor_id')->nullable();
+            $table->foreign('gestor_id')->references('id_usuario')->on('users')->onDelete('cascade');
+
+            $table->enum('sender_type', ['user', 'gestor']);
+            $table->text('message');
+
+            $table->unsignedBigInteger('grupo_id')->nullable();
+            $table->foreign('grupo_id')->references('id')->on('grupos')->onDelete('set null');
+
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('messages');
+    }
+};
+
+``n
+
+## 2025_05_07_170428_create_personal_access_tokens_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('personal_access_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('tokenable');
+            $table->string('name');
+            $table->string('token', 64)->unique();
+            $table->text('abilities')->nullable();
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('personal_access_tokens');
+    }
+};
+
+``n
+
+## 2025_05_15_110333_create_talleres_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('talleres', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+            $table->string('direccion');
+            $table->string('telefono')->nullable();
+            $table->integer('capacidad_hora')->default(2);
+            $table->timestamps();
+        });
+
+        // Insert some initial workshops
+        DB::table('talleres')->insert([
+            ['nombre' => 'Taller Central', 'direccion' => 'Calle Principal 123', 'telefono' => '912345678', 'capacidad_hora' => 2],
+            ['nombre' => 'Taller Express', 'direccion' => 'Avenida Norte 456', 'telefono' => '923456789', 'capacidad_hora' => 2],
+            ['nombre' => 'Taller Premium', 'direccion' => 'Plaza Mayor 789', 'telefono' => '934567890', 'capacidad_hora' => 2],
+        ]);
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('talleres');
+    }
+};
+
+``n
+
+## 2025_05_15_110620_create_mantenimientos_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+class CreateMantenimientosTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('mantenimientos', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('vehiculo_id');
+            $table->unsignedBigInteger('taller_id');
+            $table->date('fecha_programada');
+            $table->time('hora_programada');
+            $table->string('estado')->default('pendiente'); // pendiente, completado, cancelado
+            $table->timestamps();
+
+            $table->foreign('vehiculo_id')->references('id_vehiculos')->on('vehiculos')->onDelete('cascade');
+            $table->foreign('taller_id')->references('id')->on('talleres')->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('mantenimientos');
+    }
+}
+``n
+
+## 2025_05_19_152653_create_grupo_usuario_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('grupo_usuario', function (Blueprint $table) {
+            $table->unsignedBigInteger('grupo_id');
+            $table->unsignedBigInteger('id_usuario');
+            $table->timestamps();
+            
+            // Claves primarias compuestas
+            $table->primary(['grupo_id', 'id_usuario']);
+            
+            // Claves forÃ¡neas
+            $table->foreign('grupo_id')->references('id')->on('grupos')->onDelete('cascade');
+            $table->foreign('id_usuario')->references('id_usuario')->on('users')->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('grupo_usuario');
+    }
+};
+
+``n
+
+## 2025_05_19_194800_add_motivo_reserva_to_mantenimientos_table.php
+
+`php
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('mantenimientos', function (Blueprint $table) {
+            $table->string('motivo_reserva')->nullable()->after('estado');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('mantenimientos', function (Blueprint $table) {
+            $table->dropColumn('motivo_reserva');
+        });
+    }
+};
+
+``n
+
+## 2025_05_20_000000_add_remember_token_to_users_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            // Add remember_token column if it doesn't exist
+            if (!Schema::hasColumn('users', 'remember_token')) {
+                $table->rememberToken();
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            // Drop the column if it exists
+            if (Schema::hasColumn('users', 'remember_token')) {
+                $table->dropColumn('remember_token');
+            }
+        });
+    }
+};
+
+``n
+
+## 2025_05_20_000001_create_averias_table.php
+
+`php
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('averias', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('vehiculo_id');
+            $table->string('descripcion');
+            $table->timestamp('fecha')->nullable();
+            $table->timestamps();
+
+            $table->foreign('vehiculo_id')->references('id_vehiculos')->on('vehiculos')->onDelete('cascade');
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('averias');
+    }
+};
+
+``n
+
+## 2025_05_20_000002_create_piezas_table.php
+
+`php
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('piezas', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+            $table->enum('tipo_vehiculo', ['coche', 'moto', 'furgoneta']);
+            $table->decimal('precio', 8, 2);
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('piezas');
+    }
+};
+
+``n
+
+## 2025_05_20_000003_create_averia_pieza_table.php
+
+`php
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('averia_pieza', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('averia_id');
+            $table->unsignedBigInteger('pieza_id');
+            $table->integer('cantidad')->default(1);
+            $table->timestamps();
+
+            $table->foreign('averia_id')->references('id')->on('averias')->onDelete('cascade');
+            $table->foreign('pieza_id')->references('id')->on('piezas')->onDelete('cascade');
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('averia_pieza');
+    }
+};
+
+``n
+
+## 2025_05_23_090902_modify_solicitudes_table.php
+
+`php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('solicitudes', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_cliente')->nullable(false)->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('solicitudes', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_cliente')->nullable()->change();
+        });
+    }
+};
+
+``n

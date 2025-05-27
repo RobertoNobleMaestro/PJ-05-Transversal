@@ -22,63 +22,24 @@
     @endif
 
     <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header" style="background-color: #9F17BD; color: white;">
-                    <h5 class="mb-0">Información del empleado</h5>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        @if ($usuario->foto_perfil)
-                            <img src="{{ asset('storage/' . $usuario->foto_perfil) }}" alt="Foto de perfil" class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
-                        @else
-                            <div class="profile-placeholder rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 120px; height: 120px; background-color: #9F17BD;">
-                                <i class="fas fa-user fa-3x text-white"></i>
-                            </div>
-                        @endif
-                        <h5>{{ $usuario->nombre }}</h5>
-                    </div>
 
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">Rol:</span>
-                            <span class="badge {{ $usuario->role->nombre == 'gestor' ? 'bg-primary' : ($usuario->role->nombre == 'mecanico' ? 'bg-warning text-dark' : 'bg-success') }}">
-                                {{ $usuario->role->formatted_name }}
-                            </span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">Email:</span>
-                            <span>{{ $usuario->email }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">DNI:</span>
-                            <span>{{ $usuario->dni }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">Sede:</span>
-                            <span>{{ $sede->nombre }}</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card shadow">
                 <div class="card-header" style="background-color: #9F17BD; color: white;">
                     <h5 class="mb-0">Datos salariales y asignación</h5>
                 </div>
                 <div class="card-body">
                     <div id="ajaxResponseMessages"></div>
-                    <form id="editAsalariadoForm" method="POST" action="{{ route('admin.asalariados.update', $asalariado->id) }}" class="p-3">
+                    <form id="editAsalariadoForm" method="POST" action="{{ route('admin.asalariados.update', isset($asalariado) ? $asalariado->id : 0) }}" class="p-3">
                         @csrf
-                        <input type="hidden" name="asalariado_id" value="{{ $asalariado->id }}">
+                        <input type="hidden" name="asalariado_id" value="{{ isset($asalariado) ? $asalariado->id : 0 }}">
 
                         <div class="row mb-3">
                             <label for="salario" class="col-md-4 col-form-label">Salario mensual (€)</label>
                             <div class="col-md-8">
                                 <div class="input-group">
-                                    <input id="salario" type="number" step="0.01" min="0" class="form-control @error('salario') is-invalid @enderror" name="salario" value="{{ old('salario', $asalariado->salario) }}" required autofocus>
+                                    <input id="salario" type="number" step="0.01" min="0" class="form-control @error('salario') is-invalid @enderror" name="salario" value="{{ old('salario', isset($asalariado) && isset($asalariado->salario) ? $asalariado->salario : 0) }}" required autofocus>
                                     <span class="input-group-text">€</span>
                                     @error('salario')
                                         <span class="invalid-feedback" role="alert">
@@ -93,7 +54,7 @@
                         <div class="row mb-3">
                             <label for="hiredate" class="col-md-4 col-form-label">Fecha de contratación</label>
                             <div class="col-md-8">
-                                <input id="hiredate" type="date" class="form-control @error('hiredate') is-invalid @enderror" name="hiredate" value="{{ old('hiredate', $asalariado->hiredate ? $asalariado->hiredate->format('Y-m-d') : now()->format('Y-m-d')) }}" required>
+                                <input id="hiredate" type="date" class="form-control @error('hiredate') is-invalid @enderror" name="hiredate" value="{{ old('hiredate', isset($asalariado) && isset($asalariado->hiredate) && $asalariado->hiredate ? (is_object($asalariado->hiredate) ? $asalariado->hiredate->format('Y-m-d') : (is_string($asalariado->hiredate) ? \Carbon\Carbon::parse($asalariado->hiredate)->format('Y-m-d') : now()->format('Y-m-d'))) : now()->format('Y-m-d')) }}" required>
                                 <small class="form-text text-muted">Fecha en que fue contratado el empleado</small>
                                 <small class="form-text text-info">Nota: Todos los asalariados cobran el día 1 de cada mes</small>
                                 @error('hiredate')
@@ -108,11 +69,15 @@
                             <label for="id_lugar" class="col-md-4 col-form-label">Lugar asignado</label>
                             <div class="col-md-8">
                                 <select id="id_lugar" class="form-select @error('id_lugar') is-invalid @enderror" name="id_lugar" required>
-                                    @foreach ($lugares as $lugar)
-                                        <option value="{{ $lugar->id_lugar }}" {{ (old('id_lugar', $asalariado->id_lugar) == $lugar->id_lugar) ? 'selected' : '' }}>
-                                            {{ $lugar->nombre }}
-                                        </option>
-                                    @endforeach
+                                    @if(isset($lugares) && count($lugares) > 0)
+                                        @foreach($lugares as $lugar)
+                                            <option value="{{ $lugar->id_lugar }}" {{ (old('id_lugar', isset($asalariado) && isset($asalariado->id_lugar) ? $asalariado->id_lugar : (isset($sede) ? $sede->id_lugar : '')) == $lugar->id_lugar) ? 'selected' : '' }}>
+                                                {{ $lugar->nombre }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="{{ isset($sede) ? $sede->id_lugar : '' }}">{{ isset($sede) && isset($sede->nombre) ? $sede->nombre : 'Sede actual' }}</option>
+                                    @endif
                                 </select>
                                 <small class="form-text text-muted">Lugar donde trabaja el empleado</small>
                                 @error('id_lugar')
@@ -127,11 +92,15 @@
                             <label for="parking_id" class="col-md-4 col-form-label">Parking asignado</label>
                             <div class="col-md-8">
                                 <select id="parking_id" class="form-select @error('parking_id') is-invalid @enderror" name="parking_id" required>
-                                    @foreach ($parkings as $parking)
-                                        <option value="{{ $parking->id }}" {{ (old('parking_id', $asalariado->parking_id) == $parking->id) ? 'selected' : '' }}>
-                                            {{ $parking->nombre }}
-                                        </option>
-                                    @endforeach
+                                    @if(isset($parkings) && count($parkings) > 0)
+                                        @foreach ($parkings as $parking)
+                                            <option value="{{ $parking->id }}" {{ (old('parking_id', isset($asalariado) && isset($asalariado->parking_id) ? $asalariado->parking_id : null) == $parking->id) ? 'selected' : '' }}>
+                                                {{ isset($parking->nombre) ? $parking->nombre : 'Parking '.$parking->id }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="">No hay parkings disponibles</option>
+                                    @endif
                                 </select>
                                 <small class="form-text text-muted">Parking específico donde trabaja el empleado</small>
                                 @error('parking_id')
@@ -220,13 +189,17 @@
         // Almacenar los parkings originales agrupados por lugar
         const parkingsPorLugar = {};
         
-        @foreach ($lugares as $lugar)
-            parkingsPorLugar[{{ $lugar->id_lugar }}] = [
-                @foreach ($parkings->where('id_lugar', $lugar->id_lugar) as $parking)
-                    {id: {{ $parking->id }}, nombre: '{{ $parking->nombre }}'},
-                @endforeach
-            ];
-        @endforeach
+        @if(isset($lugares) && count($lugares) > 0)
+            @foreach ($lugares as $lugar)
+                parkingsPorLugar[{{ $lugar->id_lugar }}] = [
+                    @if(isset($parkings))
+                        @foreach ($parkings->where('id_lugar', $lugar->id_lugar) as $parking)
+                            {id: {{ $parking->id }}, nombre: '{{ $parking->nombre }}'},
+                        @endforeach
+                    @endif
+                ];
+            @endforeach
+        @endif
         
         // Función para actualizar los parkings según el lugar seleccionado
         function actualizarParkings() {

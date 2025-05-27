@@ -1267,7 +1267,8 @@ class AdminFinancieroController extends Controller
                 $presupuesto = Presupuesto::where('id_lugar', $sedeId)
                     ->where('categoria', $categoria)
                     ->where('periodo_tipo', 'mensual')
-                    ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+                    ->where('fecha_inicio', '>=', $fechaInicio)
+                    ->where('fecha_fin', '<=', $fechaFin)
                     ->first();
                 
                 if ($presupuesto) {

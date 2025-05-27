@@ -39,8 +39,8 @@ class UpdateAsalariadosFieldsSeeder extends Seeder
             // 1. Establecer el estado como 'alta' para todos los asalariados existentes
             $asalariado->estado = 'alta';
             
-            // 2. Inicializar días trabajados a 0
-            $asalariado->dias_trabajados = 0;
+            // 2. Actualizar días trabajados con valores realistas
+            $asalariado->dias_trabajados = min(rand(15, 22), Carbon::now()->day);
             
             // 3. Establecer id_lugar basado en el parking_id
             if ($asalariado->parking) {

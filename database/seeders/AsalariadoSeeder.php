@@ -82,7 +82,7 @@ class AsalariadoSeeder extends Seeder
                 'hiredate' => $hiredate,
                 'parking_id' => $parkingAsignado,
                 'estado' => 'alta',
-                'dias_trabajados' => 0,
+                'dias_trabajados' => min(rand(15, 22), now()->day),
                 'id_lugar' => $parkings->random()->id_lugar,
                 'created_at' => now(),
                 'updated_at' => now()

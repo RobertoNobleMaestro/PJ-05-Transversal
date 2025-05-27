@@ -1,0 +1,4411 @@
+# TODOS LOS SEEDERS DEL PROYECTO CARFLOW
+
+Este archivo contiene todos los seeders del proyecto organizados por nombre de archivo.
+
+## ActivoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\Activo;
+use App\Models\Lugar;
+use Carbon\Carbon;
+
+class ActivoSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        // Obtener todos los lugares (sedes) para asignar activos
+        $lugares = Lugar::all();
+        
+        if ($lugares->count() == 0) {
+            $this->command->info('No hay lugares disponibles para crear activos. Ejecuta LugarSeeder primero.');
+            return;
+        }
+        
+        // Categorías de activos
+        $categorias = ['Circulante', 'Fijo', 'Intangible', 'Diferido', 'Inversiones'];
+        
+        // Para cada lugar, crear varios activos
+        foreach ($lugares as $lugar) {
+            // Activos circulantes (efectivo, cuentas por cobrar, etc.)
+            Activo::create([
+                'nombre' => 'Efectivo en caja',
+                'descripcion' => 'Dinero disponible para operaciones diarias',
+                'categoria' => 'Circulante',
+                'valor' => rand(5000, 15000),
+                'fecha_registro' => Carbon::now()->subDays(rand(1, 30)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Activo::create([
+                'nombre' => 'Cuentas por cobrar',
+                'descripcion' => 'Deudas de clientes pendientes de cobro',
+                'categoria' => 'Circulante',
+                'valor' => rand(8000, 25000),
+                'fecha_registro' => Carbon::now()->subDays(rand(1, 30)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            // Activos fijos (inmuebles, vehículos propios, etc.)
+            Activo::create([
+                'nombre' => 'Local comercial',
+                'descripcion' => 'Propiedad donde opera la sede',
+                'categoria' => 'Fijo',
+                'valor' => rand(200000, 500000),
+                'fecha_registro' => Carbon::now()->subYears(rand(1, 5)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Activo::create([
+                'nombre' => 'Flota de vehículos propia',
+                'descripcion' => 'Vehículos en propiedad (no de alquiler)',
+                'categoria' => 'Fijo',
+                'valor' => rand(100000, 350000),
+                'fecha_registro' => Carbon::now()->subMonths(rand(6, 24)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Activo::create([
+                'nombre' => 'Mobiliario y equipamiento',
+                'descripcion' => 'Muebles, ordenadores y equipos de oficina',
+                'categoria' => 'Fijo',
+                'valor' => rand(15000, 40000),
+                'fecha_registro' => Carbon::now()->subMonths(rand(1, 12)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            // Activos intangibles
+            Activo::create([
+                'nombre' => 'Software de gestión',
+                'descripcion' => 'Licencias de software para gestión de flota y reservas',
+                'categoria' => 'Intangible',
+                'valor' => rand(5000, 25000),
+                'fecha_registro' => Carbon::now()->subMonths(rand(1, 12)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Activo::create([
+                'nombre' => 'Marca registrada',
+                'descripcion' => 'Valor de la marca Carflow en el mercado',
+                'categoria' => 'Intangible',
+                'valor' => rand(50000, 150000),
+                'fecha_registro' => Carbon::now()->subYears(2),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            // Inversiones
+            Activo::create([
+                'nombre' => 'Inversiones a largo plazo',
+                'descripcion' => 'Fondos de inversión para crecimiento',
+                'categoria' => 'Inversiones',
+                'valor' => rand(30000, 80000),
+                'fecha_registro' => Carbon::now()->subMonths(rand(3, 18)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+        }
+        
+        $this->command->info('Activos creados correctamente.');
+    }
+}
+
+```
+
+## AsalariadoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\Parking;
+
+class AsalariadoSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Obtener todos los usuarios asalariados (roles 3, 4, 5, 6)
+        $usuarios = User::whereIn('id_roles', [3, 4, 5, 6])->get();
+        $parkings = Parking::all();
+
+        // Mapear ciudades a id_lugar
+        $lugares = [
+            'Barcelona' => 2,
+            'Madrid' => 1,
+            'Valencia' => 3,
+        ];
+
+        foreach ($usuarios as $usuario) {
+            $parkingAsignado = null;
+            $ciudad = null;
+
+            // Detectar ciudad por nombre del usuario
+            if (stripos($usuario->nombre, 'Barcelona') !== false) {
+                $ciudad = 'Barcelona';
+            } elseif (stripos($usuario->nombre, 'Madrid') !== false) {
+                $ciudad = 'Madrid';
+            } elseif (stripos($usuario->nombre, 'Valencia') !== false) {
+                $ciudad = 'Valencia';
+            }
+
+            if ($ciudad && isset($lugares[$ciudad])) {
+                // Buscar el primer parking de la ciudad correspondiente
+                $parkingCiudad = $parkings->where('id_lugar', $lugares[$ciudad])->first();
+                if ($parkingCiudad) {
+                    $parkingAsignado = $parkingCiudad->id;
+                }
+            }
+
+            // Si no se detecta ciudad, asignar uno random (fallback)
+            if (!$parkingAsignado) {
+                $parkingAsignado = $parkings->random()->id;
+            }
+
+            // Generar salario base según el rol
+            $salarioBase = 0;
+            switch ($usuario->id_roles) {
+                case 3: // Gestor
+                    $salarioBase = 1800.00;
+                    break;
+                case 4: // Mecánico
+                    $salarioBase = 1600.00;
+                    break;
+                case 5: // Admin Financiero
+                    $salarioBase = 2200.00;
+                    break;
+                case 6: // Chofer
+                    $salarioBase = 1400.00;
+                    break;
+            }
+
+            // Añadir variación aleatoria al salario base (±200€)
+            $salario = $salarioBase + rand(-200, 200);
+            
+            // Fecha de contratación aleatoria entre 30 y 365 días atrás
+            $hiredate = now()->subDays(rand(30, 365));
+            
+            // Insertar el registro
+            DB::table('asalariados')->insert([
+                'id_usuario' => $usuario->id_usuario,
+                'salario' => $salario,
+                'hiredate' => $hiredate,
+                'parking_id' => $parkingAsignado,
+                'estado' => 'alta',
+                'dias_trabajados' => 0,
+                'id_lugar' => $parkings->random()->id_lugar,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+    }
+}
+
+```
+
+## AsalariadosSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class AsalariadosSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Verificar que existen usuarios para asignar
+        $users = DB::table('users')->whereNotIn('id_roles', [1])->limit(3)->get();
+        
+        if ($users->isEmpty()) {
+            $this->command->error('No hay usuarios disponibles para asignar como asalariados.');
+            return;
+        }
+        
+        // Obtener lugares disponibles
+        $lugares = DB::table('lugares')->get();
+        if ($lugares->isEmpty()) {
+            $this->command->error('No hay lugares disponibles para asignar a los asalariados.');
+            return;
+        }
+        
+        // Obtener parkings disponibles
+        $parkings = DB::table('parking')->get();
+        if ($parkings->isEmpty()) {
+            $this->command->error('No hay parkings disponibles para asignar a los asalariados.');
+            return;
+        }
+        
+        // Crear asalariados de prueba
+        foreach ($users as $index => $user) {
+            // Verificar si ya existe un asalariado para este usuario
+            $existingAsalariado = DB::table('asalariados')
+                ->where('id_usuario', $user->id_usuario)
+                ->exists();
+                
+            if (!$existingAsalariado) {
+                $lugar = $lugares->random();
+                $parking = $parkings->random();
+                
+                DB::table('asalariados')->insert([
+                    'id_usuario' => $user->id_usuario,
+                    'salario' => rand(1200, 2500),
+                    'dia_cobro' => rand(1, 28),
+                    'hiredate' => Carbon::now()->subMonths(rand(1, 12)), // Fecha de contratación aleatoria en los últimos 12 meses
+                    'estado' => 'alta',
+                    'dias_trabajados' => rand(20, 30),
+                    'id_lugar' => $lugar->id_lugar,
+                    'parking_id' => $parking->id,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+                
+                $this->command->info("Asalariado creado para usuario {$user->nombre}");
+            }
+        }
+    }
+}
+
+```
+
+## AveriasSeeder.php
+
+```php
+<?php
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+
+class AveriasSeeder extends Seeder
+{
+    public function run()
+    {
+        // Ejemplo de averías para tres vehículos distintos
+        DB::table('averias')->insert([
+            [
+                'vehiculo_id' => 1,
+                'descripcion' => 'Fallo en el sistema de frenos',
+                'fecha' => Carbon::now()->subDays(10),
+            ],
+            [
+                'vehiculo_id' => 2,
+                'descripcion' => 'Problema con la batería',
+                'fecha' => Carbon::now()->subDays(25),
+            ],
+            [
+                'vehiculo_id' => 3,
+                'descripcion' => 'Cadena desgastada',
+                'fecha' => Carbon::now()->subDays(5),
+            ],
+        ]);
+    }
+}
+
+```
+
+## CaracteristicaSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class CaracteristicaSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('caracteristicas')->insert([
+            // Características 30 coches
+            ['techo' => true, 'transmision' => 'Manual', 'num_puertas' => 3, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 1],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 3, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 2],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 3],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 4],
+            ['techo' => false, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 5],
+            ['techo' => false, 'transmision' => 'Automática', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 6],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 7],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 8],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 9],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 10],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 11],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 12],
+            ['techo' => false, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 13],
+            ['techo' => false, 'transmision' => 'Automática', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 14],
+            ['techo' => true, 'transmision' => 'Manual', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'Sin etiqueta', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 15],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 4, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 16],
+            ['techo' => true, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 17],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 3, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 18],
+            ['techo' => false, 'transmision' => 'Automática', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 19],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 20],
+            ['techo' => true, 'transmision' => 'Manual', 'num_puertas' => 3, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 21],
+            ['techo' => false, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 22],
+            ['techo' => true, 'transmision' => 'Manual', 'num_puertas' => 3, 'etiqueta_medioambiental' => 'Sin etiqueta', 'aire_acondicionado' => true, 'capacidad_maletero' => 700, 'id_vehiculos' => 23],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'Sin etiqueta', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 24],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 25],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 4, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 26],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 3, 'etiqueta_medioambiental' => 'Sin etiqueta', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 27],
+            ['techo' => false, 'transmision' => 'Manual', 'num_puertas' => 5, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 450, 'id_vehiculos' => 28],
+            ['techo' => true, 'transmision' => 'Manual', 'num_puertas' => 3, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 29],
+            ['techo' => true, 'transmision' => 'Automática', 'num_puertas' => 4, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 300, 'id_vehiculos' => 30],
+            // Características 20 motos
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 31, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => false, 'capacidad_maletero' => 50],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 32, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => false, 'capacidad_maletero' => 40],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 33, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => false, 'capacidad_maletero' => 30],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 34, 'num_puertas' => 0, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => false, 'capacidad_maletero' => 40],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 35, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => false, 'capacidad_maletero' => 45],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 36, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => false, 'capacidad_maletero' => 50],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 37, 'num_puertas' => 0, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => false, 'capacidad_maletero' => 35],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 38, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => false, 'capacidad_maletero' => 30],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 39, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => false, 'capacidad_maletero' => 60],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 40, 'num_puertas' => 0, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => false, 'capacidad_maletero' => 35],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 41, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => false, 'capacidad_maletero' => 30],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 42, 'num_puertas' => 0, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => false, 'capacidad_maletero' => 45],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 43, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => false, 'capacidad_maletero' => 50],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 44, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => false, 'capacidad_maletero' => 30],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 45, 'num_puertas' => 0, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => false, 'capacidad_maletero' => 35],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 46, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => false, 'capacidad_maletero' => 45],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 47, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => false, 'capacidad_maletero' => 40],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 48, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => false, 'capacidad_maletero' => 30],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 49, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => false, 'capacidad_maletero' => 30],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 50, 'num_puertas' => 0, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => false, 'capacidad_maletero' => 35],
+            // Características 15 furgonetas
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 51, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 1000],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 52, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 950],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 53, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 1050],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 54, 'num_puertas' => 4, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 980],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 55, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 920],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 56, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 1100],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 57, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 960],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 58, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 1020],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 59, 'num_puertas' => 4, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 970],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 60, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 990],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 61, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 950],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 62, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 1000],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 63, 'num_puertas' => 4, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 1040],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 64, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 1010],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 65, 'num_puertas' => 4, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 970],
+            // Características 10 camiones
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 66, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 3000],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 67, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 3200],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 68, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 3100],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 69, 'num_puertas' => 2, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 3300],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 70, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 3000],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 71, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 3400],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 72, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'ECO', 'aire_acondicionado' => true, 'capacidad_maletero' => 3050],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 73, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'C', 'aire_acondicionado' => true, 'capacidad_maletero' => 3250],
+            ['techo' => false, 'transmision' => 'Manual', 'id_vehiculos' => 74, 'num_puertas' => 2, 'etiqueta_medioambiental' => '0', 'aire_acondicionado' => true, 'capacidad_maletero' => 3350],
+            ['techo' => false, 'transmision' => 'Automática', 'id_vehiculos' => 75, 'num_puertas' => 2, 'etiqueta_medioambiental' => 'B', 'aire_acondicionado' => true, 'capacidad_maletero' => 3100]
+        ]);
+    }
+}
+```
+
+## ChoferSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ChoferSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Coordenadas por sede
+        $coordenadasSede = [
+            'Barcelona' => ['lat' => 41.3851, 'lng' => 2.1734],
+            'Madrid' => ['lat' => 40.4168, 'lng' => -3.7038],
+            'Valencia' => ['lat' => 39.4699, 'lng' => -0.3763]
+        ];
+
+        // Obtener todos los usuarios con rol de chofer (id_roles = 6)
+        $choferes = DB::table('users')
+            ->where('id_roles', 6)
+            ->get();
+
+        // Para cada chofer, crear un registro en la tabla choferes
+        foreach ($choferes as $chofer) {
+            // Extraer la sede del email
+            $partes = explode('@', $chofer->email);
+            $username = $partes[0]; // chofer.barcelona1
+            $partesSede = explode('.', $username);
+            $sedeConNumero = $partesSede[1]; // barcelona1
+            preg_match('/([a-zA-Z]+)/', $sedeConNumero, $matches);
+            $sede = isset($matches[1]) ? ucfirst($matches[1]) : 'Central';
+
+            // Obtener coordenadas base de la sede
+            $coords = $coordenadasSede[$sede] ?? ['lat' => 40.4168, 'lng' => -3.7038]; // Madrid como fallback
+
+            // Añadir una pequeña variación aleatoria para que no estén todos en el mismo punto
+            $latitud = $coords['lat'] + (rand(-100, 100) / 10000);
+            $longitud = $coords['lng'] + (rand(-100, 100) / 10000);
+
+            DB::table('choferes')->insert([
+                'id_usuario' => $chofer->id_usuario,
+                'latitud' => $latitud,
+                'longitud' => $longitud,
+                'estado' => 'disponible',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+    }
+} 
+```
+
+## DatabaseSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // 1. Primero las tablas base sin dependencias
+        $this->call([
+            RoleSeeder::class,           // Roles para usuarios
+            LugarSeeder::class,          // Lugares/ubicaciones
+            TipoSeeder::class,           // Tipos de vehículos
+        ]);
+        
+        // 2. Luego las tablas que dependen de las bases
+        $this->call([
+            UserSeeder::class,           // Usuarios (dependen de roles)
+            ParkingSeeder::class,        // Parkings (dependen de usuarios y lugares)
+            VehiculoSeeder::class,       // Vehículos (dependen de tipos, lugares y parkings)
+            ChoferSeeder::class,         // Choferes (dependen de usuarios)
+        ]);
+        
+        // 3. Luego las tablas que dependen de vehículos y usuarios
+        $this->call([
+            ImagenVehiculoSeeder::class, // Imágenes de vehículos
+            CaracteristicaSeeder::class, // Características de vehículos
+            ReservaSeeder::class,        // Reservas (dependen de usuarios)
+        ]);
+        
+        // 4. Finalmente las tablas con múltiples dependencias
+        $this->call([
+            VehiculosReservasSeeder::class, // Relación entre vehículos y reservas
+            PagoSeeder::class,              // Pagos (dependen de reservas)
+            MetodoPagoSeeder::class,        // Métodos de pago
+            ValoracionSeeder::class,        // Valoraciones (dependen de usuarios y vehículos)
+            CarritoSeeder::class,           // Carritos de compra
+            ReservaCompletaSeeder::class,   // Reservas completas
+            PiezasSeeder::class,            // Piezas de vehículos
+            AveriasSeeder::class,           // Averías de vehículos
+        ]);
+        
+        // 5. Subtipo de asalariados (depende de usuarios y parkings)
+        $this->call([
+            AsalariadoSeeder::class,         // Asalariados (trabajadores con salario)
+            AsalariadosSeeder::class,        // Nuevos asalariados de prueba
+        ]);
+        
+        // 6. Actualización de precios para parkings (más realistas)
+        $this->call([
+            UpdateParkingPricesSeeder::class, // Actualiza precios por m² con variaciones realistas
+        ]);
+        
+        // 6. Módulo financiero
+        $this->call([
+            // DepartamentoSeeder::class,       // Departamentos (Comentado porque no existe)
+            PasivoSeeder::class,              // Pasivos financieros
+            GastosMantenimientoSeeder::class, // Gastos de mantenimiento para vehículos y parkings
+            PagoTallerClienteSeeder::class,   // Simulación de pagos de clientes por mantenimientos
+            PagoTallerSeeder::class,          // Pagos por reparaciones en taller
+            UpdateSolicitudesChoferSeeder::class, // Asegura que no haya solicitudes pendientes para choferes
+            PagosChoferesSeeder::class,       // Pagos por servicios de taxi
+        ]);
+        
+        // 7. Datos financieros históricos (2020-2025)
+        $this->call([
+            HistoricalFinancialDataSeeder::class, // Datos históricos de ingresos y gastos desde 2020
+            FinancialData2025Seeder::class,      // Datos financieros detallados para 2025 con variabilidad mensual
+        ]);
+    }
+}
+
+```
+
+## FinancialData2025Seeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
+
+class FinancialData2025Seeder extends Seeder
+{
+    /**
+     * Generar datos financieros variados para todos los meses de 2025
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $faker = Faker::create('es_ES');
+        
+        // Obtener IDs necesarios
+        $vehiculosIds = DB::table('vehiculos')->pluck('id_vehiculos')->toArray();
+        $parkingsIds = DB::table('parking')->pluck('id')->toArray();
+        $asalariadosIds = DB::table('asalariados')->pluck('id')->toArray();
+        $lugaresIds = DB::table('lugares')->pluck('id_lugar')->toArray();
+        $usuariosIds = DB::table('users')->pluck('id_usuario')->toArray();
+        
+        // Si no hay datos, usar valores por defecto para el seeding
+        if (empty($vehiculosIds)) $vehiculosIds = [1, 2, 3, 4, 5];
+        if (empty($parkingsIds)) $parkingsIds = [1, 2, 3];
+        if (empty($asalariadosIds)) $asalariadosIds = [1, 2, 3, 4, 5];
+        if (empty($lugaresIds)) $lugaresIds = [1, 2, 3];
+        if (empty($usuariosIds)) $usuariosIds = [1, 2, 3, 4, 5];
+        
+        // Definir patrones estacionales para 2025
+        $patronesEstacionales = [
+            1 => 0.6,   // Enero (Bajo - post navidad)
+            2 => 0.65,  // Febrero (Bajo)
+            3 => 0.8,   // Marzo (Medio - semana santa)
+            4 => 0.9,   // Abril (Medio-alto - puentes)
+            5 => 1.1,   // Mayo (Alto - primavera)
+            6 => 1.3,   // Junio (Muy alto - inicio verano)
+            7 => 1.6,   // Julio (Pico - vacaciones)
+            8 => 1.7,   // Agosto (Pico máximo - vacaciones)
+            9 => 1.2,   // Septiembre (Alto - final verano)
+            10 => 0.9,  // Octubre (Medio)
+            11 => 0.7,  // Noviembre (Bajo)
+            12 => 1.0   // Diciembre (Alto - navidad)
+        ];
+        
+        // Definir eventos especiales que afectan los ingresos/gastos en 2025
+        $eventosEspeciales = [
+            '2025-01-15' => ['nombre' => 'Campaña promocional enero', 'ingresos' => 1.3, 'gastos' => 1.2],
+            '2025-02-14' => ['nombre' => 'San Valentín', 'ingresos' => 1.4, 'gastos' => 1.1],
+            '2025-03-28' => ['nombre' => 'Semana Santa', 'ingresos' => 1.5, 'gastos' => 1.2],
+            '2025-05-01' => ['nombre' => 'Puente Mayo', 'ingresos' => 1.4, 'gastos' => 1.1],
+            '2025-06-24' => ['nombre' => 'San Juan', 'ingresos' => 1.3, 'gastos' => 1.2],
+            '2025-07-15' => ['nombre' => 'Promoción verano', 'ingresos' => 1.6, 'gastos' => 1.3],
+            '2025-08-15' => ['nombre' => 'Pico de temporada', 'ingresos' => 1.8, 'gastos' => 1.4],
+            '2025-09-11' => ['nombre' => 'Diada Catalunya', 'ingresos' => 1.3, 'gastos' => 1.1],
+            '2025-10-12' => ['nombre' => 'Día Hispanidad', 'ingresos' => 1.3, 'gastos' => 1.1],
+            '2025-11-01' => ['nombre' => 'Puente Todos Santos', 'ingresos' => 1.2, 'gastos' => 1.1],
+            '2025-12-06' => ['nombre' => 'Puente Constitución', 'ingresos' => 1.3, 'gastos' => 1.1],
+            '2025-12-22' => ['nombre' => 'Navidad', 'ingresos' => 1.5, 'gastos' => 1.3],
+            '2025-12-31' => ['nombre' => 'Fin de Año', 'ingresos' => 1.4, 'gastos' => 1.2]
+        ];
+        
+        // Generar gastos para cada mes de 2025 con variabilidad según estacionalidad
+        $this->generateExpenses2025($faker, $vehiculosIds, $parkingsIds, $asalariadosIds, $patronesEstacionales, $eventosEspeciales);
+        
+        // Generar ingresos para cada mes de 2025 con variabilidad según estacionalidad
+        $this->generateIncome2025($faker, $lugaresIds, $usuariosIds, $vehiculosIds, $patronesEstacionales, $eventosEspeciales);
+        
+        $this->command->info('Datos financieros 2025 con variabilidad estacional generados correctamente.');
+    }
+    
+    /**
+     * Generar gastos variados para todos los meses de 2025
+     */
+    private function generateExpenses2025($faker, $vehiculosIds, $parkingsIds, $asalariadosIds, $patronesEstacionales, $eventosEspeciales)
+    {
+        $startDate = Carbon::createFromDate(2025, 1, 1);
+        $endDate = Carbon::createFromDate(2025, 12, 31);
+        
+        $expenseTypes = [
+            [
+                'tipo' => 'salario',
+                'conceptos' => ['Nómina mensual', 'Pago extra', 'Compensación', 'Bonus trimestral', 'Incentivo'],
+                'montoBase' => [1800, 2200],  // Rango base que será multiplicado por factor estacional
+                'relacionados' => $asalariadosIds,
+                'campoRelacion' => 'id_asalariado'
+            ],
+            [
+                'tipo' => 'mantenimiento',
+                'conceptos' => ['Mantenimiento rutinario', 'Reparación', 'Revisión técnica', 'Cambio de aceite', 'Cambio de neumáticos', 'Reparación motor', 'Chapa y pintura'],
+                'montoBase' => [150, 950],
+                'relacionados' => $vehiculosIds,
+                'campoRelacion' => 'id_vehiculo'
+            ],
+            [
+                'tipo' => 'parking',
+                'conceptos' => ['Mantenimiento de instalaciones', 'Limpieza', 'Seguridad', 'Reparaciones', 'Servicios', 'Electricidad', 'Agua', 'Mejoras'],
+                'montoBase' => [400, 1200],
+                'relacionados' => $parkingsIds,
+                'campoRelacion' => 'id_parking'
+            ],
+            [
+                'tipo' => 'otros',
+                'conceptos' => ['Suministros oficina', 'Seguros', 'Publicidad', 'Servicios públicos', 'Impuestos', 'Marketing', 'Software', 'Formación', 'Consultoría'],
+                'montoBase' => [100, 3000],
+                'relacionados' => null,
+                'campoRelacion' => null
+            ]
+        ];
+        
+        $currentDate = clone $startDate;
+        $batchInsert = [];
+        $batchSize = 500;
+        
+        while ($currentDate->lte($endDate)) {
+            $month = $currentDate->month;
+            $factorEstacional = $patronesEstacionales[$month];
+            
+            // Para cada día del mes, generamos gastos con probabilidad variable
+            $dia = 1;
+            $fechaMes = clone $currentDate;
+            
+            while ($dia <= $fechaMes->daysInMonth) {
+                $fechaActual = Carbon::createFromDate(2025, $month, $dia);
+                $factorDiario = 1.0;
+                
+                // Verificar si hay evento especial en esta fecha
+                $fechaKey = $fechaActual->format('Y-m-d');
+                if (isset($eventosEspeciales[$fechaKey])) {
+                    $factorDiario *= $eventosEspeciales[$fechaKey]['gastos'];
+                }
+                
+                // Cada tipo de gasto tiene diferente probabilidad según el día del mes
+                foreach ($expenseTypes as $expenseType) {
+                    // Mayor probabilidad de gastos a principio y final de mes
+                    $probabilidad = ($dia <= 5 || $dia >= 25) ? 0.8 : 0.4;
+                    
+                    // Salarios principalmente a principio de mes
+                    if ($expenseType['tipo'] === 'salario' && $dia <= 5) {
+                        $probabilidad = 0.9;
+                    } elseif ($expenseType['tipo'] === 'salario') {
+                        $probabilidad = 0.1; // Baja fuera de inicio de mes
+                    }
+                    
+                    // Determinamos si hay gasto de este tipo hoy
+                    if ($faker->boolean($probabilidad * 100)) {
+                        // Calculamos un monto con variabilidad basada en el mes y factores
+                        $montoBase = $faker->randomFloat(2, $expenseType['montoBase'][0], $expenseType['montoBase'][1]);
+                        $montoFinal = $montoBase * $factorEstacional * $factorDiario;
+                        
+                        $gasto = [
+                            'concepto' => $faker->randomElement($expenseType['conceptos']),
+                            'descripcion' => $faker->sentence(),
+                            'tipo' => $expenseType['tipo'],
+                            'importe' => round($montoFinal, 2),
+                            'fecha' => $fechaActual->format('Y-m-d'),
+                            'id_vehiculo' => null,
+                            'id_parking' => null,
+                            'id_asalariado' => null,
+                            'id_mantenimiento' => null,
+                            'created_at' => $fechaActual->format('Y-m-d H:i:s'),
+                            'updated_at' => $fechaActual->format('Y-m-d H:i:s')
+                        ];
+                        
+                        // Añadir relación si es necesario
+                        if ($expenseType['campoRelacion'] !== null && !empty($expenseType['relacionados'])) {
+                            $relatedId = $faker->randomElement($expenseType['relacionados']);
+                            $gasto[$expenseType['campoRelacion']] = $relatedId;
+                        }
+                        
+                        $batchInsert[] = $gasto;
+                        
+                        // Insertar en lotes para mejorar rendimiento
+                        if (count($batchInsert) >= $batchSize) {
+                            DB::table('gastos')->insert($batchInsert);
+                            $batchInsert = [];
+                        }
+                    }
+                }
+                
+                $dia++;
+            }
+            
+            $currentDate->addMonth();
+        }
+        
+        // Insertar el resto de gastos
+        if (!empty($batchInsert)) {
+            DB::table('gastos')->insert($batchInsert);
+        }
+    }
+    
+    /**
+     * Generar ingresos variados para todos los meses de 2025
+     */
+    private function generateIncome2025($faker, $lugaresIds, $usuariosIds, $vehiculosIds, $patronesEstacionales, $eventosEspeciales)
+    {
+        $startDate = Carbon::createFromDate(2025, 1, 1);
+        $endDate = Carbon::createFromDate(2025, 12, 31);
+        
+        $tiposIngresos = [
+            'alquiler' => [
+                'minPrecio' => 40,
+                'maxPrecio' => 250,
+                'duracionMinima' => 1,
+                'duracionMaxima' => 14,
+                'concepto' => 'Alquiler de vehículo',
+                'pesoEstacional' => 1.2  // Mayor afectación por estacionalidad
+            ],
+            'taxi' => [
+                'minPrecio' => 20,
+                'maxPrecio' => 180,
+                'duracionMinima' => 1,
+                'duracionMaxima' => 1,
+                'concepto' => 'Servicio de taxi',
+                'pesoEstacional' => 1.0  // Afectación media por estacionalidad
+            ],
+            'reparacion' => [
+                'minPrecio' => 100,
+                'maxPrecio' => 1200,
+                'duracionMinima' => 1,
+                'duracionMaxima' => 7,
+                'concepto' => 'Servicio de reparación',
+                'pesoEstacional' => 0.8  // Menor afectación por estacionalidad
+            ]
+        ];
+        
+        $batchReservas = [];
+        $batchVehiculosReservas = [];
+        $batchSize = 500;
+        $reservaId = DB::table('reservas')->max('id_reservas') ?? 0;
+        $vehiculoReservaId = DB::table('vehiculos_reservas')->max('id_vehiculos_reservas') ?? 0;
+        
+        $currentDate = clone $startDate;
+        
+        while ($currentDate->lte($endDate)) {
+            $month = $currentDate->month;
+            $factorEstacional = $patronesEstacionales[$month];
+            
+            // Para cada día del mes, generamos ingresos con probabilidad variable
+            $dia = 1;
+            $fechaMes = clone $currentDate;
+            
+            while ($dia <= $fechaMes->daysInMonth) {
+                $fechaActual = Carbon::createFromDate(2025, $month, $dia);
+                $factorDiario = 1.0;
+                $diaSemana = $fechaActual->dayOfWeek; // 0 (domingo) hasta 6 (sábado)
+                
+                // Mayor actividad en fines de semana
+                if ($diaSemana == 5 || $diaSemana == 6) { // viernes y sábado
+                    $factorDiario *= 1.4;
+                } elseif ($diaSemana == 0) { // domingo
+                    $factorDiario *= 1.2;
+                }
+                
+                // Verificar si hay evento especial en esta fecha
+                $fechaKey = $fechaActual->format('Y-m-d');
+                if (isset($eventosEspeciales[$fechaKey])) {
+                    $factorDiario *= $eventosEspeciales[$fechaKey]['ingresos'];
+                }
+                
+                // Calculamos número de reservas para este día según factores
+                $baseReservasDiarias = 3; // Base mínima de reservas diarias
+                $reservasDiarias = round($baseReservasDiarias * $factorEstacional * $factorDiario);
+                
+                // Generamos las reservas del día
+                for ($i = 0; $i < $reservasDiarias; $i++) {
+                    $reservaId++;
+                    
+                    // Determinar tipo de reserva con probabilidades variables según mes
+                    $probabilidadAlquiler = 50 * $factorEstacional;
+                    $probabilidadTaxi = 30;
+                    $probabilidadReparacion = 20;
+                    
+                    // En verano más alquileres, en invierno más reparaciones
+                    if ($month >= 6 && $month <= 9) { // Verano
+                        $probabilidadAlquiler += 20;
+                        $probabilidadReparacion -= 10;
+                        $probabilidadTaxi -= 10;
+                    } elseif ($month <= 2 || $month >= 11) { // Invierno
+                        $probabilidadAlquiler -= 20;
+                        $probabilidadReparacion += 15;
+                        $probabilidadTaxi += 5;
+                    }
+                    
+                    // Asegurar que las probabilidades sumen 100
+                    $total = $probabilidadAlquiler + $probabilidadTaxi + $probabilidadReparacion;
+                    $probabilidadAlquiler = ($probabilidadAlquiler / $total) * 100;
+                    $probabilidadTaxi = ($probabilidadTaxi / $total) * 100;
+                    
+                    // Determinar el tipo de reserva
+                    $random = $faker->randomFloat(2, 0, 100);
+                    if ($random <= $probabilidadAlquiler) {
+                        $tipoReserva = 'alquiler';
+                    } elseif ($random <= $probabilidadAlquiler + $probabilidadTaxi) {
+                        $tipoReserva = 'taxi';
+                    } else {
+                        $tipoReserva = 'reparacion';
+                    }
+                    
+                    $configuracion = $tiposIngresos[$tipoReserva];
+                    
+                    // Calcular precio con variabilidad según tipo, mes y día
+                    $precioBaseMin = $configuracion['minPrecio'] * (1 + ($factorEstacional - 1) * $configuracion['pesoEstacional']);
+                    $precioBaseMax = $configuracion['maxPrecio'] * (1 + ($factorEstacional - 1) * $configuracion['pesoEstacional']);
+                    
+                    $precioBase = $faker->randomFloat(2, $precioBaseMin, $precioBaseMax);
+                    $duracion = $faker->numberBetween($configuracion['duracionMinima'], $configuracion['duracionMaxima']);
+                    $precioTotal = round($precioBase * $duracion, 2);
+                    
+                    // Estado: completada si es fecha pasada, pendiente o completada si es futura
+                    $estado = $fechaActual->lt(Carbon::now()) ? 
+                        $faker->randomElement(['completada', 'completada', 'completada', 'cancelada']) : 
+                        $faker->randomElement(['completada', 'pendiente', 'pendiente']);
+                    
+                    // Crear la reserva
+                    $reserva = [
+                        'id_reservas' => $reservaId,
+                        'fecha_reserva' => $fechaActual->format('Y-m-d'),
+                        'total_precio' => $precioTotal,
+                        'estado' => $estado,
+                        'id_lugar' => $faker->randomElement($lugaresIds),
+                        'id_usuario' => $faker->randomElement($usuariosIds),
+                        'referencia_pago' => $estado === 'completada' ? 'REF' . $faker->randomNumber(8) : null,
+                        'created_at' => $fechaActual->format('Y-m-d H:i:s'),
+                        'updated_at' => $fechaActual->format('Y-m-d H:i:s')
+                    ];
+                    
+                    $batchReservas[] = $reserva;
+                    
+                    // Crear la relación con vehículos si no es "reparacion"
+                    if ($tipoReserva !== 'reparacion' && !empty($vehiculosIds)) {
+                        $vehiculoReservaId++;
+                        $fechaIni = clone $fechaActual;
+                        $fechaFin = clone $fechaIni;
+                        $fechaFin->addDays($duracion);
+                        
+                        $vehiculoReserva = [
+                            'id_vehiculos_reservas' => $vehiculoReservaId,
+                            'fecha_ini' => $fechaIni->format('Y-m-d'),
+                            'fecha_final' => $fechaFin->format('Y-m-d'),
+                            'id_reservas' => $reservaId,
+                            'id_vehiculos' => $faker->randomElement($vehiculosIds),
+                            'created_at' => $fechaActual->format('Y-m-d H:i:s'),
+                            'updated_at' => $fechaActual->format('Y-m-d H:i:s')
+                        ];
+                        
+                        $batchVehiculosReservas[] = $vehiculoReserva;
+                    }
+                    
+                    // Insertar en lotes para mejorar rendimiento
+                    if (count($batchReservas) >= $batchSize) {
+                        DB::table('reservas')->insert($batchReservas);
+                        $batchReservas = [];
+                        
+                        if (!empty($batchVehiculosReservas)) {
+                            DB::table('vehiculos_reservas')->insert($batchVehiculosReservas);
+                            $batchVehiculosReservas = [];
+                        }
+                    }
+                }
+                
+                $dia++;
+            }
+            
+            $currentDate->addMonth();
+        }
+        
+        // Insertar las reservas restantes
+        if (!empty($batchReservas)) {
+            DB::table('reservas')->insert($batchReservas);
+        }
+        
+        // Insertar las relaciones vehículos-reservas restantes
+        if (!empty($batchVehiculosReservas)) {
+            DB::table('vehiculos_reservas')->insert($batchVehiculosReservas);
+        }
+    }
+}
+
+```
+
+## GastosMantenimientoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class GastosMantenimientoSeeder extends Seeder
+{
+    /**
+     * Run the database seeds to create maintenance expenses for vehicles and parkings.
+     */
+    public function run(): void
+    {
+        $this->command->info('Creando gastos de mantenimiento...');
+
+        // Obtener todos los vehículos
+        $vehiculos = DB::table('vehiculos')->get();
+        
+        // Obtener todos los parkings
+        $parkings = DB::table('parking')->get();
+
+        // Fechas para el mes actual (para que aparezcan en el período actual)
+        $fechaInicio = Carbon::now()->startOfMonth();
+        $fechaFin = Carbon::now()->endOfMonth();
+        
+        // 1. Crear gastos de mantenimiento para vehículos
+        foreach ($vehiculos as $index => $vehiculo) {
+            // Solo creamos gastos para un porcentaje de vehículos (70%)
+            if (rand(1, 100) <= 70) {
+                // Determinar el tipo de mantenimiento
+                $tiposMantenimiento = [
+                    'Cambio de aceite y filtros',
+                    'Revisión general',
+                    'Cambio de neumáticos',
+                    'Reparación de frenos',
+                    'Mantenimiento de aire acondicionado',
+                    'Reemplazo de piezas',
+                    'Revisión de suspensión'
+                ];
+                
+                $tipoMantenimiento = $tiposMantenimiento[array_rand($tiposMantenimiento)];
+                
+                // Calcular un costo de mantenimiento basado en el tipo y precio del vehículo
+                $costoBase = 300; // Costo base
+                $precioPorcentaje = $vehiculo->precio * 0.01; // 1% del valor del vehículo
+                $variacion = rand(-100, 200); // Variación aleatoria
+                
+                $costo = round($costoBase + $precioPorcentaje + $variacion, 2);
+                
+                // Generar una fecha aleatoria dentro del mes actual
+                $fecha = Carbon::create($fechaInicio->year, $fechaInicio->month, rand(1, $fechaFin->day));
+                
+                // Buscar si existe un mantenimiento para este vehículo
+                $mantenimiento = DB::table('mantenimientos')
+                    ->where('vehiculo_id', $vehiculo->id_vehiculos)
+                    ->first();
+                
+                // Guardar el gasto de mantenimiento
+                DB::table('gastos')->insert([
+                    'concepto' => "Mantenimiento: $tipoMantenimiento",
+                    'descripcion' => "Mantenimiento $tipoMantenimiento para vehículo {$vehiculo->marca} {$vehiculo->modelo}",
+                    'tipo' => 'mantenimiento',
+                    'importe' => $costo,
+                    'fecha' => $fecha,
+                    'id_vehiculo' => $vehiculo->id_vehiculos,
+                    'id_mantenimiento' => $mantenimiento ? $mantenimiento->id : null,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+        }
+        
+        // 2. Crear gastos de mantenimiento para parkings
+        foreach ($parkings as $index => $parking) {
+            // Determinar varios tipos de mantenimiento por parking
+            $tiposMantenimientoParking = [
+                'Limpieza general',
+                'Mantenimiento eléctrico',
+                'Reparación de señalización',
+                'Mantenimiento de seguridad',
+                'Reparación de suelo',
+                'Pintura de plazas',
+                'Mantenimiento de ascensores'
+            ];
+            
+            // Crear entre 1 y 3 gastos de mantenimiento por parking
+            $numGastos = rand(1, 3);
+            
+            for ($i = 0; $i < $numGastos; $i++) {
+                $tipoMantenimiento = $tiposMantenimientoParking[array_rand($tiposMantenimientoParking)];
+                
+                // Calcular costo basado en el tamaño del parking
+                $costoBase = 150; // Costo base
+                $costoPorPlaza = $parking->plazas * 2; // 2€ por plaza
+                $variacion = rand(-50, 100); // Variación aleatoria
+                
+                $costo = round($costoBase + $costoPorPlaza + $variacion, 2);
+                
+                // Generar una fecha aleatoria dentro del mes actual
+                $fecha = Carbon::create($fechaInicio->year, $fechaInicio->month, rand(1, $fechaFin->day));
+                
+                // Guardar el gasto de mantenimiento
+                DB::table('gastos')->insert([
+                    'concepto' => "Mantenimiento Parking: $tipoMantenimiento",
+                    'descripcion' => "Mantenimiento $tipoMantenimiento para {$parking->nombre}",
+                    'tipo' => 'parking',
+                    'importe' => $costo,
+                    'fecha' => $fecha,
+                    'id_parking' => $parking->id,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+        }
+        
+        $this->command->info('Gastos de mantenimiento creados correctamente.');
+    }
+}
+
+```
+
+## HistoricalFinancialDataSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
+
+class HistoricalFinancialDataSeeder extends Seeder
+{
+    /**
+     * Generar datos históricos financieros desde 2020 hasta 2025
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $faker = Faker::create('es_ES');
+        
+        // Obtener IDs necesarios
+        $vehiculosIds = DB::table('vehiculos')->pluck('id_vehiculos')->toArray();
+        $parkingsIds = DB::table('parking')->pluck('id')->toArray();
+        $asalariadosIds = DB::table('asalariados')->pluck('id')->toArray();
+        $lugaresIds = DB::table('lugares')->pluck('id_lugar')->toArray();
+        $usuariosIds = DB::table('users')->pluck('id_usuario')->toArray();
+        
+        // Si no hay datos, usar valores por defecto para el seeding
+        if (empty($vehiculosIds)) $vehiculosIds = [1, 2, 3];
+        if (empty($parkingsIds)) $parkingsIds = [1, 2, 3];
+        if (empty($asalariadosIds)) $asalariadosIds = [1, 2, 3];
+        if (empty($lugaresIds)) $lugaresIds = [1, 2, 3];
+        if (empty($usuariosIds)) $usuariosIds = [1, 2, 3];
+        
+        // Generar datos históricos desde 2020 hasta la fecha actual (2025)
+        $this->generateExpenseData($faker, $vehiculosIds, $parkingsIds, $asalariadosIds);
+        $this->generateIncomeData($faker, $lugaresIds, $usuariosIds, $vehiculosIds);
+        
+        $this->command->info('Datos financieros históricos generados correctamente.');
+    }
+    
+    /**
+     * Generar datos históricos de gastos
+     */
+    private function generateExpenseData($faker, $vehiculosIds, $parkingsIds, $asalariadosIds)
+    {
+        $startDate = Carbon::createFromDate(2020, 1, 1);
+        $endDate = Carbon::now(); // 2025
+        
+        $expenseTypes = [
+            [
+                'tipo' => 'salario',
+                'conceptos' => ['Nómina mensual', 'Pago extra', 'Compensación'],
+                'montoMinimo' => 800,
+                'montoMaximo' => 2500,
+                'relacionados' => $asalariadosIds,
+                'campoRelacion' => 'id_asalariado'
+            ],
+            [
+                'tipo' => 'mantenimiento',
+                'conceptos' => ['Mantenimiento rutinario', 'Reparación', 'Revisión técnica', 'Cambio de aceite', 'Cambio de neumáticos'],
+                'montoMinimo' => 150,
+                'montoMaximo' => 800,
+                'relacionados' => $vehiculosIds,
+                'campoRelacion' => 'id_vehiculo'
+            ],
+            [
+                'tipo' => 'parking',
+                'conceptos' => ['Mantenimiento de instalaciones', 'Limpieza', 'Seguridad', 'Reparaciones', 'Servicios'],
+                'montoMinimo' => 400,
+                'montoMaximo' => 1000,
+                'relacionados' => $parkingsIds,
+                'campoRelacion' => 'id_parking'
+            ],
+            [
+                'tipo' => 'otros',
+                'conceptos' => ['Suministros oficina', 'Seguros', 'Publicidad', 'Servicios públicos', 'Impuestos'],
+                'montoMinimo' => 100,
+                'montoMaximo' => 2000,
+                'relacionados' => null,
+                'campoRelacion' => null
+            ]
+        ];
+        
+        $currentDate = clone $startDate;
+        $batchInsert = [];
+        $batchSize = 500;
+        
+        while ($currentDate->lte($endDate)) {
+            // Para cada mes, generamos varios gastos
+            $monthlyDate = clone $currentDate;
+            
+            // Cada tipo de gasto tiene su propia frecuencia y lógica
+            foreach ($expenseTypes as $expenseType) {
+                $entriesPerMonth = $expenseType['tipo'] === 'salario' ? count($expenseType['relacionados']) : rand(3, 10);
+                
+                for ($i = 0; $i < $entriesPerMonth; $i++) {
+                    $date = clone $monthlyDate;
+                    $date->day = rand(1, min(28, $date->daysInMonth));
+                    
+                    $gasto = [
+                        'concepto' => $faker->randomElement($expenseType['conceptos']),
+                        'descripcion' => $faker->sentence(),
+                        'tipo' => $expenseType['tipo'],
+                        'importe' => $faker->randomFloat(2, $expenseType['montoMinimo'], $expenseType['montoMaximo']),
+                        'fecha' => $date->format('Y-m-d'),
+                        'id_vehiculo' => null,
+                        'id_parking' => null,
+                        'id_asalariado' => null,
+                        'id_mantenimiento' => null,
+                        'created_at' => $date->format('Y-m-d H:i:s'),
+                        'updated_at' => $date->format('Y-m-d H:i:s')
+                    ];
+                    
+                    // Añadir relación si es necesario
+                    if ($expenseType['campoRelacion'] !== null && !empty($expenseType['relacionados'])) {
+                        $relatedId = $faker->randomElement($expenseType['relacionados']);
+                        $gasto[$expenseType['campoRelacion']] = $relatedId;
+                    }
+                    
+                    $batchInsert[] = $gasto;
+                    
+                    // Insertar en lotes para mejorar rendimiento
+                    if (count($batchInsert) >= $batchSize) {
+                        DB::table('gastos')->insert($batchInsert);
+                        $batchInsert = [];
+                    }
+                }
+            }
+            
+            $currentDate->addMonth();
+        }
+        
+        // Insertar el resto de gastos
+        if (!empty($batchInsert)) {
+            DB::table('gastos')->insert($batchInsert);
+        }
+    }
+    
+    /**
+     * Generar datos históricos de ingresos (en forma de reservas)
+     */
+    private function generateIncomeData($faker, $lugaresIds, $usuariosIds, $vehiculosIds)
+    {
+        $startDate = Carbon::createFromDate(2020, 1, 1);
+        $endDate = Carbon::now(); // 2025
+        
+        $currentDate = clone $startDate;
+        $batchReservas = [];
+        $batchVehiculosReservas = [];
+        $batchSize = 500;
+        $reservaId = DB::table('reservas')->max('id_reservas') ?? 0;
+        $vehiculoReservaId = DB::table('vehiculos_reservas')->max('id_vehiculos_reservas') ?? 0;
+        
+        $tiposReserva = [
+            'alquiler' => [
+                'minPrecio' => 40,
+                'maxPrecio' => 200,
+                'duracionMinima' => 1,
+                'duracionMaxima' => 14
+            ],
+            'taxi' => [
+                'minPrecio' => 20,
+                'maxPrecio' => 150,
+                'duracionMinima' => 1,
+                'duracionMaxima' => 1
+            ],
+            'reparacion' => [
+                'minPrecio' => 100,
+                'maxPrecio' => 800,
+                'duracionMinima' => 1,
+                'duracionMaxima' => 7
+            ]
+        ];
+        
+        while ($currentDate->lte($endDate)) {
+            // Número de reservas por mes varía según el año
+            $year = $currentDate->year;
+            // Más reservas a medida que pasan los años para simular crecimiento
+            $reservasPerMonth = 15 + ($year - 2020) * 5;
+            
+            for ($i = 0; $i < $reservasPerMonth; $i++) {
+                $reservaId++;
+                $tipoReserva = $faker->randomElement(array_keys($tiposReserva));
+                $configuracion = $tiposReserva[$tipoReserva];
+                
+                $fechaReserva = clone $currentDate;
+                $fechaReserva->day = rand(1, min(28, $fechaReserva->daysInMonth));
+                
+                // Mayor probabilidad de reservas completadas en el pasado
+                $estados = ['completada', 'cancelada', 'pendiente'];
+                $estado = $fechaReserva->lt(Carbon::now()) ? 
+                    $faker->randomElement(['completada', 'completada', 'completada', 'cancelada']) : 
+                    $faker->randomElement($estados);
+                
+                $precioBase = $faker->randomFloat(2, $configuracion['minPrecio'], $configuracion['maxPrecio']);
+                $duracion = rand($configuracion['duracionMinima'], $configuracion['duracionMaxima']);
+                $precioTotal = $precioBase * $duracion;
+                
+                // Crear la reserva
+                $reserva = [
+                    'id_reservas' => $reservaId,
+                    'fecha_reserva' => $fechaReserva->format('Y-m-d'),
+                    'total_precio' => $precioTotal,
+                    'estado' => $estado,
+                    'id_lugar' => $faker->randomElement($lugaresIds),
+                    'id_usuario' => $faker->randomElement($usuariosIds),
+                    'referencia_pago' => $estado === 'completada' ? 'REF' . $faker->randomNumber(8) : null,
+                    'created_at' => $fechaReserva->format('Y-m-d H:i:s'),
+                    'updated_at' => $fechaReserva->format('Y-m-d H:i:s')
+                ];
+                
+                $batchReservas[] = $reserva;
+                
+                // Crear la relación con vehículos si no es "reparación"
+                if ($tipoReserva !== 'reparacion' && !empty($vehiculosIds)) {
+                    $vehiculoReservaId++;
+                    $fechaIni = clone $fechaReserva;
+                    $fechaFin = clone $fechaIni;
+                    $fechaFin->addDays($duracion);
+                    
+                    $vehiculoReserva = [
+                        'id_vehiculos_reservas' => $vehiculoReservaId,
+                        'fecha_ini' => $fechaIni->format('Y-m-d'),
+                        'fecha_final' => $fechaFin->format('Y-m-d'),
+                        'id_reservas' => $reservaId,
+                        'id_vehiculos' => $faker->randomElement($vehiculosIds),
+                        'created_at' => $fechaReserva->format('Y-m-d H:i:s'),
+                        'updated_at' => $fechaReserva->format('Y-m-d H:i:s')
+                    ];
+                    
+                    $batchVehiculosReservas[] = $vehiculoReserva;
+                }
+                
+                // Insertar en lotes para mejorar rendimiento
+                if (count($batchReservas) >= $batchSize) {
+                    DB::table('reservas')->insert($batchReservas);
+                    $batchReservas = [];
+                    
+                    if (!empty($batchVehiculosReservas)) {
+                        DB::table('vehiculos_reservas')->insert($batchVehiculosReservas);
+                        $batchVehiculosReservas = [];
+                    }
+                }
+            }
+            
+            $currentDate->addMonth();
+        }
+        
+        // Insertar las reservas restantes
+        if (!empty($batchReservas)) {
+            DB::table('reservas')->insert($batchReservas);
+        }
+        
+        // Insertar las relaciones vehículos-reservas restantes
+        if (!empty($batchVehiculosReservas)) {
+            DB::table('vehiculos_reservas')->insert($batchVehiculosReservas);
+        }
+    }
+}
+
+```
+
+## ImagenVehiculoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ImagenVehiculoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('imagen_vehiculo')->insert([
+            // Coches
+            [
+                'nombre_archivo' => 'corolla.png',
+                'id_vehiculo' => 1,
+            ],
+            [
+                'nombre_archivo' => 'golf.png',
+                'id_vehiculo' => 2,
+            ],
+            [
+                'nombre_archivo' => 'focus.png',
+                'id_vehiculo' => 3,
+            ],
+            [
+                'nombre_archivo' => 'clio.png',
+                'id_vehiculo' => 4,
+            ],
+            [
+                'nombre_archivo' => '308.png',
+                'id_vehiculo' => 5,
+            ],
+            [
+                'nombre_archivo' => 'i30.png',
+                'id_vehiculo' => 6,
+            ],
+            [
+                'nombre_archivo' => 'ceed.png',
+                'id_vehiculo' => 7,
+            ],
+            [
+                'nombre_archivo' => 'leon.png',
+                'id_vehiculo' => 8,
+            ],
+            [
+                'nombre_archivo' => 'mazda_3.png',
+                'id_vehiculo' => 9,
+            ],
+            [
+                'nombre_archivo' => 'octavia.png',
+                'id_vehiculo' => 10,
+            ],
+            [
+                'nombre_archivo' => 'astra.png',
+                'id_vehiculo' => 11,
+            ],
+            [
+                'nombre_archivo' => 'c4.png',
+                'id_vehiculo' => 12,
+            ],
+            [
+                'nombre_archivo' => 'civic.png',
+                'id_vehiculo' => 13,
+            ],
+            [
+                'nombre_archivo' => 'tipo.png',
+                'id_vehiculo' => 14,
+            ],
+            [
+                'nombre_archivo' => 'pulsar.png',
+                'id_vehiculo' => 15,
+            ],
+            [
+                'nombre_archivo' => 'cruze.png',
+                'id_vehiculo' => 16,
+            ],
+            [
+                'nombre_archivo' => 'swift.png',
+                'id_vehiculo' => 17,
+            ],
+            [
+                'nombre_archivo' => 'mini.png',
+                'id_vehiculo' => 18,
+            ],
+            [
+                'nombre_archivo' => 'impreza.png',
+                'id_vehiculo' => 19,
+            ],
+            [
+                'nombre_archivo' => 'vesta.png',
+                'id_vehiculo' => 20,
+            ],
+            [
+                'nombre_archivo' => 'arrizo.png',
+                'id_vehiculo' => 21,
+            ],
+            [
+                'nombre_archivo' => 'emgrand.png',
+                'id_vehiculo' => 22,
+            ],
+            [
+                'nombre_archivo' => 'sandero.png',
+                'id_vehiculo' => 23,
+            ],
+            [
+                'nombre_archivo' => 'dolphin.png',
+                'id_vehiculo' => 24,
+            ],
+            [
+                'nombre_archivo' => 'mg5.png',
+                'id_vehiculo' => 25,
+            ],
+            [
+                'nombre_archivo' => 'tiago.png',
+                'id_vehiculo' => 26,
+            ],
+            [
+                'nombre_archivo' => 'saga.png',
+                'id_vehiculo' => 27,
+            ],
+            [
+                'nombre_archivo' => 'myvi.png',
+                'id_vehiculo' => 28,
+            ],
+            [
+                'nombre_archivo' => 'voleex.png',
+                'id_vehiculo' => 29,
+            ],
+            [
+                'nombre_archivo' => 'zotye.png',
+                'id_vehiculo' => 30,
+            ],
+            [
+                'nombre_archivo' => 'mt07.png',
+                'id_vehiculo' => 31,
+            ],
+            [
+                'nombre_archivo' => 'cbr.png',
+                'id_vehiculo' => 32,
+            ],
+            [
+                'nombre_archivo' => 'z650.png',
+                'id_vehiculo' => 33,
+            ],
+            [
+                'nombre_archivo' => 'g310r.png',
+                'id_vehiculo' => 34,
+            ],
+            [
+                'nombre_archivo' => 'gsx-s750.png',
+                'id_vehiculo' => 35,
+            ],
+            [
+                'nombre_archivo' => 'monster.png',
+                'id_vehiculo' => 36,
+            ],
+            [
+                'nombre_archivo' => 'street.png',
+                'id_vehiculo' => 37,
+            ],
+            [
+                'nombre_archivo' => '390duke.png',
+                'id_vehiculo' => 38,
+            ],
+            [
+                'nombre_archivo' => 'iron883.png',
+                'id_vehiculo' => 39,
+            ],
+            [
+                'nombre_archivo' => 'rs660.webp',
+                'id_vehiculo' => 40,
+            ],
+            [
+                'nombre_archivo' => 'leoncino.png',
+                'id_vehiculo' => 41,
+            ],
+            [
+                'nombre_archivo' => '401.png',
+                'id_vehiculo' => 42,
+            ],
+            [
+                'nombre_archivo' => 'meteor350.png',
+                'id_vehiculo' => 43,
+            ],
+            [
+                'nombre_archivo' => '300nk.webp',
+                'id_vehiculo' => 44,
+            ],
+            [
+                'nombre_archivo' => 't310.png',
+                'id_vehiculo' => 45,
+            ],
+            [
+                'nombre_archivo' => 'v7stone.webp',
+                'id_vehiculo' => 46,
+            ],
+            [
+                'nombre_archivo' => '500r.png',
+                'id_vehiculo' => 47,
+            ],
+            [
+                'nombre_archivo' => 'wolf250.webp',
+                'id_vehiculo' => 48,
+            ],
+            [
+                'nombre_archivo' => 'fifty.png',
+                'id_vehiculo' => 49,
+            ],
+            [
+                'nombre_archivo' => 'kpr200.png',
+                'id_vehiculo' => 50,
+            ],
+            [
+                'nombre_archivo' => 'sprinter.png',
+                'id_vehiculo' => 51,
+            ],
+            [
+                'nombre_archivo' => 'transit.webp',
+                'id_vehiculo' => 52,
+            ],
+            [
+                'nombre_archivo' => 'master.png',
+                'id_vehiculo' => 53,
+            ],
+            [
+                'nombre_archivo' => 'crafter.webp',
+                'id_vehiculo' => 54,
+            ],
+            [
+                'nombre_archivo' => 'jumper.png',
+                'id_vehiculo' => 55,
+            ],
+            [
+                'nombre_archivo' => 'boxer.png',
+                'id_vehiculo' => 56,
+            ],
+            [
+                'nombre_archivo' => 'ducato.png',
+                'id_vehiculo' => 57,
+            ],
+            [
+                'nombre_archivo' => 'daily.png',
+                'id_vehiculo' => 58,
+            ],
+            [
+                'nombre_archivo' => 'movano.png',
+                'id_vehiculo' => 59,
+            ],
+            [
+                'nombre_archivo' => 'nv400.png',
+                'id_vehiculo' => 60,
+            ],
+            [
+                'nombre_archivo' => 'h350.png',
+                'id_vehiculo' => 61,
+            ],
+            [
+                'nombre_archivo' => 'proace.png',
+                'id_vehiculo' => 62,
+            ],
+            [
+                'nombre_archivo' => 'tge.png',
+                'id_vehiculo' => 63,
+            ],
+            [
+                'nombre_archivo' => 'n-series.png',
+                'id_vehiculo' => 64,
+            ],
+            [
+                'nombre_archivo' => 'deliver9.png',
+                'id_vehiculo' => 65,
+            ],
+            [
+                'nombre_archivo' => 'fl.png',
+                'id_vehiculo' => 66,
+            ],
+            [
+                'nombre_archivo' => 'atego.png',
+                'id_vehiculo' => 67,
+            ],
+            [
+                'nombre_archivo' => 'lf.png',
+                'id_vehiculo' => 68,
+            ],
+            [
+                'nombre_archivo' => 'p-series.png',
+                'id_vehiculo' => 69,
+            ],
+            [
+                'nombre_archivo' => 'tgl.png',
+                'id_vehiculo' => 70,
+            ],
+            [
+                'nombre_archivo' => 'eurocargo.png',
+                'id_vehiculo' => 71,
+            ],
+            [
+                'nombre_archivo' => 'd-series.png',
+                'id_vehiculo' => 72,
+            ],
+            [
+                'nombre_archivo' => 'f-series.png',
+                'id_vehiculo' => 73,
+            ],
+            [
+                'nombre_archivo' => '500-series.png',
+                'id_vehiculo' => 74,
+            ],
+            [
+                'nombre_archivo' => 'lpt1618.png',
+                'id_vehiculo' => 75,
+            ]
+        ]);
+    }
+}
+
+```
+
+## LugarSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class LugarSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('lugares')->insert([
+            [
+                'nombre' => 'Madrid Centro',
+                'direccion' => 'Calle Gran Vía 1',
+                'latitud' => 40.4168,
+                'longitud' => -3.7038,
+            ],
+            [
+                'nombre' => 'Barcelona Puerto',
+                'direccion' => 'Passeig de Colom 22',
+                'latitud' => 41.3751,
+                'longitud' => 2.1769,
+            ],
+            [
+                'nombre' => 'Valencia Ciudad',
+                'direccion' => 'Avenida del Puerto 15',
+                'latitud' => 39.4699,
+                'longitud' => -0.3763,
+            ],
+        ]);
+    }
+}
+
+```
+
+## MetodoPagoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class MetodoPagoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('metodos_de_pago')->insert([
+            [
+                'nombre' => 'Tarjeta de Crédito',
+                'id_pago' => 1,
+            ],
+            [
+                'nombre' => 'Transferencia Bancaria',
+                'id_pago' => 2,
+            ],
+        ]);
+    }
+}
+
+```
+
+## PagoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class PagoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('pago')->insert([
+            [
+                'estado_pago' => 'completado',
+                'fecha_pago' => '2024-04-07',
+                'referencia_externa' => 'PAY-1234567890',
+                'total_precio' => 150.00,
+                'moneda' => 'EUR',
+                'id_usuario' => 2, // Usuario Regular
+                'id_reservas' => 1, // Primera reserva
+            ],
+            [
+                'estado_pago' => 'completado',
+                'fecha_pago' => '2024-04-07',
+                'referencia_externa' => 'PAY-0987654321',
+                'total_precio' => 90.00,
+                'moneda' => 'EUR',
+                'id_usuario' => 2, // Usuario Regular
+                'id_reservas' => 2, // Segunda reserva
+            ],
+        ]);
+    }
+}
+
+```
+
+## PagoTallerClienteSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class PagoTallerClienteSeeder extends Seeder
+{
+    /**
+     * Simula el pago de un cliente por un mantenimiento
+     */
+    public function run(): void
+    {
+        $this->command->info('Simulando pago de cliente por mantenimiento...');
+
+        // Buscar mantenimientos de vehículos de Valencia Ciudad (ID lugar = 1)
+        $mantenimiento = DB::table('mantenimientos')
+            ->join('vehiculos', 'mantenimientos.vehiculo_id', '=', 'vehiculos.id_vehiculos')
+            ->where('vehiculos.id_lugar', 1) // Valencia Ciudad
+            ->where('mantenimientos.estado', 'completado')
+            ->first();
+
+        if (!$mantenimiento) {
+            // Si no hay mantenimientos, buscamos cualquier vehículo de Valencia para crear uno ficticio
+            $vehiculo = DB::table('vehiculos')
+                ->where('id_lugar', 1)
+                ->first();
+                
+            if ($vehiculo) {
+                // Crear un mantenimiento ficticio para este vehículo
+                $mantenimientoId = DB::table('mantenimientos')->insertGetId([
+                    'vehiculo_id' => $vehiculo->id_vehiculos,
+                    'taller_id' => 1, // Asumiendo que hay un taller con ID 1
+                    'fecha_programada' => Carbon::now()->subDays(5),
+                    'hora_programada' => '10:00:00',
+                    'estado' => 'completado',
+                    'created_at' => Carbon::now()->subDays(10),
+                    'updated_at' => Carbon::now()->subDays(5)
+                ]);
+            } else {
+                $this->command->error('No se encontraron vehículos en Valencia Ciudad para asociar un mantenimiento.');
+                return;
+            }
+        } else {
+            $mantenimientoId = $mantenimiento->id;
+        }
+
+        // Generar datos del pago
+        $precioPiezas = rand(250, 500);
+        $precioManoObra = rand(150, 300);
+        $total = $precioPiezas + $precioManoObra;
+        
+        // Detalle del pago (JSON con descripción detallada)
+        $detalle = json_encode([
+            'piezas' => [
+                ['nombre' => 'Filtro de aceite premium', 'precio' => 35.50],
+                ['nombre' => 'Aceite motor sintético 5L', 'precio' => 85.75],
+                ['nombre' => 'Filtro de aire', 'precio' => 29.99],
+                ['nombre' => 'Filtro de combustible', 'precio' => 49.95],
+                ['nombre' => 'Bujías de encendido (juego)', 'precio' => $precioPiezas - 201.19]
+            ],
+            'servicios' => [
+                ['nombre' => 'Cambio de aceite y filtros', 'precio' => 80.00],
+                ['nombre' => 'Revisión general', 'precio' => 65.00],
+                ['nombre' => 'Diagnóstico electrónico', 'precio' => 45.00],
+                ['nombre' => 'Mano de obra adicional', 'precio' => $precioManoObra - 190.00]
+            ]
+        ]);
+        
+        // Insertar el pago en la tabla pago_taller
+        DB::table('pago_taller')->insert([
+            'mantenimiento_id' => $mantenimientoId,
+            'averia_id' => null,
+            'precio_piezas' => $precioPiezas,
+            'precio_revisiones' => $precioManoObra,
+            'total' => $total,
+            'detalle' => $detalle,
+            'created_at' => Carbon::now()->subDays(3),
+            'updated_at' => Carbon::now()
+        ]);
+        
+        $this->command->info("Pago de taller registrado con éxito por un total de {$total}€");
+    }
+}
+
+```
+
+## PagoTallerSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
+
+class PagoTallerSeeder extends Seeder
+{
+    /**
+     * Run the database seeds to create payment records for mechanic repairs.
+     */
+    public function run(): void
+    {
+        $this->command->info('Creando pagos de reparaciones mecánicas...');
+        
+        // Truncar la tabla antes de insertar nuevos registros
+        try {
+            DB::table('pago_taller')->truncate();
+        } catch (\Exception $e) {
+            $this->command->error('No se pudo truncar la tabla pago_taller: ' . $e->getMessage());
+        }
+        
+        // Obtener mantenimientos reales de la base de datos (no ids simulados)
+        try {
+            // Verificar si existe la tabla mantenimientos
+            if (Schema::hasTable('mantenimientos')) {
+                $mantenimientos = DB::table('mantenimientos')->get();
+                $this->command->info('Se encontraron ' . $mantenimientos->count() . ' registros de mantenimientos.');
+            } else {
+                $mantenimientos = collect([]);
+                $this->command->warn('La tabla mantenimientos no existe. No se generarán registros vinculados a mantenimientos.');
+            }
+        } catch (\Exception $e) {
+            $mantenimientos = collect([]);
+            $this->command->error('Error al consultar mantenimientos: ' . $e->getMessage());
+        }
+        
+        // Obtener averías reales de la base de datos (no ids simulados)
+        try {
+            // Verificar si existe la tabla averías
+            if (Schema::hasTable('averias')) {
+                $averias = DB::table('averias')->get();
+                $this->command->info('Se encontraron ' . $averias->count() . ' registros de averías.');
+            } else {
+                $averias = collect([]);
+                $this->command->warn('La tabla averias no existe. No se generarán registros vinculados a averías.');
+            }
+        } catch (\Exception $e) {
+            $averias = collect([]);
+            $this->command->error('Error al consultar averías: ' . $e->getMessage());
+        }
+        
+        // Si no hay mantenimientos ni averías, crear pagos de taller independientes
+        $crearRegistrosIndependientes = $mantenimientos->isEmpty() && $averias->isEmpty();
+        
+        if ($crearRegistrosIndependientes) {
+            $this->command->warn('No se encontraron mantenimientos ni averías. Se crearán pagos de taller independientes.');
+        }
+        
+        $faker = Faker::create('es_ES');
+        
+        // Si tenemos mantenimientos, crear pagos basados en ellos
+        if ($mantenimientos->isNotEmpty()) {
+            foreach ($mantenimientos as $index => $mantenimiento) {
+                // Solo creamos pagos para el 80% de los mantenimientos para simular realismo
+                if (rand(1, 100) <= 80) {
+                    // Generar importes realistas
+                    $precioPiezas = rand(50, 800); // Entre 50€ y 800€ en piezas
+                    $precioRevisiones = rand(75, 500); // Entre 75€ y 500€ en mano de obra
+                    $total = $precioPiezas + $precioRevisiones;
+                    
+                    // Detalle del pago (JSON)
+                    $detalle = json_encode([
+                        'piezas' => [
+                            ['nombre' => 'Filtro de aceite', 'precio' => rand(15, 30)],
+                            ['nombre' => 'Aceite motor', 'precio' => rand(40, 80)],
+                            ['nombre' => 'Otros componentes', 'precio' => $precioPiezas - rand(55, 110)]
+                        ],
+                        'servicios' => [
+                            ['nombre' => 'Mano de obra', 'precio' => $precioRevisiones * 0.8],
+                            ['nombre' => 'Diagnóstico', 'precio' => $precioRevisiones * 0.2]
+                        ]
+                    ]);
+                    
+                    // Crear el registro de pago
+                    DB::table('pago_taller')->insert([
+                        'mantenimiento_id' => $mantenimiento->id,
+                        'averia_id' => null,
+                        'precio_piezas' => $precioPiezas,
+                        'precio_revisiones' => $precioRevisiones,
+                        'total' => $total,
+                        'detalle' => $detalle,
+                        'created_at' => Carbon::now()->subDays(rand(1, 30)), // Para que caigan en el mes actual
+                        'updated_at' => Carbon::now()
+                    ]);
+                }
+            }
+        }
+        
+        // Si tenemos averías, crear pagos basados en ellas
+        if ($averias->isNotEmpty()) {
+            foreach ($averias as $index => $averia) {
+                // Solo creamos pagos para el 70% de las averías
+                if (rand(1, 100) <= 70) {
+                    // Las averías suelen ser más caras que los mantenimientos
+                    $precioPiezas = rand(200, 1500); // Entre 200€ y 1500€ en piezas
+                    $precioRevisiones = rand(150, 800); // Entre 150€ y 800€ en mano de obra
+                    $total = $precioPiezas + $precioRevisiones;
+                    
+                    // Detalle del pago (JSON)
+                    $detalle = json_encode([
+                        'piezas' => [
+                            ['nombre' => 'Componentes de motor', 'precio' => rand(150, 600)],
+                            ['nombre' => 'Piezas de recambio', 'precio' => $precioPiezas - rand(150, 600)]
+                        ],
+                        'servicios' => [
+                            ['nombre' => 'Reparación', 'precio' => $precioRevisiones * 0.7],
+                            ['nombre' => 'Diagnóstico y pruebas', 'precio' => $precioRevisiones * 0.3]
+                        ]
+                    ]);
+                    
+                    // Crear el registro de pago
+                    DB::table('pago_taller')->insert([
+                        'mantenimiento_id' => null,
+                        'averia_id' => $averia->id,
+                        'precio_piezas' => $precioPiezas,
+                        'precio_revisiones' => $precioRevisiones,
+                        'total' => $total,
+                        'detalle' => $detalle,
+                        'created_at' => Carbon::now()->subDays(rand(1, 30)), // Para que caigan en el mes actual
+                        'updated_at' => Carbon::now()
+                    ]);
+                }
+            }
+        }
+        
+        // Si no hay mantenimientos ni averías, crear registros independientes
+        if ($crearRegistrosIndependientes) {
+            // Crear entre 30 y 50 pagos de taller independientes
+            $numPagos = rand(30, 50);
+            $this->command->info("Creando {$numPagos} pagos de taller independientes.");
+            
+            // Generar registros para los últimos 12 meses
+            $fechaInicio = Carbon::now()->subMonths(12);
+            $fechaFin = Carbon::now();
+            $diasRango = $fechaFin->diffInDays($fechaInicio);
+            
+            for ($i = 0; $i < $numPagos; $i++) {
+                // Decidir aleatoriamente si es mantenimiento o avería (para el detalle)
+                $tipoServicio = rand(0, 1) ? 'Mantenimiento' : 'Avería';
+                
+                // Generar datos diferentes según el tipo
+                if ($tipoServicio == 'Mantenimiento') {
+                    $precioPiezas = rand(50, 800);
+                    $precioRevisiones = rand(75, 500);
+                    $nombreServicio = $faker->randomElement(['Revisión periódica', 'Cambio de aceite', 'Revisión de frenos', 'Alineación y balanceo', 'Cambio de neumáticos']);
+                } else {
+                    $precioPiezas = rand(200, 1500);
+                    $precioRevisiones = rand(150, 800);
+                    $nombreServicio = $faker->randomElement(['Reparación de motor', 'Reparación de transmisión', 'Cambio de embrague', 'Reparación sistema eléctrico', 'Sustitución de bomba de agua']);
+                }
+                
+                $total = $precioPiezas + $precioRevisiones;
+                $fechaCreacion = $fechaInicio->copy()->addDays(rand(0, $diasRango));
+                
+                // Detalle del pago (JSON) - más descriptivo para pagos independientes
+                $detalle = json_encode([
+                    'tipo_servicio' => $tipoServicio,
+                    'descripcion' => $nombreServicio,
+                    'vehiculo' => $faker->randomElement(['Ford Focus', 'Seat Ibiza', 'Volkswagen Golf', 'Toyota Corolla', 'Renault Clio', 'Peugeot 208']),
+                    'piezas' => [
+                        ['nombre' => $faker->randomElement(['Filtro de aceite', 'Filtro de aire', 'Pastillas de freno', 'Amortiguadores', 'Correa distribución']), 'precio' => rand(30, 150)],
+                        ['nombre' => $faker->randomElement(['Aceite motor', 'Líquido de frenos', 'Anticongelante', 'Bujías', 'Batería']), 'precio' => rand(20, 100)],
+                        ['nombre' => 'Otras piezas y consumibles', 'precio' => $precioPiezas - rand(50, 250)]
+                    ],
+                    'servicios' => [
+                        ['nombre' => 'Mano de obra', 'precio' => $precioRevisiones * 0.7],
+                        ['nombre' => 'Diagnóstico', 'precio' => $precioRevisiones * 0.3]
+                    ]
+                ]);
+                
+                // Crear el registro de pago (sin referencias a mantenimientos o averías)
+                DB::table('pago_taller')->insert([
+                    'mantenimiento_id' => null,
+                    'averia_id' => null,
+                    'precio_piezas' => $precioPiezas,
+                    'precio_revisiones' => $precioRevisiones,
+                    'total' => $total,
+                    'detalle' => $detalle,
+                    'created_at' => $fechaCreacion,
+                    'updated_at' => $fechaCreacion
+                ]);
+            }
+        }
+        
+        $this->command->info('Pagos de reparaciones mecánicas creados correctamente.');
+    }
+}
+
+```
+
+## PagosChoferesSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
+
+class PagosChoferesSeeder extends Seeder
+{
+    /**
+     * Run the database seeds para crear registros de pagos a choferes por servicios de taxi.
+     */
+    public function run(): void
+    {
+        $this->command->info('Creando pagos de servicios de taxi...');
+        $faker = Faker::create('es_ES');
+        
+        // Verificar si las tablas necesarias existen
+        if (!Schema::hasTable('solicitudes')) {
+            $this->command->error('La tabla de solicitudes no existe. No se pueden crear pagos de choferes.');
+            return;
+        }
+        
+        if (!Schema::hasTable('pagos_choferes')) {
+            $this->command->error('La tabla de pagos_choferes no existe. No se pueden crear pagos de choferes.');
+            return;
+        }
+        
+        // Obtener choferes disponibles
+        try {
+            // Obtener directamente de la tabla choferes usando el ID primario correcto
+            if (Schema::hasTable('choferes')) {
+                $choferes = DB::table('choferes')->select('id')->get();
+                $this->command->info('Se encontraron ' . $choferes->count() . ' choferes.');
+            } else {
+                $this->command->error('La tabla choferes no existe. No se pueden crear solicitudes.');
+                return;
+            }
+            
+            if ($choferes->isEmpty()) {
+                // Si no hay choferes en el sistema, creamos registros simulados
+                $choferes = collect();
+                for ($i = 1; $i <= 10; $i++) {
+                    $choferes->push((object)['id' => $i]);
+                }
+                $this->command->warn('No se encontraron choferes. Se usarán ' . $choferes->count() . ' choferes simulados.');
+            }
+        } catch (\Exception $e) {
+            $this->command->error('Error al consultar choferes: ' . $e->getMessage());
+            return;
+        }
+        
+        // Obtener clientes disponibles
+        try {
+            $clientes = DB::table('users')
+                ->where('id_roles', '!=', 6)  // No seleccionar usuarios que sean choferes
+                ->select('id_usuario as id')
+                ->get();
+                
+            if ($clientes->isEmpty()) {
+                // Si no hay clientes, creamos algunos simulados
+                $clientes = collect();
+                for ($i = 101; $i <= 120; $i++) {  // IDs distintos de los choferes
+                    $clientes->push((object)['id' => $i]);
+                }
+                $this->command->warn('No se encontraron clientes. Se usarán ' . $clientes->count() . ' clientes simulados.');
+            } else {
+                $this->command->info('Se encontraron ' . $clientes->count() . ' clientes.');
+            }
+        } catch (\Exception $e) {
+            $this->command->error('Error al consultar clientes: ' . $e->getMessage());
+            return;
+        }
+        
+        // Limpiamos la tabla de pagos de choferes
+        try {
+            DB::table('pagos_choferes')->truncate();
+        } catch (\Exception $e) {
+            // Si no se puede truncar, intentamos eliminar los registros
+            try {
+                DB::table('pagos_choferes')->delete();
+            } catch (\Exception $ex) {
+                // Continuamos si falla
+            }
+        }
+        
+        // Generar fechas para los últimos 12 meses
+        $fechaInicio = Carbon::now()->subMonths(12);
+        $fechaFin = Carbon::now();
+        $diasRango = $fechaFin->diffInDays($fechaInicio);
+        
+        // Determinar cantidad de pagos/solicitudes a generar
+        $cantidadPagos = rand(50, 100);  // Reducido para evitar demasiados errores
+        $this->command->info("Se generarán {$cantidadPagos} solicitudes y pagos de taxi.");
+        
+        // Contadores
+        $solicitudesCreadas = 0;
+        $pagosCreados = 0;
+        
+        // Colección para almacenar las solicitudes creadas
+        $solicitudesNuevas = collect();
+        
+        // Generar solicitudes
+        for ($i = 0; $i < $cantidadPagos; $i++) {
+            try {
+                // Seleccionar un chofer aleatorio
+                $chofer = $choferes->random();
+                
+                // Seleccionar un cliente aleatorio
+                $cliente = $clientes->random();
+                
+                // Generar coordenadas de origen (España)
+                $latitudOrigen = $faker->latitude(36.0, 43.5);  // Aproximadamente España
+                $longitudOrigen = $faker->longitude(-9.0, 3.0);
+                
+                // Generar coordenadas de destino (cerca del origen, pero distinto)
+                $latitudDestino = $latitudOrigen + $faker->randomFloat(6, -0.05, 0.05);
+                $longitudDestino = $longitudOrigen + $faker->randomFloat(6, -0.05, 0.05);
+                
+                // Generar precio
+                $precio = $faker->randomFloat(2, 15, 50);
+                
+                // Generar fecha aleatoria
+                $fechaSolicitud = $fechaInicio->copy()->addDays(rand(0, $diasRango));
+                
+                // Insertar solicitud con estado 'completada' (no pendiente)
+                $idSolicitud = DB::table('solicitudes')->insertGetId([
+                    'id_chofer' => $chofer->id,
+                    'id_cliente' => $cliente->id,
+                    'latitud_origen' => $latitudOrigen,
+                    'longitud_origen' => $longitudOrigen,
+                    'latitud_destino' => $latitudDestino,
+                    'longitud_destino' => $longitudDestino,
+                    'precio' => $precio,
+                    'estado' => 'completada',  // Importante: no pendiente
+                    'created_at' => $fechaSolicitud,
+                    'updated_at' => $fechaSolicitud
+                ]);
+                
+                // Añadir a nuestra colección
+                $solicitudesNuevas->push((object)['id' => $idSolicitud]);
+                $solicitudesCreadas++;
+                
+                // Generar el pago asociado (fecha de pago poco después de la solicitud)
+                $fechaPago = $fechaSolicitud->copy()->addHours(rand(1, 24));
+                
+                // Calcular importes
+                $importeTotal = $precio;  // Mismo precio que la solicitud
+                $porcentajeEmpresa = $faker->randomFloat(2, 0.2, 0.3);  // 20-30% para la empresa
+                $importeEmpresa = round($importeTotal * $porcentajeEmpresa, 2);
+                $importeChofer = round($importeTotal - $importeEmpresa, 2);
+                
+                // Insertar pago
+                DB::table('pagos_choferes')->insert([
+                    'chofer_id' => $chofer->id,
+                    'solicitud_id' => $idSolicitud,
+                    'importe_total' => $importeTotal,
+                    'importe_empresa' => $importeEmpresa,
+                    'importe_chofer' => $importeChofer,
+                    'estado_pago' => 'pagado',
+                    'fecha_pago' => $fechaPago,
+                    'created_at' => $fechaPago,
+                    'updated_at' => $fechaPago
+                ]);
+                
+                $pagosCreados++;
+                
+                // Mostrar progreso cada 10 registros
+                if ($i % 10 == 0 && $i > 0) {
+                    $this->command->info("Progreso: {$i}/{$cantidadPagos} solicitudes y pagos creados.");
+                }
+                
+            } catch (\Exception $e) {
+                $this->command->warn("Error al crear solicitud/pago #{$i}: " . $e->getMessage());
+            }
+        }
+        
+        $this->command->info("Proceso completado: {$solicitudesCreadas} solicitudes y {$pagosCreados} pagos creados correctamente.");
+    }
+}
+
+```
+
+## ParkingSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ParkingSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Insertar parkings de Barcelona (4)
+    DB::table('parking')->insert([
+    // Barcelona
+    [
+        'id' => 1,
+        'nombre' => 'Parking Barcelona Centro',
+        'plazas' => 120,
+        'latitud' => 41.3851,
+        'longitud' => 2.1734,
+        'id_usuario' => 2,
+        'id_lugar' => 2,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 2,
+        'nombre' => 'Parking Barcelona Sants',
+        'plazas' => 85,
+        'latitud' => 41.3780,
+        'longitud' => 2.1408,
+        'id_usuario' => 2,
+        'id_lugar' => 2,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 3,
+        'nombre' => 'Parking Barcelona Sagrada Familia',
+        'plazas' => 150,
+        'latitud' => 41.4036,
+        'longitud' => 2.1744,
+        'id_usuario' => 2,
+        'id_lugar' => 2,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 4,
+        'nombre' => 'Parking Barcelona Diagonal',
+        'plazas' => 200,
+        'latitud' => 41.3917,
+        'longitud' => 2.1469,
+        'id_usuario' => 2,
+        'id_lugar' => 2,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+
+    // Madrid
+    [
+        'id' => 5,
+        'nombre' => 'Parking Madrid Sol',
+        'plazas' => 100,
+        'latitud' => 40.4168,
+        'longitud' => -3.7038,
+        'id_usuario' => 3,
+        'id_lugar' => 1,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 6,
+        'nombre' => 'Parking Madrid Atocha',
+        'plazas' => 180,
+        'latitud' => 40.4066,
+        'longitud' => -3.6892,
+        'id_usuario' => 3,
+        'id_lugar' => 1,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 7,
+        'nombre' => 'Parking Madrid Chamartín',
+        'plazas' => 130,
+        'latitud' => 40.4722,
+        'longitud' => -3.6827,
+        'id_usuario' => 3,
+        'id_lugar' => 1,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 8,
+        'nombre' => 'Parking Madrid Bernabéu',
+        'plazas' => 220,
+        'latitud' => 40.4531,
+        'longitud' => -3.6883,
+        'id_usuario' => 3,
+        'id_lugar' => 1,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 9,
+        'nombre' => 'Parking Madrid Retiro',
+        'plazas' => 90,
+        'latitud' => 40.4153,
+        'longitud' => -3.6844,
+        'id_usuario' => 3,
+        'id_lugar' => 1,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 10,
+        'nombre' => 'Parking Madrid Gran Vía',
+        'plazas' => 160,
+        'latitud' => 40.4203,
+        'longitud' => -3.7058,
+        'id_usuario' => 3,
+        'id_lugar' => 1,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+
+    // Valencia
+    [
+        'id' => 11,
+        'nombre' => 'Parking Valencia Puerto',
+        'plazas' => 110,
+        'latitud' => 39.4510,
+        'longitud' => -0.3198,
+        'id_usuario' => 4,
+        'id_lugar' => 3,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 12,
+        'nombre' => 'Parking Valencia Ciudad de las Artes',
+        'plazas' => 170,
+        'latitud' => 39.4541,
+        'longitud' => -0.3535,
+        'id_usuario' => 4,
+        'id_lugar' => 3,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+    [
+        'id' => 13,
+        'nombre' => 'Parking Valencia Centro',
+        'plazas' => 140,
+        'latitud' => 39.4699,
+        'longitud' => -0.3763,
+        'id_usuario' => 4,
+        'id_lugar' => 3,
+        'created_at' => now(),
+        'updated_at' => now()
+    ],
+]);
+
+}
+}
+
+```
+
+## PasivoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\Pasivo;
+use App\Models\Lugar;
+use Carbon\Carbon;
+
+class PasivoSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        // Obtener todos los lugares (sedes) para asignar pasivos
+        $lugares = Lugar::all();
+        
+        if ($lugares->count() == 0) {
+            $this->command->info('No hay lugares disponibles para crear pasivos. Ejecuta LugarSeeder primero.');
+            return;
+        }
+        
+        // Categorías de pasivos
+        $categorias = ['Circulante', 'Fijo', 'Largo Plazo', 'Diferido'];
+        
+        // Para cada lugar, crear varios pasivos
+        foreach ($lugares as $lugar) {
+            // Pasivos circulantes (corto plazo)
+            Pasivo::create([
+                'nombre' => 'Cuentas por pagar',
+                'descripcion' => 'Pagos pendientes a proveedores',
+                'categoria' => 'Circulante',
+                'valor' => rand(3000, 12000),
+                'fecha_registro' => Carbon::now()->subDays(rand(1, 30)),
+                'fecha_vencimiento' => Carbon::now()->addDays(rand(15, 45)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Pasivo::create([
+                'nombre' => 'Impuestos por pagar',
+                'descripcion' => 'IVA y otros impuestos pendientes',
+                'categoria' => 'Circulante',
+                'valor' => rand(5000, 15000),
+                'fecha_registro' => Carbon::now()->subDays(rand(1, 30)),
+                'fecha_vencimiento' => Carbon::now()->addDays(rand(30, 60)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Pasivo::create([
+                'nombre' => 'Salarios pendientes',
+                'descripcion' => 'Nómina del mes en curso',
+                'categoria' => 'Circulante',
+                'valor' => rand(8000, 20000),
+                'fecha_registro' => Carbon::now()->subDays(rand(1, 15)),
+                'fecha_vencimiento' => Carbon::now()->addDays(rand(1, 15)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            // Pasivos fijos o a largo plazo
+            Pasivo::create([
+                'nombre' => 'Préstamo bancario',
+                'descripcion' => 'Hipoteca del local comercial',
+                'categoria' => 'Largo Plazo',
+                'valor' => rand(150000, 350000),
+                'fecha_registro' => Carbon::now()->subYears(rand(1, 3)),
+                'fecha_vencimiento' => Carbon::now()->addYears(rand(1, 5)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            Pasivo::create([
+                'nombre' => 'Leasing vehículos',
+                'descripcion' => 'Contratos de arrendamiento financiero de vehículos',
+                'categoria' => 'Fijo',
+                'valor' => rand(50000, 150000),
+                'fecha_registro' => Carbon::now()->subMonths(rand(1, 12)),
+                'fecha_vencimiento' => Carbon::now()->addYears(rand(1, 3)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+            
+            // Pasivos diferidos
+            Pasivo::create([
+                'nombre' => 'Ingresos cobrados por adelantado',
+                'descripcion' => 'Reservas pagadas pendientes de servicio',
+                'categoria' => 'Diferido',
+                'valor' => rand(10000, 30000),
+                'fecha_registro' => Carbon::now()->subDays(rand(1, 30)),
+                'fecha_vencimiento' => Carbon::now()->addMonths(rand(1, 3)),
+                'fecha_actualizacion' => Carbon::now(),
+                'id_lugar' => $lugar->id_lugar
+            ]);
+        }
+        
+        $this->command->info('Pasivos creados correctamente.');
+    }
+}
+
+```
+
+## PiezasSeeder.php
+
+```php
+<?php
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class PiezasSeeder extends Seeder
+{
+    public function run()
+    {
+        DB::table('piezas')->insert([
+            // Coche
+            ['nombre' => 'Filtro de aceite', 'tipo_vehiculo' => 'coche', 'precio' => 15.50],
+            ['nombre' => 'Pastillas de freno', 'tipo_vehiculo' => 'coche', 'precio' => 45.00],
+            ['nombre' => 'Batería', 'tipo_vehiculo' => 'coche', 'precio' => 80.00],
+            // Moto
+            ['nombre' => 'Cadena', 'tipo_vehiculo' => 'moto', 'precio' => 25.00],
+            ['nombre' => 'Filtro de aire', 'tipo_vehiculo' => 'moto', 'precio' => 12.00],
+            ['nombre' => 'Neumático', 'tipo_vehiculo' => 'moto', 'precio' => 60.00],
+            // Furgoneta
+            ['nombre' => 'Amortiguador', 'tipo_vehiculo' => 'furgoneta', 'precio' => 95.00],
+            ['nombre' => 'Correa de distribución', 'tipo_vehiculo' => 'furgoneta', 'precio' => 120.00],
+            ['nombre' => 'Radiador', 'tipo_vehiculo' => 'furgoneta', 'precio' => 110.00],
+        ]);
+    }
+}
+
+```
+
+## ReservaCompletaSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ReservaCompletaSeeder extends Seeder
+{
+    public function run()
+    {
+        // LUGARES
+        DB::table('lugares')->insertOrIgnore([
+            ['id_lugar' => 1, 'nombre' => 'Madrid Centro', 'direccion' => 'Calle Gran Vía 1', 'latitud' => '40.41680000', 'longitud' => '-3.70380000'],
+            ['id_lugar' => 2, 'nombre' => 'Barcelona Puerto', 'direccion' => 'Passeig de Colom 22', 'latitud' => '41.37510000', 'longitud' => '2.17690000'],
+        ]);
+
+        // TIPOS
+        DB::table('tipo')->insertOrIgnore([
+            ['id_tipo' => 1, 'nombre' => 'Coche'],
+            ['id_tipo' => 2, 'nombre' => 'Moto'],
+        ]);
+
+        // VEHÍCULOS
+        DB::table('vehiculos')->insertOrIgnore([
+            ['id_vehiculos' => 1, 'precio_dia' => 20, 'marca' => 'Toyota', 'modelo' => 'Corolla', 'kilometraje' => 15000, 'año' => '2023', 'id_lugar' => 1, 'id_tipo' => 1],
+            ['id_vehiculos' => 2, 'precio_dia' => 40, 'marca' => 'Honda', 'modelo' => 'CBR 600', 'kilometraje' => 8000, 'año' => '2022', 'id_lugar' => 2, 'id_tipo' => 2],
+        ]);
+
+        // IMÁGENES
+        DB::table('imagen_vehiculo')->insertOrIgnore([
+            ['id_imagen_vehiculo' => 1, 'nombre_archivo' => 'corolla_1.jpg', 'id_vehiculo' => 1],
+            ['id_imagen_vehiculo' => 2, 'nombre_archivo' => 'corolla_2.jpg', 'id_vehiculo' => 1],
+            ['id_imagen_vehiculo' => 3, 'nombre_archivo' => 'cbr600_1.jpg', 'id_vehiculo' => 2],
+        ]);
+
+        // CARACTERÍSTICAS
+        DB::table('caracteristicas')->insertOrIgnore([
+            [
+                'id_caracteristicas' => 1,
+                'id_vehiculos' => 1,
+                'transmision' => 'Automática',
+                'num_puertas' => 5,
+                'etiqueta_medioambiental' => 'ECO',
+                'aire_acondicionado' => 1,
+                'capacidad_maletero' => 450,
+                'techo' => 0
+            ],
+            [
+                'id_caracteristicas' => 2,
+                'id_vehiculos' => 2,
+                'transmision' => 'Manual',
+                'num_puertas' => 0,
+                'etiqueta_medioambiental' => 'C',
+                'aire_acondicionado' => 0,
+                'capacidad_maletero' => 0,
+                'techo' => 0
+            ]
+        ]);
+
+        // RESERVA
+        DB::table('reservas')->insertOrIgnore([
+            [
+                'id_reservas' => 3,
+                'id_usuario' => 1,
+                'estado' => 'pendiente',
+                'fecha_reserva' => now()->toDateString()
+            ]
+        ]);
+
+        // VEHÍCULOS_RESERVAS
+        DB::table('vehiculos_reservas')->insertOrIgnore([
+            [
+                'id_vehiculos_reservas' => 1,
+                'id_reservas' => 3,
+                'id_vehiculos' => 1,
+                'fecha_ini' => now()->addDays(1)->toDateString(),
+                'fecha_final' => now()->addDays(3)->toDateString()
+            ],
+            [
+                'id_vehiculos_reservas' => 2,
+                'id_reservas' => 3,
+                'id_vehiculos' => 2,
+                'fecha_ini' => now()->addDays(2)->toDateString(),
+                'fecha_final' => now()->addDays(4)->toDateString(),
+            ],
+        ]);
+
+        // PAGO
+        DB::table('pago')->insertOrIgnore([
+            [
+                'id_pago' => 1,
+                'estado_pago' => 'no pagado',
+                'fecha_pago' => now()->toDateString(),
+                'referencia_externa' => 'ABC123XYZ',
+                'total_precio' => 125.00,
+                'moneda' => 'EUR',
+                'id_usuario' => 1,
+                'id_reservas' => 3
+            ]
+        ]);
+
+        // MÉTODO DE PAGO
+        DB::table('metodos_de_pago')->insertOrIgnore([
+            [
+                'id_metodoPago' => 1,
+                'nombre' => 'Tarjeta de crédito',
+                'id_pago' => 1
+            ]
+        ]);
+    }
+}
+
+```
+
+## ReservaSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class ReservaSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Insertar reservas base
+        DB::table('reservas')->insert([
+            // Reservas en Madrid (id_lugar = 1)
+            [
+                'id_reservas' => 1,
+                'fecha_reserva' => '2024-04-07',
+                'total_precio' => 150.00,
+                'estado' => 'completada',
+                'id_lugar' => 1,
+                'id_usuario' => 2,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 2,
+                'fecha_reserva' => '2024-04-15',
+                'total_precio' => 220.00,
+                'estado' => 'pendiente',
+                'id_lugar' => 1,
+                'id_usuario' => 3,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 3,
+                'fecha_reserva' => '2024-04-25',
+                'total_precio' => 450.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 1,
+                'id_usuario' => 3,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 4,
+                'fecha_reserva' => '2024-05-10',
+                'total_precio' => 180.00,
+                'estado' => 'pendiente',
+                'id_lugar' => 1,
+                'id_usuario' => 4,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reservas en Barcelona (id_lugar = 2)
+            [
+                'id_reservas' => 5,
+                'fecha_reserva' => '2024-04-10',
+                'total_precio' => 90.00,
+                'estado' => 'completada',
+                'id_lugar' => 2,
+                'id_usuario' => 2,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 6,
+                'fecha_reserva' => '2024-04-22',
+                'total_precio' => 300.00,
+                'estado' => 'cancelada',
+                'id_lugar' => 2,
+                'id_usuario' => 5,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 7,
+                'fecha_reserva' => '2024-05-15',
+                'total_precio' => 210.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 2,
+                'id_usuario' => 4,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reservas en Valencia (id_lugar = 3)
+            [
+                'id_reservas' => 8,
+                'fecha_reserva' => '2024-04-20',
+                'total_precio' => 180.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 3,
+                'id_usuario' => 4,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 9,
+                'fecha_reserva' => '2024-05-01',
+                'total_precio' => 275.00,
+                'estado' => 'pendiente',
+                'id_lugar' => 3,
+                'id_usuario' => 3,
+                'referencia_pago' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_reservas' => 10,
+                'fecha_reserva' => '2024-05-20',
+                'total_precio' => 320.00,
+                'estado' => 'confirmada',
+                'id_lugar' => 3,
+                'id_usuario' => 5,
+                'referencia_pago' => 'REF-'.random_int(10000, 99999),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+        ]);
+    }
+}
+
+```
+
+## RoleSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class RoleSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('roles')->insert([
+            ['nombre' => 'admin'],       // ID: 1
+            ['nombre' => 'usuario'],     // ID: 2
+            ['nombre' => 'gestor'],      // ID: 3
+            ['nombre' => 'mecanico'],    // ID: 4
+            ['nombre' => 'admin_financiero'], // ID: 5
+            ['nombre' => 'chofer'] // ID: 6
+        ]);
+    }
+}
+
+```
+
+## TestParkingSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class TestParkingSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Verificar si ya existen parkings
+        $existingParkings = DB::table('parking')->count();
+        
+        if ($existingParkings > 0) {
+            $this->command->info('Ya existen parkings en la base de datos. No se crearán parkings adicionales.');
+            return;
+        }
+        
+        // Obtener lugares disponibles
+        $lugares = DB::table('lugares')->get();
+        
+        if ($lugares->isEmpty()) {
+            // Si no hay lugares, crear uno
+            $lugarId = DB::table('lugares')->insertGetId([
+                'nombre' => 'Parking Central',
+                'direccion' => 'Calle Principal 123',
+                'latitud' => 40.416775,
+                'longitud' => -3.703790,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+            $lugares = collect([
+                (object)['id_lugar' => $lugarId]
+            ]);
+            $this->command->info('Se ha creado un lugar porque no existía ninguno.');
+        }
+        
+        // Crear al menos 2 parkings
+        foreach ($lugares->take(2) as $index => $lugar) {
+            DB::table('parking')->insert([
+                'nombre' => 'Parking ' . ($index + 1),
+                'descripcion' => 'Parking de prueba ' . ($index + 1),
+                'plazas_totales' => rand(10, 50),
+                'plazas_ocupadas' => 0,
+                'id_lugar' => $lugar->id_lugar,
+                'metros_cuadrados' => rand(500, 2000),
+                'precio_plaza' => rand(50, 150),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+            
+            $parkingNum = $index + 1;
+            $this->command->info('Parking ' . $parkingNum . ' creado correctamente.');
+        }
+    }
+}
+
+```
+
+## TipoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class TipoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('tipo')->insert([
+            ['nombre' => 'Coche'],
+            ['nombre' => 'Moto'],
+            ['nombre' => 'Furgoneta'],
+            ['nombre' => 'Camión'],
+        ]);
+    }
+}
+
+```
+
+## UpdateAsalariadosFieldsSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Asalariado;
+use App\Models\User;
+use App\Models\Parking;
+use App\Models\Lugar;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+class UpdateAsalariadosFieldsSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Definir salarios estándar por rol
+        $salariosPorRol = [
+            'admin_financiero' => 3200,
+            'gestor' => 2800,
+            'mecanico' => 2500,
+            'chofer' => 2200,
+            // Añadir otros roles según sea necesario
+            'admin' => 3500,
+            'default' => 2000 // Valor por defecto para roles no definidos
+        ];
+        
+        // Obtener todos los asalariados
+        $asalariados = Asalariado::with('usuario', 'parking')->get();
+        
+        foreach ($asalariados as $asalariado) {
+            // Inicializar rol como desconocido por defecto
+            $rolNombre = 'desconocido';
+            
+            // 1. Establecer el estado como 'alta' para todos los asalariados existentes
+            $asalariado->estado = 'alta';
+            
+            // 2. Inicializar días trabajados a 0
+            $asalariado->dias_trabajados = 0;
+            
+            // 3. Establecer id_lugar basado en el parking_id
+            if ($asalariado->parking) {
+                $asalariado->id_lugar = $asalariado->parking->id_lugar;
+            }
+            
+            // 4. Convertir dia_cobro a hiredate si es necesario
+            // Si el campo hiredate está vacío y dia_cobro existe, crear una fecha de contratación 
+            // estimada (primer día del mes actual con tres meses de antigüedad)
+            if (!$asalariado->hiredate) {
+                // Crear una fecha aleatoria en los últimos 2 años
+                $diasAtras = rand(30, 730); // Entre 1 mes y 2 años
+                $asalariado->hiredate = Carbon::now()->subDays($diasAtras)->format('Y-m-d');
+            }
+            
+            // 5. Actualizar salario según el rol
+            if ($asalariado->usuario && $asalariado->usuario->roles) {
+                $rolNombre = $asalariado->usuario->roles->nombre_rol;
+                
+                if (isset($salariosPorRol[$rolNombre])) {
+                    $asalariado->salario = $salariosPorRol[$rolNombre];
+                } else {
+                    $asalariado->salario = $salariosPorRol['default'];
+                }
+            } else {
+                // Si no tiene rol asignado, usar el salario por defecto
+                $asalariado->salario = $salariosPorRol['default'];
+            }
+            
+            // Guardar cambios
+            $asalariado->save();
+            
+            $this->command->info("Actualizado asalariado ID: {$asalariado->id} - Rol: {$rolNombre} - Salario: {$asalariado->salario}");
+        }
+        
+        $this->command->info("Se han actualizado " . $asalariados->count() . " asalariados");
+    }
+}
+
+```
+
+## UpdateParkingPricesSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class UpdateParkingPricesSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     * 
+     * This seeder updates the parking entries with realistic price variations
+     * based on location, prestige, and demand factors.
+     */
+    public function run(): void
+    {
+        // Obtener todos los parkings existentes
+        $parkings = DB::table('parking')->get();
+        
+        foreach ($parkings as $parking) {
+            // Calcular metros cuadrados basado en el número de plazas
+            // Estimamos ~25m² por plaza (incluye espacio de maniobra, accesos, etc.)
+            $metrosCuadrados = $parking->plazas * 25;
+            
+            // Determinar precio base por metro cuadrado según la ciudad
+            $precioBase = 0;
+            
+            // Si el nombre contiene Barcelona
+            if (strpos($parking->nombre, 'Barcelona') !== false) {
+                // Barcelona tiene los precios más altos
+                $precioBase = rand(1100, 1400); // Entre 1.100€ y 1.400€ por m²
+                
+                // Ajustes específicos por zona
+                if (strpos($parking->nombre, 'Centro') !== false) {
+                    $precioBase += 200; // Centro de Barcelona premium
+                } elseif (strpos($parking->nombre, 'Diagonal') !== false) {
+                    $precioBase += 150; // Zona comercial premium
+                } elseif (strpos($parking->nombre, 'Sagrada Familia') !== false) {
+                    $precioBase += 100; // Zona turística premium
+                }
+            }
+            // Si el nombre contiene Madrid
+            elseif (strpos($parking->nombre, 'Madrid') !== false) {
+                // Madrid tiene precios medios-altos
+                $precioBase = rand(1000, 1250); // Entre 1.000€ y 1.250€ por m²
+                
+                // Ajustes específicos por zona
+                if (strpos($parking->nombre, 'Sol') !== false || 
+                    strpos($parking->nombre, 'Gran Vía') !== false) {
+                    $precioBase += 200; // Centro de Madrid premium
+                } elseif (strpos($parking->nombre, 'Bernabéu') !== false) {
+                    $precioBase += 150; // Zona deportiva premium
+                } elseif (strpos($parking->nombre, 'Retiro') !== false) {
+                    $precioBase += 50; // Zona verde premium
+                }
+            }
+            // Si el nombre contiene Valencia
+            elseif (strpos($parking->nombre, 'Valencia') !== false) {
+                // Valencia tiene precios más económicos
+                $precioBase = rand(800, 1000); // Entre 800€ y 1.000€ por m²
+                
+                // Ajustes específicos por zona
+                if (strpos($parking->nombre, 'Centro') !== false) {
+                    $precioBase += 100; // Centro de Valencia premium
+                } elseif (strpos($parking->nombre, 'Ciudad de las Artes') !== false) {
+                    $precioBase += 75; // Zona turística premium
+                }
+            }
+            // Para cualquier otro parking sin ciudad identificada
+            else {
+                $precioBase = rand(900, 1100); // Precio base genérico
+            }
+            
+            // Pequeña variación aleatoria adicional para más realismo (-5% a +5%)
+            $variacion = $precioBase * (rand(-50, 50) / 1000);
+            $precioFinal = $precioBase + $variacion;
+            
+            // Actualizar el parking con metros cuadrados y precio por metro cuadrado
+            DB::table('parking')
+                ->where('id', $parking->id)
+                ->update([
+                    'metros_cuadrados' => $metrosCuadrados,
+                    'precio_metro_cuadrado' => $precioFinal
+                ]);
+                
+            // Mostrar información del parking actualizado
+            $this->command->info(
+                "Actualizado: {$parking->nombre} - " .
+                "{$metrosCuadrados}m² a {$precioFinal}€/m² = " .
+                number_format($metrosCuadrados * $precioFinal, 2, ',', '.') . "€"
+            );
+        }
+        
+        $this->command->info('Precios de parkings actualizados correctamente con variaciones realistas.');
+    }
+}
+
+```
+
+## UpdateSolicitudesChoferSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+class UpdateSolicitudesChoferSeeder extends Seeder
+{
+    /**
+     * Run the database seeds para actualizar las solicitudes pendientes de choferes.
+     * Asegura que todas las solicitudes estén en estado 'aceptada' o 'rechazada', nunca 'pendiente'.
+     */
+    public function run(): void
+    {
+        $this->command->info('Actualizando solicitudes pendientes de choferes...');
+        
+        // Verificar si la tabla existe
+        if (!Schema::hasTable('solicitudes_chofer')) {
+            $this->command->warn('La tabla solicitudes_chofer no existe. No se realizarán cambios.');
+            return;
+        }
+        
+        // Contar solicitudes pendientes
+        $pendientes = DB::table('solicitudes_chofer')
+            ->where('estado', 'pendiente')
+            ->count();
+            
+        if ($pendientes === 0) {
+            $this->command->info('No hay solicitudes pendientes para choferes. No se requieren cambios.');
+            return;
+        }
+        
+        // Actualizar todas las solicitudes pendientes a 'aceptada'
+        $actualizadas = DB::table('solicitudes_chofer')
+            ->where('estado', 'pendiente')
+            ->update([
+                'estado' => 'aceptada',
+                'updated_at' => now()
+            ]);
+            
+        $this->command->info("Se actualizaron {$actualizadas} solicitudes de 'pendiente' a 'aceptada'.");
+    }
+}
+
+```
+
+## UpdateVehiculosPreciosSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class UpdateVehiculosPreciosSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Actualizar los vehículos existentes y añadir algunos nuevos con años variados
+        $vehiculos = [
+            // Vehículos de gama alta
+            ['marca' => 'Ferrari', 'modelo' => 'F8 Tributo', 'año' => 2023, 'precio' => 320000, 'precio_dia' => 450],
+            ['marca' => 'Lamborghini', 'modelo' => 'Aventador', 'año' => 2022, 'precio' => 380000, 'precio_dia' => 500],
+            ['marca' => 'Porsche', 'modelo' => '911 Turbo S', 'año' => 2024, 'precio' => 240000, 'precio_dia' => 350],
+            ['marca' => 'McLaren', 'modelo' => '720S', 'año' => 2021, 'precio' => 290000, 'precio_dia' => 400],
+            ['marca' => 'Aston Martin', 'modelo' => 'DBS Superleggera', 'año' => 2020, 'precio' => 330000, 'precio_dia' => 420],
+            
+            // Vehículos de gama media-alta
+            ['marca' => 'Mercedes-Benz', 'modelo' => 'AMG GT', 'año' => 2022, 'precio' => 140000, 'precio_dia' => 250],
+            ['marca' => 'BMW', 'modelo' => 'M8 Competition', 'año' => 2023, 'precio' => 130000, 'precio_dia' => 230],
+            ['marca' => 'Audi', 'modelo' => 'R8', 'año' => 2021, 'precio' => 150000, 'precio_dia' => 260],
+            ['marca' => 'Jaguar', 'modelo' => 'F-Type R', 'año' => 2019, 'precio' => 110000, 'precio_dia' => 200],
+            ['marca' => 'Maserati', 'modelo' => 'GranTurismo', 'año' => 2020, 'precio' => 120000, 'precio_dia' => 220],
+            
+            // Vehículos de gama media
+            ['marca' => 'Tesla', 'modelo' => 'Model S', 'año' => 2022, 'precio' => 90000, 'precio_dia' => 150],
+            ['marca' => 'Lexus', 'modelo' => 'LC 500', 'año' => 2021, 'precio' => 95000, 'precio_dia' => 160],
+            ['marca' => 'BMW', 'modelo' => 'M5', 'año' => 2020, 'precio' => 85000, 'precio_dia' => 140],
+            ['marca' => 'Audi', 'modelo' => 'RS7', 'año' => 2019, 'precio' => 80000, 'precio_dia' => 130],
+            ['marca' => 'Mercedes-Benz', 'modelo' => 'CLS 53 AMG', 'año' => 2018, 'precio' => 75000, 'precio_dia' => 120],
+            
+            // Vehículos más antiguos para demostrar la amortización
+            ['marca' => 'Porsche', 'modelo' => 'Cayman S', 'año' => 2017, 'precio' => 60000, 'precio_dia' => 100],
+            ['marca' => 'BMW', 'modelo' => 'M3', 'año' => 2016, 'precio' => 55000, 'precio_dia' => 90],
+            ['marca' => 'Audi', 'modelo' => 'TT RS', 'año' => 2015, 'precio' => 50000, 'precio_dia' => 80],
+            ['marca' => 'Mercedes-Benz', 'modelo' => 'C63 AMG', 'año' => 2014, 'precio' => 45000, 'precio_dia' => 70],
+            ['marca' => 'Nissan', 'modelo' => 'GT-R', 'año' => 2013, 'precio' => 40000, 'precio_dia' => 60],
+        ];
+        
+        // Asignar lugares, tipos y parkings aleatoriamente (asumiendo que ya existen)
+        $lugares = \App\Models\Lugar::all()->pluck('id_lugar')->toArray();
+        $tipos = \App\Models\Tipo::all()->pluck('id_tipo')->toArray();
+        $parkings = \App\Models\Parking::all()->pluck('id')->toArray();
+        
+        // Añadir matrículas aleatorias
+        $letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+        
+        foreach ($vehiculos as $vehiculo) {
+            // Generar matrícula aleatoria si no se proporcionó
+            if (!isset($vehiculo['matricula'])) {
+                $numeros = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+                $letras_mat = $letras[array_rand($letras)] . $letras[array_rand($letras)] . $letras[array_rand($letras)];
+                $matricula = $numeros . $letras_mat;
+                $vehiculo['matricula'] = $matricula;
+            }
+            
+            // Asignar valores aleatorios para lugar, tipo y parking
+            $vehiculo['id_lugar'] = $lugares[array_rand($lugares)];
+            $vehiculo['id_tipo'] = $tipos[array_rand($tipos)];
+            $vehiculo['parking_id'] = $parkings[array_rand($parkings)];
+            $vehiculo['disponibilidad'] = 1; // Disponible por defecto
+            $vehiculo['kilometraje'] = rand(1000, 50000);
+            
+            // Insertar nuevos vehículos en lugar de intentar actualizar los existentes
+            try {
+                \App\Models\Vehiculo::create($vehiculo);
+            } catch (\Exception $e) {
+                // Ignorar errores de inserción (como claves duplicadas)
+            }
+        }
+        
+        // Actualizar también los vehículos existentes que no tienen precio
+        $vehiculosExistentes = \App\Models\Vehiculo::whereNull('precio')->orWhere('precio', 0)->get();
+        
+        foreach ($vehiculosExistentes as $vehiculo) {
+            // Asignar un precio basado en la marca y el año
+            $precioBase = 0;
+            
+            if (stripos($vehiculo->marca, 'ferrari') !== false || stripos($vehiculo->marca, 'lamborghini') !== false) {
+                $precioBase = rand(200000, 400000);
+            } elseif (stripos($vehiculo->marca, 'porsche') !== false || stripos($vehiculo->marca, 'aston') !== false) {
+                $precioBase = rand(150000, 250000);
+            } elseif (stripos($vehiculo->marca, 'bmw') !== false || stripos($vehiculo->marca, 'mercedes') !== false || stripos($vehiculo->marca, 'audi') !== false) {
+                $precioBase = rand(80000, 150000);
+            } else {
+                $precioBase = rand(30000, 80000);
+            }
+            
+            $vehiculo->precio = $precioBase;
+            $vehiculo->save();
+        }
+        
+        // Actualizar los parkings con metros cuadrados y precio por metro cuadrado
+        $parkings = \App\Models\Parking::all();
+        
+        foreach ($parkings as $parking) {
+            // Metros cuadrados aleatorios entre 500 y 3000
+            $metrosCuadrados = rand(500, 3000);
+            
+            // Precio por metro cuadrado entre 800 y 2000 euros
+            $precioMetroCuadrado = rand(800, 2000);
+            
+            $parking->metros_cuadrados = $metrosCuadrados;
+            $parking->precio_metro_cuadrado = $precioMetroCuadrado;
+            $parking->save();
+        }
+    }
+}
+
+```
+
+## UserSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+
+class UserSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Admin
+        DB::table('users')->insert([
+            'nombre' => 'Admin',
+            'email' => 'admin@carflow.com',
+            'DNI' => '12345678A',
+            'telefono' => '615449359',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1985-01-01',
+            'direccion' => 'Calle Admin 1',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Gestores por sede
+        // Gestor Barcelona
+        DB::table('users')->insert([
+            'nombre' => 'Gestor Barcelona',
+            'email' => 'gestor.barcelona@carflow.com',
+            'DNI' => '23456789B',
+            'telefono' => '615449359',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-01-01',
+            'direccion' => 'Calle Barcelona 123',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 3,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Gestor Madrid
+        DB::table('users')->insert([
+            'nombre' => 'Gestor Madrid',
+            'email' => 'gestor.madrid@carflow.com',
+            'DNI' => '34567890C',
+            'telefono' => '615449360',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1988-05-15',
+            'direccion' => 'Calle Madrid 456',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 3,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Gestor Valencia
+        DB::table('users')->insert([
+            'nombre' => 'Gestor Valencia',
+            'email' => 'gestor.valencia@carflow.com',
+            'DNI' => '45678901D',
+            'telefono' => '615449361',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1992-08-20',
+            'direccion' => 'Calle Valencia 789',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 3,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Mecánicos por sede (4 por cada sede)
+        // Mecánicos Barcelona
+        for ($i = 1; $i <= 4; $i++) {
+            DB::table('users')->insert([
+                'nombre' => "Mecánico Barcelona $i",
+                'email' => "mecanico.barcelona$i@carflow.com",
+                'DNI' => '5' . str_pad($i, 7, '0', STR_PAD_LEFT) . 'E',
+                'telefono' => '62' . str_pad($i, 7, '0', STR_PAD_LEFT),
+                'password' => Hash::make('asdASD123'),
+                'fecha_nacimiento' => '199' . $i . '-01-01',
+                'direccion' => "Taller Barcelona $i",
+                'foto_perfil' => null,
+                'licencia_conducir' => 'B',
+                'id_roles' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Mecánicos Madrid
+        for ($i = 1; $i <= 4; $i++) {
+            DB::table('users')->insert([
+                'nombre' => "Mecánico Madrid $i",
+                'email' => "mecanico.madrid$i@carflow.com",
+                'DNI' => '6' . str_pad($i, 7, '0', STR_PAD_LEFT) . 'F',
+                'telefono' => '63' . str_pad($i, 7, '0', STR_PAD_LEFT),
+                'password' => Hash::make('asdASD123'),
+                'fecha_nacimiento' => '198' . $i . '-06-15',
+                'direccion' => "Taller Madrid $i",
+                'foto_perfil' => null,
+                'licencia_conducir' => 'B',
+                'id_roles' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Mecánicos Valencia
+        for ($i = 1; $i <= 4; $i++) {
+            DB::table('users')->insert([
+                'nombre' => "Mecánico Valencia $i",
+                'email' => "mecanico.valencia$i@carflow.com",
+                'DNI' => '7' . str_pad($i, 7, '0', STR_PAD_LEFT) . 'G',
+                'telefono' => '64' . str_pad($i, 7, '0', STR_PAD_LEFT),
+                'password' => Hash::make('asdASD123'),
+                'fecha_nacimiento' => '199' . $i . '-09-20',
+                'direccion' => "Taller Valencia $i",
+                'foto_perfil' => null,
+                'licencia_conducir' => 'B',
+                'id_roles' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Administrador financiero central (único)
+        DB::table('users')->insert([
+            'nombre' => 'Administrador Financiero',
+            'email' => 'finanzas@carflow.com',
+            'DNI' => '87654321H',
+            'telefono' => '655001122',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1985-03-15',
+            'direccion' => 'Oficina Central Financiera',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 5,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 20 Clientes
+        for ($i = 1; $i <= 20; $i++) {
+            DB::table('users')->insert([
+                'nombre' => "Cliente $i",
+                'email' => "cliente$i@carflow.com",
+                'DNI' => str_pad($i, 8, '0', STR_PAD_LEFT) . 'C',
+                'telefono' => '615449359',
+                'password' => Hash::make('asdASD123'),
+                'fecha_nacimiento' => '1995-01-01',
+                'direccion' => "Calle Cliente $i",
+                'foto_perfil' => '/default.png',
+                'licencia_conducir' => 'B',
+                'id_roles' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Cliente 21 con email específico
+        DB::table('users')->insert([
+            'nombre' => "Cliente 21",
+            'email' => "alegofe04@gmail.com",
+            'DNI' => '00000021C',
+            'telefono' => '615449359',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1995-01-01',
+            'direccion' => "Calle Cliente 21",
+            'foto_perfil' => '/default.png',
+            'licencia_conducir' => 'B',
+            'id_roles' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Cliente con correo gofe007@outlook.com
+        DB::table('users')->insert([
+            'nombre' => "Cliente Outlook",
+            'email' => "gofe007@outlook.com",
+            'DNI' => '00000022C',
+            'telefono' => '615449359',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1995-01-01',
+            'direccion' => "Calle Cliente Outlook",
+            'foto_perfil' => '/default.png',
+            'licencia_conducir' => 'B',
+            'id_roles' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Choferes por sede
+        // Choferes Barcelona
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 1',
+            'email' => 'chofer.barcelona1@carflow.com',
+            'DNI' => '80111111A',
+            'telefono' => '600000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-01-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 2',
+            'email' => 'chofer.barcelona2@carflow.com',
+            'DNI' => '80111112B',
+            'telefono' => '600000002',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-02-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 3',
+            'email' => 'chofer.barcelona3@carflow.com',
+            'DNI' => '80111113C',
+            'telefono' => '600000003',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-03-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 4',
+            'email' => 'chofer.barcelona4@carflow.com',
+            'DNI' => '80111114D',
+            'telefono' => '600000004',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-04-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 5',
+            'email' => 'chofer.barcelona5@carflow.com',
+            'DNI' => '80111115E',
+            'telefono' => '600000005',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-05-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 6',
+            'email' => 'chofer.barcelona6@carflow.com',
+            'DNI' => '80111116F',
+            'telefono' => '600000006',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-06-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Barcelona 7',
+            'email' => 'chofer.barcelona7@carflow.com',
+            'DNI' => '80111117G',
+            'telefono' => '600000007',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1990-07-01',
+            'direccion' => 'Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Choferes Madrid
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 1',
+            'email' => 'chofer.madrid1@carflow.com',
+            'DNI' => '80211111A',
+            'telefono' => '600000101',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-01-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 2',
+            'email' => 'chofer.madrid2@carflow.com',
+            'DNI' => '80211112B',
+            'telefono' => '600000102',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-02-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 3',
+            'email' => 'chofer.madrid3@carflow.com',
+            'DNI' => '80211113C',
+            'telefono' => '600000103',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-03-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 4',
+            'email' => 'chofer.madrid4@carflow.com',
+            'DNI' => '80211114D',
+            'telefono' => '600000104',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-04-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 5',
+            'email' => 'chofer.madrid5@carflow.com',
+            'DNI' => '80211115E',
+            'telefono' => '600000105',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-05-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 6',
+            'email' => 'chofer.madrid6@carflow.com',
+            'DNI' => '80211116F',
+            'telefono' => '600000106',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-06-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 7',
+            'email' => 'chofer.madrid7@carflow.com',
+            'DNI' => '80211117G',
+            'telefono' => '600000107',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-07-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 8',
+            'email' => 'chofer.madrid8@carflow.com',
+            'DNI' => '80211118H',
+            'telefono' => '600000108',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-08-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 9',
+            'email' => 'chofer.madrid9@carflow.com',
+            'DNI' => '80211119I',
+            'telefono' => '600000109',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-09-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Madrid 10',
+            'email' => 'chofer.madrid10@carflow.com',
+            'DNI' => '80211120J',
+            'telefono' => '600000110',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1989-10-01',
+            'direccion' => 'Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+
+        // Choferes Valencia (6)
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Valencia 1',
+            'email' => 'chofer.valencia1@carflow.com',
+            'DNI' => '80311111A',
+            'telefono' => '600000201',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1991-01-01',
+            'direccion' => 'Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Valencia 2',
+            'email' => 'chofer.valencia2@carflow.com',
+            'DNI' => '80311112B',
+            'telefono' => '600000202',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1991-02-01',
+            'direccion' => 'Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Valencia 3',
+            'email' => 'chofer.valencia3@carflow.com',
+            'DNI' => '80311113C',
+            'telefono' => '600000203',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1991-03-01',
+            'direccion' => 'Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Valencia 4',
+            'email' => 'chofer.valencia4@carflow.com',
+            'DNI' => '80311114D',
+            'telefono' => '600000204',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1991-04-01',
+            'direccion' => 'Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Valencia 5',
+            'email' => 'chofer.valencia5@carflow.com',
+            'DNI' => '80311115E',
+            'telefono' => '600000205',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1991-05-01',
+            'direccion' => 'Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'nombre' => 'Chofer Valencia 6',
+            'email' => 'chofer.valencia6@carflow.com',
+            'DNI' => '80311116F',
+            'telefono' => '600000206',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1991-06-01',
+            'direccion' => 'Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 6,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánicos Adicionales - Especialistas
+        
+        // Mecánico Jefe Barcelona
+        DB::table('users')->insert([
+            'nombre' => 'MecanicoBCN',
+            'email' => 'mecanicobcn@carflow.com',
+            'DNI' => '50000001J',
+            'telefono' => '620000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1975-05-15',
+            'direccion' => 'Calle Industria 123, Barcelona',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 4, // Rol de mecánico
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánico Jefe Madrid
+        DB::table('users')->insert([
+            'nombre' => 'MecanicoMAD',
+            'email' => 'jefe.mecanico.mad@carflow.com',
+            'DNI' => '60000001J',
+            'telefono' => '630000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1978-07-22',
+            'direccion' => 'Avenida de los Talleres 45, Madrid',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 4, // Rol de mecánico
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánico Jefe Valencia
+        DB::table('users')->insert([
+            'nombre' => 'MecanicoVAL',
+            'email' => 'jefe.mecanico.val@carflow.com',
+            'DNI' => '70000001J',
+            'telefono' => '640000001',
+            'password' => Hash::make('asdASD123'),
+            'fecha_nacimiento' => '1980-03-10',
+            'direccion' => 'Calle del Taller 78, Valencia',
+            'foto_perfil' => null,
+            'licencia_conducir' => 'B',
+            'id_roles' => 4, // Rol de mecánico
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        // Mecánicos Especialistas por ciudad
+        $especialidades = [
+            'Electricidad' => 'Especialista en Sistemas Eléctricos',
+            'Motor' => 'Especialista en Motores',
+            'Transmisión' => 'Especialista en Transmisiones',
+            'Híbridos' => 'Especialista en Vehículos Híbridos',
+            'Diagnóstico' => 'Especialista en Diagnóstico',
+            'Suspensión' => 'Especialista en Suspensión'
+        ];
+        
+        $ciudades = ['Barcelona' => '5', 'Madrid' => '6', 'Valencia' => '7'];
+        $contador = 1;
+        
+        foreach ($especialidades as $clave => $especialidad) {
+            foreach ($ciudades as $ciudad => $prefijo) {
+                $contador_str = str_pad($contador, 6, '0', STR_PAD_LEFT);
+                DB::table('users')->insert([
+                    'nombre' => "Mecánico {$especialidad} - {$ciudad}",
+                    'email' => "mecanico." . strtolower(str_replace(' ', '', $clave)) . ".{$ciudad}@carflow.com",
+                    'DNI' => "{$prefijo}{$contador_str}E",
+                    'telefono' => "6{$prefijo}" . $contador_str,
+                    'password' => Hash::make('asdASD123'),
+                    'fecha_nacimiento' => '198' . rand(0, 9) . '-' . str_pad(rand(1, 12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1, 28), 2, '0', STR_PAD_LEFT),
+                    'direccion' => "Taller de {$ciudad}, Zona {$contador}",
+                    'foto_perfil' => null,
+                    'licencia_conducir' => 'B',
+                    'id_roles' => 4, // Rol de mecánico
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $contador++;
+            }
+        }
+    }
+}
+
+```
+
+## ValoracionSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ValoracionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('valoraciones')->insert([
+            [
+                'comentario' => 'Excelente servicio, muy satisfecho',
+                'valoracion' => 5,
+                'id_reservas' => 1,
+                'id_usuario' => 2,
+            ],
+            [
+                'comentario' => 'Muy buena experiencia',
+                'valoracion' => 4,
+                'id_reservas' => 2,
+                'id_usuario' => 2,
+            ],
+            [
+                'comentario' => 'El servicio fue bueno',
+                'valoracion' => 3,
+                'id_reservas' => 2,
+                'id_usuario' => 3,
+            ],
+        ]);
+    }
+}
+
+```
+
+## VehiculoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
+
+class VehiculoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Base data for all vehicles
+        $vehiculos = [
+            // 30 Coches (id_tipo = 1)
+            ['id_vehiculos' => 1, 'precio_dia' => rand(20,150), 'marca' => 'Toyota', 'modelo' => 'Corolla', 'año' => 2024, 'kilometraje' => 41733, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 11],
+            ['id_vehiculos' => 2, 'precio_dia' => rand(20,150), 'marca' => 'Volkswagen', 'modelo' => 'Golf', 'año' => 2020, 'kilometraje' => 62124, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 12],
+            ['id_vehiculos' => 3, 'precio_dia' => rand(20,150), 'marca' => 'Ford', 'modelo' => 'Focus', 'año' => 2020, 'kilometraje' => 74116, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 1],
+            ['id_vehiculos' => 4, 'precio_dia' => rand(20,150), 'marca' => 'Renault', 'modelo' => 'Clio', 'año' => 2019, 'kilometraje' => 35532, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 13],
+            ['id_vehiculos' => 5, 'precio_dia' => rand(20,150), 'marca' => 'Peugeot', 'modelo' => '308', 'año' => 2023, 'kilometraje' => 23938, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 2],
+            ['id_vehiculos' => 6, 'precio_dia' => rand(20,150), 'marca' => 'Hyundai', 'modelo' => 'i30', 'año' => 2021, 'kilometraje' => 52000, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 5],
+            ['id_vehiculos' => 7, 'precio_dia' => rand(20,150), 'marca' => 'Kia', 'modelo' => 'Ceed', 'año' => 2022, 'kilometraje' => 33500, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 11],
+            ['id_vehiculos' => 8, 'precio_dia' => rand(20,150), 'marca' => 'Seat', 'modelo' => 'Leon', 'año' => 2020, 'kilometraje' => 61200, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 3],
+            ['id_vehiculos' => 9, 'precio_dia' => rand(20,150), 'marca' => 'Mazda', 'modelo' => '3', 'año' => 2019, 'kilometraje' => 68500, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 6],
+            ['id_vehiculos' => 10, 'precio_dia' => rand(20,150), 'marca' => 'Skoda', 'modelo' => 'Octavia', 'año' => 2024, 'kilometraje' => 12500, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 12],
+            ['id_vehiculos' => 11, 'precio_dia' => rand(20,150), 'marca' => 'Opel', 'modelo' => 'Astra', 'año' => 2023, 'kilometraje' => 20100, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 4],
+            ['id_vehiculos' => 12, 'precio_dia' => rand(20,150), 'marca' => 'Citroen', 'modelo' => 'C4', 'año' => 2021, 'kilometraje' => 48900, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 7],
+            ['id_vehiculos' => 13, 'precio_dia' => rand(20,150), 'marca' => 'Honda', 'modelo' => 'Civic', 'año' => 2020, 'kilometraje' => 75200, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 8],
+            ['id_vehiculos' => 14, 'precio_dia' => rand(20,150), 'marca' => 'Fiat', 'modelo' => 'Tipo', 'año' => 2018, 'kilometraje' => 83200, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 13],
+            ['id_vehiculos' => 15, 'precio_dia' => rand(20,150), 'marca' => 'Nissan', 'modelo' => 'Pulsar', 'año' => 2022, 'kilometraje' => 29100, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 1],
+            ['id_vehiculos' => 16, 'precio_dia' => rand(20,150), 'marca' => 'Chevrolet', 'modelo' => 'Cruze', 'año' => 2019, 'kilometraje' => 67900, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 2],
+            ['id_vehiculos' => 17, 'precio_dia' => rand(20,150), 'marca' => 'Suzuki', 'modelo' => 'Swift', 'año' => 2020, 'kilometraje' => 41000, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 9],
+            ['id_vehiculos' => 18, 'precio_dia' => rand(20,150), 'marca' => 'Mini', 'modelo' => 'Cooper', 'año' => 2023, 'kilometraje' => 13500, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 11],
+            ['id_vehiculos' => 19, 'precio_dia' => rand(20,150), 'marca' => 'Subaru', 'modelo' => 'Impreza', 'año' => 2021, 'kilometraje' => 48900, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 10],
+            ['id_vehiculos' => 20, 'precio_dia' => rand(20,150), 'marca' => 'Lada', 'modelo' => 'Vesta', 'año' => 2022, 'kilometraje' => 39200, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 3],
+            ['id_vehiculos' => 21, 'precio_dia' => rand(20,150), 'marca' => 'Chery', 'modelo' => 'Arrizo 5', 'año' => 2023, 'kilometraje' => 11000, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 12],
+            ['id_vehiculos' => 22, 'precio_dia' => rand(20,150), 'marca' => 'Geely', 'modelo' => 'Emgrand', 'año' => 2020, 'kilometraje' => 55900, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 5],
+            ['id_vehiculos' => 23, 'precio_dia' => rand(20,150), 'marca' => 'Dacia', 'modelo' => 'Sandero', 'año' => 2019, 'kilometraje' => 64800, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 4],
+            ['id_vehiculos' => 24, 'precio_dia' => rand(20,150), 'marca' => 'BYD', 'modelo' => 'Dolphin', 'año' => 2024, 'kilometraje' => 8000, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 6],
+            ['id_vehiculos' => 25, 'precio_dia' => rand(20,150), 'marca' => 'MG', 'modelo' => 'MG5', 'año' => 2023, 'kilometraje' => 15400, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 1],
+            ['id_vehiculos' => 26, 'precio_dia' => rand(20,150), 'marca' => 'Tata', 'modelo' => 'Tiago', 'año' => 2021, 'kilometraje' => 43500, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 13],
+            ['id_vehiculos' => 27, 'precio_dia' => rand(20,150), 'marca' => 'Proton', 'modelo' => 'Saga', 'año' => 2022, 'kilometraje' => 37600, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 2],
+            ['id_vehiculos' => 28, 'precio_dia' => rand(20,150), 'marca' => 'Perodua', 'modelo' => 'Myvi', 'año' => 2020, 'kilometraje' => 49200, 'id_lugar' => 3, 'id_tipo' => 1, 'parking_id' => 11],
+            ['id_vehiculos' => 29, 'precio_dia' => rand(20,150), 'marca' => 'Great Wall', 'modelo' => 'Voleex C30', 'año' => 2018, 'kilometraje' => 58900, 'id_lugar' => 1, 'id_tipo' => 1, 'parking_id' => 7],
+            ['id_vehiculos' => 30, 'precio_dia' => rand(20,150), 'marca' => 'Zotye', 'modelo' => 'Z300', 'año' => 2021, 'kilometraje' => 32800, 'id_lugar' => 2, 'id_tipo' => 1, 'parking_id' => 3],
+            
+            // 20 Motos (id_tipo = 2)
+            ['id_vehiculos' => 31, 'precio_dia' => rand(20,150), 'marca' => 'Yamaha', 'modelo' => 'MT-07', 'año' => 2022, 'kilometraje' => 8500, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 5],
+            ['id_vehiculos' => 32, 'precio_dia' => rand(20,150), 'marca' => 'Honda', 'modelo' => 'CBR500R', 'año' => 2021, 'kilometraje' => 9700, 'id_lugar' => 2, 'id_tipo' => 2, 'parking_id' => 1],
+            ['id_vehiculos' => 33, 'precio_dia' => rand(20,150), 'marca' => 'Kawasaki', 'modelo' => 'Z650', 'año' => 2020, 'kilometraje' => 12300, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 6],
+            ['id_vehiculos' => 34, 'precio_dia' => rand(20,150), 'marca' => 'BMW', 'modelo' => 'G310R', 'año' => 2023, 'kilometraje' => 5000, 'id_lugar' => 3, 'id_tipo' => 2, 'parking_id' => 11],
+            ['id_vehiculos' => 35, 'precio_dia' => rand(20,150), 'marca' => 'Suzuki', 'modelo' => 'GSX-S750', 'año' => 2019, 'kilometraje' => 18400, 'id_lugar' => 2, 'id_tipo' => 2, 'parking_id' => 2],
+            ['id_vehiculos' => 36, 'precio_dia' => rand(20,150), 'marca' => 'Ducati', 'modelo' => 'Monster', 'año' => 2021, 'kilometraje' => 7100, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 7],
+            ['id_vehiculos' => 37, 'precio_dia' => rand(20,150), 'marca' => 'Triumph', 'modelo' => 'Street Triple', 'año' => 2022, 'kilometraje' => 6300, 'id_lugar' => 3, 'id_tipo' => 2, 'parking_id' => 12],
+            ['id_vehiculos' => 38, 'precio_dia' => rand(20,150), 'marca' => 'KTM', 'modelo' => 'Duke 390', 'año' => 2020, 'kilometraje' => 7900, 'id_lugar' => 2, 'id_tipo' => 2, 'parking_id' => 3],
+            ['id_vehiculos' => 39, 'precio_dia' => rand(20,150), 'marca' => 'Harley-Davidson', 'modelo' => 'Iron 883', 'año' => 2018, 'kilometraje' => 11500, 'id_lugar' => 3, 'id_tipo' => 2, 'parking_id' => 13],
+            ['id_vehiculos' => 40, 'precio_dia' => rand(20,150), 'marca' => 'Aprilia', 'modelo' => 'RS 660', 'año' => 2023, 'kilometraje' => 4200, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 8],
+            ['id_vehiculos' => 41, 'precio_dia' => rand(20,150), 'marca' => 'Benelli', 'modelo' => 'Leoncino', 'año' => 2022, 'kilometraje' => 6100, 'id_lugar' => 2, 'id_tipo' => 2, 'parking_id' => 4],
+            ['id_vehiculos' => 42, 'precio_dia' => rand(20,150), 'marca' => 'Husqvarna', 'modelo' => 'Svartpilen 401', 'año' => 2021, 'kilometraje' => 7000, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 9],
+            ['id_vehiculos' => 43, 'precio_dia' => rand(20,150), 'marca' => 'Royal Enfield', 'modelo' => 'Meteor 350', 'año' => 2020, 'kilometraje' => 8300, 'id_lugar' => 3, 'id_tipo' => 2, 'parking_id' => 13],
+            ['id_vehiculos' => 44, 'precio_dia' => rand(20,150), 'marca' => 'CFMOTO', 'modelo' => '300NK', 'año' => 2023, 'kilometraje' => 3700, 'id_lugar' => 2, 'id_tipo' => 2, 'parking_id' => 1],
+            ['id_vehiculos' => 45, 'precio_dia' => rand(20,150), 'marca' => 'Zontes', 'modelo' => 'T310', 'año' => 2021, 'kilometraje' => 9200, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 10],
+            ['id_vehiculos' => 46, 'precio_dia' => rand(20,150), 'marca' => 'Moto Guzzi', 'modelo' => 'V7 Stone', 'año' => 2020, 'kilometraje' => 7800, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 5],
+            ['id_vehiculos' => 47, 'precio_dia' => rand(20,150), 'marca' => 'Voge', 'modelo' => '500R', 'año' => 2019, 'kilometraje' => 9700, 'id_lugar' => 3, 'id_tipo' => 2, 'parking_id' => 11],
+            ['id_vehiculos' => 48, 'precio_dia' => rand(20,150), 'marca' => 'SYM', 'modelo' => 'Wolf 250', 'año' => 2022, 'kilometraje' => 4500, 'id_lugar' => 2, 'id_tipo' => 2, 'parking_id' => 2],
+            ['id_vehiculos' => 49, 'precio_dia' => rand(20,150), 'marca' => 'Mash', 'modelo' => 'Two Fifty', 'año' => 2021, 'kilometraje' => 5300, 'id_lugar' => 1, 'id_tipo' => 2, 'parking_id' => 6],
+            ['id_vehiculos' => 50, 'precio_dia' => rand(20,150), 'marca' => 'Lifan', 'modelo' => 'KPR 200', 'año' => 2020, 'kilometraje' => 10200, 'id_lugar' => 3, 'id_tipo' => 2, 'parking_id' => 12],
+            
+            // 15 Furgonetas (id_tipo = 3)
+            ['id_vehiculos' => 51, 'precio_dia' => rand(20,150), 'marca' => 'Mercedes-Benz', 'modelo' => 'Sprinter', 'año' => 2022, 'kilometraje' => 42300, 'id_lugar' => 1, 'id_tipo' => 3, 'parking_id' => 7],
+            ['id_vehiculos' => 52, 'precio_dia' => rand(20,150), 'marca' => 'Ford', 'modelo' => 'Transit', 'año' => 2021, 'kilometraje' => 50200, 'id_lugar' => 2, 'id_tipo' => 3, 'parking_id' => 3],
+            ['id_vehiculos' => 53, 'precio_dia' => rand(20,150), 'marca' => 'Renault', 'modelo' => 'Master', 'año' => 2020, 'kilometraje' => 58800, 'id_lugar' => 3, 'id_tipo' => 3, 'parking_id' => 13],
+            ['id_vehiculos' => 54, 'precio_dia' => rand(20,150), 'marca' => 'Volkswagen', 'modelo' => 'Crafter', 'año' => 2023, 'kilometraje' => 27900, 'id_lugar' => 1, 'id_tipo' => 3, 'parking_id' => 8],
+            ['id_vehiculos' => 55, 'precio_dia' => rand(20,150), 'marca' => 'Citroën', 'modelo' => 'Jumper', 'año' => 2022, 'kilometraje' => 39000, 'id_lugar' => 2, 'id_tipo' => 3, 'parking_id' => 4],
+            ['id_vehiculos' => 56, 'precio_dia' => rand(20,150), 'marca' => 'Peugeot', 'modelo' => 'Boxer', 'año' => 2020, 'kilometraje' => 61200, 'id_lugar' => 3, 'id_tipo' => 3, 'parking_id' => 11],
+            ['id_vehiculos' => 57, 'precio_dia' => rand(20,150), 'marca' => 'Fiat', 'modelo' => 'Ducato', 'año' => 2021, 'kilometraje' => 48700, 'id_lugar' => 1, 'id_tipo' => 3, 'parking_id' => 9],
+            ['id_vehiculos' => 58, 'precio_dia' => rand(20,150), 'marca' => 'Iveco', 'modelo' => 'Daily', 'año' => 2019, 'kilometraje' => 70400, 'id_lugar' => 2, 'id_tipo' => 3, 'parking_id' => 1],
+            ['id_vehiculos' => 59, 'precio_dia' => rand(20,150), 'marca' => 'Opel', 'modelo' => 'Movano', 'año' => 2023, 'kilometraje' => 21000, 'id_lugar' => 3, 'id_tipo' => 3, 'parking_id' => 12],
+            ['id_vehiculos' => 60, 'precio_dia' => rand(20,150), 'marca' => 'Nissan', 'modelo' => 'NV400', 'año' => 2020, 'kilometraje' => 64300, 'id_lugar' => 2, 'id_tipo' => 3, 'parking_id' => 2],
+            ['id_vehiculos' => 61, 'precio_dia' => rand(20,150), 'marca' => 'Hyundai', 'modelo' => 'H350', 'año' => 2021, 'kilometraje' => 35600, 'id_lugar' => 1, 'id_tipo' => 3, 'parking_id' => 10],
+            ['id_vehiculos' => 62, 'precio_dia' => rand(20,150), 'marca' => 'Toyota', 'modelo' => 'Proace', 'año' => 2022, 'kilometraje' => 27400, 'id_lugar' => 3, 'id_tipo' => 3, 'parking_id' => 13],
+            ['id_vehiculos' => 63, 'precio_dia' => rand(20,150), 'marca' => 'MAN', 'modelo' => 'TGE', 'año' => 2023, 'kilometraje' => 18200, 'id_lugar' => 1, 'id_tipo' => 3, 'parking_id' => 5],
+            ['id_vehiculos' => 64, 'precio_dia' => rand(20,150), 'marca' => 'Isuzu', 'modelo' => 'N-Series', 'año' => 2020, 'kilometraje' => 52000, 'id_lugar' => 2, 'id_tipo' => 3, 'parking_id' => 3],
+            ['id_vehiculos' => 65, 'precio_dia' => rand(20,150), 'marca' => 'Maxus', 'modelo' => 'Deliver 9', 'año' => 2021, 'kilometraje' => 46800, 'id_lugar' => 3, 'id_tipo' => 3, 'parking_id' => 11],
+            
+            // 10 Camiones (id_tipo = 4)
+            ['id_vehiculos' => 66, 'precio_dia' => rand(20,150), 'marca' => 'Volvo', 'modelo' => 'FL', 'año' => 2022, 'kilometraje' => 31200, 'id_lugar' => 1, 'id_tipo' => 4, 'parking_id' => 6],
+            ['id_vehiculos' => 67, 'precio_dia' => rand(20,150), 'marca' => 'Mercedes-Benz', 'modelo' => 'Atego', 'año' => 2021, 'kilometraje' => 46800, 'id_lugar' => 2, 'id_tipo' => 4, 'parking_id' => 4],
+            ['id_vehiculos' => 68, 'precio_dia' => rand(20,150), 'marca' => 'DAF', 'modelo' => 'LF', 'año' => 2020, 'kilometraje' => 52900, 'id_lugar' => 3, 'id_tipo' => 4, 'parking_id' => 12],
+            ['id_vehiculos' => 69, 'precio_dia' => rand(20,150), 'marca' => 'Scania', 'modelo' => 'P-Series', 'año' => 2023, 'kilometraje' => 24800, 'id_lugar' => 1, 'id_tipo' => 4, 'parking_id' => 7],
+            ['id_vehiculos' => 70, 'precio_dia' => rand(20,150), 'marca' => 'MAN', 'modelo' => 'TGL', 'año' => 2020, 'kilometraje' => 57700, 'id_lugar' => 2, 'id_tipo' => 4, 'parking_id' => 1],
+            ['id_vehiculos' => 71, 'precio_dia' => rand(20,150), 'marca' => 'Iveco', 'modelo' => 'Eurocargo', 'año' => 2019, 'kilometraje' => 69200, 'id_lugar' => 3, 'id_tipo' => 4, 'parking_id' => 13],
+            ['id_vehiculos' => 72, 'precio_dia' => rand(20,150), 'marca' => 'Renault', 'modelo' => 'D-Series', 'año' => 2021, 'kilometraje' => 38400, 'id_lugar' => 1, 'id_tipo' => 4, 'parking_id' => 8],
+            ['id_vehiculos' => 73, 'precio_dia' => rand(20,150), 'marca' => 'Isuzu', 'modelo' => 'F-Series', 'año' => 2022, 'kilometraje' => 32600, 'id_lugar' => 2, 'id_tipo' => 4, 'parking_id' => 2],
+            ['id_vehiculos' => 74, 'precio_dia' => rand(20,150), 'marca' => 'Hino', 'modelo' => '500 Series', 'año' => 2023, 'kilometraje' => 21800, 'id_lugar' => 1, 'id_tipo' => 4, 'parking_id' => 9],
+            ['id_vehiculos' => 75, 'precio_dia' => rand(20,150), 'marca' => 'Tata', 'modelo' => 'LPT 1618', 'año' => 2020, 'kilometraje' => 61500, 'id_lugar' => 3, 'id_tipo' => 4, 'parking_id' => 11]
+        ];
+
+        // Add maintenance dates and timestamps to each vehicle
+        foreach ($vehiculos as $vehiculo) {
+            $vehiculo['ultima_fecha_mantenimiento'] = now()->subMonths(rand(1, 6));
+            $vehiculo['proxima_fecha_mantenimiento'] = now()->addMonths(rand(1, 6));
+            $vehiculo['created_at'] = now();
+            $vehiculo['updated_at'] = now();
+            
+            DB::table('vehiculos')->insert($vehiculo);
+        }
+    }
+}
+```
+
+## VehiculosReservasSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class VehiculosReservasSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        DB::table('vehiculos_reservas')->insert([
+            // Reserva 1 (Madrid) - Vehículo de Madrid
+            [
+                'id_vehiculos_reservas' => 1,
+                'id_vehiculos' => 6, // Hyundai i30 de Madrid
+                'id_reservas' => 1,
+                'fecha_ini' => '2024-04-07',
+                'fecha_final' => '2024-04-09',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 2 (Madrid) - Vehículo de Madrid
+            [
+                'id_vehiculos_reservas' => 2,
+                'id_vehiculos' => 9, // Mazda 3 de Madrid
+                'id_reservas' => 2,
+                'fecha_ini' => '2024-04-15',
+                'fecha_final' => '2024-04-18',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 3 (Madrid) - Múltiples vehículos de Madrid
+            [
+                'id_vehiculos_reservas' => 3,
+                'id_vehiculos' => 12, // Citroen C4 de Madrid
+                'id_reservas' => 3,
+                'fecha_ini' => '2024-04-25',
+                'fecha_final' => '2024-04-28',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 4,
+                'id_vehiculos' => 13, // Honda Civic de Madrid
+                'id_reservas' => 3,
+                'fecha_ini' => '2024-04-25',
+                'fecha_final' => '2024-04-28',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 4 (Madrid) - Vehículo de Madrid
+            [
+                'id_vehiculos_reservas' => 5,
+                'id_vehiculos' => 17, // Suzuki Swift de Madrid
+                'id_reservas' => 4,
+                'fecha_ini' => '2024-05-10',
+                'fecha_final' => '2024-05-12',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 5 (Barcelona) - Vehículo de Barcelona
+            [
+                'id_vehiculos_reservas' => 6,
+                'id_vehiculos' => 3, // Ford Focus de Barcelona
+                'id_reservas' => 5,
+                'fecha_ini' => '2024-04-10',
+                'fecha_final' => '2024-04-11',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 6 (Barcelona) - Múltiples vehículos de Barcelona
+            [
+                'id_vehiculos_reservas' => 7,
+                'id_vehiculos' => 5, // Peugeot 308 de Barcelona
+                'id_reservas' => 6,
+                'fecha_ini' => '2024-04-22',
+                'fecha_final' => '2024-04-24',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 8,
+                'id_vehiculos' => 8, // Seat Leon de Barcelona
+                'id_reservas' => 6,
+                'fecha_ini' => '2024-04-22',
+                'fecha_final' => '2024-04-24',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 7 (Barcelona) - Vehículo de Barcelona
+            [
+                'id_vehiculos_reservas' => 9,
+                'id_vehiculos' => 11, // Opel Astra de Barcelona
+                'id_reservas' => 7,
+                'fecha_ini' => '2024-05-15',
+                'fecha_final' => '2024-05-18',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 8 (Valencia) - Vehículo de Valencia
+            [
+                'id_vehiculos_reservas' => 10,
+                'id_vehiculos' => 1, // Toyota Corolla de Valencia
+                'id_reservas' => 8,
+                'fecha_ini' => '2024-04-20',
+                'fecha_final' => '2024-04-22',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 9 (Valencia) - Vehículo de Valencia
+            [
+                'id_vehiculos_reservas' => 11,
+                'id_vehiculos' => 4, // Renault Clio de Valencia
+                'id_reservas' => 9,
+                'fecha_ini' => '2024-05-01',
+                'fecha_final' => '2024-05-04',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Reserva 10 (Valencia) - Múltiples vehículos de Valencia
+            [
+                'id_vehiculos_reservas' => 12,
+                'id_vehiculos' => 7, // Kia Ceed de Valencia
+                'id_reservas' => 10,
+                'fecha_ini' => '2024-05-20',
+                'fecha_final' => '2024-05-23',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 13,
+                'id_vehiculos' => 10, // Skoda Octavia de Valencia
+                'id_reservas' => 10,
+                'fecha_ini' => '2024-05-20',
+                'fecha_final' => '2024-05-23',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Añadimos algunas reservas de motos
+            [
+                'id_vehiculos_reservas' => 14,
+                'id_vehiculos' => 31, // Yamaha MT-07 de Madrid
+                'id_reservas' => 1,
+                'fecha_ini' => '2024-04-07',
+                'fecha_final' => '2024-04-09',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 15,
+                'id_vehiculos' => 32, // Honda CBR500R de Barcelona
+                'id_reservas' => 5,
+                'fecha_ini' => '2024-04-10',
+                'fecha_final' => '2024-04-11',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 16,
+                'id_vehiculos' => 34, // BMW G310R de Valencia
+                'id_reservas' => 8,
+                'fecha_ini' => '2024-04-20',
+                'fecha_final' => '2024-04-22',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Añadimos algunas reservas de furgonetas
+            [
+                'id_vehiculos_reservas' => 17,
+                'id_vehiculos' => 51, // Mercedes-Benz Sprinter de Madrid
+                'id_reservas' => 2,
+                'fecha_ini' => '2024-04-15',
+                'fecha_final' => '2024-04-18',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 18,
+                'id_vehiculos' => 52, // Ford Transit de Barcelona
+                'id_reservas' => 7,
+                'fecha_ini' => '2024-05-15',
+                'fecha_final' => '2024-05-18',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 19,
+                'id_vehiculos' => 53, // Renault Master de Valencia
+                'id_reservas' => 9,
+                'fecha_ini' => '2024-05-01',
+                'fecha_final' => '2024-05-04',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Añadimos algunas reservas de camiones
+            [
+                'id_vehiculos_reservas' => 20,
+                'id_vehiculos' => 66, // Volvo FL de Madrid
+                'id_reservas' => 3,
+                'fecha_ini' => '2024-04-25',
+                'fecha_final' => '2024-04-28',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 21,
+                'id_vehiculos' => 67, // Mercedes-Benz Atego de Barcelona
+                'id_reservas' => 6,
+                'fecha_ini' => '2024-04-22',
+                'fecha_final' => '2024-04-24',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id_vehiculos_reservas' => 22,
+                'id_vehiculos' => 68, // DAF LF de Valencia
+                'id_reservas' => 10,
+                'fecha_ini' => '2024-05-20',
+                'fecha_final' => '2024-05-23',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+        ]);
+    }
+}
+```
+
+## carritoSeeder.php
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+
+class CarritoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $totalPrecio = 75.00 + 50.00;
+
+        // Crear la reserva con id_lugar obligatorio
+        $reservaId = DB::table('reservas')->insertGetId([
+            'id_usuario' => 3,
+            'id_lugar' => 1, // <- Asegúrate que el lugar con ID 1 existe en tu tabla lugares
+            'estado' => 'pendiente',
+            'fecha_reserva' => Carbon::now(),
+            'total_precio' => $totalPrecio,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Asociar vehículos a esa reserva
+        // DB::table('vehiculos_reservas')->insert([
+        //     [
+        //         'id_reservas' => $reservaId,
+        //         'id_vehiculos' => 1,
+        //         'fecha_ini' => Carbon::now()->addDays(1),
+        //         'fecha_final' => Carbon::now()->addDays(3),
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        //     [
+        //         'id_reservas' => $reservaId,
+        //         'id_vehiculos' => 2,
+        //         'fecha_ini' => Carbon::now()->addDays(4),
+        //         'fecha_final' => Carbon::now()->addDays(6),
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        // ]);
+    }
+}
+
+```
+
