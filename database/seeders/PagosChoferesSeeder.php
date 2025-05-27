@@ -18,107 +18,145 @@ class PagosChoferesSeeder extends Seeder
         $this->command->info('Creando pagos de servicios de taxi...');
         $faker = Faker::create('es_ES');
         
-        // Obtener todos los usuarios con rol de chofer, si existe la tabla users
+        // Verificar si las tablas necesarias existen
+        if (!Schema::hasTable('solicitudes')) {
+            $this->command->error('La tabla de solicitudes no existe. No se pueden crear pagos de choferes.');
+            return;
+        }
+        
+        if (!Schema::hasTable('pagos_choferes')) {
+            $this->command->error('La tabla de pagos_choferes no existe. No se pueden crear pagos de choferes.');
+            return;
+        }
+        
+        // Obtener choferes disponibles
         try {
-            $choferes = DB::table('users')
-                ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                ->where('roles.name', 'chofer')
-                ->select('users.id')
-                ->get();
-                
+            // Obtener directamente de la tabla choferes usando el ID primario correcto
+            if (Schema::hasTable('choferes')) {
+                $choferes = DB::table('choferes')->select('id')->get();
+                $this->command->info('Se encontraron ' . $choferes->count() . ' choferes.');
+            } else {
+                $this->command->error('La tabla choferes no existe. No se pueden crear solicitudes.');
+                return;
+            }
+            
             if ($choferes->isEmpty()) {
                 // Si no hay choferes en el sistema, creamos registros simulados
                 $choferes = collect();
                 for ($i = 1; $i <= 10; $i++) {
                     $choferes->push((object)['id' => $i]);
                 }
+                $this->command->warn('No se encontraron choferes. Se usarán ' . $choferes->count() . ' choferes simulados.');
             }
         } catch (\Exception $e) {
-            // Si hay un error o la tabla no existe, creamos datos simulados
-            $choferes = collect();
-            for ($i = 1; $i <= 10; $i++) {
-                $choferes->push((object)['id' => $i]);
-            }
+            $this->command->error('Error al consultar choferes: ' . $e->getMessage());
+            return;
         }
         
-        // Obtener solicitudes (reservas) existentes en lugar de solicitud_taxi
+        // Obtener clientes disponibles
         try {
-            // Obtener IDs reales de la tabla solicitudes o de reservas
-            if (Schema::hasTable('solicitudes')) {
-                $solicitudes = DB::table('solicitudes')->select('id')->get();
-                $this->command->info('Se encontraron ' . $solicitudes->count() . ' solicitudes.');
-            } else if (Schema::hasTable('reservas')) {
-                // Si no existe 'solicitudes', usar reservas como alternativa
-                $solicitudes = DB::table('reservas')->select('id_reservas as id')->get();
-                $this->command->info('No se encontró tabla solicitudes. Usando ' . $solicitudes->count() . ' reservas.');
-            } else {
-                // Si no hay ni solicitudes ni reservas, no podemos crear pagos de choferes
-                $this->command->error('No se encontraron tablas de solicitudes o reservas. No se pueden crear pagos de choferes.');
-                return; // Salir del seeder
-            }
-            
-            if ($solicitudes->isEmpty()) {
-                $this->command->warn('No hay solicitudes o reservas disponibles. Se crearán pagos de choferes con IDs simulados.');
-                // Crear una colección simulada de solicitudes
-                $solicitudes = collect();
-                for ($i = 1; $i <= 50; $i++) {
-                    $solicitudes->push((object)['id' => $i]);
+            $clientes = DB::table('users')
+                ->where('id_roles', '!=', 6)  // No seleccionar usuarios que sean choferes
+                ->select('id_usuario as id')
+                ->get();
+                
+            if ($clientes->isEmpty()) {
+                // Si no hay clientes, creamos algunos simulados
+                $clientes = collect();
+                for ($i = 101; $i <= 120; $i++) {  // IDs distintos de los choferes
+                    $clientes->push((object)['id' => $i]);
                 }
+                $this->command->warn('No se encontraron clientes. Se usarán ' . $clientes->count() . ' clientes simulados.');
+            } else {
+                $this->command->info('Se encontraron ' . $clientes->count() . ' clientes.');
             }
         } catch (\Exception $e) {
-            $this->command->error('Error al consultar solicitudes: ' . $e->getMessage());
-            return; // Salir del seeder
+            $this->command->error('Error al consultar clientes: ' . $e->getMessage());
+            return;
         }
         
-        // Generar pagos para los últimos 12 meses
-        $fechaInicio = Carbon::now()->subMonths(12);
-        $fechaFin = Carbon::now();
-        
-        // Calcular número de días en el rango para distribuir pagos
-        $diasRango = $fechaFin->diffInDays($fechaInicio);
-        
-        // Determinar cantidad de pagos a generar (entre 100-150 para 12 meses)
-        $cantidadPagos = rand(100, 150);
-        
-        // Truncar la tabla antes de insertar nuevos registros
+        // Limpiamos la tabla de pagos de choferes
         try {
             DB::table('pagos_choferes')->truncate();
         } catch (\Exception $e) {
-            $this->command->error('No se pudo truncar la tabla pagos_choferes: ' . $e->getMessage());
-            // Continuamos con el proceso aunque no se pueda truncar
+            // Si no se puede truncar, intentamos eliminar los registros
+            try {
+                DB::table('pagos_choferes')->delete();
+            } catch (\Exception $ex) {
+                // Continuamos si falla
+            }
         }
         
-        $this->command->info("Generando {$cantidadPagos} pagos de servicios de taxi.");
+        // Generar fechas para los últimos 12 meses
+        $fechaInicio = Carbon::now()->subMonths(12);
+        $fechaFin = Carbon::now();
+        $diasRango = $fechaFin->diffInDays($fechaInicio);
         
-        // Contador de éxitos
-        $registrosCreados = 0;
+        // Determinar cantidad de pagos/solicitudes a generar
+        $cantidadPagos = rand(50, 100);  // Reducido para evitar demasiados errores
+        $this->command->info("Se generarán {$cantidadPagos} solicitudes y pagos de taxi.");
         
-        // Generar registros de pagos
+        // Contadores
+        $solicitudesCreadas = 0;
+        $pagosCreados = 0;
+        
+        // Colección para almacenar las solicitudes creadas
+        $solicitudesNuevas = collect();
+        
+        // Generar solicitudes
         for ($i = 0; $i < $cantidadPagos; $i++) {
             try {
                 // Seleccionar un chofer aleatorio
                 $chofer = $choferes->random();
                 
-                // Seleccionar una solicitud aleatoria
-                $solicitud = $solicitudes->random();
+                // Seleccionar un cliente aleatorio
+                $cliente = $clientes->random();
                 
-                // Generar fecha aleatoria dentro del rango
-                $fechaPago = $fechaInicio->copy()->addDays(rand(0, $diasRango));
+                // Generar coordenadas de origen (España)
+                $latitudOrigen = $faker->latitude(36.0, 43.5);  // Aproximadamente España
+                $longitudOrigen = $faker->longitude(-9.0, 3.0);
                 
-                // Generar importes realistas
-                // La tarifa media de un servicio de taxi ronda los 15-50€
-                $importeTotal = $faker->randomFloat(2, 15, 50);
+                // Generar coordenadas de destino (cerca del origen, pero distinto)
+                $latitudDestino = $latitudOrigen + $faker->randomFloat(6, -0.05, 0.05);
+                $longitudDestino = $longitudOrigen + $faker->randomFloat(6, -0.05, 0.05);
                 
-                // La empresa se queda con un porcentaje (típicamente 20-30%)
-                $porcentajeEmpresa = $faker->randomFloat(2, 0.2, 0.3);
+                // Generar precio
+                $precio = $faker->randomFloat(2, 15, 50);
+                
+                // Generar fecha aleatoria
+                $fechaSolicitud = $fechaInicio->copy()->addDays(rand(0, $diasRango));
+                
+                // Insertar solicitud con estado 'completada' (no pendiente)
+                $idSolicitud = DB::table('solicitudes')->insertGetId([
+                    'id_chofer' => $chofer->id,
+                    'id_cliente' => $cliente->id,
+                    'latitud_origen' => $latitudOrigen,
+                    'longitud_origen' => $longitudOrigen,
+                    'latitud_destino' => $latitudDestino,
+                    'longitud_destino' => $longitudDestino,
+                    'precio' => $precio,
+                    'estado' => 'completada',  // Importante: no pendiente
+                    'created_at' => $fechaSolicitud,
+                    'updated_at' => $fechaSolicitud
+                ]);
+                
+                // Añadir a nuestra colección
+                $solicitudesNuevas->push((object)['id' => $idSolicitud]);
+                $solicitudesCreadas++;
+                
+                // Generar el pago asociado (fecha de pago poco después de la solicitud)
+                $fechaPago = $fechaSolicitud->copy()->addHours(rand(1, 24));
+                
+                // Calcular importes
+                $importeTotal = $precio;  // Mismo precio que la solicitud
+                $porcentajeEmpresa = $faker->randomFloat(2, 0.2, 0.3);  // 20-30% para la empresa
                 $importeEmpresa = round($importeTotal * $porcentajeEmpresa, 2);
                 $importeChofer = round($importeTotal - $importeEmpresa, 2);
                 
-                // Insertar el registro
+                // Insertar pago
                 DB::table('pagos_choferes')->insert([
                     'chofer_id' => $chofer->id,
-                    'solicitud_id' => $solicitud->id,
+                    'solicitud_id' => $idSolicitud,
                     'importe_total' => $importeTotal,
                     'importe_empresa' => $importeEmpresa,
                     'importe_chofer' => $importeChofer,
@@ -128,13 +166,18 @@ class PagosChoferesSeeder extends Seeder
                     'updated_at' => $fechaPago
                 ]);
                 
-                $registrosCreados++;
+                $pagosCreados++;
+                
+                // Mostrar progreso cada 10 registros
+                if ($i % 10 == 0 && $i > 0) {
+                    $this->command->info("Progreso: {$i}/{$cantidadPagos} solicitudes y pagos creados.");
+                }
+                
             } catch (\Exception $e) {
-                // Si falla un registro, continuamos con el siguiente
-                $this->command->warn("Error al crear registro #{$i}: " . $e->getMessage());
+                $this->command->warn("Error al crear solicitud/pago #{$i}: " . $e->getMessage());
             }
         }
         
-        $this->command->info('Pagos de servicios de taxi creados correctamente: ' . $registrosCreados . ' de ' . $cantidadPagos . ' registros.');
+        $this->command->info("Proceso completado: {$solicitudesCreadas} solicitudes y {$pagosCreados} pagos creados correctamente.");
     }
 }

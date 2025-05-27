@@ -61,9 +61,9 @@ class DatabaseSeeder extends Seeder
             // DepartamentoSeeder::class,       // Departamentos (Comentado porque no existe)
             PasivoSeeder::class,              // Pasivos financieros
             GastosMantenimientoSeeder::class, // Gastos de mantenimiento para vehículos y parkings
-            PresupuestoSeeder::class,         // Presupuestos por departamento
             PagoTallerClienteSeeder::class,   // Simulación de pagos de clientes por mantenimientos
             PagoTallerSeeder::class,          // Pagos por reparaciones en taller
+            UpdateSolicitudesChoferSeeder::class, // Asegura que no haya solicitudes pendientes para choferes
             PagosChoferesSeeder::class,       // Pagos por servicios de taxi
         ]);
         
