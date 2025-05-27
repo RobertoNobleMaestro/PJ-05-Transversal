@@ -217,25 +217,22 @@ class TallerController extends Controller
         try {
             $query = Mantenimiento::with(['vehiculo', 'taller'])
                 ->orderBy('created_at', 'desc');
-            
             // Filtrar por estado si se especifica
             if ($request->has('estado') && $request->estado !== 'todos') {
                 $query->where('estado', $request->estado);
             }
-            
-            $mantenimientos = $query->get();
-            
+            // Paginación: 4 por página
+            $perPage = 4;
+            $pagina = $request->input('page', 1);
+            $mantenimientos = $query->paginate($perPage, ['*'], 'page', $pagina);
             // Formatear datos para la respuesta
             $resultado = $mantenimientos->map(function($mantenimiento) {
-                $fechaHora = Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
-                
-                // Determinar el color del badge según el estado
+                $fechaHora = \Carbon\Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
                 $colorEstado = [
                     'pendiente' => 'warning',
                     'completado' => 'success',
                     'cancelado' => 'danger'
                 ][$mantenimiento->estado] ?? 'secondary';
-                
                 return [
                     'id' => $mantenimiento->id,
                     'vehiculo' => $mantenimiento->vehiculo->marca . ' ' . $mantenimiento->vehiculo->modelo,
@@ -252,14 +249,15 @@ class TallerController extends Controller
                     'motivo_averia' => $mantenimiento->motivo_averia
                 ];
             });
-            
             return response()->json([
-                'success' => true, 
-                'mantenimientos' => $resultado
+                'success' => true,
+                'mantenimientos' => $resultado,
+                'pagina_actual' => $mantenimientos->currentPage(),
+                'total_paginas' => $mantenimientos->lastPage(),
+                'total_registros' => $mantenimientos->total(),
+                'por_pagina' => $mantenimientos->perPage(),
             ]);
-            
         } catch (\Exception $e) {
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener mantenimientos: ' . $e->getMessage()

@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(data.success) {
                 tablaBody.innerHTML = '';
                 if(data.mantenimientos.length === 0) {
-                    tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">No hay mantenimientos para mostrar.</td></tr>`;
+                    tablaBody.innerHTML = `<tr><td colspan="6" class="text-center">No hay mantenimientos para mostrar.</td></tr>`;
                     document.getElementById('paginacion-mantenimientos').innerHTML = '';
                     return;
                 }
@@ -232,12 +232,12 @@ ${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-mute
                 totalPaginas = data.total_paginas || 1;
                 renderizarPaginacion();
             } else {
-                tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
+                tablaBody.innerHTML = `<tr><td colspan="6" class="text-center">Error al cargar mantenimientos.</td></tr>`;
                 document.getElementById('paginacion-mantenimientos').innerHTML = '';
             }
         })
         .catch(err => {
-            tablaBody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar mantenimientos.</td></tr>`;
+            tablaBody.innerHTML = `<tr><td colspan="6" class="text-center">Error al cargar mantenimientos.</td></tr>`;
             document.getElementById('paginacion-mantenimientos').innerHTML = '';
             console.error(err);
         });
