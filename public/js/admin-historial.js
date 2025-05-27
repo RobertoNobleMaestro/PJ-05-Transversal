@@ -1,21 +1,7 @@
-/**
- * HISTORIAL DE RESERVAS - PANEL DE ADMINISTRACIÓN
- * Este archivo contiene todas las funciones necesarias para gestionar el historial
- * de reservas desde el panel de administración, incluyendo filtrado avanzado,
- * visualización de estadísticas y consulta de detalles específicos.
- * Proporciona una visión completa del estado del negocio y las operaciones realizadas.
- */
-
-// Objeto para mantener los filtros activos
 let activeFilters = {};
+let currentPage = 1;
+let perPage = 10;
 
-/**
- * applyFilters() - Aplica los filtros para la búsqueda de reservas en el historial
- * 
- * Esta función recoge los valores de los diferentes campos de filtro
- * (usuario, lugar, estado, rango de fechas) y actualiza la lista del historial
- * mostrando solo aquellas reservas que cumplen con los criterios seleccionados.
- */
 function applyFilters() {
     // Recoger los valores de los filtros
     const usuario = document.getElementById('filterUsuario').value.trim();
@@ -37,12 +23,6 @@ function applyFilters() {
     loadHistorial();
 }
 
-/**
- * clearFilters() - Limpia todos los filtros aplicados y muestra todas las reservas
- * 
- * Esta función resetea todos los campos de filtro a sus valores predeterminados
- * y vuelve a cargar el historial completo de reservas sin filtros aplicados.
- */
 function clearFilters() {
     document.getElementById('filterUsuario').value = '';
     document.getElementById('filterLugar').value = '';
@@ -57,14 +37,6 @@ function clearFilters() {
     loadHistorial();
 }
 
-/**
- * updateStats(stats) - Actualiza las estadísticas mostradas en el panel
- * 
- * @param {Object} stats - Objeto con las estadísticas a mostrar
- * 
- * Esta función actualiza los contadores y valores en el panel de estadísticas
- * mostrando información como el total de reservas, reservas por estado e ingresos.
- */
 function updateStats(stats) {
     document.getElementById('total-reservas').textContent = stats.total_reservas;
     document.getElementById('reservas-completadas').textContent = stats.reservas_completadas;
@@ -84,15 +56,6 @@ function updateStats(stats) {
 
 }
 
-/**
- * formatCurrency(value) - Formatea un valor numérico a formato de moneda
- * 
- * @param {number} value - Valor a formatear
- * @returns {string} - Valor formateado como moneda (EUR)
- * 
- * Esta función utiliza la API Intl.NumberFormat para dar formato de moneda
- * a un valor numérico, siguiendo el formato español (€).
- */
 function formatCurrency(value) {
     return new Intl.NumberFormat('es-ES', {
         style: 'currency',
@@ -100,13 +63,6 @@ function formatCurrency(value) {
     }).format(value);
 }
 
-/**
- * loadHistorial() - Carga el historial de reservas desde la API y lo muestra en la tabla
- * 
- * Esta función realiza una petición AJAX al servidor para obtener el historial de reservas
- * (aplicando los filtros si existen) y lo muestra en la tabla del panel de administración.
- * También actualiza el panel de estadísticas con los datos recibidos.
- */
 function loadHistorial() {
     // Mostrar el indicador de carga
     document.getElementById('loading-historial').style.display = 'block';
@@ -121,6 +77,8 @@ function loadHistorial() {
     if (activeFilters.estado) params.append('estado', activeFilters.estado);
     if (activeFilters.fecha_desde) params.append('fechaDesde', activeFilters.fecha_desde);
     if (activeFilters.fecha_hasta) params.append('fechaHasta', activeFilters.fecha_hasta);
+    params.append('page', currentPage);
+    params.append('perPage', perPage);
 
     // Obtener la URL base de los datos (admin.historial.data)
     let baseUrl = document.getElementById('historial-table-container').dataset.url;
@@ -269,6 +227,11 @@ function loadHistorial() {
             `;
                 tableBody.appendChild(row);
             }
+
+            // Renderizar paginación
+            if (data.pagination) {
+                renderPagination(data.pagination);
+            }
         })
         .catch(error => {
             // Manejar errores
@@ -282,15 +245,6 @@ function loadHistorial() {
         });
 }
 
-/**
- * showDetails(id) - Muestra los detalles completos de una reserva específica
- * 
- * @param {number} id - ID de la reserva a mostrar en detalle
- * 
- * Esta función muestra un modal con todos los detalles de una reserva específica,
- * incluyendo información del cliente, vehículos, fechas, precios y estado de pago.
- * Permite consultar información detallada sin necesidad de navegar a otra página.
- */
 function showDetails(id) {
     // Mostrar indicador de carga mientras se obtienen los detalles
     Swal.fire({
@@ -383,12 +337,42 @@ function showDetails(id) {
     });
 }
 
-/**
- * Inicialización cuando el DOM está completamente cargado
- * 
- * Configura los eventos para el filtrado del historial y carga
- * los datos iniciales cuando la página está lista.
- */
+function renderPagination(pagination) {
+    const summary = document.getElementById('pagination-summary');
+    const indicator = document.getElementById('page-indicator');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    const total = pagination.total;
+    const from = (pagination.current_page - 1) * pagination.per_page + 1;
+    const to = Math.min(from + pagination.per_page - 1, total);
+
+    if (total === 0) {
+        summary.textContent = `Mostrando 0 de 0 reservas`;
+    } else {
+        summary.textContent = `Mostrando ${from} a ${to} de ${total} reservas`;
+    }
+
+    indicator.textContent = `Página ${pagination.current_page} de ${pagination.last_page}`;
+
+    prevBtn.disabled = pagination.current_page === 1;
+    nextBtn.disabled = pagination.current_page === pagination.last_page;
+
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadHistorial();
+        }
+    };
+
+    nextBtn.onclick = () => {
+        if (currentPage < pagination.last_page) {
+            currentPage++;
+            loadHistorial();
+        }
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // Inicializar la carga del historial
     loadHistorial();
