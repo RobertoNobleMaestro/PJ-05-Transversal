@@ -1317,6 +1317,22 @@ class AdminFinancieroController extends Controller
         // Agregar siempre los servicios de conductor (incluso si es 0)
         $fuentesIngresos['Ingresos por Servicios de Taxi'] = $pagosChoferes;
         
+        // Obtener ingresos por reparaciones mecánicas (talleres)
+        try {
+            $ingresosTaller = DB::table('pago_taller')
+                ->join('mantenimientos', 'pago_taller.mantenimiento_id', '=', 'mantenimientos.id')
+                ->join('vehiculos', 'mantenimientos.vehiculo_id', '=', 'vehiculos.id_vehiculos')
+                ->where('vehiculos.id_lugar', $sedeId)
+                ->whereBetween('pago_taller.created_at', [$fechaInicio, $fechaFinPeriodo])
+                ->sum('pago_taller.total');
+        } catch (\Exception $e) {
+            // Si hay un error, establecemos el valor en cero
+            $ingresosTaller = 0;
+        }
+        
+        // Agregar los ingresos por reparaciones
+        $fuentesIngresos['Ingresos por Reparaciones Mecánicas'] = $ingresosTaller;
+        
         // No agregamos categorías con valores 0, solo mostramos datos reales
         
         // Ajustar para vista trimestral si es necesario

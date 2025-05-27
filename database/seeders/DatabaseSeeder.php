@@ -61,6 +61,7 @@ class DatabaseSeeder extends Seeder
             ActivoSeeder::class,             // Activos financieros
             PasivoSeeder::class,            // Pasivos financieros
             GastosMantenimientoSeeder::class, // Gastos de mantenimiento para vehículos y parkings
+            PagoTallerSeeder::class,        // Ingresos por reparaciones mecánicas
         ]);
     }
 }
