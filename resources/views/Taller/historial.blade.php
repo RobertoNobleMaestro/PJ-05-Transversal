@@ -3,6 +3,8 @@
 @section('title', 'Historial de Mantenimientos')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/taller-historial.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
 <!-- SweetAlert2 -->
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
 <style>
@@ -11,103 +13,7 @@
     transition: max-height 0.3s, opacity 0.3s;
     overflow: hidden;
 }
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.3);
-    z-index: 99;
-    transition: opacity 0.3s;
-    opacity: 0;
-}
-.sidebar-overlay.active {
-    display: block;
-    opacity: 1;
-}
-@media (max-width: 767.98px) {
-    #filtros-container {
-        max-height: 0;
-        opacity: 0;
-        pointer-events: none;
-        margin-bottom: 0 !important;
-    }
-    #filtros-container.show-filtros-mobile {
-        max-height: 1000px;
-        opacity: 1;
-        pointer-events: auto;
-        margin-bottom: 1.5rem !important;
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        padding: 1rem 0.5rem;
-        z-index: 100;
-        position: relative;
-    }
-    #toggle-filtros {
-        display: inline-block !important;
-    }
-    .sidebar-overlay.active {
-        display: block;
-    }
-    .admin-sidebar {
-        position: fixed;
-        top: 0;
-        left: -260px;
-        width: 260px;
-        height: 100vh;
-        background: #9F17BD !important;
-        z-index: 120;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.08);
-        transition: left 0.3s;
-        overflow-y: auto;
-        color: #fff !important;
-    }
-    .admin-sidebar.show-sidebar-mobile {
-        left: 0;
-    }
-    #sidebarOverlay.active {
-        display: block;
-    }
-    .admin-sidebar.show-sidebar-mobile, .admin-sidebar.show-sidebar-mobile * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        color: #fff !important;
-    }
-    .admin-sidebar .sidebar-title,
-    .admin-sidebar .sidebar-menu,
-    .admin-sidebar .sidebar-menu a,
-    .admin-sidebar .sidebar-menu i {
-        color: #fff !important;
-        fill: #fff !important;
-    }
-}
-@media (min-width: 768px) {
-    #filtros-container {
-        max-height: none !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        margin-bottom: 1.5rem !important;
-    }
-    #toggle-filtros {
-        display: none !important;
-    }
-    .sidebar-overlay {
-        display: none !important;
-    }
-    .admin-sidebar {
-        position: static;
-        width: 220px;
-        height: auto;
-        box-shadow: none;
-        left: 0 !important;
-        background: #9F17BD !important;
-        color: #fff !important;
-    }
-}
+
     /* Modal personalizado para que combine con la página */
     .modal-content {
         border-radius: 16px;
@@ -218,13 +124,13 @@
     </div>
 
     <div class="admin-main">
-        <div class="admin-header">
+        <div class="admin-header" style="flex-direction: row !important;">
             <h1 class="admin-title">Historial de Mantenimientos</h1>
             <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <!-- Botón hamburguesa solo visible en móvil para sidebar -->
-            <button id="toggle-sidebar" class="btn btn-outline-purple d-md-none ms-2" type="button" style="font-size:1.5rem;">
+            <button id="menuToggle" class="btn btn-outline-purple d-md-none ms-2" type="button" style="font-size:1.5rem;">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -617,28 +523,6 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
     }
 });
 
-// --- Hamburguesa Sidebar Responsive ---
-$(function() {
-    // Mostrar/ocultar sidebar en móvil
-    $('#toggle-sidebar').on('click', function() {
-        $('#sidebar').addClass('show-sidebar-mobile');
-        $('#sidebarOverlay').addClass('active');
-    });
-    // Cerrar sidebar al hacer click en overlay
-    $('#sidebarOverlay').on('click', function() {
-        $('#sidebar').removeClass('show-sidebar-mobile');
-        $('#sidebarOverlay').removeClass('active');
-    });
-    // Cerrar sidebar al hacer click fuera en móvil
-    $(document).on('click touchstart', function(e) {
-        if ($(window).width() < 768) {
-            if (!$(e.target).closest('#sidebar, #toggle-sidebar').length) {
-                $('#sidebar').removeClass('show-sidebar-mobile');
-                $('#sidebarOverlay').removeClass('active');
-            }
-        }
-    });
-});
 </script>
 
 <!-- MODAL DE EDICIÓN -->

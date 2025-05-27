@@ -16,7 +16,7 @@
     
     <!-- jQuery para AJAX -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
+    @stack('styles')
 </head>
 <body>
     

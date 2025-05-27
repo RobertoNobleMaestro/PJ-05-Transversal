@@ -20,7 +20,7 @@ body {
 /* Estilos del contenedor principal */
 .admin-container {
     display: flex;
-    min-height: calc(100vh - 62px); /* Resta la altura del header */
+    min-height: 100vh; /* Resta la altura del header */
 }
 
 /* Overlay para el menú en versión móvil */

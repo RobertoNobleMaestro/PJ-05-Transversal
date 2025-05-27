@@ -42,7 +42,7 @@
             </div>
 
             <div class="filter-section">
-                <div class="row mb-3" style="gap: 10px;">
+                <div class="row">
                     <div class="col-md-3">
                         <input type="text" id="searchUser" class="form-control" placeholder="Buscar por nombre">
                     </div>

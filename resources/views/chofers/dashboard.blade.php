@@ -82,7 +82,6 @@
     </div>
 
     @section('scripts')
-        <script src="{{asset('js/index-admin.js')}}"></script>
     @endsection
 
 @endsection
