@@ -494,7 +494,7 @@ public function update(Request $request, $id)
         $vehiculos = \App\Models\Vehiculo::all();
         $talleres = \App\Models\Taller::all();
         $piezas = \App\Models\Pieza::all();
-        return view('taller.historial', compact('vehiculos', 'talleres', 'piezas'));
+        return view('Taller.historial', compact('vehiculos', 'talleres', 'piezas'));
     }
 
     public function getMantenimiento($id)

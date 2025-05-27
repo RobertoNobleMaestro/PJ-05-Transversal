@@ -297,9 +297,9 @@ Route::get('/run-migrations-safe', function () {
 
 
 // Rutas para el espacio privado de los mecánicos
-// Route::middleware(['auth', 'role:mecanico'])->group(function () {
+Route::middleware(['auth', 'role:mecanico'])->group(function () {
     Route::get('/taller', [TallerController::class, 'index'])->name('Taller.index');
-Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->name('Taller.filtrar');
+    Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->name('Taller.filtrar');
     Route::get('/taller/historial', [TallerController::class, 'historial'])->name('Taller.historial');
 
     Route::get('/taller/mantenimientos', [TallerController::class, 'getMantenimientos'])->name('Taller.mantenimientos');
@@ -313,6 +313,5 @@ Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->n
     Route::get('/taller/{id}/edit', [TallerController::class, 'edit'])->name('Taller.edit');
     Route::put('/taller/{id}', [TallerController::class, 'update'])->name('Taller.update');
     Route::delete('/taller/{id}', [TallerController::class, 'destroy'])->name('Taller.destroy');
-    
-// });
+});
 Route::get('/taller/factura/{id}', [TallerController::class, 'descargarFactura'])->name('Taller.factura');

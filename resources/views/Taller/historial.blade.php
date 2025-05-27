@@ -152,7 +152,7 @@
                             <th>Fecha Completa</th>
                             <th>Motivo</th>
                             <th>Estado</th>
-                            <th>Acciones</th>
+                            <th class="col-acciones">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -207,10 +207,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     tablaBody.innerHTML += `
                         <tr>
-                            <td>${m.vehiculo}</td>
-                            <td>${m.taller}</td>
-                            <td>${m.fechaCompleta}</td>
-                            <td>${m.motivo_reserva ? (m.motivo_reserva === 'averia' ? 'Avería' : 'Mantenimiento') : ''}
+                            <td class="col-vehiculo">${m.vehiculo}</td>
+                            <td class="col-taller">${m.taller}</td>
+                            <td class="col-fecha">${m.fechaCompleta}</td>
+                            <td class="col-motivo">${m.motivo_reserva ? (m.motivo_reserva === 'averia' ? 'Avería' : 'Mantenimiento') : ''}
 ${m.motivo_reserva === 'averia' && m.motivo_averia ? `<br><span class='text-muted small'>${m.motivo_averia}</span>` : ''}</td>
                             <td><span class="badge bg-${m.colorEstado} text-capitalize">${m.estado}</span></td>
                             <td>
