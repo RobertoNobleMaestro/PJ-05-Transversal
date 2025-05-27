@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col-md-8">
-            <h1>Gestión de Ingresos - {{ $sede->nombre }}</h1>
+            <h1>Gestión de Ingresos</h1>
             <p class="text-muted">Estimación {{ $tipoVista == 'mensual' ? 'mensual' : 'trimestral' }} y análisis de ingresos</p>
         </div>
         <div class="col-md-4 text-end">

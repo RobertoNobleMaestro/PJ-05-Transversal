@@ -105,73 +105,18 @@
                     </div>
                     
                     <div class="row text-center">
-                        <div class="col-6">
-                            <div class="border rounded p-2">
+                        <div class="col-12">
+                            <div class="border rounded p-3">
                                 <h6 class="mb-1">Días trabajados</h6>
                                 <h4 class="mb-0">{{ isset($asalariado) && isset($asalariado->dias_trabajados) ? $asalariado->dias_trabajados : 0 }}</h4>
                                 <small class="text-muted">en el mes actual</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="border rounded p-2">
-                                <h6 class="mb-1">Antigüedad</h6>
-                                <h4 class="mb-0">{{ isset($asalariado) && isset($asalariado->hiredate) && $asalariado->hiredate ? (is_object($asalariado->hiredate) ? $asalariado->hiredate->diffInMonths(now()) : (is_string($asalariado->hiredate) ? \Carbon\Carbon::parse($asalariado->hiredate)->diffInMonths(now()) : 0)) : 0 }}</h4>
-                                <small class="text-muted">meses en la empresa</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm mt-4">
-                <div class="card-header text-white" style="background-color: #9F17BD;">
-                    <h5 class="mb-0">Datos Laborales</h5>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Salario mensual:</span>
-                            <span>{{ isset($asalariado) && isset($asalariado->salario) ? number_format($asalariado->salario, 2, ',', '.') : '0,00' }} €</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Fecha de contratación:</span>
-                            <span>{{ isset($asalariado) && isset($asalariado->hiredate) && $asalariado->hiredate ? (is_object($asalariado->hiredate) ? $asalariado->hiredate->format('d/m/Y') : (is_string($asalariado->hiredate) ? \Carbon\Carbon::parse($asalariado->hiredate)->format('d/m/Y') : 'No disponible')) : 'No disponible' }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Día de cobro:</span>
-                            <span>{{ isset($asalariado) && isset($asalariado->dia_cobro) ? $asalariado->dia_cobro : 1 }} de cada mes</span>
-                        </li>
-                        @if(isset($asalariado) && isset($asalariado->estado) && $asalariado->estado == 'baja')
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Salario proporcional:</span>
-                            @php 
-                                $diasTrabajados = isset($asalariado) && isset($asalariado->dias_trabajados) ? $asalariado->dias_trabajados : 0;
-                                $salario = isset($asalariado) && isset($asalariado->salario) ? $asalariado->salario : 0;
-                                $proporcion = $diasTrabajados / 30;
-                                $salarioProporcional = $salario * $proporcion;
-                            @endphp
-                            <span>{{ number_format($salarioProporcional, 2, ',', '.') }} €</span>
-                        </li>
-                        @endif
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Sede:</span>
-                            <span>
-                                @if(isset($asalariado) && isset($asalariado->id_lugar) && $asalariado->id_lugar && isset($sede) && $sede)
-                                    {{ $sede->nombre }}
-                                @elseif(isset($parking) && $parking && isset($parking->lugar) && $parking->lugar)
-                                    {{ $parking->lugar->nombre }}
-                                @else
-                                    No asignada
-                                @endif
-                            </span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Parking asignado:</span>
-                            <span>{{ isset($asalariado) && isset($asalariado->parking) && $asalariado->parking ? $asalariado->parking->nombre : 'Sin asignar' }}</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+
         </div>
 
         <div class="col-lg-8">
@@ -179,7 +124,7 @@
 
                 <div class="card-body">
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="card">
                                 <div class="card-header bg-success text-white">
                                     <h6 class="mb-0">Estado Laboral</h6>
@@ -202,77 +147,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Datos Laborales</h6>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold"><i class="fas fa-money-bill-wave text-muted me-2"></i> Salario mensual:</span>
-                                            <span>1.688,00 €</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold"><i class="fas fa-calendar-alt text-muted me-2"></i> Fecha de contratación:</span>
-                                            <span>06/06/2024</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold"><i class="fas fa-calendar-check text-muted me-2"></i> Día de cobro:</span>
-                                            <span>5 de cada mes</span>
-                                        </li>
-
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold"><i class="fas fa-parking text-muted me-2"></i> Parking asignado:</span>
-                                            <span>Parking Barcelona Centro</span>
-                                        </li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h6 class="mb-0">Simulación salarial anual</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Concepto</th>
-                                            <th class="text-end">Importe</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Salario base mensual</td>
-                                            <td class="text-end">{{ isset($asalariado) && isset($asalariado->salario) ? number_format($asalariado->salario, 2, ',', '.') : '0,00' }} €</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Salario anual (12 meses)</td>
-                                            <td class="text-end">{{ isset($asalariado) && isset($asalariado->salario) ? number_format($asalariado->salario * 12, 2, ',', '.') : '0,00' }} €</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Pagas extra (2)</td>
-                                            <td class="text-end">{{ isset($asalariado) && isset($asalariado->salario) ? number_format($asalariado->salario * 2, 2, ',', '.') : '0,00' }} €</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <td class="fw-bold">Total anual bruto</td>
-                                            <td class="text-end fw-bold">{{ isset($asalariado) && isset($asalariado->salario) ? number_format($asalariado->salario * 14, 2, ',', '.') : '0,00' }} €</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>
