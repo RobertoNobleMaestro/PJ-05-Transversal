@@ -116,7 +116,7 @@ class AsalariadosEstadoController extends Controller
             $asalariado = Asalariado::findOrFail($id);
             $asalariado->estado = 'alta';
             $asalariado->dias_trabajados = 0; // Reiniciar contador de días trabajados
-            $asalariado->hiredate = Carbon::now(); // Actualizar fecha de contratación a hoy
+            $asalariado->hiredate = Carbon::now(); // Establecer la fecha de contratación a la fecha actual
             $asalariado->save();
             
             return response()->json(['success' => 'Asalariado reactivado correctamente', 'asalariado' => $asalariado]);

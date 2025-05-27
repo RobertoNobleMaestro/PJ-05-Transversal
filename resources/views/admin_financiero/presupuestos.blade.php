@@ -180,11 +180,16 @@
                                             <td>
                                                 <div class="input-group">
                                                     <input type="number" class="form-control" name="presupuestos[{{ $categoria }}]" 
-                                                        step="0.01" min="0" 
+                                                        step="0.01" min="0" max="99999999.99"
                                                         value="{{ old('presupuestos.' . $categoria, $presupuestoActual ?: $valor) }}"
-                                                        aria-label="Presupuesto para {{ $categoria }}">
+                                                        {{ $esPositivo ? '' : 'disabled' }}
+                                                        aria-label="Presupuesto para {{ $categoria }}"
+                                                        title="Máximo: 99.999.999,99 €">
                                                     <span class="input-group-text">€</span>
                                                 </div>
+                                                @if(!$esPositivo)
+                                                <small class="text-danger">Deshabilitado debido a balance negativo</small>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -203,8 +208,11 @@
                                             {{ number_format($totalPresupuestosActuales, 2, ',', '.') }} €
                                         </th>
                                         <th>
-                                            <button type="submit" class="btn btn-success w-100">
+                                            <button type="submit" class="btn btn-success w-100" {{ !$esPositivo ? 'disabled' : '' }}>
                                                 <i class="fas fa-save me-2"></i> Guardar Presupuestos
+                                                @if(!$esPositivo)
+                                                <span class="d-block small">(Balance negativo)</span>
+                                                @endif
                                             </button>
                                         </th>
                                     </tr>
@@ -221,6 +229,55 @@
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Validación de presupuestos en tiempo real
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputsPresupuesto = document.querySelectorAll('input[name^="presupuestos"]');
+        const btnGuardar = document.querySelector('button[type="submit"]');
+        const balanceDisponible = {{ $esPositivo ? $balance : 0 }};
+        let mensajeError = document.getElementById('error-presupuesto');
+        
+        // Si no existe el mensaje de error, lo creamos
+        if (!mensajeError) {
+            mensajeError = document.createElement('div');
+            mensajeError.id = 'error-presupuesto';
+            mensajeError.className = 'alert alert-danger mt-3 d-none';
+            btnGuardar.parentNode.appendChild(mensajeError);
+        }
+        
+        // Función para validar todos los presupuestos
+        function validarPresupuestos() {
+            let totalPresupuestos = 0;
+            
+            // Sumar todos los presupuestos
+            inputsPresupuesto.forEach(input => {
+                const valor = parseFloat(input.value) || 0;
+                totalPresupuestos += valor;
+            });
+            
+            // Validar contra el balance disponible
+            if (totalPresupuestos > balanceDisponible) {
+                btnGuardar.disabled = true;
+                mensajeError.textContent = `El total de presupuestos (${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(totalPresupuestos)}) excede el balance disponible (${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(balanceDisponible)})`;
+                mensajeError.classList.remove('d-none');
+                return false;
+            } else {
+                btnGuardar.disabled = {{ $esPositivo ? 'false' : 'true' }};
+                mensajeError.classList.add('d-none');
+                return true;
+            }
+        }
+        
+        // Validar al cargar la página
+        validarPresupuestos();
+        
+        // Validar al cambiar cualquier input
+        inputsPresupuesto.forEach(input => {
+            input.addEventListener('input', validarPresupuestos);
+        });
+    });
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Datos para el gráfico de balance

@@ -864,17 +864,31 @@ class AdminFinancieroController extends Controller
         // Obtener ingresos (reservas y pagos)
         $ingresos = 0;
         
-        // Ingresos por reservas
+        // Ingresos por reservas asociadas a esta sede
         $ingresosReservas = Reserva::where('estado', 'completada')
+            ->whereHas('vehiculos', function($query) use ($sedeId) {
+                $query->where('id_lugar', $sedeId);
+            })
             ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
             ->sum('total_precio');
         
-        // Ingresos por pagos (otros servicios)
+        // Ingresos por pagos (otros servicios) asociados a esta sede
         $ingresosPagos = Pago::where('estado_pago', 'completado')
+            ->whereHas('reserva.vehiculos', function($query) use ($sedeId) {
+                $query->where('id_lugar', $sedeId);
+            })
             ->whereBetween('fecha_pago', [$fechaInicio, $fechaFin])
             ->sum('total_precio');
+            
+        // Añadir ingresos por alquiler de plazas de parking (estimación)
+        $ingresosParking = Parking::where('id_lugar', $sedeId)
+            ->get()
+            ->sum(function($parking) {
+                // Estimación: 70% de ocupación media × precio plaza × días
+                return $parking->plazas * 0.7 * 15 * 30; // 15€/día, 30 días
+            });
         
-        $ingresos = $ingresosReservas + $ingresosPagos;
+        $ingresos = $ingresosReservas + $ingresosPagos + $ingresosParking;
         
         // Obtener categorías de gastos para este período
         $gastos = [];
@@ -951,8 +965,85 @@ class AdminFinancieroController extends Controller
         
         $request->validate([
             'presupuestos' => 'required|array',
-            'presupuestos.*' => 'numeric|min:0',
+            'presupuestos.*' => 'numeric|min:0|max:99999999.99',
+        ], [
+            'presupuestos.*.max' => 'El presupuesto no puede superar los 99.999.999,99 € debido a limitaciones técnicas.'
         ]);
+        
+        // Obtener la sede del administrador financiero
+        $adminAsalariado = Auth::user()->asalariado;
+        $sedeId = $adminAsalariado->parking->id_lugar;
+        
+        // Fecha de inicio y fin para el período actual (mes actual)
+        $fechaInicio = Carbon::now()->startOfMonth();
+        $fechaFin = Carbon::now()->endOfMonth();
+        
+        // Calcular ingresos y gastos para validar el balance antes de asignar presupuestos
+        
+        // Ingresos por reservas asociadas a esta sede
+        $ingresosReservas = Reserva::where('estado', 'completada')
+            ->whereHas('vehiculos', function($query) use ($sedeId) {
+                $query->where('id_lugar', $sedeId);
+            })
+            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+            ->sum('total_precio');
+        
+        // Ingresos por pagos (otros servicios) asociados a esta sede
+        $ingresosPagos = Pago::where('estado_pago', 'completado')
+            ->whereHas('reserva.vehiculos', function($query) use ($sedeId) {
+                $query->where('id_lugar', $sedeId);
+            })
+            ->whereBetween('fecha_pago', [$fechaInicio, $fechaFin])
+            ->sum('total_precio');
+            
+        // Ingresos por alquiler de plazas de parking
+        $ingresosParking = Parking::where('id_lugar', $sedeId)
+            ->get()
+            ->sum(function($parking) {
+                return $parking->plazas * 0.7 * 15 * 30; // 70% ocupación, 15€/día, 30 días
+            });
+        
+        $ingresos = $ingresosReservas + $ingresosPagos + $ingresosParking;
+        
+        // Calcular gastos
+        $gastoSalarios = Asalariado::whereIn('parking_id', function($query) use ($sedeId) {
+            $query->select('id')->from('parking')->where('id_lugar', $sedeId);
+        })->where('estado', 'alta')->sum('salario');
+        
+        $countParkings = Parking::where('id_lugar', $sedeId)->count();
+        $costoMantenimientoParking = 200; // 200€ por parking al mes
+        
+        $countVehiculos = Vehiculo::where('id_lugar', $sedeId)->count();
+        $costoMantenimientoVehiculo = 750; // 750€ por vehículo al mes
+        
+        $gastoFiscales = $gastoSalarios * 0.3; // 30% de los salarios
+        
+        $totalGastos = $gastoSalarios + 
+                        ($countParkings * $costoMantenimientoParking) + 
+                        ($countVehiculos * $costoMantenimientoVehiculo) + 
+                        $gastoFiscales;
+        
+        // Calcular balance
+        $balance = $ingresos - $totalGastos;
+        $esPositivo = $balance >= 0;
+        
+        // Verificar que el balance sea positivo para permitir asignar presupuestos
+        if (!$esPositivo) {
+            return redirect()->back()->with('error', 
+                'No se pueden asignar presupuestos con un balance negativo. ' . 
+                'Primero debes aumentar los ingresos o reducir los gastos.');
+        }
+        
+        // Calcular el total de presupuestos solicitados
+        $totalPresupuestosSolicitados = array_sum($request->presupuestos);
+        
+        // Verificar que el total de presupuestos no exceda el balance disponible
+        if ($totalPresupuestosSolicitados > $balance) {
+            return redirect()->back()->with('error', 
+                'El total de presupuestos asignados (' . number_format($totalPresupuestosSolicitados, 2, ',', '.') . '€) ' . 
+                'excede el balance disponible (' . number_format($balance, 2, ',', '.') . '€). ' . 
+                'Por favor, reduce los montos para ajustarse al balance disponible.');
+        }
         
         try {
             // Obtener la sede del administrador financiero

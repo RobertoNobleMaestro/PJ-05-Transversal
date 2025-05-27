@@ -55,7 +55,7 @@ class TestParkingSeeder extends Seeder
             ]);
             
             $parkingNum = $index + 1;
-            $this->command->info("Parking {$parkingNum} creado correctamente.");
+            $this->command->info('Parking ' . $parkingNum . ' creado correctamente.');
         }
     }
 }

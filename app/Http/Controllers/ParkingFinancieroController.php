@@ -34,17 +34,23 @@ class ParkingFinancieroController extends Controller
         // Obtener todos los parkings con sus lugares relacionados
         $parkings = Parking::with('lugar')->get();
         
-        // Calcular los valores adicionales para cada parking
+        // Utilizar los valores almacenados en la base de datos o calcularlos si no existen
         foreach ($parkings as $parking) {
-            // Metros cuadrados (25m² por plaza)
-            $parking->metros_cuadrados = $parking->plazas * 25;
+            // Si no tiene valores almacenados, calcularlos
+            if ($parking->metros_cuadrados <= 0) {
+                $parking->metros_cuadrados = $parking->plazas * 25; // 25m² por plaza
+            }
             
-            // Valor total calculado (usando el método del modelo)
+            // Usar el método del modelo que ya comprueba si usar valores de DB
             $parking->valor_total = $parking->calcularValorTotal();
             
-            // Precio por metro cuadrado
-            $parking->precio_por_metro = $parking->metros_cuadrados > 0 ? 
-                                        round($parking->valor_total / $parking->metros_cuadrados, 2) : 0;
+            // Asignar el precio por metro desde la DB al atributo que usa la vista
+            $parking->precio_por_metro = $parking->precio_metro_cuadrado > 0 ? 
+                                       $parking->precio_metro_cuadrado : 
+                                       ($parking->metros_cuadrados > 0 ? 
+                                        round($parking->valor_total / $parking->metros_cuadrados, 2) : 0);
+                                        
+            // Asegurar que la vista recibe el precio correcto usando el atributo que espera
         }
         
         return view('admin_financiero.parkings', compact('parkings'));
@@ -63,11 +69,21 @@ class ParkingFinancieroController extends Controller
         
         $parking = Parking::with('lugar')->findOrFail($id);
         
-        // Calcular los valores adicionales
-        $parking->metros_cuadrados = $parking->plazas * 25;
+        // Utilizar valores almacenados en la base de datos o calcularlos si no existen
+        if ($parking->metros_cuadrados <= 0) {
+            $parking->metros_cuadrados = $parking->plazas * 25; // 25m² por plaza
+        }
+        
+        // Usar el método del modelo que ya comprueba si usar valores de DB
         $parking->valor_total = $parking->calcularValorTotal();
-        $parking->precio_por_metro = $parking->metros_cuadrados > 0 ? 
-                                    round($parking->valor_total / $parking->metros_cuadrados, 2) : 0;
+        
+        // Asignar el precio por metro desde la DB al atributo que usa la vista
+        $parking->precio_por_metro = $parking->precio_metro_cuadrado > 0 ? 
+                                   $parking->precio_metro_cuadrado : 
+                                   ($parking->metros_cuadrados > 0 ? 
+                                    round($parking->valor_total / $parking->metros_cuadrados, 2) : 0);
+                                    
+        // Asegurar que la vista recibe el precio correcto usando el atributo que espera
         
         // Obtener la lista de lugares para el select
         $lugares = Lugar::all();

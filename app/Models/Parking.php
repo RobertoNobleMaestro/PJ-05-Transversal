@@ -17,7 +17,9 @@ class Parking extends Model
         'latitud',
         'longitud',
         'id_usuario',
-        'id_lugar'
+        'id_lugar',
+        'metros_cuadrados',
+        'precio_metro_cuadrado'
     ];
 
     // Relación con Lugar
@@ -33,7 +35,7 @@ class Parking extends Model
     }
     
     /**
-     * Calcula el valor total del parking
+     * Calcula el valor total del parking usando los valores almacenados en la base de datos
      * 
      * @param int|null $año_referencia Año para el cálculo (por defecto, el año actual)
      * @return float
@@ -44,14 +46,16 @@ class Parking extends Model
             $año_referencia = now()->year;
         }
         
-        // Valor base por plaza de parking
-        $valor_por_plaza = 25000; // 25.000€ por plaza
+        // Si tenemos valores de metros cuadrados y precio por metro, los usamos
+        if ($this->metros_cuadrados > 0 && $this->precio_metro_cuadrado > 0) {
+            return $this->metros_cuadrados * $this->precio_metro_cuadrado;
+        }
         
-        // Metros cuadrados estimados (25m² por plaza)
-        $plazas = $this->plazas > 0 ? $this->plazas : 100; // Si no hay plazas, asumimos 100
+        // Fallback al método antiguo si no hay datos en la base de datos
+        $metros_cuadrados = $this->plazas * 25; // 25m² por plaza
+        $precio_por_metro = 1000; // 1.000€ por metro cuadrado por defecto
         
-        // Valor total basado en número de plazas
-        return $plazas * $valor_por_plaza;
+        return $metros_cuadrados * $precio_por_metro;
     }
 }
 

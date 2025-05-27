@@ -51,6 +51,11 @@ class DatabaseSeeder extends Seeder
             AsalariadosSeeder::class,        // Nuevos asalariados de prueba
         ]);
         
+        // 6. Actualización de precios para parkings (más realistas)
+        $this->call([
+            UpdateParkingPricesSeeder::class, // Actualiza precios por m² con variaciones realistas
+        ]);
+        
         // 6. Datos financieros (activos y pasivos)
         $this->call([
             ActivoSeeder::class,             // Activos financieros

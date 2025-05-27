@@ -50,7 +50,7 @@ class AsalariadosSeeder extends Seeder
                     'id_usuario' => $user->id_usuario,
                     'salario' => rand(1200, 2500),
                     'dia_cobro' => rand(1, 28),
-                    'hiredate' => rand(1, 28), // Día del mes como entero (1-28)
+                    'hiredate' => Carbon::now()->subMonths(rand(1, 12)), // Fecha de contratación aleatoria en los últimos 12 meses
                     'estado' => 'alta',
                     'dias_trabajados' => rand(20, 30),
                     'id_lugar' => $lugar->id_lugar,
