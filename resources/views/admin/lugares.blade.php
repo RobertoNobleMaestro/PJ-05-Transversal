@@ -205,7 +205,6 @@
 </style>
 
 <div class="admin-container">
-    <!-- Overlay para menu00fa mu00f3vil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <!-- Barra lateral -->

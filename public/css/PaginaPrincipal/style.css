@@ -219,3 +219,170 @@ a {
   border-radius: 10px;
 }
 
+/* ===== Responsive ===== */
+@media (max-width: 991.98px) {
+  .hero-section {
+    padding-bottom: 0.5rem;
+  }
+  .hero-section h1 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+  .hero-section .col-md-5, .hero-section .col-md-6 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .hero-section img {
+    max-width: 80%;
+    margin: 0 auto;
+  }
+  .stats-section {
+    padding: 1rem 0;
+  }
+  .stat-box {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 0.7rem;
+  }
+  .stat-box i {
+    font-size: 2rem;
+  }
+  .stat-content h3 {
+    font-size: 1.2rem;
+  }
+  .vehicles-section {
+    padding: 1rem 0;
+  }
+  #filtros-form {
+    position: static !important;
+    top: unset !important;
+    margin-bottom: 1.5rem;
+    box-shadow: none;
+  }
+  .card img {
+    height: 120px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hero-section {
+    padding-bottom: 0.2rem;
+  }
+  .hero-section h1 {
+    font-size: 1.1rem;
+  }
+  .hero-section .col-md-5, .hero-section .col-md-6 {
+    margin-bottom: 1rem;
+  }
+  .hero-section img {
+    max-width: 100%;
+    height: auto;
+  }
+  .stat-box {
+    padding: 0.5rem;
+  }
+  .vehicles-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  .card-body {
+    padding: 0.5rem 0.7rem;
+  }
+  .card-body .card-title {
+    font-size: 0.9rem;
+  }
+  .card-body .info-row {
+    font-size: 0.8rem;
+  }
+  .card-body .card-text {
+    font-size: 0.8rem;
+  }
+  #filtros-form {
+    margin-bottom: 1rem;
+    padding: 1rem 0.5rem;
+  }
+  .breadcrumb-container {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-section {
+    padding-bottom: 0;
+  }
+  .hero-section h1 {
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .hero-section .col-md-5, .hero-section .col-md-6 {
+    margin-bottom: 0.7rem;
+  }
+  .stat-box i {
+    font-size: 1.5rem;
+  }
+  .stat-content h3 {
+    font-size: 1rem;
+  }
+  .vehicles-section h2 {
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .card {
+    margin-bottom: 0.7rem;
+  }
+  .card-body {
+    padding: 0.4rem 0.5rem;
+  }
+  .card-body .card-title {
+    font-size: 0.85rem;
+  }
+  .card-body .info-row {
+    font-size: 0.75rem;
+  }
+  .card-body .card-text {
+    font-size: 0.75rem;
+  }
+  #filtros-form {
+    margin-bottom: 0.7rem;
+    padding: 0.7rem 0.3rem;
+  }
+  .breadcrumb-container {
+    padding: 0.3rem;
+    font-size: 0.7rem;
+  }
+  .btn-group.mt-3 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .btn-group.mt-3 .btn {
+    width: 100%;
+    margin-bottom: 0.3rem;
+  }
+}
+
+/* Ajuste para que los filtros y tarjetas se apilen correctamente en móvil */
+@media (max-width: 991.98px) {
+  .vehicles-section .row > .col-md-3,
+  .vehicles-section .row > .col-md-9 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* Ajuste para el chat flotante en móvil */
+@media (max-width: 575.98px) {
+  #chatBtn {
+    bottom: 10px;
+    right: 10px;
+  }
+  #chatBox {
+    width: 95vw !important;
+    right: 2.5vw !important;
+    bottom: 60px !important;
+    min-width: unset;
+    max-width: 98vw;
+  }
+}
+

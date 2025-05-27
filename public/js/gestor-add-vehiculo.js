@@ -261,3 +261,43 @@ document.addEventListener('DOMContentLoaded', function() {
         createVehiculo(); // Procesar mediante AJAX
     });
 });
+
+// Wizard de dos pasos para añadir vehículo
+function showStep(step) {
+    document.getElementById('wizard-step-1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('wizard-step-2').style.display = step === 2 ? 'block' : 'none';
+}
+
+function validateStep(step) {
+    let isValid = true;
+    const stepDiv = document.getElementById('wizard-step-' + step);
+    const inputs = stepDiv.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        if (input.name) {
+            validateField(input);
+            if (input.parentNode.querySelector('.error-message')?.textContent) {
+                isValid = false;
+            }
+        }
+    });
+    return isValid;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    showStep(1);
+    document.getElementById('next-step').onclick = function(e) {
+        e.preventDefault();
+        if (validateStep(1)) {
+            showStep(2);
+        }
+    };
+    document.getElementById('prev-step').onclick = function(e) {
+        e.preventDefault();
+        showStep(1);
+    };
+    document.getElementById('addVehiculoForm').addEventListener('submit', function(e) {
+        if (!validateStep(2)) {
+            e.preventDefault();
+        }
+    });
+});

@@ -21,15 +21,15 @@
                 <li><a href="{{ route('gestor.vehiculos') }}"
                         class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                         Vehículos</a></li>
-                <li><a href="{{ route('gestor.chat.listar') }}"
-                class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
-                    class="fas fa-comments"></i> Chats</a></li>
-                    <li><a href="{{ route('gestor.historial') }}"
+                <li><a href="{{ route('gestor.historial') }}"
                 class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
                     class="fas fa-history"></i>Historial</a></li>
                                         <li><a href="{{ route('gestor.parking.index') }}"
                 class="{{ request()->routeIs('gestor.parking.index') ? 'active' : '' }}"><i
                     class="fas fa-parking"></i>Parking</a></li>
+                    <li><a href="{{ route('gestor.user.index') }}"
+                class="{{ request()->routeIs('gestor.user.index') ? 'active' : '' }}"><i
+                    class="fas fa-user"></i>Usuarios</a></li>
             </ul>
         </div>
 
@@ -86,11 +86,23 @@
                     <div class="col-md-6 col-lg-4">
                         <div class="admin-card shadow-sm">
                             <div class="admin-card-icon">
-                                <i class="fas fa-comments fa-3x"></i>
+                                <i class="fas fa-parking fa-3x"></i>
                             </div>
-                            <h3>Chats con clientes</h3>
-                            <p>Aqui podrás ver todas las conversaciones con los clientes.</p>
-                            <a href="{{ route('admin.historial') }}" class="btn-admin-card">
+                            <h3>Gestión de parkings</h3>
+                            <p>Aqui podrás ver y gestionar de los parkings de tu sede.</p>
+                            <a href="{{ route('gestor.parking.index') }}" class="btn-admin-card">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="admin-card shadow-sm">
+                            <div class="admin-card-icon">
+                                <i class="fas fa-users fa-3x"></i>
+                            </div>
+                            <h3>Gestión de Usuarios</h3>
+                            <p>Administra los usuarios del sistema, sus roles y permisos.</p>
+                            <a href="{{ route('gestor.user.index') }}" class="btn-admin-card">
                                 Acceder <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
