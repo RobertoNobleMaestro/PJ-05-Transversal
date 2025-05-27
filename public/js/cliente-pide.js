@@ -50,7 +50,7 @@ function mostrarAlerta(icono, titulo, texto) {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar el mapa con vista por defecto
-    map = L.map('map').setView([0, 0], 11);
+    map = L.map('map').setView([0, 0], 8);
     
     // Añadir la capa de OpenStreetMap
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 userLat = position.coords.latitude;
                 userLng = position.coords.longitude;
 
-                // Centrar el mapa en la ubicación del usuario
-                map.setView([userLat, userLng], 13);
+                // Centrar el mapa en la ubicación del usuario con menos zoom
+                map.setView([userLat, userLng], 11);
 
                 // Añadir marcador del usuario con el icono personalizado
                 userMarker = L.marker([userLat, userLng], {icon: userIcon})

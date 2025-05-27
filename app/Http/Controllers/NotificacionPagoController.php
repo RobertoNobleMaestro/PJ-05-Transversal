@@ -115,9 +115,16 @@ class NotificacionPagoController extends Controller
                             'estado_pago' => 'pagado',
                             'updated_at' => now()
                         ]);
+
+                    // Generar el PDF del ticket
+                    $pdf = PDF::loadView('notificaciones.ticket', ['solicitud' => $solicitud]);
                     
-                    // Redirigir al home con mensaje de éxito
-                    return redirect()->route('home')->with('success', '¡Pago realizado correctamente!');
+                    // Guardar el mensaje de éxito en la sesión
+                    session()->flash('success', '¡Pago realizado correctamente! Tu ticket se está descargando.');
+                    
+                    // Descargar el PDF
+                    return $pdf->download('ticket-servicio-' . $solicitud->id . '.pdf')
+                        ->header('Refresh', '0;url=' . route('home'));
                 }
             } catch (\Stripe\Exception\ApiErrorException $e) {
                 // Manejar errores de Stripe

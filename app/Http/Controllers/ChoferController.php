@@ -611,4 +611,43 @@ class ChoferController extends Controller
             'solicitud' => $solicitud
         ]);
     }
+
+    /**
+     * Marca al chofer como disponible para recibir nuevas solicitudes
+     */
+    public function marcarDisponible()
+    {
+        try {
+            $chofer = Chofer::where('id_usuario', Auth::id())->first();
+            
+            if (!$chofer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chofer no encontrado'
+                ], 404);
+            }
+
+            if ($chofer->estado === 'disponible') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Ya estás marcado como disponible',
+                    'estado' => 'disponible'
+                ]);
+            }
+
+            $chofer->estado = 'disponible';
+            $chofer->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente',
+                'estado' => 'disponible'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

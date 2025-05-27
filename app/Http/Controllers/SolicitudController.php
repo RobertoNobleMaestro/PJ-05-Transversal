@@ -14,13 +14,17 @@ use App\Events\SolicitudAceptada;
 
 class SolicitudController extends Controller
 {
+    /**
+     * Obtiene choferes disponibles dentro de un radio determinado
+     */
     public function getChoferesCercanos(Request $request)
     {
         try {
             $latitud = $request->latitud;
             $longitud = $request->longitud;
-            $radio = 20; // Radio en km
+            $radio = 20; // Radio de búsqueda en kilómetros
 
+            // Consulta a la base de datos para encontrar choferes disponibles dentro del radio
             $choferes = DB::table('choferes')
                 ->join('users', 'choferes.id_usuario', '=', 'users.id_usuario')
                 ->where('choferes.estado', 'disponible')
@@ -29,6 +33,7 @@ class SolicitudController extends Controller
                     'users.nombre',
                     'choferes.latitud',
                     'choferes.longitud',
+                    // Cálculo aproximado de distancia usando fórmula del plano cartesiano
                     DB::raw("
                         SQRT(
                             POW(($latitud - choferes.latitud) * 111, 2) + 
@@ -50,9 +55,13 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Crea una nueva solicitud de viaje
+     */
     public function crearSolicitud(Request $request)
     {
         try {
+            // Validación de campos requeridos
             $request->validate([
                 'id_chofer' => 'required|exists:choferes,id',
                 'latitud_origen' => 'required|numeric',
@@ -63,6 +72,7 @@ class SolicitudController extends Controller
                 'id_cliente' => 'required|exists:users,id_usuario'
             ]);
 
+            // Verifica que el chofer esté disponible
             $chofer = Chofer::find($request->id_chofer);
             if (!$chofer || $chofer->estado !== 'disponible') {
                 return response()->json([
@@ -71,6 +81,19 @@ class SolicitudController extends Controller
                 ], 400);
             }
 
+            // Verifica si el usuario ya tiene una solicitud pendiente
+            $solicitudExistente = Solicitud::where('id_cliente', $request->id_cliente)
+                ->whereIn('estado', ['pendiente', 'aceptada'])
+                ->first();
+
+            if ($solicitudExistente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya tienes una solicitud activa pendiente o aceptada'
+                ], 400);
+            }
+
+            // Crea una nueva solicitud
             $solicitud = new Solicitud();
             $solicitud->id_chofer = $request->id_chofer;
             $solicitud->id_cliente = $request->id_cliente;
@@ -88,6 +111,7 @@ class SolicitudController extends Controller
                 'solicitud' => $solicitud
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            // Manejo de errores de validación
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
@@ -102,9 +126,13 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Obtiene las solicitudes pendientes para el chofer autenticado
+     */
     public function getSolicitudesChofer()
     {
         try {
+            // Obtiene al chofer que corresponde al usuario autenticado
             $chofer = Chofer::where('id_usuario', Auth::id())->first();
             
             if (!$chofer) {
@@ -114,6 +142,7 @@ class SolicitudController extends Controller
                 ], 404);
             }
 
+            // Recupera solicitudes pendientes asignadas al chofer
             $solicitudes = Solicitud::with(['cliente', 'chofer'])
                 ->where('id_chofer', $chofer->id)
                 ->where('estado', 'pendiente')
@@ -133,31 +162,30 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Acepta una solicitud y cambia el estado del chofer a ocupado
+     */
     public function aceptarSolicitud($id)
     {
         try {
-            // Primero encontramos la solicitud y cargamos las relaciones necesarias
             $solicitud = Solicitud::with(['chofer.usuario'])->findOrFail($id);
             
-            // Actualizar el estado de la solicitud
             $solicitud->estado = 'aceptada';
             $solicitud->save();
 
-            // Actualizar el estado del chofer a ocupado
+            // Cambia el estado del chofer a ocupado
             $chofer = Chofer::find($solicitud->id_chofer);
             $chofer->estado = 'ocupado';
             $chofer->save();
 
-            // Aseguramos que las relaciones estén cargadas
             $solicitud->refresh();
             $solicitud->load(['chofer.usuario']);
 
-            // Verificamos que las relaciones estén disponibles antes de disparar el evento
+            // Verifica que las relaciones están cargadas antes de lanzar evento
             if (!$solicitud->chofer || !$solicitud->chofer->usuario) {
                 throw new \Exception('No se pudieron cargar las relaciones necesarias');
             }
 
-            // Disparar el evento de notificación
             event(new SolicitudAceptada($solicitud));
 
             return response()->json([
@@ -175,6 +203,9 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Rechaza una solicitud cambiando su estado
+     */
     public function rechazarSolicitud($id)
     {
         try {
@@ -195,6 +226,9 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Obtiene la ruta entre origen y destino usando OpenRouteService API
+     */
     public function obtenerRuta(Request $request)
     {
         try {
@@ -203,6 +237,7 @@ class SolicitudController extends Controller
             $destino_lat = $request->query('destino_lat');
             $destino_lng = $request->query('destino_lng');
 
+            // Validación de coordenadas
             if (!$origen_lat || !$origen_lng || !$destino_lat || !$destino_lng) {
                 return response()->json([
                     'success' => false,
@@ -210,8 +245,10 @@ class SolicitudController extends Controller
                 ], 400);
             }
 
-            $apiKey = env('OPENROUTE_API_KEY', '5b3ce3597851110001cf6248e4c8c0c0c0c84c0c0c0c0c0c0c0c0c0c0c0c0c0');
-            
+            // API Key de OpenRouteService
+            $apiKey = env('OPENROUTE_API_KEY');
+
+            // Parámetros de la solicitud a la API
             $url = 'https://api.openrouteservice.org/v2/directions/driving-car';
             $params = [
                 'start' => "$origen_lng,$origen_lat",
@@ -223,13 +260,15 @@ class SolicitudController extends Controller
                 'params' => $params
             ]);
 
-            $response = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Authorization' => $apiKey,
-                'Accept' => 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-            ])->get($url, $params);
+            // Realiza la solicitud HTTP
+            $response = Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => $apiKey,
+                    'Accept' => 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+                ])
+                ->get($url, $params);
 
+            // Manejo de respuesta exitosa
             if ($response->successful()) {
                 $data = $response->json();
                 Log::info('Respuesta exitosa de OpenRouteService', ['data' => $data]);
@@ -241,6 +280,7 @@ class SolicitudController extends Controller
                 ]);
             }
 
+            // Manejo de error HTTP
             Log::error('Error en respuesta de OpenRouteService', [
                 'status' => $response->status(),
                 'body' => $response->body()
@@ -262,6 +302,9 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Obtiene el estado actual de una solicitud específica
+     */
     public function getEstadoSolicitud($id)
     {
         try {
@@ -287,6 +330,9 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Obtiene detalles de una solicitud aceptada aún no leída por el cliente
+     */
     public function getDetalles()
     {
         try {
@@ -314,28 +360,30 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Cancela una solicitud aceptada y actualiza el estado del chofer
+     */
     public function cancelarSolicitud($id)
     {
         try {
             DB::beginTransaction();
 
             $solicitud = Solicitud::findOrFail($id);
-            
-            // Verificar que la solicitud pertenece al usuario actual
+
+            // Verifica que la solicitud pertenece al usuario autenticado
             if ($solicitud->id_cliente !== Auth::id()) {
                 throw new \Exception('No tienes permiso para cancelar esta solicitud');
             }
 
-            // Verificar que la solicitud está en estado aceptada
+            // Solo se pueden cancelar solicitudes aceptadas
             if ($solicitud->estado !== 'aceptada') {
                 throw new \Exception('Solo se pueden cancelar solicitudes aceptadas');
             }
 
-            // Actualizar el estado de la solicitud
             $solicitud->estado = 'cancelada';
             $solicitud->save();
 
-            // Actualizar el estado del chofer a disponible
+            // Cambiar el estado del chofer a disponible
             $chofer = Chofer::find($solicitud->id_chofer);
             $chofer->estado = 'disponible';
             $chofer->save();
@@ -356,3 +404,4 @@ class SolicitudController extends Controller
         }
     }
 }
+

@@ -1,0 +1,74 @@
+/* Responsive Dashboard Chofers - iPhone 12 y móvil */
+
+/* Por defecto, muestra todo en escritorio */
+.dashboard-title { display: block; font-size: 2rem; }
+.dashboard-welcome-user { display: inline; }
+.dashboard-logout-desktop { display: inline-flex; }
+.sidebar-logout-mobile { display: none; }
+.dashboard-alert-title, .dashboard-card-title { display: block; font-size: 1.3rem; }
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #8c37c1;
+  font-size: 2rem;
+  margin: 0;
+  padding: 0 8px;
+  box-shadow: none;
+  border-radius: 8px;
+  height: 40px;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .dashboard-title {
+    color: transparent;
+    font-size: 1px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    height: 24px;
+    min-height: 24px;
+    max-height: 24px;
+  }
+  .dashboard-welcome-user, .dashboard-logout-desktop {
+    display: none !important;
+  }
+  .sidebar-logout-mobile {
+    display: block !important;
+    margin-top: 1.5rem;
+  }
+  .dashboard-alert-title, .dashboard-card-title {
+    display: none !important;
+  }
+  .menu-toggle {
+    display: flex;
+    position: static;
+    margin: 0;
+    padding: 0 8px;
+    height: 40px;
+    width: 40px;
+    font-size: 2rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .admin-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 10px;
+    min-height: 52px;
+    background: #fff;
+    border-radius: 0 0 10px 10px;
+  }
+}
+
+@media (max-width: 390px) {
+  .dashboard-title {
+    font-size: 1rem;
+    padding: 0;
+  }
+} 

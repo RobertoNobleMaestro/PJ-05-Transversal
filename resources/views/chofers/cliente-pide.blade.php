@@ -12,13 +12,43 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- Link a css -->
     <link rel="stylesheet" href="{{asset('css/chofers/styles.css')}}">
+    <link rel="stylesheet" href="{{asset('css/chofers/cliente-pide.css')}}">
     <!-- Link a leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <title>Solicita vehículo</title>
 </head>
 <body>
-    @include('layouts.navbar')
-    <h2 class="mb-4">Solicita un vehículo</h2>
+    {{-- @include('layouts.navbar') --}}
+    
+    <!-- Botón hamburguesa para móvil -->
+    <button class="hamburger-btn" id="hamburgerBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h3>Menú</h3>
+            <button class="close-menu" id="closeMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav">
+            <a href="{{ url()->previous() }}" class="mobile-nav-item">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </nav>
+    </div>
+
+    <div class="header-container">
+        <a href="{{ url()->previous() }}" class="btn-volver">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        <div class="title-container">
+            <h2>Solicita un vehículo</h2>
+        </div>
+        <div style="width: 150px;"></div> <!-- Espacio vacío para balancear el layout -->
+    </div>
     
     <!-- Elemento oculto con el ID del cliente -->
     <div data-cliente-id="{{ Auth::id() }}" style="display: none;"></div>
@@ -112,7 +142,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-
     <!-- Verificación de SweetAlert2 -->
     <script>
         if (typeof Swal === 'undefined') {
@@ -121,5 +150,29 @@
     </script>
 
     <script src="{{asset('js/cliente-pide.js')}}"></script>
+
+    <!-- Script para el menú móvil -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const closeMenu = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            hamburgerBtn.addEventListener('click', function() {
+                mobileMenu.classList.add('active');
+            });
+
+            closeMenu.addEventListener('click', function() {
+                mobileMenu.classList.remove('active');
+            });
+
+            // Cerrar menú al hacer clic fuera
+            document.addEventListener('click', function(event) {
+                if (!mobileMenu.contains(event.target) && !hamburgerBtn.contains(event.target)) {
+                    mobileMenu.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

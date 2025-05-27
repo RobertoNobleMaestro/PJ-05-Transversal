@@ -160,6 +160,7 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers/solicitudes', [ChoferController::class, 'solicitudes'])->name('chofers.solicitudes');
     Route::get('/api/solicitudes/chofer', [ChoferController::class, 'getSolicitudesChofer'])->name('api.solicitudes.chofer');
     Route::get('/chofers/solicitudes/{id}', [ChoferController::class, 'detallesSolicitud'])->name('chofers.solicitud.detalles');
+    Route::post('/api/chofer/disponible', [ChoferController::class, 'marcarDisponible'])->name('api.chofer.disponible');
     
     // Chat por grupo
     Route::get('/chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');

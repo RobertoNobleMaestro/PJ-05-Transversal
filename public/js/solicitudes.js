@@ -246,15 +246,15 @@ function rechazarSolicitud(id) {
 // Cargar solicitudes al iniciar la página
 document.addEventListener('DOMContentLoaded', function() {
     cargarSolicitudes();
-    
     // Actualizar cada 30 segundos
     setInterval(cargarSolicitudes, 30000);
-    
-    // Escuchar eventos de solicitud aceptada
-    window.Echo.private('solicitud.{{ Auth::id() }}')
-        .listen('SolicitudAceptada', (e) => {
-            cargarSolicitudes();
-        });
+    // Escuchar eventos de solicitud aceptada SOLO si existe Echo y userId
+    if (window.Echo && window.userId) {
+        window.Echo.private('solicitud.' + window.userId)
+            .listen('SolicitudAceptada', (e) => {
+                cargarSolicitudes();
+            });
+    }
 });
 
 // Event Listeners
@@ -274,6 +274,40 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape' && document.getElementById('modalVisualizador').style.display === 'block') {
             cerrarModal();
         }
+    });
+
+    // Botón de disponibilidad
+    document.getElementById('btnDisponible').addEventListener('click', function() {
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        fetch('/api/chofer/disponible', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: data.estado === 'disponible' ? '¡Disponible!' : 'Estado actualizado',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#28a745'
+                });
+            } else {
+                throw new Error(data.message || 'Error al actualizar el estado');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire(
+                'Error',
+                'No se pudo actualizar tu estado. Por favor, inténtalo de nuevo.',
+                'error'
+            );
+        });
     });
 });
 
