@@ -180,6 +180,10 @@ $(function() {
             $('#motivo-averia').val('');
         }
     });
+
+    // Envío AJAX para agendar mantenimiento y recargar la página al éxito
+    // (Eliminado porque el correcto está en public/js/taller.js)
+
     function getFiltrosData() {
         return {
             sede: $('#filtro-sede').val(),

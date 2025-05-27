@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factura - {{ $numero_factura ?? ('MT-' . str_pad($mantenimiento->id, 6, '0', STR_PAD_LEFT)) }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root {
+                :root {
             --color-primario: #9F17BD;
             --color-secundario: #B3B3B3;
             --morado-claro: #c176d6;
@@ -209,13 +210,13 @@
                 font-size: 9px !important;
             }
         }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="factura-container">
             <div class="header">
-                <img src="{{ asset('img/logo.png') }}" class="logo">
                 <h1>FACTURA</h1>
                 <p><strong>Número:</strong> {{ $numero_factura ?? ('MT-' . str_pad($mantenimiento->id, 6, '0', STR_PAD_LEFT)) }}</p>
                 <p><strong>Fecha de emisión:</strong> {{ $fecha_emision ?? \Carbon\Carbon::now()->format('d/m/Y H:i') }}</p>
@@ -249,15 +250,50 @@
                         <td>{{ $vehiculo->marca }} {{ $vehiculo->modelo }} ({{ $vehiculo->matricula }})</td>
                         <td>{{ $fecha_hora }}</td>
                         <td>{{ $mantenimiento->taller->nombre ?? '-' }}</td>
-                        <td>{{ $mantenimiento->motivo_reserva == 'averia' ? 'Avería' : 'Mantenimiento' }}</td>
+                        <td>
+                            {{ $mantenimiento->motivo_reserva == 'averia' ? 'Avería' : 'Mantenimiento' }}
+                            @if($mantenimiento->motivo_reserva == 'averia' && !empty($mantenimiento->motivo_averia))
+                                <br><span style="color:#888;font-size:10px;">{{ $mantenimiento->motivo_averia }}</span>
+                            @endif
+                        </td>
                         <td>€ {{ number_format($precio, 2, ',', '.') }}</td>
                         <td>€ {{ number_format($precio * 0.21, 2, ',', '.') }}</td>
                         <td>€ {{ number_format($precio * 1.21, 2, ',', '.') }}</td>
                     </tr>
                 </tbody>
             </table>
+
+            @if(isset($piezas) && count($piezas) > 0)
+            <h2 class="mt-3">Piezas utilizadas en la avería</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pieza</th>
+                        <th>Cantidad</th>
+                        <th>Precio unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($piezas as $pieza)
+                    <tr>
+                        <td>{{ $pieza->nombre }}</td>
+                        <td>{{ $pieza->pivot->cantidad }}</td>
+                        <td>€ {{ number_format($pieza->precio, 2, ',', '.') }}</td>
+                        <td>€ {{ number_format($pieza->precio * $pieza->pivot->cantidad, 2, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @endif
             <div class="total">
-                <p>Total (IVA incluido): € {{ number_format($precio * 1.21, 2, ',', '.') }}</p>
+                <p>Subtotal servicio: € {{ number_format($precio, 2, ',', '.') }}</p>
+                @if(isset($subtotal_piezas) && $subtotal_piezas > 0)
+                <p>Subtotal piezas: € {{ number_format($subtotal_piezas, 2, ',', '.') }}</p>
+                @endif
+                <p><strong>Total (sin IVA): € {{ number_format($precio_total, 2, ',', '.') }}</strong></p>
+                <p>IVA (21%): € {{ number_format($precio_total * 0.21, 2, ',', '.') }}</p>
+                <p><strong>Total (IVA incluido): € {{ number_format($precio_total * 1.21, 2, ',', '.') }}</strong></p>
             </div>
             <div class="info-pago">
                 <h2>Información de pago</h2>

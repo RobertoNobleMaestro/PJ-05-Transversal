@@ -13,6 +13,7 @@ return new class extends Migration {
     {
         Schema::table('mantenimientos', function (Blueprint $table) {
             $table->string('motivo_reserva')->nullable()->after('estado');
+            $table->string('motivo_averia')->nullable()->after('motivo_reserva');
         });
     }
 
@@ -25,6 +26,7 @@ return new class extends Migration {
     {
         Schema::table('mantenimientos', function (Blueprint $table) {
             $table->dropColumn('motivo_reserva');
+            $table->dropColumn('motivo_averia');
         });
     }
 };
