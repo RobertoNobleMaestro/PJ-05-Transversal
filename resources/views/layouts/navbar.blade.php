@@ -32,7 +32,7 @@
           <span class="navbar-toggler-icon" style="color:#fff;">&#9776;</span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
-          <ul class="navbar-nav ml-auto align-items-center">
+          <ul class="navbar-nav align-items-center flex-row justify-content-end">
             @auth
               <!-- Cerrar sesión -->
               <li class="nav-item">
@@ -47,7 +47,7 @@
                   <span id="cart-count" class="badge bg-danger"></span>
                 </a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('chat.index') }}">
                     <i class="fas fa-comments"></i>
                 </a>

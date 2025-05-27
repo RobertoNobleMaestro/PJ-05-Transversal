@@ -34,8 +34,14 @@
                 <div class="admin-welcome">
                     @if(auth()->check())
                         <span>Bienvenido, {{ auth()->user()->nombre }}</span>
-                        <a href="{{ route('logout') }}" class="btn btn-outline-danger"><i class="fas fa-sign-out-alt"></i>
+                        <a href="{{ route('logout') }}" class="btn btn-outline-danger" title="Cerrar sesión">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                        @if(auth()->user()->id_roles == 1)
+                            <a href="{{ route('gestor.index') }}" class="btn btn-purple ms-2" title="Ir al panel de gestor">
+                                <i class="fas fa-user-cog"></i> Panel Gestor
                             </a>
+                        @endif
                     @endif
                 </div>
             </div>

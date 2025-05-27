@@ -28,6 +28,16 @@ class ReservaCrudController extends Controller
         return view('admin.historial', compact('reservas', 'lugares', 'estados'));
     }
 
+    // Muestra el historial completo de reservas para el admin
+    public function adminHistorial(Request $request)
+    {
+        $reservas = Reserva::orderBy('fecha_reserva', 'desc')
+            ->with(['usuario', 'lugar', 'vehiculos'])
+            ->get();
+        $lugares = Lugar::all();
+        $estados = ['pendiente', 'confirmada', 'cancelada', 'completada', 'pagado'];
+        return view('admin.historial', compact('reservas', 'lugares', 'estados'));
+    }
 
     // Obtiene datos del historial de reservas para AJAX
     public function getHistorialData(Request $request)

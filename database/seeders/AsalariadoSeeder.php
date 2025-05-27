@@ -15,24 +15,43 @@ class AsalariadoSeeder extends Seeder
      */
     public function run(): void
     {
-        // Obtener todos los usuarios que son asalariados (roles 3, 4 y 5)
-        $usuarios = User::whereIn('id_roles', [3, 4, 5])->get();
-        
-        // Obtener todos los parkings disponibles
+        // Obtener todos los usuarios asalariados (roles 3, 4, 5, 6)
+        $usuarios = User::whereIn('id_roles', [3, 4, 5, 6])->get();
         $parkings = Parking::all();
-        
+
+        // Mapear ciudades a id_lugar
+        $lugares = [
+            'Barcelona' => 2,
+            'Madrid' => 1,
+            'Valencia' => 3,
+        ];
+
         foreach ($usuarios as $usuario) {
-            // Asignar un parking según la lógica de negocio (por ejemplo, por ciudad)
-            // Si el usuario ya tiene parkings asignados, usar el primero
             $parkingAsignado = null;
-            
-            if ($usuario->parkings->count() > 0) {
-                $parkingAsignado = $usuario->parkings->first()->id;
-            } else {
-                // Asignar uno aleatorio si no tiene
+            $ciudad = null;
+
+            // Detectar ciudad por nombre del usuario
+            if (stripos($usuario->nombre, 'Barcelona') !== false) {
+                $ciudad = 'Barcelona';
+            } elseif (stripos($usuario->nombre, 'Madrid') !== false) {
+                $ciudad = 'Madrid';
+            } elseif (stripos($usuario->nombre, 'Valencia') !== false) {
+                $ciudad = 'Valencia';
+            }
+
+            if ($ciudad && isset($lugares[$ciudad])) {
+                // Buscar el primer parking de la ciudad correspondiente
+                $parkingCiudad = $parkings->where('id_lugar', $lugares[$ciudad])->first();
+                if ($parkingCiudad) {
+                    $parkingAsignado = $parkingCiudad->id;
+                }
+            }
+
+            // Si no se detecta ciudad, asignar uno random (fallback)
+            if (!$parkingAsignado) {
                 $parkingAsignado = $parkings->random()->id;
             }
-            
+
             // Generar salario base según el rol
             $salarioBase = 0;
             switch ($usuario->id_roles) {
@@ -45,8 +64,11 @@ class AsalariadoSeeder extends Seeder
                 case 5: // Admin Financiero
                     $salarioBase = 2200.00;
                     break;
+                case 6: // Chofer
+                    $salarioBase = 1400.00;
+                    break;
             }
-            
+
             // Añadir variación aleatoria al salario base (±200€)
             $salario = $salarioBase + rand(-200, 200);
             

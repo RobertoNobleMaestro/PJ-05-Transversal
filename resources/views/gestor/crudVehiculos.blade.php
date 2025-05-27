@@ -14,7 +14,9 @@
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+    <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
     <!-- Barra lateral -->
     <div class="admin-sidebar" id="sidebar">
         <div style="position: fixed;width: 220px;">
@@ -23,12 +25,15 @@
                     <li><a href="{{ route('gestor.vehiculos') }}"
                             class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                             Vehículos</a></li>
-                    <li><a href="{{ route('gestor.chat.listar') }}"
-                    class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
-                        class="fas fa-comments"></i> Chats</a></li>
-                        <li><a href="{{ route('gestor.historial') }}"
+                    <li><a href="{{ route('gestor.historial') }}"
                     class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
                         class="fas fa-history"></i>Historial</a></li>
+                                            <li><a href="{{ route('gestor.parking.index') }}"
+                    class="{{ request()->routeIs('gestor.parking.index') ? 'active' : '' }}"><i
+                        class="fas fa-parking"></i>Parking</a></li>
+                        <li><a href="{{ route('gestor.user.index') }}"
+                    class="{{ request()->routeIs('gestor.user.index') ? 'active' : '' }}"><i
+                        class="fas fa-user"></i>Usuarios</a></li>
                 </ul>
             </div>            
         </div>
@@ -38,7 +43,7 @@
     <div class="admin-main">
         <div class="admin-header">
             <h1 class="admin-title">
-                Gestión de Vehículos @if(isset($lugarGestor)) de {{ $lugarGestor->nombre }} @endif
+                Gestión de Vehículos
             </h1>
             <a href="{{ route('gestor.index') }}" class="btn-purple">
                 <i class="fas fa-arrow-left"></i> Volver al Panel
@@ -74,10 +79,17 @@
                 </select>
                 
                 <!-- Filtro por valoracion -->
-                <select class="filter-control" id="filterValoracion">
+                <!-- <select class="filter-control" id="filterValoracion">
                     <option value="">Todas las valoraciones</option>
                     @foreach($valoraciones as $val)
                         <option value="{{ $val }}">{{ $val }}+ estrellas</option>
+                    @endforeach
+                </select> -->
+                
+                <select class="filter-control" id="filterParking">
+                    <option value="">Todos los parkings</option>
+                    @foreach($parkings as $parking)
+                        <option value="{{ $parking->id }}">{{ $parking->nombre }}</option>
                     @endforeach
                 </select>
                 
@@ -93,23 +105,25 @@
             <p>Cargando vehículos...</p>
         </div>
         <div id="vehiculos-table-container" style="display: none;" data-url="{{ route('gestor.vehiculos.data') }}">
-            <table class="crud-table" id="vehiculos-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                        <th>Año</th>
-                        <th>Kilometraje</th>
-                        <th>Lugar</th>
-                        <th>Tipo</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los datos se cargarán aquí mediante AJAX -->
-                </tbody>
-            </table>
+            <div class="crud-table-container">
+                <table class="crud-table" id="vehiculos-table">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Año</th>
+                            <th>Kilometraje</th>
+                            <th>Tipo</th>
+                            <th>Parking</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán aquí mediante AJAX -->
+                    </tbody>
+                </table>
+            </div>
             <!-- Paginación -->
             <div class="pagination-container mt-4" id="pagination-controls">
                 <div class="pagination-info">
@@ -161,6 +175,24 @@
                         <!-- Las reservas se cargarán aquí -->
                     </tbody>
                 </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-purple" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar las características -->
+<div class="modal fade" id="caracteristicasModal" tabindex="-1" aria-labelledby="caracteristicasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="caracteristicasModalLabel">Características del Vehículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="caracteristicasBody">
+                <!-- Aquí se mostrarán las características -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-purple" data-bs-dismiss="modal">Cerrar</button>

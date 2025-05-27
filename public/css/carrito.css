@@ -138,7 +138,9 @@ hr {
 .btn-volver i {
   margin-right: 6px;
 }
-
+.boton-div-volver {
+  padding: 30px 30px 0px 30px !important;
+}
 .btn-eliminar {
   background-color: #dc3545;
   color: white;
@@ -164,4 +166,76 @@ hr {
 
 .carrito-logo i:hover {
     color: #4a2d7a;
+}
+
+@media (max-width: 900px) {
+  .contenedor-principal {
+    flex-direction: column-reverse;
+    gap: 20px;
+    padding: 20px;
+  }
+  .vehiculos-lista, .resumen-carrito {
+    width: 100%;
+    max-width: 100%;
+  }
+  .vehiculo-item img {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .contenedor-principal {
+    padding: 30px;
+    gap: 10px;
+  }
+  .boton-div-volver {
+    padding: 30px 30px 0px 30px !important;
+  }
+  h1::after {
+    top: 230px;
+  }
+  h1 {
+    font-size: 1.3rem;
+  }
+  .vehiculo-item {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px;
+    gap: 10px;
+  }
+  .vehiculo-item img {
+    width: 100%;
+    max-width: 180px;
+    margin: 0 auto 10px auto;
+  }
+  .resumen-carrito {
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.98rem;
+  }
+  .btn-volver {
+    width: 25%;
+    text-align: center;
+    font-size: 0.98rem;
+    padding: 10px 0;
+    margin-bottom: 10px;
+  }
+  .boton {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .vehiculo-item img {
+    max-width: 360px;
+  }
+  .resumen-precio {
+    font-size: 1.1rem;
+  }
 }
