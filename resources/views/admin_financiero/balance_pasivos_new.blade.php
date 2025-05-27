@@ -102,23 +102,7 @@
                     </div>
                 </div>
                 
-                <!-- Ingresos no devengados -->
-                <div class="col-md-12 mt-3">
-                    <div class="card border-left-info h-100 py-2">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <i class="fas fa-calendar-alt fa-2x text-info"></i>
-                                </div>
-                                <div class="col">
-                                    <div class="text-xs text-uppercase mb-1">Ingresos no devengados (Pagos anticipados)</div>
-                                    <div class="h5 mb-0 font-weight-bold">{{ number_format($pasivosPorCategoria['Ingresos No Devengados'] ?? 0, 2, ',', '.') }} €</div>
-                                    <div class="text-xs text-muted">Reservas pagadas por adelantado (pasarán a ingresos cuando se entregue el vehículo)</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>

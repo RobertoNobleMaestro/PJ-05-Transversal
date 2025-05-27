@@ -480,7 +480,14 @@ class AdminFinancieroController extends Controller
         
         // Obtener todos los asalariados (independientemente de la sede, ya que ahora hay un único administrador)
         $asalariados = Asalariado::where('estado', 'alta')->get();
-        $totalSalarios = $asalariados->sum('salario');
+        $numAsalariados = $asalariados->count();
+        
+        // Calcular salario estándar y total
+        $salarioEstandar = 1656; // Salario estándar de 1.656€
+        $totalSalarioCalculado = $numAsalariados * $salarioEstandar;
+        
+        // Total de salarios desde la base de datos
+        $totalSalarios = $totalSalarioCalculado; // Usar el valor calculado en lugar de la suma
         
         // Añadir la categoría de salarios al balance de pasivos
         $pasivosPorCategoria['Salarios personal'] = $totalSalarios;
