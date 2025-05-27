@@ -62,9 +62,7 @@ class DatabaseSeeder extends Seeder
             PasivoSeeder::class,              // Pasivos financieros
             GastosMantenimientoSeeder::class, // Gastos de mantenimiento para vehículos y parkings
             PagoTallerClienteSeeder::class,   // Simulación de pagos de clientes por mantenimientos
-            PagoTallerSeeder::class,          // Pagos por reparaciones en taller
-            UpdateSolicitudesChoferSeeder::class, // Asegura que no haya solicitudes pendientes para choferes
-            PagosChoferesSeeder::class,       // Pagos por servicios de taxi
+            PagoTallerSeeder::class          // Pagos por reparaciones en taller
         ]);
         
         // 7. Datos financieros históricos (2020-2025)
