@@ -143,22 +143,24 @@
                 </div>
             </div>
 
-            <div id="vehiculos-table-container">
-                <table class="crud-table" id="tablaMantenimientos">
-                    <thead>
-                        <tr>
-                            <th>Vehículo</th>
-                            <th>Taller</th>
-                            <th>Fecha Completa</th>
-                            <th>Motivo</th>
-                            <th>Estado</th>
-                            <th class="col-acciones">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Datos cargados dinámicamente -->
-                    </tbody>
-                </table>
+            <div id="taller-historial-table-container">
+                <div class="crud-table-container" style="overflow-x: auto;">
+                    <table class="crud-table" id="tablaMantenimientos">
+                        <thead>
+                            <tr>
+                                <th>Vehículo</th>
+                                <th>Taller</th>
+                                <th>Fecha Completa</th>
+                                <th>Motivo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Datos cargados dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
                 <div id="paginacion-mantenimientos" class="custom-pagination mt-3 d-flex justify-content-center"></div>
             </div>
         </div>
