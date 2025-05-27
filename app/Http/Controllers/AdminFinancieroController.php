@@ -549,8 +549,32 @@ class AdminFinancieroController extends Controller
         if ($totalGastoMantenimientoParkings == 0) {
             $parkings = Parking::all(); // Ahora abarcamos todos los parkings
             $countParkings = $parkings->count();
-            $costoMantenimientoParking = 200; // 200€ por parking como estimación
-            $totalGastoMantenimientoParkings = $countParkings * $costoMantenimientoParking;
+            
+            // Precio de mantenimiento por metro cuadrado predeterminado
+            $precioMantenimientoPorMetro = 2.5; // 2.5€ por metro cuadrado
+            
+            $totalGastoMantenimientoParkings = 0;
+            $metrosCuadradosTotales = 0;
+            $parkingsConDetalle = [];
+            
+            foreach ($parkings as $parking) {
+                $metrosCuadrados = $parking->metros_cuadrados ?: ($parking->plazas * 25); // 25m² por plaza si no hay metros explícitos
+                $metrosCuadradosTotales += $metrosCuadrados;
+                
+                $costoParking = $metrosCuadrados * $precioMantenimientoPorMetro;
+                $totalGastoMantenimientoParkings += $costoParking;
+                
+                $parkingsConDetalle[] = [
+                    'nombre' => $parking->nombre,
+                    'metros_cuadrados' => $metrosCuadrados,
+                    'costo' => $costoParking
+                ];
+            }
+            
+            // Guardar los detalles para la vista
+            session(['parkings_detalle' => $parkingsConDetalle]);
+            session(['precio_metro_mantenimiento' => $precioMantenimientoPorMetro]);
+            session(['metros_cuadrados_totales' => $metrosCuadradosTotales]);
         }
         
         // Añadir categoría de mantenimiento de parkings
@@ -756,6 +780,38 @@ class AdminFinancieroController extends Controller
             })
             ->whereBetween('fecha', [$fechaInicio, $fechaFin])
             ->sum('importe');
+            
+        // Si no hay gastos reales registrados, calculamos en base al precio por metro cuadrado
+        if ($gastoMantenimientoParkings == 0) {
+            // Obtener todos los parkings
+            $parkings = Parking::whereIn('id', $parkingsIds)->get();
+            
+            // Precio de mantenimiento por metro cuadrado predeterminado
+            $precioMantenimientoPorMetro = 2.5; // 2.5€ por metro cuadrado
+            
+            $gastoMantenimientoParkings = 0;
+            $metrosCuadradosTotales = 0;
+            $parkingsConDetalle = [];
+            
+            foreach ($parkings as $parking) {
+                $metrosCuadrados = $parking->metros_cuadrados ?: ($parking->plazas * 25); // 25m² por plaza si no hay metros explícitos
+                $metrosCuadradosTotales += $metrosCuadrados;
+                
+                $costoParking = $metrosCuadrados * $precioMantenimientoPorMetro;
+                $gastoMantenimientoParkings += $costoParking;
+                
+                $parkingsConDetalle[] = [
+                    'nombre' => $parking->nombre,
+                    'metros_cuadrados' => $metrosCuadrados,
+                    'costo' => $costoParking
+                ];
+            }
+            
+            // Guardar los detalles para la vista
+            session(['parkings_detalle' => $parkingsConDetalle]);
+            session(['precio_metro_mantenimiento' => $precioMantenimientoPorMetro]);
+            session(['metros_cuadrados_totales' => $metrosCuadradosTotales]);
+        }
             
         // Calcular el costo promedio por parking (para mostrar en la vista)
         $costoMantenimientoParking = $countParkings > 0 ? round($gastoMantenimientoParkings / $countParkings, 2) : 0;

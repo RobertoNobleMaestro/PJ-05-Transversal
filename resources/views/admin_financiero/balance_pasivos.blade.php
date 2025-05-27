@@ -214,7 +214,13 @@ if (!isset($activos)) {
                                 <div class="col">
                                     <div class="text-xs text-uppercase mb-1">Mantenimiento Parkings</div>
                                     <div class="h5 mb-0 font-weight-bold">{{ number_format($gastosMantenimientoParkings ?? ($pasivosPorCategoria['Mantenimiento Parkings'] ?? 200), 0, ',', '.') }} €</div>
-                                    <div class="text-xs text-muted">Facturas pendientes de instalaciones ({{ $countParkings ?? 0 }} parkings)</div>
+                                    <div class="text-xs text-muted">
+                                        @if(session('parkings_detalle'))
+                                            Calculado a {{ session('precio_metro_mantenimiento') }}€/m² (Total: {{ number_format(session('metros_cuadrados_totales'), 0, ',', '.') }} m²)
+                                        @else
+                                            Facturas pendientes de instalaciones ({{ $countParkings ?? 0 }} parkings)
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
