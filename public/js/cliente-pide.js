@@ -306,6 +306,8 @@ function solicitarViaje(choferId) {
             .then(data => {
                 if (data.success) {
                     mostrarAlerta('success', '¡Solicitud enviada!', 'El chofer ha sido notificado de tu solicitud.');
+                    // Iniciar polling para verificar el estado de la solicitud
+                    iniciarPollingSolicitud(data.solicitud.id);
                 } else {
                     throw new Error(data.message || 'Error al crear la solicitud');
                 }
@@ -316,4 +318,129 @@ function solicitarViaje(choferId) {
             });
         }
     });
+}
+
+// Función para iniciar el polling de la solicitud
+function iniciarPollingSolicitud(solicitudId) {
+    window.pollingInterval = setInterval(() => {
+        fetch(`/api/solicitudes/${solicitudId}/estado`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.estado === 'aceptada') {
+                    clearInterval(window.pollingInterval);
+                    // Mostrar el modal de notificación
+                    const modalNotificacion = new bootstrap.Modal(document.getElementById('modalNotificacionAceptacion'));
+                    modalNotificacion.show();
+                    // Guardar los datos del chofer para mostrarlos después
+                    window.choferAsignado = data.chofer;
+                    window.solicitudActual = data.solicitud;
+                } else if (data.estado === 'rechazada') {
+                    clearInterval(window.pollingInterval);
+                    mostrarAlerta('error', 'Solicitud rechazada', 'El chofer ha rechazado tu solicitud.');
+                    actualizarListaChoferes([]); // Limpiar la lista de choferes
+                }
+            })
+            .catch(error => {
+                console.error('Error en polling:', error);
+            });
+    }, 5000); // Verificar cada 5 segundos
+}
+
+// Función para ver los detalles del viaje
+function verDetallesViaje() {
+    if (window.choferAsignado && window.solicitudActual) {
+        mostrarChoferAsignado(window.choferAsignado, window.solicitudActual);
+        const modalChoferAsignado = new bootstrap.Modal(document.getElementById('modalChoferAsignado'));
+        modalChoferAsignado.show();
+    }
+}
+
+// Función para mostrar la información del chofer asignado
+function mostrarChoferAsignado(chofer, solicitud) {
+    // Mostrar el botón de ver chofer
+    document.getElementById('btnVerChofer').style.display = 'block';
+
+    // Actualizar la información en el modal
+    document.getElementById('chofer-foto').src = chofer.foto_perfil || '/img/default-avatar.png';
+    document.getElementById('chofer-nombre').textContent = chofer.nombre;
+    document.getElementById('chofer-distancia').textContent = `${chofer.distancia.toFixed(2)} km`;
+    document.getElementById('chofer-precio').textContent = solicitud.precio;
+
+    // Configurar el botón de pago
+    const btnPago = document.getElementById('btn-realizar-pago');
+    btnPago.onclick = () => realizarPago(solicitud.id);
+
+    // Actualizar el mapa para mostrar solo la ubicación del chofer asignado
+    actualizarMapaChoferAsignado(chofer.latitud, chofer.longitud);
+}
+
+// Función para actualizar el mapa con el chofer asignado
+function actualizarMapaChoferAsignado(choferLat, choferLng) {
+    // Limpiar marcadores existentes
+    choferMarkers.forEach(marker => marker.remove());
+    choferMarkers = [];
+
+    // Añadir marcador del chofer asignado
+    const marker = L.marker([choferLat, choferLng], {icon: choferIcon})
+        .addTo(map)
+        .bindPopup('Tu chofer asignado');
+    choferMarkers.push(marker);
+
+    // Centrar el mapa en el chofer
+    map.setView([choferLat, choferLng], 15);
+}
+
+// Función para realizar el pago
+function realizarPago(solicitudId) {
+    Swal.fire({
+        title: 'Procesando pago',
+        text: 'Por favor, espera mientras procesamos tu pago...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Simular el proceso de pago (esto se reemplazará con la implementación real)
+    setTimeout(() => {
+        Swal.fire({
+            title: '¡Pago exitoso!',
+            text: 'Tu viaje ha sido confirmado.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Cerrar el modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalChoferAsignado'));
+                modal.hide();
+                
+                // Limpiar el formulario y el mapa para una nueva solicitud
+                document.getElementById('formDestino').reset();
+                if (destinoMarker) {
+                    destinoMarker.remove();
+                    destinoMarker = null;
+                }
+                destinoSeleccionado = false;
+                
+                // Actualizar la ubicación del usuario
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            userLat = position.coords.latitude;
+                            userLng = position.coords.longitude;
+                            map.setView([userLat, userLng], 13);
+                            if (userMarker) {
+                                userMarker.setLatLng([userLat, userLng]);
+                            } else {
+                                userMarker = L.marker([userLat, userLng], {icon: userIcon})
+                                    .addTo(map)
+                                    .bindPopup('Tu ubicación');
+                            }
+                            obtenerChoferesCercanos(userLat, userLng);
+                        }
+                    );
+                }
+            }
+        });
+    }, 2000);
 }

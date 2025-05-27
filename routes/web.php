@@ -33,6 +33,8 @@ use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\ParkingFinancieroController;
+use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\NotificacionPagoController;
 use Illuminate\Support\Facades\Schema;
 
 
@@ -90,6 +92,12 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/carrito/count', [CarritoController::class, 'getCartCount'])->name('carrito.count');
     Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');
 
+    // Notificaciones
+    Route::get('/notificaciones/count', [NotificacionController::class, 'getCount'])->name('notificaciones.count');
+    Route::post('/notificaciones/marcar-leida/{id}', [NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar-leida');
+    Route::get('/api/solicitudes/detalles', [SolicitudController::class, 'getDetalles'])->name('solicitudes.detalles');
+    Route::post('/api/solicitudes/{id}/cancelar', [SolicitudController::class, 'cancelarSolicitud'])->name('solicitudes.cancelar');
+
     // Reservas y vehÃ­culos
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
@@ -114,6 +122,12 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/pago/exito/{id_reserva}', [PagoController::class, 'exito'])->name('pago.exito');
     Route::get('/pago/cancelado', [PagoController::class, 'cancelado'])->name('pago.cancelado');
     Route::get('/facturas/descargar/{id_reserva}', [FacturaController::class, 'descargarFactura'])->name('facturas.descargar');
+
+    // Rutas para pago de notificaciones
+    Route::get('/notificacion/pago/{id_solicitud}', [NotificacionPagoController::class, 'checkout'])->name('notificacion.pago.checkout');
+    Route::get('/notificacion/pago/exito/{id_solicitud}', [NotificacionPagoController::class, 'exito'])->name('notificacion.pago.exito');
+    Route::get('/notificacion/pago/cancelado', [NotificacionPagoController::class, 'cancelado'])->name('notificacion.pago.cancelado');
+    Route::post('/notificacion/pago/webhook', [NotificacionPagoController::class, 'webhook'])->name('notificacion.pago.webhook');
 });
 
 Route::middleware(['auth', 'role:gestor'])->group(function () {
@@ -147,6 +161,8 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
     
     // Solicitudes de transporte
     Route::get('/chofers/solicitudes', [ChoferController::class, 'solicitudes'])->name('chofers.solicitudes');
+    Route::get('/api/solicitudes/chofer', [ChoferController::class, 'getSolicitudesChofer'])->name('api.solicitudes.chofer');
+    Route::get('/chofers/solicitudes/{id}', [ChoferController::class, 'detallesSolicitud'])->name('chofers.solicitud.detalles');
     
     // Chat por grupo
     Route::get('/chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
@@ -160,7 +176,7 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
 });
 
 // Ruta para la solicitud de transporte privado (cliente)
-Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
+Route::get('/solicitar-chofer', [ChoferController::class, 'clientePide'])->name('chofers.cliente-pide');
 Route::get('/api/choferes-cercanos', [SolicitudController::class, 'getChoferesCercanos'])->name('api.choferes.cercanos');
 
 // Rutas para solicitudes
@@ -170,6 +186,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/solicitudes/{id}/aceptar', [SolicitudController::class, 'aceptarSolicitud']);
     Route::post('/api/solicitudes/{id}/rechazar', [SolicitudController::class, 'rechazarSolicitud']);
     Route::get('/api/solicitudes/ruta', [SolicitudController::class, 'obtenerRuta']);
+    Route::get('/api/solicitudes/{id}/estado', [SolicitudController::class, 'getEstadoSolicitud']);
 });
 
 // Ruta para crear solicitudes (sin autenticación)

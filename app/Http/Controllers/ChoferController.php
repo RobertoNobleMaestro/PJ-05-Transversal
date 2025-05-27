@@ -62,9 +62,10 @@ class ChoferController extends Controller
     /**
      * Muestra la vista para que los clientes soliciten un chofer
      */
-    public function pideCoche()
+    public function clientePide()
     {
-        return view('chofers.cliente-pide');
+        $cliente = Auth::user();
+        return view('chofers.cliente-pide', compact('cliente'));
     }
 
     /**
@@ -568,14 +569,46 @@ class ChoferController extends Controller
             return redirect()->back()->with('error', 'Chofer no encontrado');
         }
 
+        return view('chofers.solicitudes');
+    }
+
+    public function getSolicitudesChofer()
+    {
+        $chofer = Chofer::where('id_usuario', Auth::id())->first();
+        
+        if (!$chofer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chofer no encontrado'
+            ], 404);
+        }
+
         $solicitudes = Solicitud::with(['cliente', 'chofer'])
             ->where('id_chofer', $chofer->id)
             ->where('estado', 'pendiente')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('chofers.solicitudes', [
+        return response()->json([
+            'success' => true,
             'solicitudes' => $solicitudes
+        ]);
+    }
+
+    public function detallesSolicitud($id)
+    {
+        $chofer = Chofer::where('id_usuario', Auth::id())->first();
+        
+        if (!$chofer) {
+            return redirect()->back()->with('error', 'Chofer no encontrado');
+        }
+
+        $solicitud = Solicitud::with(['cliente', 'chofer'])
+            ->where('id_chofer', $chofer->id)
+            ->findOrFail($id);
+
+        return view('chofers.detalles-solicitud', [
+            'solicitud' => $solicitud
         ]);
     }
 }

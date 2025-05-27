@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use App\Events\SolicitudAceptada;
 
 class SolicitudController extends Controller
 {
@@ -135,19 +136,41 @@ class SolicitudController extends Controller
     public function aceptarSolicitud($id)
     {
         try {
-            $solicitud = Solicitud::findOrFail($id);
+            // Primero encontramos la solicitud y cargamos las relaciones necesarias
+            $solicitud = Solicitud::with(['chofer.usuario'])->findOrFail($id);
+            
+            // Actualizar el estado de la solicitud
             $solicitud->estado = 'aceptada';
             $solicitud->save();
 
+            // Actualizar el estado del chofer a ocupado
+            $chofer = Chofer::find($solicitud->id_chofer);
+            $chofer->estado = 'ocupado';
+            $chofer->save();
+
+            // Aseguramos que las relaciones estén cargadas
+            $solicitud->refresh();
+            $solicitud->load(['chofer.usuario']);
+
+            // Verificamos que las relaciones estén disponibles antes de disparar el evento
+            if (!$solicitud->chofer || !$solicitud->chofer->usuario) {
+                throw new \Exception('No se pudieron cargar las relaciones necesarias');
+            }
+
+            // Disparar el evento de notificación
+            event(new SolicitudAceptada($solicitud));
+
             return response()->json([
                 'success' => true,
-                'message' => 'Solicitud aceptada exitosamente'
+                'message' => 'Solicitud aceptada exitosamente',
+                'solicitud' => $solicitud,
+                'chofer' => $chofer
             ]);
         } catch (\Exception $e) {
             Log::error('Error al aceptar solicitud: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al aceptar la solicitud'
+                'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -235,6 +258,100 @@ class SolicitudController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getEstadoSolicitud($id)
+    {
+        try {
+            $solicitud = Solicitud::with(['chofer.usuario'])->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'estado' => $solicitud->estado,
+                'solicitud' => $solicitud,
+                'chofer' => [
+                    'id' => $solicitud->chofer->id,
+                    'nombre' => $solicitud->chofer->usuario->nombre,
+                    'latitud' => $solicitud->chofer->latitud,
+                    'longitud' => $solicitud->chofer->longitud
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener estado de solicitud: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el estado de la solicitud'
+            ], 500);
+        }
+    }
+
+    public function getDetalles()
+    {
+        try {
+            $solicitud = DB::table('solicitudes')
+                ->join('users as cliente', 'solicitudes.id_cliente', '=', 'cliente.id_usuario')
+                ->join('users as chofer', 'solicitudes.id_chofer', '=', 'chofer.id_usuario')
+                ->where('solicitudes.id_cliente', Auth::id())
+                ->where('solicitudes.estado', 'aceptada')
+                ->where('solicitudes.notificacion_leida', false)
+                ->select(
+                    'solicitudes.id',
+                    'cliente.nombre as cliente_nombre',
+                    'chofer.nombre as chofer_nombre',
+                    'solicitudes.precio'
+                )
+                ->first();
+
+            if (!$solicitud) {
+                return response()->json(['error' => 'No se encontró la solicitud'], 404);
+            }
+
+            return response()->json($solicitud);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al obtener los detalles de la solicitud'], 500);
+        }
+    }
+
+    public function cancelarSolicitud($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $solicitud = Solicitud::findOrFail($id);
+            
+            // Verificar que la solicitud pertenece al usuario actual
+            if ($solicitud->id_cliente !== Auth::id()) {
+                throw new \Exception('No tienes permiso para cancelar esta solicitud');
+            }
+
+            // Verificar que la solicitud está en estado aceptada
+            if ($solicitud->estado !== 'aceptada') {
+                throw new \Exception('Solo se pueden cancelar solicitudes aceptadas');
+            }
+
+            // Actualizar el estado de la solicitud
+            $solicitud->estado = 'cancelada';
+            $solicitud->save();
+
+            // Actualizar el estado del chofer a disponible
+            $chofer = Chofer::find($solicitud->id_chofer);
+            $chofer->estado = 'disponible';
+            $chofer->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud cancelada correctamente'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al cancelar solicitud: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }
