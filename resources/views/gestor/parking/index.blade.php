@@ -39,9 +39,9 @@
                 Gestión de Parkings @if(isset($lugarGestor)) en {{ $lugarGestor->nombre }} @endif
             </h1>
             <div class="d-flex gap-2">
-                <a href="{{ route('gestor.parking.create') }}" class="btn-purple">
+                <button type="button" class="btn-purple" onclick="openCreatePanel()">
                     <i class="fas fa-plus"></i> Añadir Parking
-                </a>
+                </button>
                 <a href="{{ route('gestor.index') }}" class="btn-purple">
                     <i class="fas fa-arrow-left"></i> Volver al Panel
                 </a>
@@ -53,7 +53,7 @@
             <h5 class="mb-3 text-dark font-weight-bold">Mapa de Parkings</h5>
             <div id="map" style="height: 500px; border-radius: 10px;"></div>
                     <div id="editPanel" class="edit-panel-below" style="display: none;">
-            <h4 class="text-dark font-weight-bold mb-3">Editar Parking</h4>
+            <h4 class="text-dark font-weight-bold mb-3"><span id="editPanelTitle">Editar Parking</span></h4>
             <form id="editParkingForm" method="POST" onsubmit="return validarFormulario(event)">
                 @csrf
                 @method('PUT')
@@ -80,7 +80,7 @@
                 </div>
 
                 <div class="form-actions mt-3">
-                    <button type="submit" class="btn btn-submit">Guardar</button>
+                    <button type="submit" class="btn btn-submit" id="submitBtn">Guardar</button>
                     <button type="button" class="btn btn-cancel" onclick="closeEditPanel()">Cancelar</button>
                 </div>
             </form>

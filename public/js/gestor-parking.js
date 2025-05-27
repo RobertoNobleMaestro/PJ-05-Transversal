@@ -56,12 +56,28 @@ window.openEditPanel = function(id, nombre, plazas, lat, lng) {
     document.getElementById('latitud').value = lat;
     document.getElementById('longitud').value = lng;
     form.action = `/gestor/parking/${id}`;
+    form.method = 'POST'; // Laravel usa POST + _method para PUT
+
+    // Asegura que el input _method sea PUT
+    let methodInput = form.querySelector('input[name="_method"]');
+    if (!methodInput) {
+        methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'PUT';
+        form.appendChild(methodInput);
+    } else {
+        methodInput.value = 'PUT';
+    }
+
+    // Cambia el título y el botón
+    document.getElementById('editPanelTitle').textContent = 'Editar Parking';
+    document.getElementById('submitBtn').textContent = 'Guardar';
 
     const panel = document.getElementById('editPanel');
     panel.classList.add('show');
     panel.style.display = 'block';
 
-    // Asegurarse de que el panel está visible antes de hacer scroll
     setTimeout(() => {
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 300);
@@ -171,10 +187,13 @@ window.openCreatePanel = function() {
     form.action = '/gestor/parking';
     form.method = 'POST';
 
-    let methodInput = form.querySelector('input[name=\"_method\"]');
+    // Elimina el input _method si existe
+    let methodInput = form.querySelector('input[name="_method"]');
     if (methodInput) methodInput.remove();
 
-    form.querySelector('.btn.btn-submit').textContent = 'Crear';
+    // Cambia el título y el botón
+    document.getElementById('editPanelTitle').textContent = 'Añadir Parking';
+    document.getElementById('submitBtn').textContent = 'Añadir';
 
     panel.classList.add('show');
     panel.style.display = 'block';

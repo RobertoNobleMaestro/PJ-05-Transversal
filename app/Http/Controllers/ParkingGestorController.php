@@ -112,13 +112,33 @@ class ParkingGestorController extends Controller
             'longitud' => 'required|numeric',
         ]);
 
+        $user = auth()->user();
         $parking = new \App\Models\Parking();
         $parking->nombre = $request->nombre;
         $parking->plazas = $request->plazas;
         $parking->latitud = $request->latitud;
         $parking->longitud = $request->longitud;
-        $parking->id_usuario = auth()->user()->id_usuario; // O el campo que corresponda
-        // Si tienes id_lugar, añádelo aquí
+        $parking->id_usuario = $user->id_usuario;
+
+        // Buscar id_lugar del gestor
+        $id_lugar = null;
+        $primerParking = Parking::where('id_usuario', $user->id_usuario)->first();
+        if ($primerParking) {
+            $id_lugar = $primerParking->id_lugar;
+        } else {
+            // Deducir por nombre (como en el seeder)
+            if (stripos($user->nombre, 'Barcelona') !== false) {
+                $id_lugar = 2;
+            } elseif (stripos($user->nombre, 'Madrid') !== false) {
+                $id_lugar = 1;
+            } elseif (stripos($user->nombre, 'Valencia') !== false) {
+                $id_lugar = 3;
+            }
+        }
+        if (!$id_lugar) {
+            return redirect()->route('gestor.parking.index')->with('error', 'No se pudo determinar el lugar del gestor.');
+        }
+        $parking->id_lugar = $id_lugar;
         $parking->save();
 
         return redirect()->route('gestor.parking.index')->with('success', 'Parking creado correctamente.');
