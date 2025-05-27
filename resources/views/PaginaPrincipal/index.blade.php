@@ -230,14 +230,16 @@
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": token
           },
-          body: JSON.stringify({ mensaje })
+          body: JSON.stringify({ message: mensaje })
         })
         .then(res => res.json())
         .then(data => {
           const iaMsg = document.createElement('div');
-          iaMsg.innerText = "IA: " + (data.respuesta ?? "Sin respuesta");
+          iaMsg.innerText = "IA: " + (data.reply ?? "Sin respuesta");
           iaMsg.classList.add("text-success");
           chatMessages.appendChild(iaMsg);
+          // Auto-scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
         })
         .catch(error => {
           const errorMsg = document.createElement('div');

@@ -269,57 +269,11 @@
                 <canvas id="expensesChart" height="300"></canvas>
             </div>
             
-            @if($periodoTipo === 'anual')
-            <div class="chart-container">
-                <h3 class="chart-title">Evolución Mensual de Gastos ({{ $añoSeleccionado }})</h3>
-                <canvas id="monthlyExpensesChart" height="250"></canvas>
-            </div>
-            @endif
-            
-            <div class="chart-container">
-                <h3 class="chart-title">Comparativa Ingresos vs Gastos vs Objetivo</h3>
-                <canvas id="comparisonChart" height="250"></canvas>
-            </div>
+
         </div>
         
         <div class="col-md-4">
-            <div class="recommendation-container">
-                <h3 class="recommendation-title">Recomendaciones Financieras</h3>
-                
-                @if($margen < 0)
-                <div class="recommendation-item">
-                    <h5>Acción Urgente Requerida</h5>
-                    <p>Los gastos superan a los ingresos por {{ number_format(abs($ingresosTotales - $gastosTotales), 2) }} €. Se necesita incrementar ingresos o reducir gastos inmediatamente.</p>
-                </div>
-                <div class="recommendation-item">
-                    <h5>Incremento Mínimo Necesario</h5>
-                    <p>Para alcanzar punto de equilibrio, aumentar ingresos en al menos {{ number_format(abs($ingresosTotales - $gastosTotales), 2) }} €.</p>
-                </div>
-                @elseif($margen >= 0 && $margen < 30)
-                <div class="recommendation-item">
-                    <h5>Situación Estable pero Mejorable</h5>
-                    <p>El negocio es rentable pero con margen ajustado. Para mejorar la salud financiera, buscar aumentar ingresos o reducir gastos.</p>
-                </div>
-                <div class="recommendation-item">
-                    <h5>Incremento Recomendado</h5>
-                    <p>Para alcanzar zona verde (>60%), aumentar ingresos en {{ number_format($incrementoNecesario, 2) }} €.</p>
-                </div>
-                @else
-                <div class="recommendation-item">
-                    <h5>Excelente Situación Financiera</h5>
-                    <p>El negocio muestra una salud financiera óptima con un margen de beneficio superior al 60%.</p>
-                </div>
-                <div class="recommendation-item">
-                    <h5>Oportunidad de Expansión</h5>
-                    <p>Considerar reinversión para expandir operaciones o mejorar infraestructura.</p>
-                </div>
-                @endif
-                
-                <div class="recommendation-item">
-                    <h5>Planificación Presupuestaria</h5>
-                    <p>Presupuesto objetivo recomendado: {{ number_format($presupuestoObjetivo, 2) }} €</p>
-                </div>
-            </div>
+
             
             <div class="chart-container">
                 <h3 class="chart-title">Detalle de Gastos</h3>
@@ -442,148 +396,9 @@
             }
         });
         
-        // Gráfico de comparación ingresos vs gastos vs objetivo
-        const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
-        new Chart(comparisonCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Comparativa Financiera'],
-                datasets: [
-                    {
-                        label: 'Ingresos Actuales',
-                        data: [{{ $ingresosTotales }}],
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Gastos Estimados',
-                        data: [{{ $gastosTotales }}],
-                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Presupuesto Objetivo',
-                        data: [{{ $presupuestoObjetivo }}],
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(context.raw);
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+
         
-        @if($periodoTipo === 'anual')
-        // Datos para el gráfico mensual (solo si es anual)
-        const meses = [];
-        const gastosMensuales = [];
-        const salariosMensuales = [];
-        const materialesMensuales = [];
-        const mantenimientoMensuales = [];
-        const otrosMensuales = [];
-        
-        @foreach($gastosMensuales as $gasto)
-            meses.push('{{ $gasto['mes'] }}');
-            gastosMensuales.push({{ $gasto['total'] }});
-            salariosMensuales.push({{ $gasto['salarios'] }});
-            materialesMensuales.push({{ $gasto['materiales'] }});
-            mantenimientoMensuales.push({{ $gasto['mantenimiento'] }});
-            otrosMensuales.push({{ $gasto['otros'] }});
-        @endforeach
-        
-        // Gráfico de evolución mensual
-        const monthlyExpensesCtx = document.getElementById('monthlyExpensesChart').getContext('2d');
-        new Chart(monthlyExpensesCtx, {
-            type: 'line',
-            data: {
-                labels: meses,
-                datasets: [
-                    {
-                        label: 'Total Gastos',
-                        data: gastosMensuales,
-                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Salarios',
-                        data: salariosMensuales,
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        borderDash: [5, 5],
-                        fill: false
-                    },
-                    {
-                        label: 'Mantenimiento',
-                        data: mantenimientoMensuales,
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        borderDash: [5, 5],
-                        fill: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(context.raw);
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        @endif
+
         
         // Manejar los filtros dinámicos
         document.getElementById('periodo').addEventListener('change', function() {

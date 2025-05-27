@@ -50,15 +50,18 @@ class AsalariadoSeeder extends Seeder
             // Añadir variación aleatoria al salario base (±200€)
             $salario = $salarioBase + rand(-200, 200);
             
-            // Día de cobro aleatorio entre 1 y 10
-            $diaCobro = rand(1, 10);
+            // Fecha de contratación aleatoria entre 30 y 365 días atrás
+            $hiredate = now()->subDays(rand(30, 365));
             
             // Insertar el registro
             DB::table('asalariados')->insert([
                 'id_usuario' => $usuario->id_usuario,
                 'salario' => $salario,
-                'dia_cobro' => $diaCobro,
+                'hiredate' => $hiredate,
                 'parking_id' => $parkingAsignado,
+                'estado' => 'alta',
+                'dias_trabajados' => 0,
+                'id_lugar' => $parkings->random()->id_lugar,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);

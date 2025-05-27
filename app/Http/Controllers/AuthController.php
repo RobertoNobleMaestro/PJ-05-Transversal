@@ -40,18 +40,25 @@ class AuthController extends Controller
                 // La autenticación fue exitosa
                 $request->session()->regenerate();
 
-                // Obtener el usuario autenticado
+                // Obtener el usuario autenticado con su rol
                 $user = Auth::user();
-
+                $user->load('role'); // Cargar explícitamente la relación role
+                
                 // Determinar la redirección basada en el rol del usuario
-                $redirect = match($user->id_roles) {
-                    1 => '/admin',           // Admin
-                    3 => '/gestor',          // Gestor
-                    4 => '/taller/historial', // Mecánico
-                    5 => '/asalariados',      //asalariados
-                    6 => '/chofers',         // Chofer
-                    default => '/home'        // Cliente u otros roles
-                };
+                // Comprobar primero por el método hasRole si existe el rol cargado
+                if ($user->role && $user->hasRole('admin_financiero')) {
+                    $redirect = '/admin-financiero/asalariados';
+                } else {
+                    // Usar el fallback por id_roles si hasRole no funciona
+                    $redirect = match($user->id_roles) {
+                        1 => '/admin',                    // Admin
+                        3 => '/gestor',                   // Gestor
+                        4 => '/taller/historial',         // Mecánico
+                        5 => '/admin-financiero/asalariados', // Admin Financiero
+                        6 => '/chofers',                  // Chofer
+                        default => '/home'                // Cliente u otros roles
+                    };
+                }
 
 
                 // Devolver respuesta exitosa

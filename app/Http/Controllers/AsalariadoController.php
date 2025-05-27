@@ -214,7 +214,7 @@ class AsalariadoController extends Controller
         
         // Verificar que pertenezca a la misma sede
         if ($parkingAsalariado->id_lugar != $sedeId) {
-            return redirect()->route('asalariados.index')
+            return redirect()->route('admin.asalariados.index')
                 ->with('error', 'No puedes editar asalariados de otras sedes');
         }
         
@@ -275,8 +275,8 @@ class AsalariadoController extends Controller
         $asalariado->parking_id = $request->parking_id;
         $asalariado->save();
         
-        return redirect()->route('asalariados.index')
-            ->with('success', 'Información de asalariado actualizada correctamente');
+        return redirect()->route('admin.asalariados.index')
+            ->with('success', 'Asalariado actualizado correctamente');
     }
     
     /**

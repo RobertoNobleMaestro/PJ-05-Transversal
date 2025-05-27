@@ -62,6 +62,21 @@ class User extends Authenticatable
 
     public function hasRole($roleName)
     {
+        // Si el rol es un ID (número), verificar por ID
+        if (is_numeric($roleName)) {
+            return $this->id_roles == $roleName;
+        }
+        
+        // Verificar por el nombre del rol
+        $adminFinancieroNames = ['admin_financiero', 'Admin_financiero', 'admin financiero', 'Admin Financiero'];
+        
+        // Caso especial para admin_financiero (permite varias variantes)
+        if (in_array($roleName, $adminFinancieroNames)) {
+            return $this->id_roles == 5 || 
+                  ($this->role && in_array($this->role->nombre_rol, $adminFinancieroNames));
+        }
+        
+        // Verificación normal por nombre del rol
         return $this->role && $this->role->nombre_rol === $roleName;
     }
 

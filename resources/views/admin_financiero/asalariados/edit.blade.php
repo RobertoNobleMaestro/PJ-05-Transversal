@@ -8,7 +8,7 @@
             <p class="text-muted">Modificar información de salario y parking</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('asalariados.index') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.asalariados.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver al listado
             </a>
         </div>
@@ -70,7 +70,7 @@
                 </div>
                 <div class="card-body">
                     <div id="ajaxResponseMessages"></div>
-                    <form id="editAsalariadoForm" method="POST" action="javascript:void(0)" class="p-3">
+                    <form id="editAsalariadoForm" method="POST" action="{{ route('admin.asalariados.update', $asalariado->id) }}" class="p-3">
                         @csrf
                         <input type="hidden" name="asalariado_id" value="{{ $asalariado->id }}">
 
@@ -91,11 +91,12 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="dia_cobro" class="col-md-4 col-form-label">Día de cobro</label>
+                            <label for="hiredate" class="col-md-4 col-form-label">Fecha de contratación</label>
                             <div class="col-md-8">
-                                <input id="dia_cobro" type="number" min="1" max="31" class="form-control @error('dia_cobro') is-invalid @enderror" name="dia_cobro" value="{{ old('dia_cobro', $asalariado->dia_cobro) }}" required>
-                                <small class="form-text text-muted">Día del mes en que se realiza el pago (1-31)</small>
-                                @error('dia_cobro')
+                                <input id="hiredate" type="date" class="form-control @error('hiredate') is-invalid @enderror" name="hiredate" value="{{ old('hiredate', $asalariado->hiredate ? $asalariado->hiredate->format('Y-m-d') : now()->format('Y-m-d')) }}" required>
+                                <small class="form-text text-muted">Fecha en que fue contratado el empleado</small>
+                                <small class="form-text text-info">Nota: Todos los asalariados cobran el día 1 de cada mes</small>
+                                @error('hiredate')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -103,6 +104,25 @@
                             </div>
                         </div>
 
+                        <div class="row mb-3">
+                            <label for="id_lugar" class="col-md-4 col-form-label">Lugar asignado</label>
+                            <div class="col-md-8">
+                                <select id="id_lugar" class="form-select @error('id_lugar') is-invalid @enderror" name="id_lugar" required>
+                                    @foreach ($lugares as $lugar)
+                                        <option value="{{ $lugar->id_lugar }}" {{ (old('id_lugar', $asalariado->id_lugar) == $lugar->id_lugar) ? 'selected' : '' }}>
+                                            {{ $lugar->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Lugar donde trabaja el empleado</small>
+                                @error('id_lugar')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        
                         <div class="row mb-3">
                             <label for="parking_id" class="col-md-4 col-form-label">Parking asignado</label>
                             <div class="col-md-8">
@@ -113,7 +133,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="form-text text-muted">Parking donde trabaja el empleado (solo dentro de su sede)</small>
+                                <small class="form-text text-muted">Parking específico donde trabaja el empleado</small>
                                 @error('parking_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -124,7 +144,7 @@
 
                         <div class="row">
                             <div class="col-md-12 text-end mt-4">
-                                <a href="{{ route('asalariados.index') }}" class="btn btn-outline-secondary me-2">
+                                <a href="{{ route('admin.asalariados.index') }}" class="btn btn-outline-secondary me-2">
                                     Cancelar
                                 </a>
                                 <button type="submit" id="saveAsalariadoBtn" class="btn text-white" style="background-color: #9F17BD;">
@@ -193,12 +213,50 @@
         const btnText = document.getElementById('btnText');
         const responseMessages = document.getElementById('ajaxResponseMessages');
         
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Vinculación de lugar con parkings
+        const lugarSelect = document.getElementById('id_lugar');
+        const parkingSelect = document.getElementById('parking_id');
+        
+        // Almacenar los parkings originales agrupados por lugar
+        const parkingsPorLugar = {};
+        
+        @foreach ($lugares as $lugar)
+            parkingsPorLugar[{{ $lugar->id_lugar }}] = [
+                @foreach ($parkings->where('id_lugar', $lugar->id_lugar) as $parking)
+                    {id: {{ $parking->id }}, nombre: '{{ $parking->nombre }}'},
+                @endforeach
+            ];
+        @endforeach
+        
+        // Función para actualizar los parkings según el lugar seleccionado
+        function actualizarParkings() {
+            const lugarId = lugarSelect.value;
+            const parkingsDisponibles = parkingsPorLugar[lugarId] || [];
             
-            // Mostrar estado de carga
-            saveBtn.classList.add('is-loading');
-            btnText.textContent = 'Guardando...';
+            // Limpiar opciones actuales
+            parkingSelect.innerHTML = '';
+            
+            // Añadir nuevas opciones
+            parkingsDisponibles.forEach(parking => {
+                const option = document.createElement('option');
+                option.value = parking.id;
+                option.textContent = parking.nombre;
+                parkingSelect.appendChild(option);
+            });
+            
+            // Si no hay parkings disponibles
+            if (parkingsDisponibles.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = 'No hay parkings disponibles';
+                parkingSelect.appendChild(option);
+            }
+        }
+        
+        // Actualizar parkings al cambiar el lugar
+        lugarSelect.addEventListener('change', actualizarParkings);
+        
+        // Inicializar parkings
+        actualizarParkings();
             
             // Obtener datos del formulario
             const asalariadoId = form.querySelector('input[name="asalariado_id"]').value;

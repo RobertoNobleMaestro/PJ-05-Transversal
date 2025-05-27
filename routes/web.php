@@ -26,11 +26,13 @@ use App\Http\Controllers\HistorialGestorController;
 use App\Http\Controllers\ParkingGestorController;
 use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\AdminFinancieroController;
-use App\Http\Controllers\AsalariadoController;
-use App\Http\Controllers\FinancialReportController;
+use App\Http\Controllers\AsalariadosController;
+use App\Http\Controllers\AsalariadosEstadoController;
 use App\Http\Controllers\BalanceController;
+use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\ParkingFinancieroController;
 use Illuminate\Support\Facades\Schema;
 
 
@@ -206,28 +208,74 @@ Route::get('/debug/chat', function() {
 
 // Rutas para el administrador financiero
 Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
-    Route::get('/admin-financiero', [AsalariadoController::class, 'index'])->name('admin.financiero');
-    Route::get('/admin-financiero/resumen', [AsalariadoController::class, 'index'])->name('admin.financiero.resumen');
+    // Ruta principal (redirige a asalariados)
+    Route::get('/admin-financiero', [AsalariadosController::class, 'index'])->name('admin.financiero');
+    
+    // Rutas para la gestión de asalariados
+    Route::prefix('admin-financiero/asalariados')->group(function () {
+        Route::get('/', [AsalariadosController::class, 'index'])->name('admin.asalariados.index');
+        Route::get('/data', [AsalariadosController::class, 'getAsalariados'])->name('admin.asalariados.data');
+        Route::get('/create', [AsalariadosController::class, 'create'])->name('admin.asalariados.create');
+        Route::post('/', [AsalariadosController::class, 'store'])->name('admin.asalariados.store');
+        Route::get('/{id}/editar', [AsalariadosController::class, 'edit'])->name('admin.asalariados.edit');
+        Route::post('/{id}/update', [AsalariadosController::class, 'update'])->name('admin.asalariados.update');
+        Route::get('/{id}/detalle', [AsalariadosController::class, 'show'])->name('admin.asalariados.show');
+        Route::get('/{id}/nomina', [AsalariadosController::class, 'generarNomina'])->name('admin.asalariados.nomina');
+        Route::post('/{id}/baja', [AsalariadosController::class, 'darDeBaja'])->name('admin.asalariados.baja');
+        Route::get('/bajas', [AsalariadosController::class, 'bajas'])->name('admin.asalariados.bajas');
+        Route::post('/{id}/alta', [AsalariadosController::class, 'darDeAlta'])->name('admin.asalariados.alta');
+    });
+    
+    // Nuevas rutas para las vistas financieras
+    Route::get('/admin-financiero/balance-activos', [AdminFinancieroController::class, 'balanceActivos'])->name('admin.financiero.balance.activos');
+    Route::get('/admin-financiero/balance-pasivos', [AdminFinancieroController::class, 'balancePasivos'])->name('admin.financiero.balance.pasivos');
+    Route::get('/admin-financiero/gastos', [AdminFinancieroController::class, 'gastos'])->name('admin.financiero.gastos');
+    Route::get('/admin-financiero/ingresos', [AdminFinancieroController::class, 'ingresos'])->name('admin.financiero.ingresos');
+    
+    // Nuevas rutas para presupuestos
+    Route::get('/admin-financiero/presupuestos', [AdminFinancieroController::class, 'presupuestos'])->name('admin.financiero.presupuestos');
+    Route::post('/admin-financiero/presupuestos/guardar', [AdminFinancieroController::class, 'guardarPresupuestos'])->name('admin.financiero.presupuestos.guardar');
+    Route::get('/admin-financiero/presupuestos/historial', [AdminFinancieroController::class, 'historialPresupuestos'])->name('admin.financiero.presupuestos.historial');
+    
+    // Rutas para el CRUD de parkings
+    Route::get('/admin-financiero/parkings', [ParkingFinancieroController::class, 'index'])->name('admin.financiero.parkings.index');
+    Route::get('/admin-financiero/parkings/{id}/edit', [ParkingFinancieroController::class, 'edit'])->name('admin.financiero.parkings.edit');
+    Route::put('/admin-financiero/parkings/{id}', [ParkingFinancieroController::class, 'update'])->name('admin.financiero.parkings.update');
+    // Ruta para compatibilidad con enlaces antiguos
+    Route::get('/admin-financiero/parkings-antiguos', function() {
+        return redirect()->route('admin.financiero.parkings.index');
+    })->name('admin.financiero.parkings');
+    
+    // Rutas para gestionar el estado de asalariados (alta/baja)
+    Route::get('/admin-financiero/asalariados/inactivos', [AsalariadosEstadoController::class, 'inactivos'])->name('admin.financiero.asalariados.inactivos');
+    Route::post('/admin-financiero/asalariados/{id}/desactivar', [AsalariadosEstadoController::class, 'desactivar'])->name('admin.financiero.asalariados.desactivar');
+    Route::post('/admin-financiero/asalariados/{id}/reactivar', [AsalariadosEstadoController::class, 'reactivar'])->name('admin.financiero.asalariados.reactivar');
+    
+    // Ruta de compatibilidad para enlaces que usan admin.financiero.asalariados.index
+    Route::get('/admin-financiero/lista-asalariados', function() {
+        return redirect()->route('admin.asalariados.index');
+    })->name('admin.financiero.asalariados.index');
+    
+    // Ruta para generar nómina en PDF
+    Route::get('/admin-financiero/nomina/{id}', [AdminFinancieroController::class, 'generarNomina'])->name('admin.financiero.nomina');
+    
+    // Rutas obsoletas que mantienen para compatibilidad
+    Route::get('/admin-financiero/resumen', [AsalariadosController::class, 'index'])->name('admin.financiero.resumen');
     Route::get('/financial/gastos-ingresos', [FinancialReportController::class, 'gastosIngresos'])->name('financial.gastos-ingresos');
     Route::get('/financial/balance', [FinancialReportController::class, 'balance'])->name('financial.balance');
     Route::get('/financial/presupuesto', [FinancialReportController::class, 'presupuestoEstimado'])->name('financial.presupuesto');
+    Route::get('/admin-financiero/balance', [BalanceController::class, 'index'])->name('admin.financiero.balance');
+    Route::get('/admin-financiero/balance/chart', [BalanceController::class, 'getChartData'])->name('admin.financiero.balance.chart');
     
-    // Rutas para la gestión de asalariados
-    Route::prefix('asalariados')->group(function () {
-        Route::get('/', [AsalariadoController::class, 'index'])->name('asalariados.index');
-        Route::get('/data', [AsalariadoController::class, 'getAsalariados'])->name('asalariados.data');
-        Route::get('/{id}/editar', [AsalariadoController::class, 'edit'])->name('asalariados.edit');
-        Route::match(['post', 'put'], '/{id}/update', [AsalariadoController::class, 'update'])->name('asalariados.update');
-        Route::post('/{id}/update-ajax', [AsalariadoController::class, 'updateAjax'])->name('asalariados.update.ajax');
-        Route::get('/{id}/detalle', [AsalariadoController::class, 'show'])->name('asalariados.show');
-        Route::get('/{id}/ficha-salarial', [AsalariadoController::class, 'descargarFichaSalarial'])->name('asalariados.ficha.salarial');
-    });
-    // Nuevo sistema de reportes financieros - COMENTADO
+    // Alias para la ruta antigua asalariados.index que ahora redirecciona a admin.asalariados.index
+    Route::get('/asalariados', function() {
+        return redirect()->route('admin.asalariados.index');
+    })->name('asalariados.index');
+    
+    // Rutas de sistema de reportes financieros (comentadas)
     // Route::get('/financial/dashboard', [FinancialReportController::class, 'dashboard'])->name('financial.dashboard');
     // Route::get('/financial/vehiculos', [FinancialReportController::class, 'vehiculosRentabilidad'])->name('financial.vehiculos');
     // Route::get('/financial/proyecciones', [FinancialReportController::class, 'proyecciones'])->name('financial.proyecciones');
-    Route::get('/admin-financiero/balance', [BalanceController::class, 'index'])->name('admin.financiero.balance');
-    Route::get('/admin-financiero/balance/chart', [BalanceController::class, 'getChartData'])->name('admin.financiero.balance.chart');
     
     // Rutas para Activos
     Route::get('/admin-financiero/activos/create', [BalanceController::class, 'createActivo'])->name('admin.financiero.activo.create');
@@ -285,6 +333,10 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
 });
+Route::post('/chat-view/enviar', [ChatViewController::class, 'send'])->name('chat-view.send');
+Route::post('/chat/enviar', [ChatController::class, 'sendMessage'])->name('chat.send');
+Route::post('/chat-ia', [ChatIAController::class, 'send'])->name('chat.ia.send');
+
 Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
 // Route::post('/chat/send', [ChatIAController::class, 'send'])->name('chat.send2');

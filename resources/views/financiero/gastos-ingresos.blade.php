@@ -122,7 +122,7 @@
     </div>
     
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="stat-card text-white bg-primary">
                 <div class="card-body">
                     <h5 class="card-title">Ingresos Totales</h5>
@@ -131,7 +131,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="stat-card text-white bg-warning">
                 <div class="card-body">
                     <h5 class="card-title">Gastos Totales</h5>
@@ -140,7 +140,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="stat-card text-white {{ $totalBeneficios >= 0 ? 'bg-success' : 'bg-danger' }}">
                 <div class="card-body">
                     <h5 class="card-title">Beneficios</h5>
@@ -149,24 +149,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card text-white {{ $rentabilidad >= 0 ? 'bg-info' : 'bg-danger' }}">
-                <div class="card-body">
-                    <h5 class="card-title">Rentabilidad</h5>
-                    <p class="stat-value">{{ number_format($rentabilidad, 2) }}%</p>
-                    <p class="mb-0">ROI (Retorno de inversión)</p>
-                </div>
-            </div>
-        </div>
     </div>
     
     <div class="row">
         <div class="col-md-8">
-            <div class="chart-container">
-                <h3 class="chart-title">Evolución de Ingresos y Gastos ({{ now()->year }})</h3>
-                <canvas id="balanceChart" height="300"></canvas>
-            </div>
-            
+
             <div class="chart-container">
                 <h3 class="chart-title">Beneficios Mensuales ({{ now()->year }})</h3>
                 <canvas id="beneficiosChart" height="250"></canvas>
@@ -195,12 +182,6 @@
                             <td><strong>Beneficio Neto:</strong></td>
                             <td class="text-end {{ $totalBeneficios >= 0 ? 'positive' : 'negative' }}">
                                 {{ number_format($totalBeneficios, 2) }} €
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ROI:</td>
-                            <td class="text-end {{ $rentabilidad >= 0 ? 'positive' : 'negative' }}">
-                                {{ number_format($rentabilidad, 2) }}%
                             </td>
                         </tr>
                     </tbody>
@@ -274,65 +255,6 @@
         const ingresos = {!! $ingresos !!};
         const gastos = {!! $gastos !!};
         const beneficios = {!! $beneficios !!};
-        
-        // Gráfico de líneas: Ingresos y Gastos
-        const balanceCtx = document.getElementById('balanceChart').getContext('2d');
-        new Chart(balanceCtx, {
-            type: 'line',
-            data: {
-                labels: etiquetas.map(etiqueta => etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1)),
-                datasets: [
-                    {
-                        label: 'Ingresos',
-                        data: ingresos,
-                        borderColor: '#9F17BD',
-                        backgroundColor: 'rgba(159, 23, 189, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Gastos',
-                        data: gastos,
-                        borderColor: '#FFC107',
-                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value, index, values) {
-                                return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
-                            }
-                        }
-                    }
-                }
-            }
-        });
         
         // Gráfico de barras: Beneficios
         const beneficiosCtx = document.getElementById('beneficiosChart').getContext('2d');

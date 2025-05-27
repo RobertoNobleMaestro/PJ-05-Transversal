@@ -130,48 +130,15 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Administradores financieros por sede
-        // Administrador financiero Barcelona
+        // Administrador financiero central (único)
         DB::table('users')->insert([
-            'nombre' => 'Admin Financiero Barcelona',
-            'email' => 'finanzas.barcelona@carflow.com',
+            'nombre' => 'Administrador Financiero',
+            'email' => 'finanzas@carflow.com',
             'DNI' => '87654321H',
             'telefono' => '655001122',
             'password' => Hash::make('asdASD123'),
             'fecha_nacimiento' => '1985-03-15',
-            'direccion' => 'Oficina Financiera Barcelona',
-            'foto_perfil' => null,
-            'licencia_conducir' => 'B',
-            'id_roles' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Administrador financiero Madrid
-        DB::table('users')->insert([
-            'nombre' => 'Admin Financiero Madrid',
-            'email' => 'finanzas.madrid@carflow.com',
-            'DNI' => '76543210I',
-            'telefono' => '655112233',
-            'password' => Hash::make('asdASD123'),
-            'fecha_nacimiento' => '1983-07-22',
-            'direccion' => 'Oficina Financiera Madrid',
-            'foto_perfil' => null,
-            'licencia_conducir' => 'B',
-            'id_roles' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Administrador financiero Valencia
-        DB::table('users')->insert([
-            'nombre' => 'Admin Financiero Valencia',
-            'email' => 'finanzas.valencia@carflow.com',
-            'DNI' => '65432109J',
-            'telefono' => '655334455',
-            'password' => Hash::make('asdASD123'),
-            'fecha_nacimiento' => '1987-11-05',
-            'direccion' => 'Oficina Financiera Valencia',
+            'direccion' => 'Oficina Central Financiera',
             'foto_perfil' => null,
             'licencia_conducir' => 'B',
             'id_roles' => 5,

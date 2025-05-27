@@ -31,6 +31,28 @@ class Parking extends Model
     {
         return $this->hasMany(Vehiculo::class, 'parking_id', 'id');
     }
+    
+    /**
+     * Calcula el valor total del parking
+     * 
+     * @param int|null $año_referencia Año para el cálculo (por defecto, el año actual)
+     * @return float
+     */
+    public function calcularValorTotal($año_referencia = null)
+    {
+        if ($año_referencia === null) {
+            $año_referencia = now()->year;
+        }
+        
+        // Valor base por plaza de parking
+        $valor_por_plaza = 25000; // 25.000€ por plaza
+        
+        // Metros cuadrados estimados (25m² por plaza)
+        $plazas = $this->plazas > 0 ? $this->plazas : 100; // Si no hay plazas, asumimos 100
+        
+        // Valor total basado en número de plazas
+        return $plazas * $valor_por_plaza;
+    }
 }
 
 

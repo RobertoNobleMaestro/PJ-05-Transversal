@@ -332,43 +332,30 @@ error_reporting(E_ALL);
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('asalariados*') ? 'active' : '' }}" href="{{ route('asalariados.index') }}">
+                        <a class="nav-link {{ request()->routeIs('admin.asalariados.index') ? 'active' : '' }}" href="{{ route('admin.asalariados.index') }}">
                             <i class="fas fa-users me-1"></i> Asalariados
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('financial/gastos-ingresos*') ? 'active' : '' }}" href="{{ route('financial.gastos-ingresos') }}">
-                            <i class="fas fa-money-bill-wave me-1"></i> Gastos e Ingresos
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.balance.activos') ? 'active' : '' }}" href="{{ route('admin.financiero.balance.activos') }}">
+                            <i class="fas fa-coins me-1"></i> Balance de Activos
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('financial/balance*') ? 'active' : '' }}" href="{{ route('financial.balance') }}">
-                            <i class="fas fa-balance-scale me-1"></i> Balance
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.balance.pasivos') ? 'active' : '' }}" href="{{ route('admin.financiero.balance.pasivos') }}">
+                            <i class="fas fa-file-invoice-dollar me-1"></i> Balance de Pasivos
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('financial/presupuesto*') ? 'active' : '' }}" href="{{ route('financial.presupuesto') }}">
-                            <i class="fas fa-chart-pie me-1"></i> Presupuesto
-                        </a>
-                    </li>
-                    <!-- Secciones financieras comentadas (versión solo con Asalariados) -->
-                    {{-- 
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->is('financial/dashboard*') ? 'active' : '' }}" href="{{ route('financial.dashboard') }}">
-                            <i class="fas fa-chart-bar me-1"></i> Dashboard Financiero
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.gastos') ? 'active' : '' }}" href="{{ route('admin.financiero.gastos') }}">
+                            <i class="fas fa-money-bill-wave me-1"></i> Gastos
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('financial/vehiculos*') ? 'active' : '' }}" href="{{ route('financial.vehiculos') }}">
-                            <i class="fas fa-car me-1"></i> Rentabilidad Vehículos
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.ingresos') ? 'active' : '' }}" href="{{ route('admin.financiero.ingresos') }}">
+                            <i class="fas fa-chart-line me-1"></i> Ingresos
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->is('financial/proyecciones*') ? 'active' : '' }}" href="{{ route('financial.proyecciones') }}">
-                            <i class="fas fa-chart-line me-1"></i> Proyecciones
-                        </a>
-                    </li>
-                    --}}
                 </ul>
                 
                 <div class="d-flex align-items-center">
@@ -411,6 +398,9 @@ error_reporting(E_ALL);
     </footer>
 
     <!-- Bootstrap JS -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

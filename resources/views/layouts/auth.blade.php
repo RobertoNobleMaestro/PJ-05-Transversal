@@ -61,7 +61,33 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('/home') }}">Inicio</a>
                     </li>
-                    <!-- Aquí pueden ir más elementos del menú -->
+                    @if(Auth::check() && Auth::user()->id_roles == 5)
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.asalariados.index') ? 'active fw-bold' : '' }}" href="{{ route('admin.asalariados.index') }}">
+                            <i class="fas fa-users me-1"></i> Asalariados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.balance.activos') ? 'active fw-bold' : '' }}" href="{{ route('admin.financiero.balance.activos') }}">
+                            <i class="fas fa-coins me-1"></i> Balance de Activos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.balance.pasivos') ? 'active fw-bold' : '' }}" href="{{ route('admin.financiero.balance.pasivos') }}">
+                            <i class="fas fa-file-invoice-dollar me-1"></i> Balance de Pasivos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.gastos') ? 'active fw-bold' : '' }}" href="{{ route('admin.financiero.gastos') }}">
+                            <i class="fas fa-money-bill-wave me-1"></i> Gastos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.financiero.ingresos') ? 'active fw-bold' : '' }}" href="{{ route('admin.financiero.ingresos') }}">
+                            <i class="fas fa-chart-line me-1"></i> Ingresos
+                        </a>
+                    </li>
+                    @endif
                 </ul>
                 
                 <div class="d-flex align-items-center">

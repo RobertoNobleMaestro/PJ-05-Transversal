@@ -8,7 +8,7 @@
             <p class="text-muted">Gestión de trabajadores asalariados de la sede</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('asalariados.index') }}" class="btn btn-success me-2">
+            <a href="{{ route('admin.asalariados.index') }}" class="btn btn-success me-2">
                 <i class="fas fa-users"></i> Gestión de Asalariados
             </a>
         </div>
@@ -64,6 +64,17 @@
                                     </a>
                                     <a href="{{ route('admin.financiero.edit', $asalariado->id) }}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-edit"></i>
+                                    </a>
+                                    @php
+                                        $hoy = \Carbon\Carbon::now();
+                                        $diaCobro = $asalariado->dia_cobro;
+                                        $esDiaCobro = $hoy->day == $diaCobro;
+                                    @endphp
+                                    <a href="{{ route('admin.financiero.nomina', $asalariado->id) }}" 
+                                       class="btn btn-sm {{ $esDiaCobro ? 'btn-success' : 'btn-secondary' }}" 
+                                       {{ !$esDiaCobro ? 'disabled' : '' }} 
+                                       title="{{ $esDiaCobro ? 'Generar nómina (día de cobro)' : 'No es día de cobro' }}">
+                                        <i class="fas fa-file-invoice-dollar"></i> Nómina
                                     </a>
                                 </td>
                             </tr>

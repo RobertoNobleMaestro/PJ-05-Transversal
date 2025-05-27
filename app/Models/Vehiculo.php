@@ -110,4 +110,44 @@ class Vehiculo extends Model
             ? $this->proxima_fecha_mantenimiento->format('d/m/Y')
             : 'No disponible';
     }
+    
+    /**
+     * Calcula el valor actual del vehículo teniendo en cuenta la depreciación
+     * (20% por año, 0 después de 5 años)
+     *
+     * @param int|null $año_referencia Año para el cálculo (por defecto, el año actual)
+     * @return float
+     */
+    public function calcularValorActual($año_referencia = null)
+    {
+        if ($año_referencia === null) {
+            $año_referencia = now()->year;
+        }
+        
+        // Años transcurridos desde la fabricación
+        $años_transcurridos = max(0, $año_referencia - $this->año);
+        
+        // Si han pasado 5 años o más, el valor es 0
+        if ($años_transcurridos >= 5) {
+            return 0;
+        }
+        
+        // Usar valor por defecto si el precio es nulo o cero
+        $precio_base = $this->precio_dia * 200; // Estimación: 200 días de alquiler como valor base
+        
+        // Calcular depreciación (20% por año)
+        $porcentaje_valor_restante = 1 - (0.2 * $años_transcurridos);
+        return round($precio_base * $porcentaje_valor_restante, 2);
+    }
+    
+    /**
+     * Determina si el vehículo está amortizado (valor 0)
+     *
+     * @param int|null $año_referencia Año para el cálculo
+     * @return bool
+     */
+    public function estaAmortizado($año_referencia = null)
+    {
+        return $this->calcularValorActual($año_referencia) <= 0;
+    }
 }

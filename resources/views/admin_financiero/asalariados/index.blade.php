@@ -11,10 +11,15 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h1>Gestión de Asalariados</h1>
-            <p class="text-muted">Sede de {{ $sede->nombre }}</p>
+            <p class="text-muted">Administrador Financiero</p>
         </div>
         <div class="col-md-4 text-end">
-            <!-- Resumen financiero button removed -->
+            <a href="{{ route('admin.asalariados.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Asalariado
+            </a>
+            <a href="{{ route('admin.financiero.asalariados.inactivos') }}" class="btn btn-secondary ms-2">
+                <i class="fas fa-user-slash"></i> Usuarios dados de baja
+            </a>
         </div>
     </div>
 
@@ -35,7 +40,7 @@
     <div class="card shadow">
         <div class="card-header" style="background-color: #9F17BD; color: white;">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Listado de Asalariados - {{ $sede->nombre }}</h5>
+                <h5 class="mb-0">Listado de Asalariados</h5>
                 <input type="text" id="searchInput" class="form-control form-control-sm w-25" placeholder="Buscar asalariado...">
             </div>
         </div>
@@ -52,11 +57,11 @@
                         </select>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label for="filterParking" class="filter-label">Parking</label>
-                        <select id="filterParking" class="form-select form-select-sm">
-                            <option value="">Todos los parkings</option>
-                            @foreach($parkings as $parking)
-                                <option value="{{ $parking->id }}">{{ $parking->nombre }}</option>
+                        <label for="filterLugar" class="filter-label">Lugar</label>
+                        <select id="filterLugar" class="form-select form-select-sm">
+                            <option value="">Todos los lugares</option>
+                            @foreach($lugares as $lugar)
+                                <option value="{{ $lugar->id_lugar }}">{{ $lugar->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -75,8 +80,8 @@
                             <th>Nombre</th>
                             <th>Rol</th>
                             <th>Salario</th>
-                            <th>Día de cobro</th>
-                            <th>Parking asignado</th>
+                            <th>Fecha de contratación</th>
+                            <th>Lugar</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -115,7 +120,7 @@
             <div class="card text-white" style="background-color: #9F17BD;">
                 <div class="card-body">
                     <h5 class="card-title">Total Asalariados</h5>
-                    <p class="card-text display-4">{{ $asalariados->count() }}</p>
+                    <p class="card-text display-4" id="total-asalariados">Cargando...</p>
                 </div>
             </div>
         </div>
@@ -123,10 +128,7 @@
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <h5 class="card-title">Gasto Mensual Total</h5>
-                    @php
-                    $totalSalarios = $asalariados->sum('salario');
-                    @endphp
-                    <p class="card-text display-4">{{ number_format($totalSalarios, 2, ',', '.') }} €</p>
+                    <p class="card-text display-4" id="total-salarios">Cargando...</p>
                 </div>
             </div>
         </div>
@@ -134,11 +136,35 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h5 class="card-title">Salario Promedio</h5>
-                    @php
-                    $avgSalario = $asalariados->count() > 0 ? $asalariados->avg('salario') : 0;
-                    @endphp
-                    <p class="card-text display-4">{{ number_format($avgSalario, 2, ',', '.') }} €</p>
+                    <p class="card-text display-4" id="avg-salario">Cargando...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para dar de baja -->
+<div class="modal fade" id="desactivarModal" tabindex="-1" aria-labelledby="desactivarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="desactivarModalLabel">Confirmar desactivación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas dar de baja a <strong id="nombreAsalariado"></strong>?</p>
+                <p>Al dar de baja un asalariado:</p>
+                <ul>
+                    <li>Se registrarán los días trabajados hasta hoy</li>
+                    <li>Se calculará el salario proporcional</li>
+                    <li>Se pasará a la lista de asalariados inactivos</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmarDesactivar">
+                    <i class="fas fa-user-slash me-1"></i> Confirmar baja
+                </button>
             </div>
         </div>
     </div>
@@ -150,7 +176,7 @@
         const tableBody = document.getElementById('asalariadosTableBody');
         const searchInput = document.getElementById('searchInput');
         const filterRol = document.getElementById('filterRol');
-        const filterParking = document.getElementById('filterParking');
+        const filterLugar = document.getElementById('filterLugar');
         const clearFiltersBtn = document.getElementById('clearFilters');
         const perPageSelect = document.getElementById('perPageSelect');
         const pagination = document.getElementById('pagination');
@@ -171,7 +197,7 @@
             tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Cargando asalariados...</td></tr>';
             
             // Construir URL con parámetros
-            let url = '{{ route("asalariados.data") }}?page=' + currentPage + '&perPage=' + perPage;
+            let url = '{{ route("admin.asalariados.data") }}?page=' + currentPage + '&perPage=' + perPage;
             
             // Añadir filtros si existen
             if (searchInput.value.trim()) {
@@ -182,19 +208,43 @@
                 url += '&rol=' + encodeURIComponent(filterRol.value);
             }
             
-            if (filterParking.value) {
-                url += '&parking=' + encodeURIComponent(filterParking.value);
+            if (filterLugar.value) {
+                url += '&lugar=' + encodeURIComponent(filterLugar.value);
             }
             
-            // Realizar la petición AJAX
-            fetch(url)
+            // Mostrar un mensaje de carga
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Cargando asalariados...</td></tr>';
+            
+            // Establecer un tiempo máximo para la petición
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+            
+            // Realizar la petición AJAX con fetch, pero sin usar el filtro de rol por ahora
+            // Eliminar el parámetro rol para evitar problemas
+            let urlSinRol = url;
+            if (filterRol.value) {
+                urlSinRol = url.replace(`&rol=${encodeURIComponent(filterRol.value)}`, '');
+            }
+            
+            // Registrar la URL que estamos usando
+            console.log('Realizando petición a:', urlSinRol);
+            
+            fetch(urlSinRol, { signal: controller.signal })
                 .then(response => {
+                    clearTimeout(timeoutId);
+                    
                     if (!response.ok) {
-                        throw new Error('Error en la respuesta del servidor');
+                        return response.text().then(text => {
+                            console.error('Error en respuesta del servidor:', response.status, text);
+                            throw new Error(`Error del servidor (${response.status}): ${text || 'No hay detalles disponibles'}`);
+                        });
                     }
+                    
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Datos recibidos:', data);
+                    
                     // Procesar y mostrar datos
                     if (data && data.asalariados) {
                         renderAsalariados(data.asalariados);
@@ -225,13 +275,45 @@
                     }
                     
                     // Actualizar estadísticas si existen
-                    if (data) {
+                    if (data && data.summary) {
                         updateStatsCards(data);
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger"><i class="fas fa-exclamation-triangle me-2"></i>${error.message}</td></tr>`;
+                    clearTimeout(timeoutId);
+                    console.error('Error en la petición:', error);
+                    
+                    // Mensaje de error mejorado
+                    let mensajeError = error.message || 'Error desconocido al cargar los datos';
+                    
+                    // Si es un error de timeout
+                    if (error.name === 'AbortError') {
+                        mensajeError = 'La petición ha tardado demasiado tiempo. Por favor, inténtalo de nuevo.';
+                    }
+                    
+                    // Mostrar un mensaje de error amigable
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger p-4">
+                                <div>
+                                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                                    <h5>Error al cargar los datos</h5>
+                                    <p>${mensajeError}</p>
+                                    <button class="btn btn-sm btn-outline-secondary mt-2" onclick="loadAsalariados()">
+                                        <i class="fas fa-sync-alt me-1"></i> Reintentar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    
+                    // Reiniciar la paginación y contadores
+                    pagination.innerHTML = '';
+                    showingEntries.textContent = 'Error al cargar los datos';
+                    
+                    // Reiniciar las tarjetas de estadísticas
+                    document.getElementById('total-asalariados').textContent = '-';
+                    document.getElementById('total-salarios').textContent = '-';
+                    document.getElementById('avg-salario').textContent = '-';
                 });
         }
         
@@ -248,37 +330,102 @@
             // Recorrer asalariados y crear filas
             asalariados.forEach(asalariado => {
                 // Determinar la clase para la badge según el rol
-                let rolClass = '';
-                switch(asalariado.nombre_rol.toLowerCase()) {
-                    case 'gestor':
-                        rolClass = 'bg-primary';
-                        break;
-                    case 'mecanico':
-                        rolClass = 'bg-warning text-dark';
-                        break;
-                    case 'admin_financiero':
-                        rolClass = 'bg-success';
-                        break;
-                    default:
-                        rolClass = 'bg-secondary';
+                let rolClass = 'bg-secondary';
+                let rolName = 'sin rol';
+                
+                try {
+                    // Primero intentamos el acceso con role (singular)
+                    if (asalariado.usuario && asalariado.usuario.role && asalariado.usuario.role.nombre_rol) {
+                        rolName = asalariado.usuario.role.nombre_rol.toLowerCase();
+                    } 
+                    // Si no existe, intentamos con id_roles directamente
+                    else if (asalariado.usuario && asalariado.usuario.id_roles) {
+                        const roleId = asalariado.usuario.id_roles;
+                        // Mapeamos IDs de roles a nombres
+                        switch(roleId) {
+                            case 1: rolName = 'admin'; break;
+                            case 2: rolName = 'cliente'; break;
+                            case 3: rolName = 'gestor'; break;
+                            case 4: rolName = 'mecanico'; break;
+                            case 5: rolName = 'admin_financiero'; break;
+                            case 6: rolName = 'chofer'; break;
+                            default: rolName = 'sin rol';
+                        }
+                    }
+                    
+                    switch(rolName) {
+                        case 'gestor':
+                            rolClass = 'bg-primary';
+                            break;
+                        case 'mecanico':
+                            rolClass = 'bg-warning text-dark';
+                            break;
+                        case 'admin_financiero':
+                            rolClass = 'bg-success';
+                            break;
+                        case 'chofer':
+                            rolClass = 'bg-info';
+                            break;
+                        default:
+                            rolClass = 'bg-secondary';
+                    }
+                } catch (error) {
+                    console.error('Error al procesar el rol del asalariado:', error);
+                }
+                
+                // Formatear la fecha de contratación
+                const hiredate = new Date(asalariado.hiredate);
+                const formattedDate = hiredate.toLocaleDateString('es-ES');
+                
+                // Determinar nombre y sede de manera segura
+                let nombreCompleto = 'Usuario no disponible';
+                let nombreRol = rolName; // Usamos el mismo valor que usamos para el color
+                let lugarNombre = 'Sin lugar asignado';
+                
+                try {
+                    if (asalariado.usuario) {
+                        const nombre = asalariado.usuario.nombre || '';
+                        const apellidos = asalariado.usuario.apellidos || '';
+                        nombreCompleto = nombre + (apellidos ? ' ' + apellidos : '');
+                        
+                        if (nombreCompleto.trim() === '') {
+                            nombreCompleto = 'Usuario ID: ' + asalariado.id_usuario;
+                        }
+                    }
+                    
+                    if (asalariado.usuario && asalariado.usuario.role && asalariado.usuario.role.nombre_rol) {
+                        nombreRol = asalariado.usuario.role.nombre_rol;
+                    }
+                    
+                    if (asalariado.sede && asalariado.sede.nombre) {
+                        lugarNombre = asalariado.sede.nombre;
+                    }
+                } catch (error) {
+                    console.error('Error al procesar datos del asalariado:', error);
                 }
                 
                 // Crear la fila
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${asalariado.nombre}</td>
-                    <td><span class="badge ${rolClass}">${asalariado.nombre_rol === 'admin_financiero' ? 'Admin Financiero' : asalariado.nombre_rol.charAt(0).toUpperCase() + asalariado.nombre_rol.slice(1)}</span></td>
+                    <td>${nombreCompleto}</td>
+                    <td><span class="badge ${rolClass}">${rolName === 'admin_financiero' ? 'Admin Financiero' : rolName === 'sin rol' ? 'Sin rol' : rolName.charAt(0).toUpperCase() + rolName.slice(1)}</span></td>
                     <td>${formatCurrency(asalariado.salario)}</td>
-                    <td>Día ${asalariado.dia_cobro}</td>
-                    <td>${asalariado.nombre_parking}</td>
+                    <td>${formattedDate}</td>
+                    <td>${lugarNombre}</td>
                     <td>
                         <div class="action-buttons">
-                            <a href="/asalariados/${asalariado.id}/detalle" class="btn btn-sm" style="background-color: #9F17BD; color: white;">
+                            <a href="{{ url('/admin-financiero/asalariados') }}/${asalariado.id}/detalle" class="btn btn-sm" style="background-color: #9F17BD; color: white;" title="Ver detalles">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="/asalariados/${asalariado.id}/editar" class="btn btn-sm btn-primary">
+                            <a href="{{ url('/admin-financiero/asalariados') }}/${asalariado.id}/editar" class="btn btn-sm btn-primary" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            <a href="{{ url('/admin-financiero/asalariados') }}/${asalariado.id}/nomina" class="btn btn-sm btn-success" title="Generar nómina">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger desactivar-btn" title="Dar de baja" data-id="${asalariado.id}" data-nombre="${nombreCompleto}">
+                                <i class="fas fa-user-slash"></i>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -341,14 +488,42 @@
         // Función para actualizar las tarjetas de estadísticas
         function updateStatsCards(data) {
             // Actualizar el contador de asalariados, salario total y promedio si existen en el DOM
-            const asalariadosCountElement = document.getElementById('asalariadosCount');
-            const totalSalariosElement = document.getElementById('totalSalarios');
-            const avgSalariosElement = document.getElementById('avgSalarios');
+            const totalAsalariadosElement = document.getElementById('total-asalariados');
+            const totalSalariosElement = document.getElementById('total-salarios');
+            const avgSalarioElement = document.getElementById('avg-salario');
             
-            if (asalariadosCountElement && data && data.total_count !== undefined) {
-                asalariadosCountElement.textContent = data.total_count;
-            } else if (asalariadosCountElement) {
-                asalariadosCountElement.textContent = '0';
+            if (data && data.summary) {
+                // Usar los datos de resumen proporcionados por la API
+                if (totalAsalariadosElement) {
+                    totalAsalariadosElement.textContent = data.summary.total || '0';
+                }
+                
+                if (totalSalariosElement) {
+                    totalSalariosElement.textContent = formatCurrency(data.summary.totalSalarios || 0);
+                }
+                
+                if (avgSalarioElement) {
+                    avgSalarioElement.textContent = formatCurrency(data.summary.avgSalario || 0);
+                }
+            } else if (data && data.pagination) {
+                // Usar los datos de paginación como alternativa
+                if (totalAsalariadosElement) {
+                    totalAsalariadosElement.textContent = data.pagination.total || '0';
+                }
+                
+                // No tenemos datos para estas tarjetas, mostrar valores por defecto
+                if (totalSalariosElement) {
+                    totalSalariosElement.textContent = formatCurrency(0);
+                }
+                
+                if (avgSalarioElement) {
+                    avgSalarioElement.textContent = formatCurrency(0);
+                }
+            } else {
+                // Valores por defecto si no hay datos disponibles
+                if (totalAsalariadosElement) totalAsalariadosElement.textContent = '0';
+                if (totalSalariosElement) totalSalariosElement.textContent = formatCurrency(0);
+                if (avgSalarioElement) avgSalarioElement.textContent = formatCurrency(0);
             }
         }
         
@@ -368,7 +543,7 @@
             loadAsalariados();
         });
         
-        filterParking.addEventListener('change', function() {
+        filterLugar.addEventListener('change', function() {
             currentPage = 1;
             loadAsalariados();
         });
@@ -384,7 +559,7 @@
         clearFiltersBtn.addEventListener('click', function() {
             searchInput.value = '';
             filterRol.value = '';
-            filterParking.value = '';
+            filterLugar.value = '';
             currentPage = 1;
             loadAsalariados();
         });
@@ -401,6 +576,50 @@
                 timeout = setTimeout(later, wait);
             };
         }
+        // Código para manejar la desactivación de asalariados
+        let asalariadoId;
+        
+        // Mostrar modal de confirmación para desactivar
+        $(document).on('click', '.desactivar-btn', function() {
+            asalariadoId = $(this).data('id');
+            const nombre = $(this).data('nombre');
+            $('#nombreAsalariado').text(nombre);
+            $('#desactivarModal').modal('show');
+        });
+        
+        // Confirmar desactivación
+        $('#confirmarDesactivar').on('click', function() {
+            $.ajax({
+                url: `/admin-financiero/asalariados/${asalariadoId}/desactivar`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    $('#desactivarModal').modal('hide');
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        title: '¡Dado de baja!',
+                        text: 'El asalariado ha sido desactivado correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Ok'
+                    }).then(() => {
+                        // Recargar los asalariados
+                        loadAsalariados();
+                    });
+                },
+                error: function(xhr) {
+                    $('#desactivarModal').modal('hide');
+                    // Mostrar mensaje de error
+                    Swal.fire({
+                        title: 'Error',
+                        text: xhr.responseJSON?.error || 'Ocurrió un error al desactivar el asalariado',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                }
+            });
+        });
     });
 </script>
 @endsection
