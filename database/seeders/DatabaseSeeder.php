@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,           // Usuarios (dependen de roles)
             ParkingSeeder::class,        // Parkings (dependen de usuarios y lugares)
             VehiculoSeeder::class,       // Vehículos (dependen de tipos, lugares y parkings)
+            ChoferSeeder::class,         // Choferes (dependen de usuarios)
         ]);
         
         // 3. Luego las tablas que dependen de vehículos y usuarios

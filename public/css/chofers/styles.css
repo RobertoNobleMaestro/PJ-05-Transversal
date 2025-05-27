@@ -12,6 +12,165 @@
     padding: 20px;
 }
 
+/* Layout para la página de solicitud de vehículo */
+.main-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 100px);
+}
+
+.mapa-container {
+    width: 35%;
+    height: 100%;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-box {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    z-index: 1000;
+}
+
+.search-form {
+    background: white;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.search-form .input-group {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.search-form .form-control {
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+}
+
+.search-form .form-control:focus {
+    box-shadow: none;
+}
+
+.search-form .btn {
+    padding: 10px 15px;
+    background-color: #8c37c1;
+    border: none;
+}
+
+.search-form .btn:hover {
+    background-color: #462478;
+}
+
+.panel-derecho {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formulario-destino {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.choferes-disponibles {
+    flex: 1;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    overflow-y: auto;
+}
+
+.chofer-item {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.chofer-info {
+    flex: 1;
+}
+
+.chofer-item h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.chofer-item p {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.btn-seleccionar {
+    background: none;
+    border: none;
+    color: #8c37c1;
+    font-size: 1.2rem;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-seleccionar:hover {
+    color: #462478;
+}
+
+.precio-chofer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.precio-chofer p {
+    font-size: 0.9rem;
+    margin-bottom: 3px;
+}
+
+.precio-chofer .fw-bold {
+    color: #8c37c1;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+.btn-solicitar {
+    background-color: #8c37c1;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-solicitar:hover {
+    background-color: #462478;
+}
+
 /* Color lila para mensajes propios */
 .bg-purple {
     background-color: #8c4ae2 !important;
@@ -146,6 +305,10 @@
 #mensajes {
     flex-grow: 1;
     overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .input-mensaje {
@@ -153,3 +316,38 @@
     margin-top: auto;
     gap: 0.5rem;
 }
+
+/* Estilo para el botón de crear grupo */
+#crearGrupoModal .btn-primary {
+    background-color: #8c4ae2 !important;
+    border: none !important;
+}
+
+#crearGrupoModal .btn-primary:hover {
+    background-color: #551475 !important;
+}
+
+/* Estilos para los mensajes del chat */
+.mensaje {
+    max-width: 60%;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 15px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.mensaje-propio {
+    background-color: #8c4ae2;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.mensaje-recibido {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+

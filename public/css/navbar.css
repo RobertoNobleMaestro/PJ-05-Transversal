@@ -92,4 +92,20 @@
         width: 30px; /* Tamaño de la imagen de perfil */
         height: 30px; /* Tamaño de la imagen de perfil */
     }
+}
+
+#cart-count {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: 9px;
+    border-radius: 50%;
+}
+
+#notification-count {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: 9px;
+    border-radius: 50%;
 } 

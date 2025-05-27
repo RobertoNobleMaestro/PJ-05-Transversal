@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +12,11 @@
     <link rel="stylesheet" href="{{ asset('css/admin/style.css') }}">
     <!-- estilos del login-->
     <link rel="stylesheet" href="">
-    <title>@yield('title')</title>
+    <title>@yield('title') - CARFLOW</title>
     
     <!-- jQuery para AJAX -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
+    @stack('styles')
 </head>
 <body>
     

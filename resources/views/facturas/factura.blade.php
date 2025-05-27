@@ -24,9 +24,11 @@
             max-width: 850px;
             margin: 0 auto;
             background: white;
-            padding: 30px;
+            padding: 32px 24px;
             box-shadow: 0 0 12px rgba(0,0,0,0.15);
             border-radius: 10px;
+            padding-top: 32px;
+            padding-bottom: 32px;
         }
         .header {
             text-align: center;
@@ -131,6 +133,78 @@
                 max-width: 100%;
             }
         }
+        @media (max-width: 430px) {
+            body {
+                padding: 0;
+                font-size: 13px;
+            }
+            .factura-container {
+                padding: 18px 10px 18px 10px;
+                max-width: 100vw;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .header {
+                padding-bottom: 4px;
+                margin-bottom: 8px;
+            }
+            .logo {
+                max-width: 48px;
+                margin-bottom: 2px;
+            }
+            h1 {
+                font-size: 15px;
+                margin-bottom: 2px;
+            }
+            h2 {
+                font-size: 13px;
+                margin-top: 6px;
+                margin-bottom: 2px;
+            }
+            .datos-factura.row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .datos-factura .col-12 {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .card {
+                border-radius: 8px;
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+            .card-body {
+                padding: 10px 8px;
+            }
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .col-4, .col-6, .col-12, .col-md-6 {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .total {
+                font-size: 13px;
+                margin-top: 6px;
+            }
+            .info-pago {
+                padding: 6px 2px;
+                font-size: 12px;
+            }
+            .footer {
+                font-size: 10px;
+                margin-top: 10px;
+            }
+            .actions {
+                margin: 6px 0;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 5px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -143,7 +217,8 @@
                 <i class="fas fa-print"></i> Imprimir Factura
             </button>
         </div>
-
+        <br>
+        <br>
         <div class="factura-container">
             <div class="header">
                 <img src="{{ asset('img/logo.png') }}" alt="Logo de la empresa" class="logo">
@@ -152,72 +227,75 @@
                 <p><strong>Fecha de emisión:</strong> {{ $fecha_emision }}</p>
             </div>
 
-            <div class="datos-factura">
-                <div class="datos-empresa">
-                    <h2>Datos de la empresa</h2>
-                    <p><strong>CarFlow S.L.</strong></p>
-                    <p>CIF: B12345678</p>
-                    <p>Calle Principal, 123</p>
-                    <p>28001 Madrid, España</p>
-                    <p>Email: info@carflow.com</p>
-                    <p>Teléfono: +34 91 123 45 67</p>
+            <div class="datos-factura row">
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm h-100" style="background: var(--morado-fondo);">
+                        <div class="card-body p-3">
+                            <h2 class="mb-2" style="font-size: 1.1rem; color: var(--color-primario);"><i class="fas fa-building mr-2"></i> Empresa</h2>
+                            <p class="mb-1"><strong>CarFlow S.L.</strong></p>
+                            <p class="mb-1">CIF: B12345678</p>
+                            <p class="mb-1">Calle Principal, 123</p>
+                            <p class="mb-1">28001 Madrid, España</p>
+                            <p class="mb-1">Email: info@carflow.com</p>
+                            <p class="mb-0">Teléfono: +34 91 123 45 67</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="datos-cliente">
-                    <h2>Datos del cliente</h2>
-                    <p><strong>{{ $reserva->usuario->nombre }}</strong></p>
-                    <p>DNI/NIF: {{ $reserva->usuario->dni }}</p>
-                    <p>{{ $reserva->usuario->direccion }}</p>
-                    <p>Email: {{ $reserva->usuario->email }}</p>
-                    @if($reserva->usuario->telefono)
-                    <p>Teléfono: {{ $reserva->usuario->telefono }}</p>
-                    @endif
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm h-100" style="background: var(--morado-fondo);">
+                        <div class="card-body p-3">
+                            <h2 class="mb-2" style="font-size: 1.1rem; color: var(--color-primario);"><i class="fas fa-user mr-2"></i> Cliente</h2>
+                            <p class="mb-1"><strong>{{ $reserva->usuario->nombre }}</strong></p>
+                            <p class="mb-1">DNI/NIF: {{ $reserva->usuario->dni }}</p>
+                            <p class="mb-1">{{ $reserva->usuario->direccion }}</p>
+                            <p class="mb-1">Email: {{ $reserva->usuario->email }}</p>
+                            @if($reserva->usuario->telefono)
+                            <p class="mb-0">Teléfono: {{ $reserva->usuario->telefono }}</p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <h2>Detalle de la reserva</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Vehículo</th>
-                        <th>Período</th>
-                        <th>Lugar</th>
-                        <th>Precio por día</th>
-                        <th>Días</th>
-                        <th>Importe</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($reserva->vehiculosReservas as $vr)
-                    @php
-                        $fecha_ini = \Carbon\Carbon::parse($vr->fecha_ini);
-                        $fecha_fin = \Carbon\Carbon::parse($vr->fecha_final);
-                        $dias = $fecha_ini->diffInDays($fecha_fin) + 1;
-                        $importe = $vr->vehiculo->precio_dia * $dias;
-                    @endphp
-                    <tr>
-                        <td>{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</td>
-                        <td>{{ $fecha_ini->format('d/m/Y') }} - {{ $fecha_fin->format('d/m/Y') }}</td>
-                        <td>{{ $reserva->lugar->nombre ?? 'No especificado' }}</td>
-                        <td>€ {{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}</td>
-                        <td>{{ $dias }}</td>
-                        <td>€ {{ number_format($importe, 2, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <div class="total">
-                <p>Total (IVA incluido): € {{ number_format($reserva->total_precio, 2, ',', '.') }}</p>
+            <div class="row">
+                @foreach($reserva->vehiculosReservas as $vr)
+                @php
+                    $fecha_ini = \Carbon\Carbon::parse($vr->fecha_ini);
+                    $fecha_fin = \Carbon\Carbon::parse($vr->fecha_final);
+                    $dias = $fecha_ini->diffInDays($fecha_fin) + 1;
+                    $importe = $vr->vehiculo->precio_dia * $dias;
+                @endphp
+                <div class="col-12 mb-3">
+                    <div class="card shadow-sm border-0 h-100" style="background: var(--morado-fondo);">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-car fa-lg mr-2" style="color: var(--color-primario);"></i>
+                                <h5 class="mb-0" style="color: var(--color-primario); font-size: 1.1rem;">{{ $vr->vehiculo->marca }} {{ $vr->vehiculo->modelo }}</h5>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 small"><strong>Período:</strong><br>{{ $fecha_ini->format('d/m/Y') }} - {{ $fecha_fin->format('d/m/Y') }}</div>
+                                <div class="col-6 small"><strong>Lugar:</strong><br>{{ $reserva->lugar->nombre ?? 'No especificado' }}</div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-4 small"><strong>Precio/día</strong><br>€ {{ number_format($vr->vehiculo->precio_dia, 2, ',', '.') }}</div>
+                                <div class="col-4 small"><strong>Días</strong><br>{{ $dias }}</div>
+                                <div class="col-4 small"><strong>Importe</strong><br>€ {{ number_format($importe, 2, ',', '.') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
             </div>
-
-            <div class="info-pago">
-                <h2>Información de pago</h2>
-                <p><strong>Estado:</strong> {{ ucfirst($reserva->estado) }}</p>
-                <p><strong>Fecha de pago:</strong> {{ $fecha_emision }}</p>
-                <p><strong>Referencia:</strong> {{ $reserva->referencia_pago ?? $numero_factura }}</p>
-                <p><strong>Método de pago:</strong> Tarjeta de crédito</p>
+            <div class="col-12 mb-3">
+                <div class="card shadow-sm border-0 h-100" style="background: var(--morado-fondo);">
+                    <div class="card-body p-3">
+                        <h2>Información de pago</h2>
+                        <br>
+                        <p><strong>Estado:</strong> {{ ucfirst($reserva->estado) }}</p>
+                        <p><strong>Fecha de pago:</strong> {{ $fecha_emision }}</p>
+                        <p><strong>Método de pago:</strong> Tarjeta de crédito</p>
+                    </div>
+                </div>
             </div>
-
             <div class="footer">
                 <p>Gracias por confiar en CarFlow. Este documento es una factura simplificada válida a efectos fiscales.</p>
                 <p>Para cualquier consulta relacionada con esta factura, contacte con nuestro servicio de atención al cliente.</p>

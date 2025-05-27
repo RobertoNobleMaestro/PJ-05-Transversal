@@ -93,6 +93,12 @@ class HistorialGestorController extends Controller
                         'error' => 'No se ha encontrado un parking asociado al gestor.',
                         'reservas' => [],
                         'stats' => [],
+                        'pagination' => [
+                            'current_page' => 1,
+                            'last_page' => 1,
+                            'total' => 0,
+                            'per_page' => 10,
+                        ]
                     ], 400);
                 }
             }
@@ -118,12 +124,14 @@ class HistorialGestorController extends Controller
                 $query->whereDate('reservas.fecha_reserva', '<=', $request->fechaHasta);
             }
 
-            // Ejecutar la consulta
-            $reservas = $query->orderBy('reservas.fecha_reserva', 'desc')->get();
+            // Paginación
+            $perPage = (int) $request->input('perPage', 10);
+            $page = (int) $request->input('page', 1);
+            $paginated = $query->orderBy('reservas.fecha_reserva', 'desc')->paginate($perPage, ['*'], 'page', $page);
 
             // Procesar resultados
             $reservasProcessed = [];
-            foreach ($reservas as $reserva) {
+            foreach ($paginated->items() as $reserva) {
                 $reservaData = $reserva->toArray();
 
                 $reservaData['nombre_usuario'] = $reserva->usuario->nombre ?? 'Usuario #' . $reserva->id_usuario;
@@ -160,21 +168,24 @@ class HistorialGestorController extends Controller
             }
 
             $stats = [
-                'total' => (clone $baseStatsQuery)->count(),
+                'total' => $baseStatsQuery->count(),
                 'completadas' => (clone $baseStatsQuery)->where('estado', 'completada')->count(),
                 'pendientes' => (clone $baseStatsQuery)->where('estado', 'pendiente')->count(),
                 'canceladas' => (clone $baseStatsQuery)->where('estado', 'cancelada')->count(),
                 'confirmadas' => (clone $baseStatsQuery)->where('estado', 'confirmada')->count(),
-                'ingresos' => (clone $baseStatsQuery)
-                    ->whereIn('estado', ['completada', 'confirmada', 'pagado'])
-                    ->sum('total_precio') ?? 0
+                'ingresos' => (clone $baseStatsQuery)->where('estado', 'completada')->sum('total_precio') ?? 0
             ];
 
             return response()->json([
                 'reservas' => $reservasProcessed,
-                'stats' => $stats
+                'stats' => $stats,
+                'pagination' => [
+                    'current_page' => $paginated->currentPage(),
+                    'last_page' => $paginated->lastPage(),
+                    'total' => $paginated->total(),
+                    'per_page' => $paginated->perPage(),
+                ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al procesar la solicitud',
@@ -187,6 +198,12 @@ class HistorialGestorController extends Controller
                     'canceladas' => 0,
                     'confirmadas' => 0,
                     'ingresos' => 0
+                ],
+                'pagination' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 0,
+                    'per_page' => 10,
                 ]
             ], 500);
         }

@@ -6,8 +6,12 @@ use App\Models\Vehiculo;
 use App\Models\Taller;
 use App\Models\Mantenimiento;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Averia;
+use App\Models\Pieza;
+use App\Models\Factura;
+use App\Models\GastoTaller;
 
 class TallerController extends Controller
 {
@@ -114,7 +118,26 @@ class TallerController extends Controller
             $mantenimiento->hora_programada = $request->hora_mantenimiento;
             $mantenimiento->estado = 'pendiente';
             $mantenimiento->motivo_reserva = $request->motivo_reserva;
-            $mantenimiento->save();
+            // Guardar motivo breve de avería si aplica
+            if ($request->motivo_reserva === 'averia') {
+                $mantenimiento->motivo_averia = $request->motivo_averia;
+                $mantenimiento->save();
+                // Crear registro de avería
+                $averia = new Averia();
+                $averia->vehiculo_id = $request->id_vehiculo;
+                $averia->descripcion = $request->motivo_averia;
+                $averia->fecha = now();
+                $averia->save();
+                // Insertar piezas y cantidades
+                if ($request->has('pieza_id')) {
+                    foreach ($request->input('pieza_id') as $piezaId) {
+                        $cantidad = $request->input('cantidad_pieza')[$piezaId] ?? 1;
+                        $averia->piezas()->attach($piezaId, ['cantidad' => $cantidad]);
+                    }
+                }
+            } else {
+                $mantenimiento->save();
+            }
             
             // Guardar fecha actual como última fecha de mantenimiento
             $vehiculo->ultima_fecha_mantenimiento = now();
@@ -194,25 +217,22 @@ class TallerController extends Controller
         try {
             $query = Mantenimiento::with(['vehiculo', 'taller'])
                 ->orderBy('created_at', 'desc');
-            
             // Filtrar por estado si se especifica
             if ($request->has('estado') && $request->estado !== 'todos') {
                 $query->where('estado', $request->estado);
             }
-            
-            $mantenimientos = $query->get();
-            
+            // Paginación: 4 por página
+            $perPage = 4;
+            $pagina = $request->input('page', 1);
+            $mantenimientos = $query->paginate($perPage, ['*'], 'page', $pagina);
             // Formatear datos para la respuesta
             $resultado = $mantenimientos->map(function($mantenimiento) {
-                $fechaHora = Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
-                
-                // Determinar el color del badge según el estado
+                $fechaHora = \Carbon\Carbon::parse($mantenimiento->fecha_programada->format('Y-m-d') . ' ' . $mantenimiento->hora_programada);
                 $colorEstado = [
                     'pendiente' => 'warning',
                     'completado' => 'success',
                     'cancelado' => 'danger'
                 ][$mantenimiento->estado] ?? 'secondary';
-                
                 return [
                     'id' => $mantenimiento->id,
                     'vehiculo' => $mantenimiento->vehiculo->marca . ' ' . $mantenimiento->vehiculo->modelo,
@@ -225,17 +245,19 @@ class TallerController extends Controller
                     'fechaCompleta' => $fechaHora->format('d/m/Y H:i:s'),
                     'esPasado' => $fechaHora->isPast(),
                     'id_vehiculo' => $mantenimiento->vehiculo_id,
-                    'motivo_reserva' => $mantenimiento->motivo_reserva
+                    'motivo_reserva' => $mantenimiento->motivo_reserva,
+                    'motivo_averia' => $mantenimiento->motivo_averia
                 ];
             });
-            
             return response()->json([
-                'success' => true, 
-                'mantenimientos' => $resultado
+                'success' => true,
+                'mantenimientos' => $resultado,
+                'pagina_actual' => $mantenimientos->currentPage(),
+                'total_paginas' => $mantenimientos->lastPage(),
+                'total_registros' => $mantenimientos->total(),
+                'por_pagina' => $mantenimientos->perPage(),
             ]);
-            
         } catch (\Exception $e) {
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener mantenimientos: ' . $e->getMessage()
@@ -310,7 +332,32 @@ class TallerController extends Controller
                     $vehiculo->save();
                 }
             }
-            
+
+            // --- LÓGICA DE GASTOS TALLER ---
+            if ($request->estado === 'completado' && $mantenimiento->motivo_reserva === 'averia') {
+                // Buscar la avería asociada
+                $averia = Averia::where('vehiculo_id', $mantenimiento->vehiculo_id)
+                    ->where('descripcion', $mantenimiento->motivo_averia)
+                    ->orderByDesc('fecha')->first();
+                
+                // Calcular totales y detalle
+                $piezas = [];
+                if ($averia) {
+                    $piezas = $averia->piezas()->withPivot('cantidad')->get();
+                    foreach ($piezas as $pieza) {
+                        $gasto = new GastoTaller();
+                        $gasto->pieza_id = $pieza->id;
+                        $gasto->cantidad = $pieza->pivot->cantidad;
+                        $gasto->precio_pieza = round($pieza->precio * 0.20, 2); // 20% del precio unitario
+                        $gasto->mantenimiento_id = $mantenimiento->id;
+                        $gasto->averia_id = $averia ? $averia->id : null;
+                        // No asignar factura_id
+                        $gasto->save();
+                    }
+                }
+            }
+            // --- FIN LÓGICA DE GASTOS TALLER ---
+
             return response()->json([
                 'success' => true,
                 'message' => 'Estado de mantenimiento actualizado a: ' . $request->estado
@@ -327,11 +374,11 @@ class TallerController extends Controller
     {
         $mantenimiento = Mantenimiento::find($id);
         if (!$mantenimiento) {
-            return response()->json(['success' => false, 'message' => 'Mantenimiento no encontrado.']);
+            return response()->json(['success' => false, 'message' => 'Mantenimiento no encontrado.'], 200, ['Content-Type' => 'application/json']);
         }
 
         $mantenimiento->delete();
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true], 200, ['Content-Type' => 'application/json']);
     }
 
     public function edit($id)
@@ -345,13 +392,25 @@ class TallerController extends Controller
 
 public function update(Request $request, $id)
 {
-    $request->validate([
-        'vehiculo_id' => 'required|exists:vehiculos,id_vehiculos',
-        'taller_id' => 'required|exists:talleres,id',
-        'fecha_programada' => 'required|date',
-        'hora_programada' => 'required',
-        'estado' => 'required|in:pendiente,completado,cancelado',
-    ]);
+    // Validación con manejo para AJAX
+    try {
+        $validated = $request->validate([
+            'vehiculo_id' => 'required|exists:vehiculos,id_vehiculos',
+            'taller_id' => 'required|exists:talleres,id',
+            'fecha_programada' => 'required|date',
+            'hora_programada' => 'required',
+            'estado' => 'required|in:pendiente,completado,cancelado',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+                'message' => 'Errores de validación.'
+            ], 422);
+        }
+        throw $e;
+    }
 
     $mantenimiento = Mantenimiento::findOrFail($id);
     $mantenimiento->update($request->only([
@@ -361,6 +420,22 @@ public function update(Request $request, $id)
         'hora_programada',
         'estado'
     ]));
+
+    // Si es avería, actualizar piezas y cantidades
+    if ($mantenimiento->motivo_reserva === 'averia' && $mantenimiento->motivo_averia) {
+        $averia = Averia::where('vehiculo_id', $mantenimiento->vehiculo_id)
+            ->where('descripcion', $mantenimiento->motivo_averia)
+            ->orderByDesc('fecha')->first();
+        if ($averia) {
+            $averia->piezas()->detach();
+            if ($request->has('pieza_id')) {
+                foreach ($request->input('pieza_id') as $piezaId) {
+                    $cantidad = $request->input('cantidad_pieza')[$piezaId] ?? 1;
+                    $averia->piezas()->attach($piezaId, ['cantidad' => $cantidad]);
+                }
+            }
+        }
+    }
 
     if ($request->estado === 'completado') {
         $vehiculo = $mantenimiento->vehiculo;
@@ -382,7 +457,31 @@ public function update(Request $request, $id)
         }
     }
 
-    return redirect()->route('Taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+    if ($request->estado === 'completado' && $mantenimiento->motivo_reserva === 'averia') {
+        // Buscar la avería asociada
+        $averia = \App\Models\Averia::where('vehiculo_id', $mantenimiento->vehiculo_id)
+            ->where('descripcion', $mantenimiento->motivo_averia)
+            ->orderByDesc('fecha')->first();
+        if ($averia) {
+            $piezas = $averia->piezas()->withPivot('cantidad')->get();
+            foreach ($piezas as $pieza) {
+                \App\Models\GastoTaller::create([
+                    'pieza_id' => $pieza->id,
+                    'cantidad' => $pieza->pivot->cantidad,
+                    'precio_pieza' => round($pieza->precio * 0.20, 2),
+                    'mantenimiento_id' => $mantenimiento->id,
+                    'averia_id' => $averia->id,
+                ]);
+            }
+        }
+    }
+
+    // RESPUESTA SEGÚN EL TIPO DE PETICIÓN
+    if ($request->expectsJson() || $request->ajax()) {
+        return response()->json(['success' => true]);
+    } else {
+        return redirect()->route('Taller.historial')->with('success', 'Mantenimiento actualizado correctamente.');
+    }
 }
 
 
@@ -391,10 +490,54 @@ public function update(Request $request, $id)
     // Método para mostrar la página de historial de mantenimientos
     public function historial()
     {
-        return view('taller.historial');
+        // Recupera todos los vehículos y talleres para el modal de edición
+        $vehiculos = \App\Models\Vehiculo::all();
+        $talleres = \App\Models\Taller::all();
+        $piezas = \App\Models\Pieza::all();
+        return view('Taller.historial', compact('vehiculos', 'talleres', 'piezas'));
     }
 
-    public function descargarFactura($id)
+    public function getMantenimiento($id)
+    {
+        try {
+            $mantenimiento = Mantenimiento::findOrFail($id);
+            $piezas = [];
+            if ($mantenimiento->motivo_reserva === 'averia' && $mantenimiento->motivo_averia) {
+                $averia = \App\Models\Averia::where('vehiculo_id', $mantenimiento->vehiculo_id)
+                    ->where('descripcion', $mantenimiento->motivo_averia)
+                    ->orderByDesc('fecha')->first();
+                if ($averia) {
+                    $piezas = $averia->piezas()->withPivot('cantidad')->get()->map(function($pieza) {
+                        return [
+                            'id' => $pieza->id,
+                            'cantidad' => $pieza->pivot->cantidad
+                        ];
+                    });
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'mantenimiento' => [
+                    'id' => $mantenimiento->id,
+                    'vehiculo_id' => $mantenimiento->vehiculo_id,
+                    'taller_id' => $mantenimiento->taller_id,
+                    'fecha_programada' => $mantenimiento->fecha_programada instanceof \Carbon\Carbon ? $mantenimiento->fecha_programada->format('Y-m-d') : $mantenimiento->fecha_programada,
+                    'hora_programada' => $mantenimiento->hora_programada,
+                    'estado' => $mantenimiento->estado,
+                    'motivo_reserva' => $mantenimiento->motivo_reserva,
+                    'motivo_averia' => $mantenimiento->motivo_averia,
+                    'piezas' => $piezas
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener mantenimiento: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+public function descargarFactura($id)
     {
         $mantenimiento = \App\Models\Mantenimiento::with(['vehiculo.tipo'])->findOrFail($id);
         $vehiculo = $mantenimiento->vehiculo;
@@ -407,12 +550,45 @@ public function update(Request $request, $id)
         ];
         $precio = $precios[$vehiculo->tipo->nombre ?? 'Coche'] ?? 100;
     
+        // Obtener piezas y cantidades si es avería
+        $piezas = [];
+        $subtotal_piezas = 0;
+        if ($mantenimiento->motivo_reserva === 'averia') {
+            $averia = \App\Models\Averia::where('vehiculo_id', $vehiculo->id_vehiculos)
+                ->where('descripcion', $mantenimiento->motivo_averia)
+                ->orderByDesc('fecha')->first();
+            if ($averia) {
+                $piezas = $averia->piezas()->withPivot('cantidad')->get();
+                foreach ($piezas as $pieza) {
+                    $subtotal_piezas += $pieza->precio * $pieza->pivot->cantidad;
+                    // Insertar gasto si no existe ya para este mantenimiento, avería y pieza
+                    $existe = \App\Models\GastoTaller::where('pieza_id', $pieza->id)
+                        ->where('mantenimiento_id', $mantenimiento->id)
+                        ->where('averia_id', $averia->id)
+                        ->first();
+                    if (!$existe) {
+                        \App\Models\GastoTaller::create([
+                            'pieza_id' => $pieza->id,
+                            'cantidad' => $pieza->pivot->cantidad,
+                            'precio_pieza' => $pieza->precio,
+                            'mantenimiento_id' => $mantenimiento->id,
+                            'averia_id' => $averia->id,
+                        ]);
+                    }
+                }
+            }
+        }
+        $precio_total = $precio + $subtotal_piezas;
+
         $data = [
             'mantenimiento' => $mantenimiento,
             'vehiculo' => $vehiculo,
             'precio' => $precio,
+            'subtotal_piezas' => $subtotal_piezas,
+            'precio_total' => $precio_total,
             'fecha_hora' => $mantenimiento->fecha_programada->format('d/m/Y') . ' ' . $mantenimiento->hora_programada,
-            'imagen' => $vehiculo->imagen // Ajusta según tu sistema
+            'imagen' => $vehiculo->imagen, // Ajusta según tu sistema
+            'piezas' => $piezas
         ];
     
         $pdf = Pdf::loadView('Taller.factura', $data);

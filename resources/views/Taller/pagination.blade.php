@@ -1,7 +1,7 @@
 @if ($paginator->hasPages())
     <nav class="taller-pagination" aria-label="Paginación">
         <ul class="pagination justify-content-center">
-
+            {{-- Botón Anterior --}}
             @if ($paginator->onFirstPage())
                 <li class="page-item disabled" aria-disabled="true" aria-label="Anterior">
                     <span class="page-link taller-page-link">&laquo;</span>
@@ -12,14 +12,12 @@
                 </li>
             @endif
 
-
+            {{-- Números de página SOLO en pantallas grandes --}}
+            <span class="d-none d-md-flex">
             @foreach ($elements as $element)
-
-            @if (is_string($element))
+                @if (is_string($element))
                     <li class="page-item disabled" aria-disabled="true"><span class="page-link taller-page-link">{{ $element }}</span></li>
                 @endif
-
-
                 @if (is_array($element))
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
@@ -30,8 +28,9 @@
                     @endforeach
                 @endif
             @endforeach
+            </span>
 
-
+            {{-- Botón Siguiente --}}
             @if ($paginator->hasMorePages())
                 <li class="page-item">
                     <a class="page-link taller-page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Siguiente">&raquo;</a>
@@ -63,6 +62,10 @@
             color: #bbb;
             background: #f8f8fa;
             border-color: #e0e0e0;
+        }
+        /* Ocultar los números de página en pantallas pequeñas */
+        @media (max-width: 767.98px) {
+            .taller-pagination .d-md-flex { display: none !important; }
         }
     </style>
 @endif
