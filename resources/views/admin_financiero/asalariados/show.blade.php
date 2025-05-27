@@ -203,11 +203,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="mt-3 text-center border-top pt-3">
-                                        <h5>Antigüedad</h5>
-                                        <h3>12</h3>
-                                        <p class="text-muted mb-0">meses en la empresa</p>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
