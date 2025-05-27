@@ -14,44 +14,6 @@
     overflow: hidden;
 }
 
-    /* Modal personalizado para que combine con la página */
-    .modal-content {
-        border-radius: 16px;
-        border: 2px solid #6f42c1;
-        box-shadow: 0 8px 32px rgba(111,66,193,0.09);
-        background: #fff;
-    }
-    .modal-header {
-        background: linear-gradient(90deg, #6f42c1 0%, #a084e8 100%);
-        color: #fff;
-        border-top-left-radius: 14px;
-        border-top-right-radius: 14px;
-        border-bottom: none;
-    }
-    .modal-title {
-        font-weight: bold;
-        font-size: 1.3rem;
-        letter-spacing: 0.5px;
-    }
-    .modal-footer {
-        border-top: none;
-        background: #faf7ff;
-        border-bottom-left-radius: 14px;
-        border-bottom-right-radius: 14px;
-    }
-    .modal-body label {
-        color: #6f42c1;
-        font-weight: 500;
-    }
-    .modal-body input, .modal-body select {
-        border-radius: 8px;
-        border: 1.5px solid #e0d7f7;
-        transition: border-color 0.2s;
-    }
-    .modal-body input:focus, .modal-body select:focus {
-        border-color: #6f42c1;
-        box-shadow: 0 0 0 2px #e0d7f7;
-    }
     .btn-primary {
         background: linear-gradient(90deg, #6f42c1 0%, #a084e8 100%);
         border: none;
@@ -124,9 +86,9 @@
     </div>
 
     <div class="admin-main">
-        <div class="admin-header" style="flex-direction: row !important;">
+        <div class="admin-header align-items-center" style="flex-direction: row !important;">
             <h1 class="admin-title">Historial de Mantenimientos</h1>
-            <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
+            <a href="{{ route('logout') }}" class="btn-outline-purple">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <!-- Botón hamburguesa solo visible en móvil para sidebar -->
@@ -528,7 +490,7 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
 <!-- MODAL DE EDICIÓN -->
 <div class="modal fade" id="modalEditarMantenimiento" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content custom-modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalEditarLabel">Editar Mantenimiento</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -536,11 +498,11 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
       <form id="formEditarMantenimiento" onsubmit="enviarFormularioEdicion(event)">
         <div class="modal-body">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <input type="hidden" id="edit_id" name="id">
               <div class="mb-3">
                 <label for="edit_vehiculo_id" class="form-label">Vehículo</label>
-                <select id="edit_vehiculo_id" name="vehiculo_id" class="form-select" required>
+                <select id="edit_vehiculo_id" name="vehiculo_id" class="form-select modal-form-select" required>
                   @foreach($vehiculos as $vehiculo)
                     <option value="{{ $vehiculo->id_vehiculos }}">{{ $vehiculo->modelo }} - {{ $vehiculo->placa }}</option>
                   @endforeach
@@ -548,7 +510,7 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
               </div>
               <div class="mb-3">
                 <label for="edit_taller_id" class="form-label">Taller</label>
-                <select id="edit_taller_id" name="taller_id" class="form-select" required>
+                <select id="edit_taller_id" name="taller_id" class="form-select modal-form-select" required>
                   @foreach($talleres as $taller)
                     <option value="{{ $taller->id }}">{{ $taller->nombre }}</option>
                   @endforeach
@@ -556,22 +518,22 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
               </div>
               <div class="mb-3">
                 <label for="edit_fecha_programada" class="form-label">Fecha</label>
-                <input type="date" id="edit_fecha_programada" name="fecha_programada" class="form-control" required>
+                <input type="date" id="edit_fecha_programada" name="fecha_programada" class="form-control modal-form-control" required>
               </div>
               <div class="mb-3">
                 <label for="edit_hora_programada" class="form-label">Hora</label>
-                <input type="time" id="edit_hora_programada" name="hora_programada" class="form-control" required>
+                <input type="time" id="edit_hora_programada" name="hora_programada" class="form-control modal-form-control" required>
               </div>
               <div class="mb-3">
                 <label for="edit_motivo_reserva" class="form-label">Motivo de la reserva</label>
-                <select id="edit_motivo_reserva" name="motivo_reserva" class="form-select" required>
+                <select id="edit_motivo_reserva" name="motivo_reserva" class="form-select modal-form-select" required>
                   <option value="mantenimiento">Mantenimiento</option>
                   <option value="averia">Avería</option>
                 </select>
               </div>
               <div class="mb-3">
                 <label for="edit_estado" class="form-label">Estado</label>
-                <select id="edit_estado" name="estado" class="form-select" required>
+                <select id="edit_estado" name="estado" class="form-select modal-form-select" required>
                   <option value="pendiente">Pendiente</option>
                   <option value="completado">Completado</option>
                   <option value="cancelado">Cancelado</option>
@@ -586,7 +548,7 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
                   <div class="d-flex align-items-center mb-1">
                     <input type="checkbox" class="form-check-input me-2 edit-pieza-checkbox" name="pieza_id[]" value="{{ $pieza->id }}" id="pieza_{{ $pieza->id }}">
                     <label for="pieza_{{ $pieza->id }}" class="me-2">{{ $pieza->nombre }}</label>
-                    <input type="number" min="1" max="99" name="cantidad_pieza[{{ $pieza->id }}]" class="form-control form-control-sm edit-cantidad-pieza" style="width:70px;" placeholder="Cantidad" disabled>
+                    <input type="number" min="1" max="99" name="cantidad_pieza[{{ $pieza->id }}]" class="form-control form-control-sm edit-cantidad-pieza modal-form-control" style="width:70px;" placeholder="Cantidad" disabled>
                   </div>
                   @endforeach
                 </div>
@@ -595,8 +557,8 @@ $(document).on('change', '.edit-pieza-checkbox', function() {
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary btn-sm btn-agendar-mantenimiento" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-sm btn-agendar-mantenimiento">Guardar cambios</button>
+          <button type="button" class="btn btn-outline-purple btn-sm btn-agendar-modal" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-purple btn-sm btn-agendar-modal">Guardar cambios</button>
         </div>
       </form>
     </div>

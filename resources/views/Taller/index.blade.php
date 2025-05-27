@@ -3,6 +3,7 @@
 @section('title', 'Lista de Vehículos')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/taller-index.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 @endpush
 
 
@@ -23,9 +24,9 @@
     </div>
 
     <div class="admin-main">
-        <div class="admin-header">
-            <h1 class="admin-title">Gestión de Vehículos</h1>
-            <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
+    <div class="admin-header align-items-center" style="flex-direction: row !important;">
+        <h1 class="admin-title">Gestión de taller</h1>
+            <a href="{{ route('logout') }}" class="btn-outline-purple">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <!-- Botón hamburguesa solo visible en móvil para sidebar -->
@@ -354,7 +355,6 @@ $(function() {
         left: -260px;
         width: 260px;
         height: 100vh;
-        background: #9F17BD !important;
         z-index: 120;
         box-shadow: 2px 0 10px rgba(0,0,0,0.08);
         transition: left 0.3s;
@@ -396,11 +396,10 @@ $(function() {
     }
     .admin-sidebar {
         position: static;
-        width: 220px;
+        width: 250px;
         height: auto;
         box-shadow: none;
         left: 0 !important;
-        background: #9F17BD !important;
         color: #fff !important;
     }
 }
