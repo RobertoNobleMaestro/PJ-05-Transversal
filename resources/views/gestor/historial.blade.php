@@ -136,6 +136,21 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Paginación -->
+            <div class="pagination-container mt-4" id="pagination-controls">
+                <div class="pagination-info">
+                    <span id="pagination-summary">Mostrando 0 de 0 reservas</span>
+                </div>
+                <div class="pagination-buttons">
+                    <button id="prev-page" class="btn btn-sm btn-outline-primary" >
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span id="page-indicator" class="mx-2">Página 1 de 1</span>
+                    <button id="next-page" class="btn btn-sm btn-outline-primary" >
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

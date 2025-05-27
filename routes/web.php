@@ -31,6 +31,7 @@ use App\Http\Controllers\AsalariadoController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 
 Route::redirect('/', '/home');
@@ -131,11 +132,12 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
     Route::get('/gestor/historial/data', [HistorialGestorController::class, 'getHistorialData'])->name('gestor.historial.data');
     Route::prefix('gestor')->middleware('auth')->group(function () {
-    Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
-    Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
-    Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
-    Route::get('/gestor/parking/create', [App\Http\Controllers\ParkingGestorController::class, 'create'])->name('gestor.parking.create');
-});
+        Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
+        Route::post('/parking', [ParkingGestorController::class, 'store'])->name('gestor.parking.store');
+        Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
+        Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
+        Route::get('/parking/create', [ParkingGestorController::class, 'create'])->name('gestor.parking.create');
+    });
 
 });
 
