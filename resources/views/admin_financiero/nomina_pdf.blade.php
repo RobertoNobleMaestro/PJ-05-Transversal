@@ -187,7 +187,15 @@
     <div class="section">
         <div class="section-title">CONCEPTO SALARIAL</div>
         <div class="row">
-            <div class="label">Salario Base:</div>
+            <div class="label">Salario Base Mensual:</div>
+            <div class="value">{{ number_format($salarioBase, 2, ',', '.') }} €</div>
+        </div>
+        <div class="row">
+            <div class="label">Días Trabajados:</div>
+            <div class="value">{{ $diasTrabajados }} de {{ $diasEnMes }} días ({{ $porcentajeSalario }}%)</div>
+        </div>
+        <div class="row">
+            <div class="label">Salario Proporcional:</div>
             <div class="value">{{ number_format($salarioBruto, 2, ',', '.') }} €</div>
         </div>
         <div class="row">

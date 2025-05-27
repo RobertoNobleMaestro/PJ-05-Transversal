@@ -1,8 +1,8 @@
 <?php
-// Temporarily enable detailed error reporting to find the count() error
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Error reporting desactivado - problemas de count() ya resueltos
+// ini_set('display_errors', 0);
+// ini_set('display_startup_errors', 0);
+// error_reporting(0);
 ?>
 <!DOCTYPE html>
 <html lang="es">

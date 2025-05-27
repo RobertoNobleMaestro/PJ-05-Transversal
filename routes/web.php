@@ -256,6 +256,8 @@ Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
     Route::get('/admin-financiero/presupuestos', [AdminFinancieroController::class, 'presupuestos'])->name('admin.financiero.presupuestos');
     Route::post('/admin-financiero/presupuestos/guardar', [AdminFinancieroController::class, 'guardarPresupuestos'])->name('admin.financiero.presupuestos.guardar');
     Route::get('/admin-financiero/presupuestos/historial', [AdminFinancieroController::class, 'historialPresupuestos'])->name('admin.financiero.presupuestos.historial');
+    Route::get('/admin-financiero/presupuestos/amortizado/{vehiculo_id}', [AdminFinancieroController::class, 'presupuestosAmortizado'])->name('admin.financiero.presupuestos.amortizado');
+    Route::post('/admin-financiero/presupuestos/reparar-vehiculo', [AdminFinancieroController::class, 'repararVehiculoAmortizado'])->name('admin.financiero.presupuestos.reparar');
     
     // Rutas para el CRUD de parkings
     Route::get('/admin-financiero/parkings', [ParkingFinancieroController::class, 'index'])->name('admin.financiero.parkings.index');

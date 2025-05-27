@@ -1267,7 +1267,7 @@ class AdminFinancieroController extends Controller
                 $presupuesto = Presupuesto::where('id_lugar', $sedeId)
                     ->where('categoria', $categoria)
                     ->where('periodo_tipo', 'mensual')
-                    ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+                    ->whereBetween('fecha_inicio', [$fechaInicio, $fechaFin])
                     ->first();
                 
                 if ($presupuesto) {
@@ -1507,58 +1507,30 @@ class AdminFinancieroController extends Controller
         // Fecha de fin del período para el cálculo de ingresos (en vista trimestral)
         $fechaFinPeriodo = ($tipoVista === 'mensual') ? $fechaFin : $fechaFin;
         
-        // Obtener ingresos de reservas directamente de la tabla reservas
-        // en lugar de la tabla pagos que no existe
-        $ingresoReservas = DB::table('reservas')
-            ->where('estado', 'completada') // Asumiendo que el estado 'completada' indica una reserva pagada
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFinPeriodo])
-            ->sum('total_precio');
+        // Obtener pagos de reservas sin agrupar por tipo de vehículo
+        // Ya que no tenemos la relación directa en la base de datos
+        $pagosReservas = Pago::where('estado_pago', 'completado')
+            ->whereBetween('fecha_pago', [$fechaInicio, $fechaFinPeriodo])
+            ->select(DB::raw('SUM(total_precio) as total'))
+            ->first();
         
-        // Ajustar para incluir un margen de error (10% adicional)
-        $totalPagos = $ingresoReservas;
+        // Obtener total de pagos
+        $totalPagos = $pagosReservas ? $pagosReservas->total : 0;
         
-        // Como no podemos agrupar por tipo de vehículo, usaremos categorías genéricas
+        // Como no podemos agrupar por tipo de vehículo, usaremos categorias genéricas
         $pagosReservas = [
             'Alquiler de vehículos' => $totalPagos
         ];
         
         // Obtener pagos de servicios de conductor (ingresos por llevar clientes en taxi)
         try {
-            // Comprobar fechas para depuración
-            \Log::info('Consultando ingresos por servicios de taxi para el período: ' . 
-                      $fechaInicio->format('Y-m-d') . ' a ' . $fechaFinPeriodo->format('Y-m-d'));
-            
-            // Verificar si hay registros en ese período
-            $conteoRegistros = DB::table('pagos_choferes')
+            $pagosChoferes = DB::table('pagos_choferes')
                 ->whereBetween('fecha_pago', [$fechaInicio, $fechaFinPeriodo])
                 ->where('estado_pago', 'pagado')
-                ->count();
-                
-            \Log::info('Registros encontrados en pagos_choferes: ' . $conteoRegistros);
-            
-            // Si no hay datos reales, generar datos simulados para el período
-            if ($conteoRegistros == 0) {
-                \Log::info('No se encontraron datos reales. Generando datos simulados para el período.');
-                
-                // Generamos un ingreso simulado basado en el número de días del período
-                // Promedio de 3 servicios por día, con un ingreso medio de 8€ por servicio para la empresa
-                $diasPeriodo = $fechaInicio->diffInDays($fechaFinPeriodo) + 1;
-                $pagosChoferes = $diasPeriodo * 3 * 8;
-                
-                \Log::info('Ingresos simulados generados: ' . $pagosChoferes . '€');
-            } else {
-                // Consultar la suma de importes
-                $pagosChoferes = DB::table('pagos_choferes')
-                    ->whereBetween('fecha_pago', [$fechaInicio, $fechaFinPeriodo])
-                    ->where('estado_pago', 'pagado')
-                    ->sum('importe_empresa');
-                    
-                \Log::info('Ingresos reales encontrados: ' . $pagosChoferes . '€');
-            }
+                ->sum('importe_empresa');
         } catch (\Exception $e) {
-            // Si hay un error, establecemos el valor en cero y registramos el error
+            // Si hay un error, establecemos el valor en cero
             $pagosChoferes = 0;
-            \Log::error('Error al consultar ingresos de servicios de taxi: ' . $e->getMessage());
         }
         
         // Construir el array de fuentes de ingresos con descripciones específicas
@@ -1630,40 +1602,23 @@ class AdminFinancieroController extends Controller
                 $mesFin = Carbon::now()->subMonths($i)->endOfMonth();
                 $periodosGrafico[] = $mesInicio->format('M Y');
                 
-                // Ingresos por reservas en este mes
+                // Ingresos por pagos de reservas en este mes
                 try {
-                    $ingresosPagosMes = DB::table('reservas')
-                        ->where('estado', 'completada')
-                        ->whereBetween('fecha_reserva', [$mesInicio, $mesFin])
+                    $ingresosPagosMes = Pago::where('estado_pago', 'completado')
+                        ->whereBetween('fecha_pago', [$mesInicio, $mesFin])
                         ->sum('total_precio');
                 } catch (\Exception $e) {
                     $ingresosPagosMes = 0;
-                    \Log::error('Error al obtener ingresos de reservas: ' . $e->getMessage());
                 }
                     
                 // Ingresos por servicios de conductor en este mes
                 try {
-                    // Verificar si hay registros para este mes
-                    $conteoChoferesMes = DB::table('pagos_choferes')
+                    $ingresosChoferesMes = DB::table('pagos_choferes')
                         ->where('estado_pago', 'pagado')
                         ->whereBetween('fecha_pago', [$mesInicio, $mesFin])
-                        ->count();
-                        
-                    if ($conteoChoferesMes > 0) {
-                        // Si hay datos reales, usarlos
-                        $ingresosChoferesMes = DB::table('pagos_choferes')
-                            ->where('estado_pago', 'pagado')
-                            ->whereBetween('fecha_pago', [$mesInicio, $mesFin])
-                            ->sum('importe_empresa');
-                    } else {
-                        // Si no hay datos reales, generar datos simulados
-                        // Promedio de 3 servicios por día, con un ingreso medio de 8€ por servicio
-                        $diasEnMes = $mesInicio->daysInMonth;
-                        $ingresosChoferesMes = $diasEnMes * 3 * 8 * 0.8; // Factor 0.8 para meses anteriores
-                    }
+                        ->sum('importe_empresa');
                 } catch (\Exception $e) {
                     $ingresosChoferesMes = 0;
-                    \Log::error('Error al obtener ingresos de choferes para el mes: ' . $e->getMessage());
                 }
                     
                 $datosEvolucion[] = $ingresosPagosMes + $ingresosChoferesMes;
@@ -1676,41 +1631,23 @@ class AdminFinancieroController extends Controller
                 $trimNum = floor($trimestreInicio->month / 3) + 1;
                 $periodosGrafico[] = 'T' . $trimNum . ' ' . $trimestreInicio->year;
                 
-                // Ingresos por reservas en este trimestre
+                // Ingresos por pagos de reservas en este trimestre
                 try {
-                    $ingresosPagosTrimestre = DB::table('reservas')
-                        ->where('estado', 'completada')
-                        ->whereBetween('fecha_reserva', [$trimestreInicio, $trimestreFin])
+                    $ingresosPagosTrimestre = Pago::where('estado_pago', 'completado')
+                        ->whereBetween('fecha_pago', [$trimestreInicio, $trimestreFin])
                         ->sum('total_precio');
                 } catch (\Exception $e) {
                     $ingresosPagosTrimestre = 0;
-                    \Log::error('Error al obtener ingresos de reservas trimestrales: ' . $e->getMessage());
                 }
                     
                 // Ingresos por servicios de conductor en este trimestre
                 try {
-                    // Verificar si hay registros para este trimestre
-                    $conteoChoferesTrimestre = DB::table('pagos_choferes')
+                    $ingresosChoferesTrimestre = DB::table('pagos_choferes')
                         ->where('estado_pago', 'pagado')
                         ->whereBetween('fecha_pago', [$trimestreInicio, $trimestreFin])
-                        ->count();
-                        
-                    if ($conteoChoferesTrimestre > 0) {
-                        // Si hay datos reales, usarlos
-                        $ingresosChoferesTrimestre = DB::table('pagos_choferes')
-                            ->where('estado_pago', 'pagado')
-                            ->whereBetween('fecha_pago', [$trimestreInicio, $trimestreFin])
-                            ->sum('importe_empresa');
-                    } else {
-                        // Si no hay datos reales, generar datos simulados
-                        // Promedio de 3 servicios por día, con un ingreso medio de 8€ por servicio
-                        // Para un trimestre (aproximadamente 90 días)
-                        $diasTrimestre = $trimestreInicio->diffInDays($trimestreFin) + 1;
-                        $ingresosChoferesTrimestre = $diasTrimestre * 3 * 8 * 0.8; // Factor 0.8 para trimestres anteriores
-                    }
+                        ->sum('importe_empresa');
                 } catch (\Exception $e) {
                     $ingresosChoferesTrimestre = 0;
-                    \Log::error('Error al obtener ingresos de choferes para el trimestre: ' . $e->getMessage());
                 }
                     
                 $datosEvolucion[] = $ingresosPagosTrimestre + $ingresosChoferesTrimestre;
@@ -1821,15 +1758,8 @@ class AdminFinancieroController extends Controller
         // Verificar permisos
         $this->verificarAdminFinanciero();
         
-        // Obtener el vehículo con todas sus relaciones
-        $vehiculo = Vehiculo::with(['tipo', 'lugar'])->findOrFail($vehiculo_id);
-        
-        // Diagnóstico: registrar en el log si la matrícula está vacía
-        if (empty($vehiculo->matricula)) {
-            \Log::info('Vehículo con ID ' . $vehiculo_id . ' tiene matrícula vacía');
-        } else {
-            \Log::info('Vehículo con ID ' . $vehiculo_id . ' tiene matrícula: ' . $vehiculo->matricula);
-        }
+        // Obtener el vehículo
+        $vehiculo = Vehiculo::findOrFail($vehiculo_id);
         
         // Verificar que el vehículo está amortizado
         if (!$vehiculo->estaAmortizado()) {
@@ -1839,21 +1769,7 @@ class AdminFinancieroController extends Controller
         
         // Obtener la sede actual
         $usuario = auth()->user();
-        
-        // Comprobar si el usuario tiene lugar asignado
-        if (!$usuario->lugar) {
-            // Si el usuario no tiene lugar, usar el lugar del vehículo
-            $sede = $vehiculo->lugar;
-            
-            if (!$sede) {
-                // Si el vehículo tampoco tiene lugar, redirigir con error
-                return redirect()->route('admin.financiero.balance.activos')
-                    ->with('error', 'No se pudo determinar la sede. Por favor, contacte con el administrador.');
-            }
-        } else {
-            $sede = $usuario->lugar;
-        }
-        
+        $sede = $usuario->lugar;
         $sedeId = $sede->id_lugar;
         
         // Obtener el mes actual para los filtros
@@ -1866,9 +1782,9 @@ class AdminFinancieroController extends Controller
         
         // Calcular ingresos para el período actual
         $ingresos = Reserva::where('id_lugar', $sedeId)
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+            ->whereBetween('fecha_inicio', [$fechaInicio, $fechaFin])
             ->where('estado', 'completada')
-            ->sum('total_precio');
+            ->sum('importe_total');
         
         // Calcular gastos para el período actual
         $gastoSalarios = Asalariado::whereHas('parking', function($query) use ($sedeId) {
@@ -1951,21 +1867,7 @@ class AdminFinancieroController extends Controller
         
         // Obtener la sede actual
         $usuario = auth()->user();
-        
-        // Comprobar si el usuario tiene lugar asignado
-        if (!$usuario->lugar) {
-            // Si el usuario no tiene lugar, usar el lugar del vehículo
-            $sede = $vehiculo->lugar;
-            
-            if (!$sede) {
-                // Si el vehículo tampoco tiene lugar, redirigir con error
-                return redirect()->route('admin.financiero.balance.activos')
-                    ->with('error', 'No se pudo determinar la sede. Por favor, contacte con el administrador.');
-            }
-        } else {
-            $sede = $usuario->lugar;
-        }
-        
+        $sede = $usuario->lugar;
         $sedeId = $sede->id_lugar;
         
         // Verificar que el mes seleccionado es el actual
@@ -1993,9 +1895,9 @@ class AdminFinancieroController extends Controller
         
         // Calcular ingresos para el período actual
         $ingresos = Reserva::where('id_lugar', $sedeId)
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+            ->whereBetween('fecha_inicio', [$fechaInicio, $fechaFin])
             ->where('estado', 'completada')
-            ->sum('total_precio');
+            ->sum('importe_total');
         
         // Calcular gastos para el período actual
         // (código simplificado)

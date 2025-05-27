@@ -150,4 +150,51 @@ class Vehiculo extends Model
     {
         return $this->calcularValorActual($año_referencia) <= 0;
     }
+    
+    /**
+     * Calcula el costo de reparación para un vehículo amortizado
+     * (Recupera el valor original del vehículo)
+     *
+     * @return float
+     */
+    public function calcularCostoReparacion()
+    {
+        // Si el vehículo no está amortizado, no hay costo de reparación
+        if (!$this->estaAmortizado()) {
+            return 0;
+        }
+        
+        // El costo de reparación es un porcentaje del valor original del vehículo
+        $valor_original = $this->precio_dia * 200; // Estimación: 200 días de alquiler como valor base
+        
+        // La reparación cuesta entre un 20% y un 40% del valor original, dependiendo de la antigüedad
+        $antigüedad = now()->year - $this->año;
+        $porcentaje_costo = min(0.4, 0.2 + ($antigüedad * 0.05)); // Aumenta 5% por cada año, máximo 40%
+        
+        return round($valor_original * $porcentaje_costo, 2);
+    }
+    
+    /**
+     * Registra la reparación de un vehículo amortizado
+     *
+     * @param string $descripcion Descripción de la reparación
+     * @return bool
+     */
+    public function repararVehiculoAmortizado($descripcion = 'Reparación de vehículo amortizado')
+    {
+        // Solo se puede reparar si está amortizado
+        if (!$this->estaAmortizado()) {
+            return false;
+        }
+        
+        // Actualizar fechas de mantenimiento
+        $this->estado = 'activo'; // Cambiar estado a activo
+        $this->ultima_fecha_mantenimiento = now();
+        $this->proxima_fecha_mantenimiento = now()->addMonths(6); // Próximo mantenimiento en 6 meses
+        
+        // Guardar cambios
+        return $this->save();
+    }
+    
+
 }

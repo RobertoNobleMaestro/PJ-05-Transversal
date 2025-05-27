@@ -27,19 +27,33 @@ class HomeController extends Controller
     // Estadísticas y tipo vehiculo via fetch
     private function getStatsData(): array
     {
+        // Asegurarnos de que los valores devueltos son numéricos para evitar problemas con count()
+        $usuariosClientes = User::where('id_roles', 2)->count();
+        $vehiculos = Vehiculo::count();
+        $valoracionMedia = Valoracion::avg('valoracion');
+        
+        // Valoración de vehículos - usar una consulta más segura
+        $valoracionVehiculos = DB::table('vehiculos')
+            ->leftJoin('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
+            ->leftJoin('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
+            ->leftJoin('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
+            ->avg('valoraciones.valoracion');
+        
+        // Convertir a tipos numéricos explícitamente
+        $usuariosClientes = intval($usuariosClientes) ?: 0;
+        $vehiculos = intval($vehiculos) ?: 0;
+        $valoracionMedia = is_numeric($valoracionMedia) ? round(floatval($valoracionMedia), 1) : 0;
+        $valoracionVehiculos = is_numeric($valoracionVehiculos) ? round(floatval($valoracionVehiculos), 1) : 0;
+        
+        // Obtener los tipos de vehículo
+        $tipos = Tipo::all();
+        
         return [
-            'usuariosClientes' => User::where('id_roles', 2)->count(),
-            'vehiculos' => Vehiculo::count(),
-            'valoracionMedia' => round(Valoracion::avg('valoracion'), 1),
-            'valoracionVehiculos' => round(
-                DB::table('vehiculos')
-                    ->join('vehiculos_reservas', 'vehiculos.id_vehiculos', '=', 'vehiculos_reservas.id_vehiculos')
-                    ->join('reservas', 'vehiculos_reservas.id_reservas', '=', 'reservas.id_reservas')
-                    ->join('valoraciones', 'reservas.id_reservas', '=', 'valoraciones.id_reservas')
-                    ->avg('valoraciones.valoracion'),
-                1
-            ),
-            'tipos' => Tipo::all(),
+            'usuariosClientes' => $usuariosClientes,
+            'vehiculos' => $vehiculos,
+            'valoracionMedia' => $valoracionMedia,
+            'valoracionVehiculos' => $valoracionVehiculos,
+            'tipos' => $tipos,
         ];
     }
 

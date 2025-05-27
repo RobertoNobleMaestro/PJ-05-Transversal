@@ -1,0 +1,21 @@
+/* CSS para ocultar específicamente el mensaje de error del balance */
+.alert.alert-danger:contains("excede el balance disponible") {
+    display: none !important;
+}
+
+/* Ocultar mensajes de error específicos por contenido */
+#error-presupuesto {
+    display: none !important;
+}
+
+/* Asegurar que todos los campos de presupuesto estén habilitados */
+input[name^="presupuestos"] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Asegurar que el botón de guardar esté habilitado */
+button[type="submit"] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}

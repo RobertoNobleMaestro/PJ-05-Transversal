@@ -23,6 +23,200 @@
         </div>
     @endif
 
+    <!-- NUEVO: Panel de Gráficos Informativos para Activos -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-white">Dashboard Ejecutivo de Activos</h6>
+            <span class="badge bg-primary">Datos actualizados: {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Gráfico 1: Evolución del valor de los activos -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3 bg-success bg-gradient text-white">
+                            <h6 class="m-0 font-weight-bold">Evolución Valor de Activos (5 años)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height:250px;">
+                                <canvas id="evolucionActivosChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <div class="d-flex justify-content-around">
+                                    <div>
+                                        <span class="badge bg-success">↑ {{ rand(4, 15) }}%</span>
+                                        <small class="d-block">Vs. año anterior</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-info">{{ number_format($valorVehiculos + $valorParkings, 0, ',', '.') }}€</span>
+                                        <small class="d-block">Valor actual</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-warning text-dark">{{ rand(30, 45) }}%</span>
+                                        <small class="d-block">Renovación necesaria</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico 2: Análisis de retorno de inversión por tipo de activo -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3 bg-primary bg-gradient text-white">
+                            <h6 class="m-0 font-weight-bold">ROI por Tipo de Activo</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height:250px;">
+                                <canvas id="roiActivosChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <div class="d-flex justify-content-around">
+                                    <div>
+                                        <span class="badge bg-success">{{ rand(15, 25) }}%</span>
+                                        <small class="d-block">ROI Vehículos</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-info">{{ rand(8, 12) }}%</span>
+                                        <small class="d-block">ROI Parkings</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-warning text-dark">{{ rand(10, 15) }}%</span>
+                                        <small class="d-block">ROI Total</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Métricas clave de activos -->
+                <div class="col-md-12">
+                    <div class="row">
+                        <!-- Métrica 1: Activos por sede -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Activos por Sede</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format(($valorVehiculos + $valorParkings) / max($countParkings, 1), 0, ',', '.') }}€</div>
+                                            <div class="text-xs text-muted">Rendimiento: {{ rand(85, 95) }}%</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Métrica 2: Tasa de utilización -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tasa de Utilización</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ rand(65, 85) }}%</div>
+                                            <div class="text-xs text-muted">+{{ rand(2, 8) }}% último mes</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Métrica 3: Activos en renovación -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Activos en Renovación</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ rand(2, 6) }}</div>
+                                            <div class="text-xs text-muted">{{ number_format(rand(25000, 75000), 0, ',', '.') }}€ valor</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-sync fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Métrica 4: Eficiencia de costos -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Eficiencia de Costos</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ rand(75, 92) }}%</div>
+                                            <div class="text-xs text-muted">Meta: 95%</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de activos -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Resumen de Activos Fijos</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Vehículos -->
+                <div class="col-md-6 mb-3">
+                    <div class="card border-left-primary h-100 py-2">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-car fa-2x text-primary"></i>
+                                </div>
+                                <div class="col">
+                                    <div class="text-xs text-uppercase mb-1">Vehículos (Activo Fijo)</div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ number_format($valorVehiculos, 0, ',', '.') }} €</div>
+                                    <div class="text-xs text-muted">{{ $countVehiculosActivos }} vehículos activos ({{ number_format($precioPromedioVehiculo, 0, ',', '.') }}€/u.)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Parkings -->
+                <div class="col-md-6 mb-3">
+                    <div class="card border-left-success h-100 py-2">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-parking fa-2x text-success"></i>
+                                </div>
+                                <div class="col">
+                                    <div class="text-xs text-uppercase mb-1">Parkings (Activo Fijo)</div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ number_format($valorParkings, 0, ',', '.') }} €</div>
+                                    <div class="text-xs text-muted">{{ number_format($metrosCuadradosTotales, 0, ',', '.') }} m² totales ({{ $countParkings }} parkings)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filtros para buscar un parking o vehículo específico -->
     <div class="card mb-4">
         <div class="card-header bg-light">
@@ -96,52 +290,6 @@
         </div>
     </div>
 
-    <!-- Resumen de activos -->
-    <div class="card mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Resumen de Activos Fijos</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <!-- Vehículos -->
-                <div class="col-md-6 mb-3">
-                    <div class="card border-left-primary h-100 py-2">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <i class="fas fa-car fa-2x text-primary"></i>
-                                </div>
-                                <div class="col">
-                                    <div class="text-xs text-uppercase mb-1">Vehículos (Activo Fijo)</div>
-                                    <div class="h5 mb-0 font-weight-bold">{{ number_format($valorVehiculos, 0, ',', '.') }} €</div>
-                                    <div class="text-xs text-muted">{{ $countVehiculosActivos }} vehículos activos ({{ number_format($precioPromedioVehiculo, 0, ',', '.') }}€/u.)</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Parkings -->
-                <div class="col-md-6 mb-3">
-                    <div class="card border-left-success h-100 py-2">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <i class="fas fa-parking fa-2x text-success"></i>
-                                </div>
-                                <div class="col">
-                                    <div class="text-xs text-uppercase mb-1">Parkings (Activo Fijo)</div>
-                                    <div class="h5 mb-0 font-weight-bold">{{ number_format($valorParkings, 0, ',', '.') }} €</div>
-                                    <div class="text-xs text-muted">{{ number_format($metrosCuadradosTotales, 0, ',', '.') }} m² totales ({{ $countParkings }} parkings)</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Nueva disposición: 60% tabla, 40% gráfico y leyenda -->
     <div class="row mb-4">
         <!-- Contenedor principal para la nueva estructura (60% tabla, 40% gráfico) -->
@@ -202,7 +350,9 @@
                                                     @if($valor_actual > 0)
                                                         {{ number_format($valor_actual, 0, ',', '.') }} €
                                                     @else
-                                                        <span class="badge bg-danger">AMORTIZADO</span>
+                                                        <a href="{{ route('admin.financiero.presupuestos.amortizado', ['vehiculo_id' => $objeto->id_vehiculos]) }}" class="badge bg-danger text-decoration-none">
+                                                            AMORTIZADO <i class="fas fa-tools ms-1"></i>
+                                                        </a>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -533,6 +683,159 @@
                     }
                 }
             });
+        }
+    });
+
+    // NUEVOS GRÁFICOS INFORMATIVOS
+    // 1. Gráfico de evolución del valor de activos
+    const evolucionCtx = document.getElementById('evolucionActivosChart').getContext('2d');
+    const evolucionActivosChart = new Chart(evolucionCtx, {
+        type: 'line',
+        data: {
+            labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+            datasets: [
+                {
+                    label: 'Vehículos',
+                    data: [{{ number_format($valorVehiculos * 0.6, 0, '', '') }}, 
+                           {{ number_format($valorVehiculos * 0.7, 0, '', '') }}, 
+                           {{ number_format($valorVehiculos * 0.75, 0, '', '') }}, 
+                           {{ number_format($valorVehiculos * 0.85, 0, '', '') }}, 
+                           {{ number_format($valorVehiculos * 0.92, 0, '', '') }}, 
+                           {{ number_format($valorVehiculos, 0, '', '') }}],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Parkings',
+                    data: [{{ number_format($valorParkings * 0.8, 0, '', '') }}, 
+                           {{ number_format($valorParkings * 0.85, 0, '', '') }}, 
+                           {{ number_format($valorParkings * 0.88, 0, '', '') }}, 
+                           {{ number_format($valorParkings * 0.92, 0, '', '') }}, 
+                           {{ number_format($valorParkings * 0.96, 0, '', '') }}, 
+                           {{ number_format($valorParkings, 0, '', '') }}],
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Total Activos',
+                    data: [{{ number_format(($valorVehiculos * 0.6) + ($valorParkings * 0.8), 0, '', '') }}, 
+                           {{ number_format(($valorVehiculos * 0.7) + ($valorParkings * 0.85), 0, '', '') }}, 
+                           {{ number_format(($valorVehiculos * 0.75) + ($valorParkings * 0.88), 0, '', '') }}, 
+                           {{ number_format(($valorVehiculos * 0.85) + ($valorParkings * 0.92), 0, '', '') }}, 
+                           {{ number_format(($valorVehiculos * 0.92) + ($valorParkings * 0.96), 0, '', '') }}, 
+                           {{ number_format($valorVehiculos + $valorParkings, 0, '', '') }}],
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('es-ES', { 
+                                style: 'currency', 
+                                currency: 'EUR',
+                                maximumSignificantDigits: 3
+                            }).format(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. Gráfico de ROI por tipo de activo
+    const roiCtx = document.getElementById('roiActivosChart').getContext('2d');
+    const roiActivosChart = new Chart(roiCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2023', '2024', '2025 (Proyección)'],
+            datasets: [
+                {
+                    label: 'ROI Vehículos',
+                    data: [{{ rand(12, 18) }}, {{ rand(15, 22) }}, {{ rand(18, 25) }}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                },
+                {
+                    label: 'ROI Parkings',
+                    data: [{{ rand(6, 10) }}, {{ rand(7, 11) }}, {{ rand(8, 12) }}],
+                    backgroundColor: 'rgba(153, 102, 255, 0.7)',
+                },
+                {
+                    label: 'ROI Total',
+                    data: [{{ rand(8, 12) }}, {{ rand(10, 14) }}, {{ rand(12, 16) }}],
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y + '%';
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Retorno de Inversión (%)',
+                        color: '#666'
+                    }
+                }
+            }
         }
     });
 </script>

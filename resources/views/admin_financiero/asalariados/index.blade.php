@@ -81,7 +81,9 @@
                             <th>Rol</th>
                             <th>Salario</th>
                             <th>Fecha de contratación</th>
+                            <th>Días trabajados</th>
                             <th>Lugar</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -147,23 +149,25 @@
 <div class="modal fade" id="desactivarModal" tabindex="-1" aria-labelledby="desactivarModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="desactivarModalLabel">Confirmar desactivación</h5>
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="desactivarModalLabel">Programar baja de asalariado</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>¿Estás seguro de que deseas dar de baja a <strong id="nombreAsalariado"></strong>?</p>
-                <p>Al dar de baja un asalariado:</p>
+                <p>¿Estás seguro de que deseas programar la baja de <strong id="nombreAsalariado"></strong>?</p>
+                <p class="text-danger fw-bold">La baja se programará para el día 1 del mes siguiente.</p>
+                <p>Al programar la baja de un asalariado:</p>
                 <ul>
-                    <li>Se registrarán los días trabajados hasta hoy</li>
-                    <li>Se calculará el salario proporcional</li>
-                    <li>Se pasará a la lista de asalariados inactivos</li>
+                    <li>El asalariado seguirá activo hasta el día 1 del mes siguiente</li>
+                    <li>Se conservarán los días trabajados acumulados</li>
+                    <li>Se programará automáticamente el cálculo del salario proporcional</li>
+                    <li>El asalariado NO aparecerá en la lista de inactivos hasta la fecha programada</li>
                 </ul>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmarDesactivar">
-                    <i class="fas fa-user-slash me-1"></i> Confirmar baja
+                <button type="button" class="btn btn-warning text-dark" id="confirmarDesactivar">
+                    <i class="fas fa-calendar-alt me-1"></i> Programar baja
                 </button>
             </div>
         </div>
@@ -323,7 +327,7 @@
             tableBody.innerHTML = '';
             
             if (asalariados.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No hay asalariados que coincidan con los filtros</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No hay asalariados que coincidan con los filtros</td></tr>';
                 return;
             }
             
@@ -406,12 +410,24 @@
                 
                 // Crear la fila
                 const row = document.createElement('tr');
+                // Verificar si tiene una baja programada
+                let bajaProgramadaHtml = '';
+                if (asalariado.estado_baja_programada === 'pendiente' && asalariado.fecha_baja_programada) {
+                    const fechaBajaProgramada = new Date(asalariado.fecha_baja_programada);
+                    const fechaFormateada = fechaBajaProgramada.toLocaleDateString('es-ES');
+                    bajaProgramadaHtml = `<span class="badge bg-warning text-dark">Baja programada: ${fechaFormateada}</span>`;
+                }
+                
                 row.innerHTML = `
                     <td>${nombreCompleto}</td>
                     <td><span class="badge ${rolClass}">${rolName === 'admin_financiero' ? 'Admin Financiero' : rolName === 'sin rol' ? 'Sin rol' : rolName.charAt(0).toUpperCase() + rolName.slice(1)}</span></td>
                     <td>${formatCurrency(asalariado.salario)}</td>
                     <td>${formattedDate}</td>
+                    <td>${asalariado.dias_trabajados !== null ? asalariado.dias_trabajados : 0}</td>
                     <td>${lugarNombre}</td>
+                    <td>
+                        ${bajaProgramadaHtml}
+                    </td>
                     <td>
                         <div class="action-buttons">
                             <a href="{{ url('/admin-financiero/asalariados') }}/${asalariado.id}/detalle" class="btn btn-sm" style="background-color: #9F17BD; color: white;" title="Ver detalles">
@@ -597,10 +613,17 @@
                 },
                 success: function(response) {
                     $('#desactivarModal').modal('hide');
-                    // Mostrar mensaje de éxito
+                    // Mostrar mensaje de éxito con la fecha programada
+                    let mensaje = 'Baja programada correctamente.';
+                    
+                    // Si la respuesta incluye la fecha, mostrarla
+                    if (response.fecha_baja_programada) {
+                        mensaje = `Baja programada para el día ${response.fecha_baja_programada}. El asalariado seguirá activo hasta esa fecha.`;
+                    }
+                    
                     Swal.fire({
-                        title: '¡Dado de baja!',
-                        text: 'El asalariado ha sido desactivado correctamente.',
+                        title: '¡Baja programada!',
+                        text: mensaje,
                         icon: 'success',
                         confirmButtonText: 'Ok'
                     }).then(() => {

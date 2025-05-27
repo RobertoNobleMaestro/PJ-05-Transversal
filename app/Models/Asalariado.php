@@ -55,7 +55,7 @@ class Asalariado extends Model
     /**
      * Calcula el salario proporcional basado en la fecha de contratación
      * @param string $fecha Fecha para la que calcular el salario (formato Y-m-d)
-     * @return float Salario proporcional
+     * @return array Contiene el salario proporcional, días trabajados, días del mes y porcentaje
      */
     public function calcularSalarioProporcional($fecha = null)
     {
@@ -73,29 +73,52 @@ class Asalariado extends Model
         
         // Si fue contratado antes del mes actual, recibe el salario completo
         if ($fechaContratacion->lt($primerDiaMes)) {
-            return $this->salario;
+            return [
+                'salario' => $this->salario,
+                'diasTrabajados' => $diasEnMes,
+                'diasEnMes' => $diasEnMes,
+                'porcentaje' => 100
+            ];
         }
         
         // Si fue contratado durante el mes actual, calcular la parte proporcional
         if ($fechaContratacion->between($primerDiaMes, $ultimoDiaMes)) {
             $diasTrabajados = $diasEnMes - $fechaContratacion->day + 1;
-            return ($this->salario / $diasEnMes) * $diasTrabajados;
+            $porcentaje = round(($diasTrabajados / $diasEnMes) * 100, 2);
+            $salarioProporcional = ($this->salario / $diasEnMes) * $diasTrabajados;
+            
+            return [
+                'salario' => $salarioProporcional,
+                'diasTrabajados' => $diasTrabajados,
+                'diasEnMes' => $diasEnMes,
+                'porcentaje' => $porcentaje
+            ];
         }
         
         // Si fue contratado después del último día del mes, no recibe salario
-        return 0;
+        return [
+            'salario' => 0,
+            'diasTrabajados' => 0,
+            'diasEnMes' => $diasEnMes,
+            'porcentaje' => 0
+        ];
     }
     
     /**
      * Calcula el salario proporcional para empleados dados de baja
-     * @return float Salario proporcional hasta la fecha de baja
+     * @return array Contiene el salario proporcional, días trabajados, días del mes y porcentaje
      */
     public function calcularSalarioBaja()
     {
         try {
             // Si aún no está dado de baja o no tiene días trabajados registrados, retornar 0
             if ($this->estado !== 'baja' || !isset($this->dias_trabajados) || $this->dias_trabajados <= 0) {
-                return 0;
+                return [
+                    'salario' => 0,
+                    'diasTrabajados' => 0,
+                    'diasEnMes' => now()->endOfMonth()->day,
+                    'porcentaje' => 0
+                ];
             }
             
             $fechaActual = now();
@@ -108,14 +131,32 @@ class Asalariado extends Model
             // Asegurar que tenemos un salario válido
             $salario = floatval($this->salario);
             if ($salario <= 0) {
-                return 0;
+                return [
+                    'salario' => 0,
+                    'diasTrabajados' => 0,
+                    'diasEnMes' => $diasEnMes,
+                    'porcentaje' => 0
+                ];
             }
             
             // Calcular el salario proporcional
-            return ($salario / $diasEnMes) * $diasTrabajados;
+            $salarioProporcional = ($salario / $diasEnMes) * $diasTrabajados;
+            $porcentaje = round(($diasTrabajados / $diasEnMes) * 100, 2);
+            
+            return [
+                'salario' => $salarioProporcional,
+                'diasTrabajados' => $diasTrabajados,
+                'diasEnMes' => $diasEnMes,
+                'porcentaje' => $porcentaje
+            ];
         } catch (\Exception $e) {
             \Log::error('Error al calcular el salario de baja: ' . $e->getMessage());
-            return 0; // En caso de error, devolver 0
+            return [
+                'salario' => 0,
+                'diasTrabajados' => 0,
+                'diasEnMes' => now()->endOfMonth()->day,
+                'porcentaje' => 0
+            ];
         }
     }
 }

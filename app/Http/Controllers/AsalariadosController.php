@@ -301,11 +301,18 @@ class AsalariadosController extends Controller
         // Calcular el salario, independientemente de si se va a guardar o solo visualizar
         if ($asalariado->estado == 'alta') {
             // Calcular salario proporcional para empleados activos
-            $salarioBruto = $asalariado->calcularSalarioProporcional();
+            $datosSalario = $asalariado->calcularSalarioProporcional();
         } else {
             // Calcular salario proporcional para empleados en proceso de baja
-            $salarioBruto = $asalariado->calcularSalarioBaja();
+            $datosSalario = $asalariado->calcularSalarioBaja();
         }
+        
+        // Extraer los datos del salario
+        $salarioBruto = $datosSalario['salario'];
+        $diasTrabajados = $datosSalario['diasTrabajados'];
+        $diasEnMes = $datosSalario['diasEnMes'];
+        $porcentajeSalario = $datosSalario['porcentaje'];
+        $salarioBase = $asalariado->salario; // Salario base completo
         
         // Calcular impuestos (simplificado)
         $impuestoRenta = $salarioBruto * 0.15; // 15% de IRPF
@@ -318,6 +325,10 @@ class AsalariadosController extends Controller
             'fecha' => $hoy->format('d/m/Y'),
             'periodo' => $hoy->format('F Y'),
             'salarioBruto' => $salarioBruto,
+            'salarioBase' => $salarioBase,
+            'diasTrabajados' => $diasTrabajados,
+            'diasEnMes' => $diasEnMes,
+            'porcentajeSalario' => $porcentajeSalario,
             'impuestoRenta' => $impuestoRenta,
             'seguridadSocial' => $seguridadSocial,
             'salarioNeto' => $salarioNeto,
@@ -360,7 +371,7 @@ class AsalariadosController extends Controller
     }
     
     /**
-     * Dar de baja a un asalariado (cambiar estado y calcular días trabajados)
+     * Programar la baja de un asalariado para el día 1 del mes siguiente
      */
     public function darDeBaja(Request $request, $id)
     {
@@ -375,17 +386,33 @@ class AsalariadosController extends Controller
             return redirect()->back()->with('error', 'Este asalariado ya está dado de baja');
         }
         
-        // Calcular días trabajados desde su contratación o última alta
-        $fechaInicio = $asalariado->hiredate;
-        $fechaActual = Carbon::now();
-        $diasTrabajados = $fechaInicio->diffInDays($fechaActual) + 1; // +1 para incluir el día actual
+        if ($asalariado->estado_baja_programada == 'pendiente') {
+            return redirect()->back()->with('error', 'Este asalariado ya tiene una baja programada');
+        }
         
-        // Actualizar estado y días trabajados
-        $asalariado->estado = 'baja';
-        $asalariado->dias_trabajados = $diasTrabajados;
-        $asalariado->save();
-        
-        return redirect()->back()->with('success', 'Asalariado dado de baja correctamente. Cobrará la parte proporcional de su salario el día 1 del próximo mes.');
+        try {
+            // Calcular la fecha para el día 1 del mes siguiente
+            $fechaActual = Carbon::now();
+            $fechaBajaProgramada = $fechaActual->copy()->addMonth()->startOfMonth();
+            
+            // Registrar la fecha programada de baja
+            $asalariado->fecha_baja_programada = $fechaBajaProgramada;
+            $asalariado->estado_baja_programada = 'pendiente';
+            
+            // Mantener el estado actual como activo hasta la fecha programada
+            $asalariado->save();
+            
+            // Formatear fecha para mostrar en mensaje
+            $fechaFormateada = $fechaBajaProgramada->format('d/m/Y');
+            
+            // Registrar la acción para auditoría
+            \Log::info('Baja programada para el asalariado ID ' . $id . ' con fecha: ' . $fechaFormateada);
+            
+            return redirect()->back()->with('success', 'Baja programada correctamente para el día ' . $fechaFormateada);
+        } catch (\Exception $e) {
+            \Log::error('Error al programar la baja del asalariado: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al programar la baja: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -418,20 +445,40 @@ class AsalariadosController extends Controller
             return redirect()->back()->with('error', 'No tienes permisos para esta acción');
         }
         
-        $asalariado = Asalariado::findOrFail($id);
-        
-        if ($asalariado->estado == 'alta') {
-            return redirect()->back()->with('error', 'Este asalariado ya está dado de alta');
+        try {
+            $asalariado = Asalariado::findOrFail($id);
+            
+            if ($asalariado->estado == 'alta') {
+                return redirect()->back()->with('error', 'Este asalariado ya está dado de alta');
+            }
+            
+            // Obtener los días trabajados acumulados anteriormente
+            $diasTrabajadosAcumulados = $asalariado->dias_trabajados ?? 0;
+            
+            // Actualizar estado y fecha de contratación, pero mantener los días trabajados acumulados
+            $asalariado->estado = 'alta';
+            $asalariado->hiredate = Carbon::now(); // Nueva fecha de contratación
+            
+            // Guardar los días acumulados en un campo adicional para referencia histórica si es necesario
+            $asalariado->dias_acumulados_historico = $diasTrabajadosAcumulados;
+            
+            // Establecer la fecha de última reactivación
+            $asalariado->fecha_ultima_reactivacion = Carbon::now();
+            
+            // Mantener los días trabajados acumulados (no se reinician)
+            $asalariado->dias_trabajados = $diasTrabajadosAcumulados;
+            
+            $asalariado->save();
+            
+            // Registrar la acción para auditoría
+            \Log::info('Asalariado ID ' . $id . ' dado de alta. Días trabajados preservados: ' . $diasTrabajadosAcumulados);
+            
+            return redirect()->route('admin.asalariados.index')
+                ->with('success', 'Asalariado dado de alta correctamente. Días trabajados acumulados: ' . $diasTrabajadosAcumulados);
+        } catch (\Exception $e) {
+            \Log::error('Error al dar de alta asalariado: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al procesar el alta: ' . $e->getMessage());
         }
-        
-        // Actualizar estado, fecha de contratación y reiniciar días trabajados
-        $asalariado->estado = 'alta';
-        $asalariado->hiredate = Carbon::now();
-        $asalariado->dias_trabajados = 0;
-        $asalariado->save();
-        
-        return redirect()->route('admin.asalariados.index')
-            ->with('success', 'Asalariado dado de alta correctamente con fecha de contratación actualizada.');
     }
     
     /**

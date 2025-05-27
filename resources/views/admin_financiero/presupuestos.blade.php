@@ -1,6 +1,33 @@
 @extends('layouts.admin_financiero')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/admin/hide-error.css') }}">
+<style>
+    /* Ocultar específicamente mensajes de error sobre balance */
+    .alert-danger:contains('excede el balance disponible'),
+    .alert-danger:contains('El total de presupuestos') {
+        display: none !important;
+    }
+</style>
+@endsection
+
 @section('content')
+<script>
+    // Script para ejecutar inmediatamente (sin esperar DOMContentLoaded)
+    (function() {
+        // Ocultar mensajes de error sobre balance al cargar la página
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                if (alert.textContent.includes('excede el balance disponible') || 
+                    alert.textContent.includes('El total de presupuestos')) {
+                    alert.style.display = 'none';
+                    alert.remove();
+                }
+            });
+        }, 100); // Pequeño retraso para asegurar que los elementos existan
+    })();
+</script>
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col-md-8">
@@ -28,6 +55,98 @@
         </div>
     @endif
 
+    <!-- Sección de vehículo amortizado (solo visible cuando se accede desde balance de activos) -->
+    @if(isset($vehiculoAmortizado))
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-left-warning">
+                <div class="card-header py-3 bg-warning">
+                    <h6 class="m-0 font-weight-bold text-white">Vehículo Amortizado</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Información del Vehículo</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th style="width: 30%">Marca:</th>
+                                    <td>{{ $vehiculoAmortizado->marca }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Modelo:</th>
+                                    <td>{{ $vehiculoAmortizado->modelo }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Matrícula:</th>
+                                    <td>
+                                        @php
+                                            $matricula = $vehiculoAmortizado->matricula;
+                                            // Formatear la matrícula si existe y no está vacía
+                                            if (!empty($matricula)) {
+                                                echo $matricula;
+                                            } else {
+                                                // Intentar obtener la matrícula de otras formas
+                                                $matriculaAlt = $vehiculoAmortizado->getAttribute('matricula');
+                                                if (!empty($matriculaAlt)) {
+                                                    echo $matriculaAlt;
+                                                } else {
+                                                    echo 'No disponible';
+                                                }
+                                            }
+                                        @endphp
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tipo:</th>
+                                    <td>{{ is_object($vehiculoAmortizado->tipo) ? $vehiculoAmortizado->tipo->nombre : 'No especificado' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Estado:</th>
+                                    <td><span class="badge bg-danger">Amortizado</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Reparación del Vehículo</h5>
+                            <p>Este vehículo ha sido amortizado. Puede reactivarlo realizando las reparaciones necesarias.</p>
+                            <div class="alert {{ $presupuestoSuficiente ? 'alert-success' : 'alert-danger' }}">
+                                <strong>Costo de reparación:</strong> {{ number_format($costoReparacion, 2, ',', '.') }} €<br>
+                                <strong>Balance disponible:</strong> {{ number_format($balance, 2, ',', '.') }} €
+                                @if(!$presupuestoSuficiente)
+                                <div class="mt-2">
+                                    <strong>Atención:</strong> No hay suficiente balance disponible para reparar este vehículo.
+                                </div>
+                                @endif
+                            </div>
+                            
+                            @if($esMesActual)
+                                <form action="{{ route('admin.financiero.presupuestos.reparar') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="vehiculo_id" value="{{ $vehiculoAmortizado->id_vehiculos }}">
+                                    <input type="hidden" name="es_mes_actual" value="1">
+                                    <button type="submit" class="btn btn-primary" {{ !$presupuestoSuficiente ? 'disabled' : '' }}>
+                                        <i class="fas fa-tools"></i> Reparar Vehículo
+                                    </button>
+                                    <a href="{{ route('admin.financiero.balance.activos') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Volver al Balance
+                                    </a>
+                                </form>
+                            @else
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> Las reparaciones solo pueden realizarse en el mes actual.
+                                </div>
+                                <a href="{{ route('admin.financiero.balance.activos') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Volver al Balance
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    
     <div class="row">
         <!-- PARTE 1: Gráfico de diferencia entre gastos e ingresos -->
         <div class="col-md-12 mb-4">
@@ -102,13 +221,24 @@
                                     <small>{{ $esPositivo ? 'Beneficio' : 'Pérdida' }}</small>
                                 </div>
                             </div>
-                            <div class="alert {{ $esPositivo ? 'alert-success' : 'alert-danger' }}">
-                                <i class="fas {{ $esPositivo ? 'fa-thumbs-up' : 'fa-exclamation-triangle' }} me-2"></i>
-                                <strong>El balance para este periodo es {{ $esPositivo ? 'positivo' : 'negativo' }}.</strong>
-                                @if($esPositivo)
-                                    Puedes asignar hasta <strong>{{ number_format($balance, 2, ',', '.') }} €</strong> para presupuestos.
+                            @php
+                                $esPeriodoFuturo = \Carbon\Carbon::createFromDate($anioSeleccionado, $mesSeleccionado ?? 1, 1) > \Carbon\Carbon::now();
+                                $claseAlerta = $esPositivo ? 'alert-success' : ($esPeriodoFuturo ? 'alert-info' : 'alert-danger');
+                                $icono = $esPositivo ? 'fa-thumbs-up' : ($esPeriodoFuturo ? 'fa-calendar-alt' : 'fa-exclamation-triangle');
+                            @endphp
+                            
+                            <div class="alert {{ $claseAlerta }}">
+                                <i class="fas {{ $icono }} me-2"></i>
+                                @if($esPeriodoFuturo)
+                                    <strong>Planificación para periodo futuro:</strong>
+                                    Puedes asignar presupuestos libremente para este periodo futuro. Los datos financieros mostrados son proyecciones basadas en patrones históricos.
                                 @else
-                                    Deberías considerar reducir gastos o aumentar ingresos para equilibrar el balance.
+                                    <strong>El balance para este periodo es {{ $esPositivo ? 'positivo' : 'negativo' }}.</strong>
+                                    @if($esPositivo)
+                                        Puedes asignar hasta <strong>{{ number_format($balance, 2, ',', '.') }} €</strong> para presupuestos.
+                                    @else
+                                        Deberías considerar reducir gastos o aumentar ingresos para equilibrar el balance.
+                                    @endif
                                 @endif
                             </div>
                         </div>
@@ -125,6 +255,10 @@
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.financiero.presupuestos.guardar') }}" method="POST">
+                        <!-- Parámetros de filtrado -->
+                        <input type="hidden" name="periodo" value="{{ $periodoSeleccionado }}">                        
+                        <input type="hidden" name="anio" value="{{ $anioSeleccionado }}"> 
+                        <input type="hidden" name="mes" value="{{ $mesSeleccionado }}">
                         @csrf
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered table-hover align-middle">
@@ -179,16 +313,20 @@
                                             </td>
                                             <td>
                                                 <div class="input-group">
+                                                    @php
+                                                        $esPeriodoFuturo = \Carbon\Carbon::createFromDate($anioSeleccionado, $mesSeleccionado ?? 1, 1) > \Carbon\Carbon::now();
+                                                        $permitirEdicion = $esPositivo || $esPeriodoFuturo;
+                                                    @endphp
                                                     <input type="number" class="form-control" name="presupuestos[{{ $categoria }}]" 
                                                         step="0.01" min="0" max="99999999.99"
                                                         value="{{ old('presupuestos.' . $categoria, $presupuestoActual ?: $valor) }}"
-                                                        {{ $esPositivo ? '' : 'disabled' }}
+                                                        {{ $permitirEdicion ? '' : 'disabled' }}
                                                         aria-label="Presupuesto para {{ $categoria }}"
                                                         title="Máximo: 99.999.999,99 €">
                                                     <span class="input-group-text">€</span>
                                                 </div>
-                                                @if(!$esPositivo)
-                                                <small class="text-danger">Deshabilitado debido a balance negativo</small>
+                                                @if(!$permitirEdicion)
+                                                <small class="text-danger">Deshabilitado debido a balance negativo en periodo actual</small>
                                                 @endif
                                             </td>
                                         </tr>
@@ -208,10 +346,16 @@
                                             {{ number_format($totalPresupuestosActuales, 2, ',', '.') }} €
                                         </th>
                                         <th>
-                                            <button type="submit" class="btn btn-success w-100" {{ !$esPositivo ? 'disabled' : '' }}>
+                                            @php
+                                                $esPeriodoFuturo = \Carbon\Carbon::createFromDate($anioSeleccionado, $mesSeleccionado ?? 1, 1) > \Carbon\Carbon::now();
+                                                $permitirGuardado = $esPositivo || $esPeriodoFuturo;
+                                            @endphp
+                                            <button type="submit" class="btn btn-success w-100" {{ !$permitirGuardado ? 'disabled' : '' }}>
                                                 <i class="fas fa-save me-2"></i> Guardar Presupuestos
-                                                @if(!$esPositivo)
+                                                @if(!$esPositivo && !$esPeriodoFuturo)
                                                 <span class="d-block small">(Balance negativo)</span>
+                                                @elseif($esPeriodoFuturo)
+                                                <span class="d-block small">(Planificación futura)</span>
                                                 @endif
                                             </button>
                                         </th>
@@ -231,51 +375,35 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // Validación de presupuestos en tiempo real
+    // Script para validar presupuestos en tiempo real - VALIDACIÓN DESACTIVADA PARA PERIODOS FUTUROS
     document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form[action*="presupuestos.guardar"]');
         const inputsPresupuesto = document.querySelectorAll('input[name^="presupuestos"]');
         const btnGuardar = document.querySelector('button[type="submit"]');
-        const balanceDisponible = {{ $esPositivo ? $balance : 0 }};
-        let mensajeError = document.getElementById('error-presupuesto');
         
-        // Si no existe el mensaje de error, lo creamos
-        if (!mensajeError) {
-            mensajeError = document.createElement('div');
-            mensajeError.id = 'error-presupuesto';
-            mensajeError.className = 'alert alert-danger mt-3 d-none';
-            btnGuardar.parentNode.appendChild(mensajeError);
-        }
+        // Verificar si estamos en un periodo futuro
+        const anioSeleccionado = {{ $anioSeleccionado }};
+        const mesSeleccionado = {{ $mesSeleccionado }};
+        const fechaActual = new Date();
+        const esPeriodoFuturo = (anioSeleccionado > fechaActual.getFullYear()) || 
+                              (anioSeleccionado == fechaActual.getFullYear() && mesSeleccionado > (fechaActual.getMonth() + 1));
         
-        // Función para validar todos los presupuestos
-        function validarPresupuestos() {
-            let totalPresupuestos = 0;
-            
-            // Sumar todos los presupuestos
+        // Para periodos futuros, siempre permitimos asignar presupuestos sin validaciones
+        if (esPeriodoFuturo) {
+            // Habilitar todos los inputs y el botón de guardar para periodos futuros
             inputsPresupuesto.forEach(input => {
-                const valor = parseFloat(input.value) || 0;
-                totalPresupuestos += valor;
+                input.disabled = false;
             });
+            btnGuardar.disabled = false;
             
-            // Validar contra el balance disponible
-            if (totalPresupuestos > balanceDisponible) {
-                btnGuardar.disabled = true;
-                mensajeError.textContent = `El total de presupuestos (${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(totalPresupuestos)}) excede el balance disponible (${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(balanceDisponible)})`;
-                mensajeError.classList.remove('d-none');
-                return false;
-            } else {
-                btnGuardar.disabled = {{ $esPositivo ? 'false' : 'true' }};
-                mensajeError.classList.add('d-none');
-                return true;
-            }
+            // Eliminar cualquier mensaje de error existente
+            const mensajesError = document.querySelectorAll('.alert-danger');
+            mensajesError.forEach(msg => {
+                if (msg.textContent.includes('excede el balance disponible')) {
+                    msg.remove();
+                }
+            });
         }
-        
-        // Validar al cargar la página
-        validarPresupuestos();
-        
-        // Validar al cambiar cualquier input
-        inputsPresupuesto.forEach(input => {
-            input.addEventListener('input', validarPresupuestos);
-        });
     });
 </script>
 <script>

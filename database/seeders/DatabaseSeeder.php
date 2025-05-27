@@ -56,12 +56,21 @@ class DatabaseSeeder extends Seeder
             UpdateParkingPricesSeeder::class, // Actualiza precios por m² con variaciones realistas
         ]);
         
-        // 6. Datos financieros (activos y pasivos)
+        // 6. Módulo financiero
         $this->call([
-            ActivoSeeder::class,             // Activos financieros
-            PasivoSeeder::class,            // Pasivos financieros
+            // DepartamentoSeeder::class,       // Departamentos (Comentado porque no existe)
+            PasivoSeeder::class,              // Pasivos financieros
             GastosMantenimientoSeeder::class, // Gastos de mantenimiento para vehículos y parkings
-            PagoTallerSeeder::class,        // Ingresos por reparaciones mecánicas
+            PresupuestoSeeder::class,         // Presupuestos por departamento
+            PagoTallerClienteSeeder::class,   // Simulación de pagos de clientes por mantenimientos
+            PagoTallerSeeder::class,          // Pagos por reparaciones en taller
+            PagosChoferesSeeder::class,       // Pagos por servicios de taxi
+        ]);
+        
+        // 7. Datos financieros históricos (2020-2025)
+        $this->call([
+            HistoricalFinancialDataSeeder::class, // Datos históricos de ingresos y gastos desde 2020
+            FinancialData2025Seeder::class,      // Datos financieros detallados para 2025 con variabilidad mensual
         ]);
     }
 }
