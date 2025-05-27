@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +12,11 @@
     <link rel="stylesheet" href="{{ asset('css/admin/style.css') }}">
     <!-- estilos del login-->
     <link rel="stylesheet" href="">
-    <title>@yield('title')</title>
+    <title>@yield('title') - CARFLOW</title>
     
     <!-- jQuery para AJAX -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
+    @stack('styles')
 </head>
 <body>
     
@@ -47,6 +47,41 @@
                 link.style.borderRadius = '5px';
             }
         });
+
+        // --- MENÚ HAMBURGUESA RESPONSIVE ---
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (menuToggle && sidebar && overlay) {
+            // Abrir sidebar
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.add('sidebar-visible');
+                overlay.classList.add('active');
+            });
+
+            // Cerrar sidebar al hacer click en el overlay
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('sidebar-visible');
+                overlay.classList.remove('active');
+            });
+
+            // Opcional: cerrar sidebar si se redimensiona a escritorio
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991) {
+                    sidebar.classList.remove('sidebar-visible');
+                    overlay.classList.remove('active');
+                }
+            });
+
+            // Opcional: cerrar sidebar al hacer click en un enlace del menú
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('sidebar-visible');
+                    overlay.classList.remove('active');
+                });
+            });
+        }
     });
     </script>
     

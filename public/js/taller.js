@@ -89,7 +89,6 @@ $(document).ready(function() {
                     horasSelect.prop('disabled', false);
                     
                     // Información sobre disponibilidad
-                    $('#disponibilidad-info').html('<small>Horarios en gris no están disponibles (ocupación máxima).</small>');
                     
                 } else {
                     mostrarAlerta('Error: ' + response.message, 'error');
@@ -110,36 +109,76 @@ $(document).ready(function() {
     $('#formAgendarMantenimiento').submit(function(e) {
         e.preventDefault();
         
+        let valido = true;
+        // Limpiar errores previos
+        $('#taller-id').removeClass('is-invalid');
+        $('#fecha-mantenimiento').removeClass('is-invalid');
+        $('#hora-mantenimiento').removeClass('is-invalid');
+        $('#motivo-reserva').removeClass('is-invalid');
+        $('#motivo-averia').removeClass('is-invalid');
+        $('#taller-id').siblings('.invalid-feedback').hide();
+        $('#fecha-mantenimiento').siblings('.invalid-feedback').hide();
+        $('#hora-mantenimiento').siblings('.invalid-feedback').hide();
+        $('#motivo-reserva').siblings('.invalid-feedback').hide();
+        $('#motivo-averia').siblings('.invalid-feedback').hide();
+
         const vehiculoId = $('#vehiculo-id').val();
         const fecha = $('#fecha-mantenimiento').val();
         const hora = $('#hora-mantenimiento').val();
         const tallerId = $('#taller-id').val();
-        
-        // Validar formulario
-        if (!fecha || !hora || !tallerId) {
-            mostrarAlerta('Debe completar todos los campos', 'error');
-            return;
+        const motivoReserva = $('#motivo-reserva').val();
+        const motivoAveria = $('#motivo-averia').val();
+
+        if (!tallerId) {
+            $('#taller-id').addClass('is-invalid');
+            $('#taller-id').siblings('.invalid-feedback').show();
+            valido = false;
         }
-        
-        // Verificar que la fecha no sea anterior a hoy
+        if (!fecha) {
+            $('#fecha-mantenimiento').addClass('is-invalid');
+            $('#fecha-mantenimiento').siblings('.invalid-feedback').show();
+            valido = false;
+        }
+        if (!hora) {
+            $('#hora-mantenimiento').addClass('is-invalid');
+            $('#hora-mantenimiento').siblings('.invalid-feedback').show();
+            valido = false;
+        }
+        if (!motivoReserva) {
+            $('#motivo-reserva').addClass('is-invalid');
+            $('#motivo-reserva').siblings('.invalid-feedback').show();
+            valido = false;
+        }
+        if (motivoReserva === 'averia' && !motivoAveria) {
+            $('#motivo-averia').addClass('is-invalid');
+            $('#motivo-averia').siblings('.invalid-feedback').show();
+            valido = false;
+        }
+        // Validar fecha no pasada
         const hoy = new Date().toISOString().split('T')[0];
-        if (fecha < hoy) {
-            mostrarAlerta('No se puede agendar mantenimiento en una fecha pasada', 'error');
-            return;
+        if (fecha && fecha < hoy) {
+            $('#fecha-mantenimiento').addClass('is-invalid');
+            $('#fecha-mantenimiento').siblings('.invalid-feedback').show();
+            valido = false;
         }
+        if (!valido) return;
         
         // Enviar solicitud AJAX
-        $.ajax({
-            url: '/taller/agendar-mantenimiento',
-            type: 'POST',
-            data: {
+        var dataAjax = {
                 id_vehiculo: vehiculoId,
                 fecha_mantenimiento: fecha,
                 hora_mantenimiento: hora,
                 taller_id: tallerId,
-                motivo_reserva: $('#motivo-reserva').val(),
+                motivo_reserva: motivoReserva,
                 _token: $('meta[name="csrf-token"]').attr('content')
-            },
+        };
+        if (motivoReserva === 'averia') {
+            dataAjax.motivo_averia = motivoAveria;
+        }
+        $.ajax({
+            url: '/taller/agendar-mantenimiento',
+            type: 'POST',
+            data: dataAjax,
             success: function(response) {
                 if (response.success) {
                     // Actualizar la fecha en la tabla
@@ -172,6 +211,25 @@ $(document).ready(function() {
             text: mensaje,
             icon: tipo,
             confirmButtonText: 'Aceptar'
+        }).then(function() {
+            if (tipo === 'success') {
+                location.reload();
+            }
         });
     }
+
+    // Validación en tiempo real para quitar errores al corregir
+    $('#taller-id, #fecha-mantenimiento, #hora-mantenimiento, #motivo-reserva, #motivo-averia').on('input change', function() {
+        if ($(this).val()) {
+            $(this).removeClass('is-invalid');
+            $(this).siblings('.invalid-feedback').hide();
+        }
+        if ($(this).attr('id') === 'fecha-mantenimiento') {
+            const hoy = new Date().toISOString().split('T')[0];
+            if ($(this).val() && $(this).val() >= hoy) {
+                $(this).removeClass('is-invalid');
+                $(this).siblings('.invalid-feedback').hide();
+            }
+        }
+    });
 }); 

@@ -16,6 +16,7 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GestorController;
+use App\Http\Controllers\GestorUserController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VehiculoCrudController;
 use App\Http\Controllers\LugarController;
@@ -29,7 +30,11 @@ use App\Http\Controllers\AdminFinancieroController;
 use App\Http\Controllers\AsalariadoController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ChoferController;
+use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\NotificacionPagoController;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 
 Route::redirect('/', '/home');
@@ -86,6 +91,12 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/carrito/count', [CarritoController::class, 'getCartCount'])->name('carrito.count');
     Route::delete('/eliminar-reserva/{id}', [CarritoController::class, 'eliminarReserva'])->name('eliminar.reserva');
 
+    // Notificaciones
+    Route::get('/notificaciones/count', [NotificacionController::class, 'getCount'])->name('notificaciones.count');
+    Route::post('/notificaciones/marcar-leida/{id}', [NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar-leida');
+    Route::get('/api/solicitudes/detalles', [SolicitudController::class, 'getDetalles'])->name('solicitudes.detalles');
+    Route::post('/api/solicitudes/{id}/cancelar', [SolicitudController::class, 'cancelarSolicitud'])->name('solicitudes.cancelar');
+
     // Reservas y vehÃ­culos
     Route::post('/reservas', [ReservaController::class, 'crearReserva']);
     Route::get('/vehiculos/{id}/reservas', [ReservaController::class, 'reservasPorVehiculo']);
@@ -110,6 +121,12 @@ Route::middleware(['auth', 'role:cliente'])->group(function () {
     Route::get('/pago/exito/{id_reserva}', [PagoController::class, 'exito'])->name('pago.exito');
     Route::get('/pago/cancelado', [PagoController::class, 'cancelado'])->name('pago.cancelado');
     Route::get('/facturas/descargar/{id_reserva}', [FacturaController::class, 'descargarFactura'])->name('facturas.descargar');
+
+    // Rutas para pago de notificaciones
+    Route::get('/notificacion/pago/{id_solicitud}', [NotificacionPagoController::class, 'checkout'])->name('notificacion.pago.checkout');
+    Route::get('/notificacion/pago/exito/{id_solicitud}', [NotificacionPagoController::class, 'exito'])->name('notificacion.pago.exito');
+    Route::get('/notificacion/pago/cancelado', [NotificacionPagoController::class, 'cancelado'])->name('notificacion.pago.cancelado');
+    Route::post('/notificacion/pago/webhook', [NotificacionPagoController::class, 'webhook'])->name('notificacion.pago.webhook');
 });
 
 Route::middleware(['auth', 'role:gestor'])->group(function () {
@@ -124,15 +141,18 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
         Route::get('/{id_vehiculos}/edit', [VehiculoCrudController::class, 'edit'])->name('gestor.vehiculos.edit');
         Route::post('/{id_vehiculos}', [VehiculoCrudController::class, 'update'])->name('gestor.vehiculos.update');
         Route::delete('/{id_vehiculos}', [VehiculoCrudController::class, 'destroy'])->name('gestor.vehiculos.destroy');
+        Route::get('/{id_vehiculos}/caracteristicas', [VehiculoCrudController::class, 'caracteristicas'])->name('gestor.vehiculos.caracteristicas');
     });
     Route::get('gestor/vehiculos/{id}/crudreservas', [VehiculoCrudController::class, 'getReservas']);
     Route::get('/gestor/historial', [HistorialGestorController::class, 'historial'])->name('gestor.historial');
     Route::get('/gestor/historial/data', [HistorialGestorController::class, 'getHistorialData'])->name('gestor.historial.data');
     Route::prefix('gestor')->middleware('auth')->group(function () {
-    Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
-    Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
-    Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
-});
+        Route::get('/parking', [ParkingGestorController::class, 'index'])->name('gestor.parking.index');
+        Route::post('/parking', [ParkingGestorController::class, 'store'])->name('gestor.parking.store');
+        Route::put('/parking/{id}', [ParkingGestorController::class, 'update'])->name('gestor.parking.update');
+        Route::delete('/parking/{id}', [ParkingGestorController::class, 'destroy'])->name('gestor.parking.destroy');
+        Route::get('/parking/create', [ParkingGestorController::class, 'create'])->name('gestor.parking.create');
+    });
 
 });
 
@@ -140,6 +160,12 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 // Rutas para el espacio privado de los chofers 
 Route::middleware(['auth', 'role:chofer'])->group(function(){
     Route::get('/chofers', [ChoferController::class, 'dashboard'])->name('chofers.dashboard');
+    
+    // Solicitudes de transporte
+    Route::get('/chofers/solicitudes', [ChoferController::class, 'solicitudes'])->name('chofers.solicitudes');
+    Route::get('/api/solicitudes/chofer', [ChoferController::class, 'getSolicitudesChofer'])->name('api.solicitudes.chofer');
+    Route::get('/chofers/solicitudes/{id}', [ChoferController::class, 'detallesSolicitud'])->name('chofers.solicitud.detalles');
+    Route::post('/api/chofer/disponible', [ChoferController::class, 'marcarDisponible'])->name('api.chofer.disponible');
     
     // Chat por grupo
     Route::get('/chofers/chat', [ChoferController::class, 'showChatView'])->name('chofers.chat');
@@ -153,7 +179,21 @@ Route::middleware(['auth', 'role:chofer'])->group(function(){
 });
 
 // Ruta para la solicitud de transporte privado (cliente)
-Route::get('/solicitar-chofer', [ChoferController::class, 'pideCoche'])->name('chofers.cliente-pide');
+Route::get('/solicitar-chofer', [ChoferController::class, 'clientePide'])->name('chofers.cliente-pide');
+Route::get('/api/choferes-cercanos', [SolicitudController::class, 'getChoferesCercanos'])->name('api.choferes.cercanos');
+
+// Rutas para solicitudes
+Route::middleware(['auth'])->group(function () {
+    // Rutas para choferes
+    Route::get('/api/solicitudes/chofer', [SolicitudController::class, 'getSolicitudesChofer']);
+    Route::post('/api/solicitudes/{id}/aceptar', [SolicitudController::class, 'aceptarSolicitud']);
+    Route::post('/api/solicitudes/{id}/rechazar', [SolicitudController::class, 'rechazarSolicitud']);
+    Route::get('/api/solicitudes/ruta', [SolicitudController::class, 'obtenerRuta']);
+    Route::get('/api/solicitudes/{id}/estado', [SolicitudController::class, 'getEstadoSolicitud']);
+});
+
+// Ruta para crear solicitudes (sin autenticación)
+Route::post('/api/solicitudes/crear', [SolicitudController::class, 'crearSolicitud']);
 
 // Ruta de depuración para el chat (solo para desarrollo)
 Route::get('/debug/chat', function() {
@@ -240,7 +280,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 
     // Historial
-    Route::get('/admin/historial', [ReservaCrudController::class, 'historial'])->name('admin.historial');
+    Route::get('/admin/historial', [ReservaCrudController::class, 'adminHistorial'])->name('admin.historial');
     Route::get('/admin/historial/data', [ReservaCrudController::class, 'getHistorialData'])->name('admin.historial.data');
 });
 // Chat routes
@@ -253,6 +293,15 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/gestor/chats', [ChatViewController::class, 'listarConversaciones'])->name('gestor.chat.listar');
     Route::get('/gestor/chats/{id_usuario}', [ChatViewController::class, 'verConversacion'])->name('gestor.chat.conversacion');
     Route::delete('/gestor/chats/mensaje/{id}', [ChatViewController::class, 'eliminarMensaje'])->name('gestor.chat.delete');
+    Route::prefix('gestor')->middleware(['auth', 'role:gestor'])->group(function () {
+    Route::get('/users', [GestorUserController::class, 'index'])->name('gestor.user.index');
+    Route::get('/users/data', [GestorUserController::class, 'getUsers'])->name('gestor.user.data');
+    Route::get('/users/create', [GestorUserController::class, 'create'])->name('gestor.user.create');
+    Route::post('/users', [GestorUserController::class, 'store'])->name('gestor.user.store');
+    Route::get('/users/{id}/edit', [GestorUserController::class, 'edit'])->name('gestor.user.edit');
+    Route::post('/users/{id}', [GestorUserController::class, 'update'])->name('gestor.user.update');
+    Route::delete('/users/{id}', [GestorUserController::class, 'destroy'])->name('gestor.user.destroy');
+    });
 });
 Route::get('/chat/stream/{id_usuario}', [ChatController::class, 'stream'])->middleware('auth');
 
@@ -285,9 +334,9 @@ Route::get('/run-migrations-safe', function () {
 
 
 // Rutas para el espacio privado de los mecánicos
-// Route::middleware(['auth', 'role:mecanico'])->group(function () {
+Route::middleware(['auth', 'role:mecanico'])->group(function () {
     Route::get('/taller', [TallerController::class, 'index'])->name('Taller.index');
-Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->name('Taller.filtrar');
+    Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->name('Taller.filtrar');
     Route::get('/taller/historial', [TallerController::class, 'historial'])->name('Taller.historial');
 
     Route::get('/taller/mantenimientos', [TallerController::class, 'getMantenimientos'])->name('Taller.mantenimientos');
@@ -296,10 +345,19 @@ Route::post('/taller/filtrar', [TallerController::class, 'filtrarVehiculos'])->n
     Route::post('/taller/agendar-mantenimiento', [TallerController::class, 'agendarMantenimiento'])->name('Taller.agendar');
     Route::get('/taller/horarios-disponibles', [TallerController::class, 'getHorariosDisponibles'])->name('Taller.horarios');
     Route::get('/taller/getMantenimientos', [TallerController::class, 'getMantenimientos'])->name('Taller.getMantenimientos');
+    Route::get('/taller/getMantenimiento/{id}', [TallerController::class, 'getMantenimiento'])->name('Taller.getMantenimiento');
 
     Route::get('/taller/{id}/edit', [TallerController::class, 'edit'])->name('Taller.edit');
     Route::put('/taller/{id}', [TallerController::class, 'update'])->name('Taller.update');
     Route::delete('/taller/{id}', [TallerController::class, 'destroy'])->name('Taller.destroy');
-    
-// });
+});
 Route::get('/taller/factura/{id}', [TallerController::class, 'descargarFactura'])->name('Taller.factura');
+
+// Rutas para el sistema de transporte
+Route::get('/cliente/pide', function () {
+    return view('chofers.cliente-pide');
+})->name('cliente.pide');
+
+Route::get('/solicitudes', function () {
+    return view('chofers.solicitudes');
+})->name('solicitudes');

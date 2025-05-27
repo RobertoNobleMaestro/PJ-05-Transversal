@@ -314,6 +314,7 @@
     padding: 10px;
     border-radius: 4px;
     cursor: pointer;
+    z-index: 9999;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 .pagination-container {
@@ -408,146 +409,204 @@
     }
 }
 
+/* --- MEJORAS RESPONSIVE PARA CRUD ADMIN --- */
+
+/* Sidebar oculta y menú hamburguesa en móvil */
 @media (max-width: 991px) {
     .admin-sidebar {
         position: fixed;
-        left: -250px; /* Ocultar fuera de pantalla */
+        left: -250px;
         top: 0;
-        height: 100%;
-        transition: left 0.3s ease;
-        z-index: 999;
+        width: var(--sidebar-width);
+        height: 100vh;
+        z-index: 9998;
+        background: var(--sidebar-color);
+        transition: left 0.3s;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.15);
     }
-    
-    .menu-toggle {
-        display: block;
-    }
-    
-    .admin-main {
-        margin-left: 0;
-        width: 100%;
-    }
-    
     .sidebar-visible {
-        left: 0; /* Mostrar menú cuando está visible */
+        left: 0 !important;
     }
-    
-    /* Overlay para cerrar menú al hacer clic */
     .sidebar-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.4);
         z-index: 998;
     }
-    
     .sidebar-overlay.active {
         display: block;
     }
-    
-    /* Ajustes para la tabla */
-    .crud-table {
-        overflow-x: auto;
+    .menu-toggle {
         display: block;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        background: var(--sidebar-color);
+        color: #fff;
+        border: none;
+        padding: 10px 12px;
+        border-radius: 5px;
+        z-index: 9999;
+        font-size: 1.3rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    .admin-main {
+        margin-left: 0 !important;
         width: 100%;
     }
-    
-    /* Ajustes de tabla en tablets */
     .crud-table-container {
         width: 100%;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    
     .crud-table {
-        min-width: 900px; /* Asegurar que la tabla tenga un ancho mínimo */
+        min-width: 700px;
+        width: 100%;
+        display: table;
     }
-    
-    /* Ancho de las columnas */
-    .crud-table th:nth-child(1) { width: 5%; } /* ID */
-    .crud-table th:nth-child(2) { width: 15%; } /* Nombre */
-    .crud-table th:nth-child(6) { width: 10%; } /* Rol */
-    .crud-table th:nth-child(9) { width: 15%; } /* Acciones */
 }
 
+/* Filtros apilados y tabla scrolleable en móvil */
 @media (max-width: 768px) {
     .filter-section {
-        flex-direction: column;
+        flex-direction: column !important;
+        align-items: stretch !important;
         gap: 1rem;
+        padding: 0.5rem;
+        width: 100%;
+        box-sizing: border-box;
     }
-    
     .filter-group {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 0.5rem;
+    }
+    .filter-control,
+    .filter-section input,
+    .filter-section select,
+    .filter-section button {
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+    }
+    .d-flex.gap-2.align-items-center {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.5rem !important;
         width: 100%;
     }
-    
-    .search-input {
+    .search-input, .add-user-btn {
         width: 100%;
         min-width: unset;
+        margin-bottom: 0.5rem;
     }
-    
     .add-user-btn {
-        width: 100%;
         text-align: center;
     }
-    
-    /* Ajustes para la tabla en móviles */
-    .crud-table th, 
-    .crud-table td {
+    .crud-table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .crud-table {
+        min-width: 600px;
+        width: 100%;
+        display: table;
+    }
+    .crud-table th, .crud-table td {
         padding: 0.5rem 0.25rem;
-        font-size: 0.8rem;
         white-space: nowrap;
     }
-    
-    /* Ocultar más columnas en móviles */
-    .crud-table .col-hide-sm {
-        display: none;
-    }
-    
-    /* Ajustes para móviles */
-    .crud-table {
-        min-width: 600px; /* Ancho mínimo más pequeño para móviles */
-    }
-    
-    .action-cell {
-        min-width: 120px;
-    }
-    
     .action-buttons {
         flex-direction: column;
         gap: 0.25rem;
     }
-    
     .btn-edit, .btn-delete {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        width: 100%;
         text-align: center;
     }
 }
 
+/* Ocultar columnas poco importantes en móvil */
 @media (max-width: 576px) {
-    /* Para móviles muy pequeños */
+    .crud-table th.col-hide-sm, .crud-table td.col-hide-sm {
+        display: none !important;
+    }
     .crud-table {
-        font-size: 0.75rem;
+        font-size: 0.78rem;
+        min-width: 400px;
     }
-    
-    .crud-table th, 
-    .crud-table td {
-        padding: 0.4rem 0.2rem;
+    .admin-header {
+        flex-direction: column-reverse;
+        gap: 0.5rem;
+        text-align: end;
+        align-items: flex-end;
     }
-    
-    .action-buttons form {
+    .admin-title {
+        font-size: 1.1rem;
+    }
+    .crud-table-container {
         width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    
-    .action-buttons button {
+    .crud-table {
+        min-width: 500px;
         width: 100%;
+        display: table;
     }
-    
-    .btn-edit {
-        display: block;
+}
+
+/* Mejoras para tarjetas y estadísticas en móvil */
+@media (max-width: 600px) {
+    .stats-container {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+    .stat-card {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+}
+
+/* Scroll horizontal en tablas en móvil/tablet */
+@media (max-width: 991px) {
+    .crud-table-container {
         width: 100%;
-        text-align: center;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .crud-table {
+        min-width: 700px;
+        width: 100%;
+        display: table;
+    }
+}
+@media (max-width: 768px) {
+    .crud-table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .crud-table {
+        min-width: 600px;
+        width: 100%;
+        display: table;
+    }
+}
+@media (max-width: 576px) {
+    .crud-table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .crud-table {
+        min-width: 500px;
+        width: 100%;
+        display: table;
     }
 }

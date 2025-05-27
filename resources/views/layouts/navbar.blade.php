@@ -28,11 +28,11 @@
         <a href="{{ route('home') }}">
           <img src="{{ asset('img/logo.png') }}" alt="Logo Carflow">
         </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon" style="color:#fff;">&#9776;</span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
-          <ul class="navbar-nav ml-auto align-items-center">
+          <ul class="navbar-nav align-items-center flex-row justify-content-end">
             @auth
               <!-- Cerrar sesión -->
               <li class="nav-item">
@@ -47,11 +47,11 @@
                   <span id="cart-count" class="badge bg-danger"></span>
                 </a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('chat.index') }}">
                     <i class="fas fa-comments"></i>
                 </a>
-              </li>
+              </li> -->
               <!-- Foto de perfil (link al perfil) -->
               <li class="nav-item">
                 <a class="nav-link" href="{{ url('/perfil/' . Auth::user()->id_usuario) }}">
@@ -88,5 +88,6 @@
                 .catch(error => console.error('Error fetching cart count:', error));
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

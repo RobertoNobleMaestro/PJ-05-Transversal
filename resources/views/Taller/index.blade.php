@@ -3,6 +3,7 @@
 @section('title', 'Lista de Vehículos')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/taller-index.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 @endpush
 
 
@@ -23,11 +24,19 @@
     </div>
 
     <div class="admin-main">
-        <div class="admin-header">
-            <h1 class="admin-title">Gestión de Vehículos</h1>
-                <a href="{{ route('gestor.index') }}" class="btn-outline-purple">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
+    <div class="admin-header align-items-center" style="flex-direction: row !important;">
+        <h1 class="admin-title">Gestión de taller</h1>
+            <a href="{{ route('logout') }}" class="btn-outline-purple">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <!-- Botón hamburguesa solo visible en móvil para sidebar -->
+            <button id="toggle-sidebar" class="btn btn-outline-purple d-md-none ms-2" type="button" style="font-size:1.5rem;">
+                <i class="fas fa-bars"></i>
+            </button>
+            <!-- Botón hamburguesa solo visible en móvil para filtros -->
+            <button id="toggle-filtros" class="btn btn-outline-purple d-md-none ms-2" type="button" style="font-size:1.5rem;">
+                <i class="fas fa-sliders-h"></i>
+            </button>
         </div>
 
         @if(session('success'))
@@ -44,8 +53,8 @@
             </div>
         @endif
 
-
-        <div class="row mb-4 g-2 align-items-end">
+        <!-- Filtros envueltos en un contenedor para mostrar/ocultar -->
+        <div id="filtros-container" class="row mb-4 g-2 align-items-end">
             <div class="col-md-3">
                 <label for="filtro-sede" class="filtros-label">Sede</label>
                 <select id="filtro-sede" class="form-select select-purple" style="border">
@@ -111,46 +120,43 @@
                     
                     <div class="mb-3">
                         <label for="taller-id" class="form-label">Taller</label>
-                        <select class="form-select" id="taller-id" name="taller_id" required>
+                        <select class="form-select" id="taller-id" name="taller_id">
                             <option value="">Seleccione un taller</option>
                             @foreach($talleres as $taller)
                                 <option value="{{ $taller->id }}">{{ $taller->nombre }} - {{ $taller->direccion }}</option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback">Por favor seleccione un taller.</div>
+                        <div class="invalid-feedback" style="display:none;">Por favor seleccione un taller.</div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="fecha-mantenimiento" class="form-label">Fecha de Mantenimiento</label>
-                        <input type="date" class="form-control" id="fecha-mantenimiento" name="fecha_mantenimiento" required min="{{ date('Y-m-d') }}">
-                        <div class="invalid-feedback">La fecha no puede ser anterior a hoy.</div>
+                        <input type="date" class="form-control" id="fecha-mantenimiento" name="fecha_mantenimiento" min="{{ date('Y-m-d') }}">
+                        <div class="invalid-feedback" style="display:none;">La fecha no puede ser anterior a hoy.</div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="hora-mantenimiento" class="form-label">Hora de Mantenimiento</label>
-                        <select class="form-select" id="hora-mantenimiento" name="hora_mantenimiento" disabled required>
+                        <select class="form-select" id="hora-mantenimiento" name="hora_mantenimiento" disabled>
                             <option value="">Seleccione primero un taller y fecha</option>
                         </select>
+                        <div class="invalid-feedback" style="display:none;">Por favor seleccione una hora.</div>
                         <div class="text-info mt-1" id="disponibilidad-info"></div>
                     </div>
 
                     <div class="mb-3">
                         <label for="motivo-reserva" class="form-label">Motivo de la reserva</label>
-                        <select class="form-select" id="motivo-reserva" name="motivo_reserva" required>
+                        <select class="form-select" id="motivo-reserva" name="motivo_reserva">
                             <option value="">Seleccione el motivo</option>
                             <option value="mantenimiento">Mantenimiento</option>
                             <option value="averia">Avería</option>
                         </select>
-                        <div class="invalid-feedback">Por favor seleccione el motivo de la reserva.</div>
+                        <div class="invalid-feedback" style="display:none;">Por favor seleccione el motivo de la reserva.</div>
                     </div>
                     <div class="mb-3" id="motivo-averia-container" style="display:none;">
                         <label for="motivo-averia" class="form-label">Motivo de la avería (breve)</label>
                         <input type="text" class="form-control" id="motivo-averia" name="motivo_averia" maxlength="100" placeholder="Describa brevemente la avería">
-                    </div>
-                    
-                    <div class="alert alert-warning" id="alerta-disponibilidad" style="display: none">
-                        <i class="fas fa-exclamation-triangle"></i> 
-                        Recuerde que solo se pueden agendar 2 vehículos por hora en cada taller.
+                        <div class="invalid-feedback" style="display:none;">Por favor describa brevemente la avería.</div>
                     </div>
                     
                     <div class="d-grid">
@@ -169,6 +175,26 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function() {
+    // Mostrar/ocultar sidebar en móvil
+    $('#toggle-sidebar').on('click', function() {
+        $('#sidebar').addClass('show-sidebar-mobile');
+        $('#sidebarOverlay').addClass('active');
+    });
+    // Cerrar sidebar al hacer click en overlay
+    $('#sidebarOverlay').on('click', function() {
+        $('#sidebar').removeClass('show-sidebar-mobile');
+        $('#sidebarOverlay').removeClass('active');
+        // También cerrar filtros si están abiertos
+        $('#filtros-container').removeClass('show-filtros-mobile');
+    });
+    // Cerrar sidebar al hacer click fuera en móvil
+    $(document).on('click touchstart', function(e) {
+        if ($(window).width() < 768) {
+            if (!$(e.target).closest('#sidebar, #toggle-sidebar').length) {
+                $('#sidebar').removeClass('show-sidebar-mobile');
+            }
+        }
+    });
     // Mostrar/ocultar campo motivo avería
     $('#motivo-reserva').on('change', function() {
         if ($(this).val() === 'averia') {
@@ -179,6 +205,20 @@ $(function() {
             $('#motivo-averia').prop('required', false);
             $('#motivo-averia').val('');
         }
+    });
+    // Hamburguesa para filtros responsive
+    $('#toggle-filtros').on('click', function() {
+        $('#filtros-container').toggleClass('show-filtros-mobile');
+        if ($('#filtros-container').hasClass('show-filtros-mobile')) {
+            $('#sidebarOverlay').addClass('active');
+        } else {
+            $('#sidebarOverlay').removeClass('active');
+        }
+    });
+    // Overlay para cerrar filtros en móvil
+    $('#sidebarOverlay').on('click', function() {
+        $('#filtros-container').removeClass('show-filtros-mobile');
+        $('#sidebarOverlay').removeClass('active');
     });
     function getFiltrosData() {
         return {
@@ -239,6 +279,15 @@ $(function() {
             filtrarVehiculos(href);
         }
     });
+    // Ocultar filtros al hacer click fuera en móvil
+    $(document).on('click touchstart', function(e) {
+        if ($(window).width() < 768) {
+            if (!$(e.target).closest('#filtros-container, #toggle-filtros').length) {
+                $('#filtros-container').removeClass('show-filtros-mobile');
+                $('#sidebarOverlay').removeClass('active');
+            }
+        }
+    });
 });
 </script>
 <!-- Bootstrap JS Bundle with Popper -->
@@ -253,4 +302,106 @@ $(function() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.js"></script>
 <!-- Custom JS -->
 <script src="{{ asset('js/taller.js') }}"></script>
+<style>
+/* Filtros ocultos en móvil por defecto */
+#filtros-container {
+    transition: max-height 0.3s, opacity 0.3s;
+    overflow: hidden;
+}
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.3);
+    z-index: 99;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+@media (max-width: 767.98px) {
+    #filtros-container {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        margin-bottom: 0 !important;
+    }
+    #filtros-container.show-filtros-mobile {
+        max-height: 1000px;
+        opacity: 1;
+        pointer-events: auto;
+        margin-bottom: 1.5rem !important;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        padding: 1rem 0.5rem;
+        z-index: 100;
+        position: relative;
+    }
+    #toggle-filtros {
+        display: inline-block !important;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 260px;
+        height: 100vh;
+        z-index: 120;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.08);
+        transition: left 0.3s;
+        overflow-y: auto;
+        color: #fff !important;
+    }
+    .admin-sidebar.show-sidebar-mobile {
+        left: 0;
+    }
+    #sidebarOverlay.active {
+        display: block;
+    }
+    .admin-sidebar.show-sidebar-mobile, .admin-sidebar.show-sidebar-mobile * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        color: #fff !important;
+    }
+    .admin-sidebar .sidebar-title,
+    .admin-sidebar .sidebar-menu,
+    .admin-sidebar .sidebar-menu a,
+    .admin-sidebar .sidebar-menu i {
+        color: #fff !important;
+        fill: #fff !important;
+    }
+}
+@media (min-width: 768px) {
+    #filtros-container {
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        margin-bottom: 1.5rem !important;
+    }
+    #toggle-filtros {
+        display: none !important;
+    }
+    .sidebar-overlay {
+        display: none !important;
+    }
+    .admin-sidebar {
+        position: static;
+        width: 250px;
+        height: auto;
+        box-shadow: none;
+        left: 0 !important;
+        color: #fff !important;
+    }
+}
+</style>
 @endsection

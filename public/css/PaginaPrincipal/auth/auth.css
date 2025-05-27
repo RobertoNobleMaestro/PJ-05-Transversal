@@ -352,6 +352,21 @@ a:hover {
     .form-row {
         grid-template-columns: 1fr;
     }
+    .container{
+        flex-direction: column-reverse;
+    }
+    .container-izquierda{
+        border-radius: 0px;
+        padding: 20px;
+        width: 100%;
+        
+    }
+    .container-derecha{
+        border-radius: 0px;
+        height: fit-content;
+        padding: 20px;
+        width: 100%;
+    }
 }
 
 .form-row > div {
@@ -453,5 +468,24 @@ a:hover {
     justify-content: center;
     align-items: center;
     padding: 0 20px;
+}
+
+@media (max-width: 900px) {
+    .contenedor-principal {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+    .vehiculos-lista, .resumen-carrito {
+        width: 100%;
+        max-width: 100%;
+    }
+    .vehiculo-item img {
+        width: 100%;
+        max-width: 250px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
 }
 

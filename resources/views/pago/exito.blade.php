@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <a href="{{ route('home') }}" class="btn btn-primary">
+                    <a href="{{ route('home') }}" class="btn-exito">
                         <i class="fas fa-home mr-2"></i>Volver al inicio
                     </a>
                 </div>

@@ -18,7 +18,7 @@ class ParkingGestorController extends Controller
             return redirect('/login');
         }
         
-        if (auth()->user()->id_roles !== 3) {
+        if (auth()->user()->id_roles !== 3 && auth()->user()->id_roles !== 1) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'No tienes permiso para acceder a esta sección'], 403);
             }
@@ -28,76 +28,125 @@ class ParkingGestorController extends Controller
         return null; // El usuario es administrador, continuar
     }
 
-public function index(Request $request)
-{
-    $authCheck = $this->checkGestor($request);
-    if ($authCheck) {
-        return $authCheck;
+    public function index(Request $request)
+    {
+        $authCheck = $this->checkGestor($request);
+        if ($authCheck) {
+            return $authCheck;
+        }
+        $user = auth()->user();
+        if ($user->id_roles == 1) {
+            $parkings = Parking::all();
+            return view('gestor.parking.index', compact('parkings'));
+        }
+        $gestor = auth()->user();
+        $parkings = Parking::where('id_usuario', auth()->user()->id_usuario)->get();
+        return view('gestor.parking.index', compact('parkings'));
     }
 
-    $gestor = auth()->user();
-$parkings = Parking::where('id_usuario', auth()->user()->id_usuario)->get();
-return view('gestor.parking.index', compact('parkings'));
+    public function update(Request $request, $id)
+    {
+        $authCheck = $this->checkGestor($request);
+        if ($authCheck) return $authCheck;
 
-}
-public function update(Request $request, $id)
-{
-    $authCheck = $this->checkGestor($request);
-    if ($authCheck) return $authCheck;
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'plazas' => 'required|integer|min:1',
+            'latitud' => 'required|numeric',
+            'longitud' => 'required|numeric',
+        ]);
 
-    $request->validate([
-        'nombre' => 'required|string|max:255',
-        'plazas' => 'required|integer|min:1',
-        'latitud' => 'required|numeric',
-        'longitud' => 'required|numeric',
-    ]);
+        $parking = Parking::where('id_usuario', auth()->user()->id_usuario)->findOrFail($id);
+        $parking->update([
+            'nombre' => $request->nombre,
+            'plazas' => $request->plazas,
+            'latitud' => $request->latitud,
+            'longitud' => $request->longitud,
+        ]);
 
-    $parking = Parking::where('id_usuario', auth()->user()->id_usuario)->findOrFail($id);
-    $parking->update([
-        'nombre' => $request->nombre,
-        'plazas' => $request->plazas,
-        'latitud' => $request->latitud,
-        'longitud' => $request->longitud,
-    ]);
-
-    return redirect()->route('gestor.parking.index')->with('success', 'Parking actualizado correctamente.');
-}
-
-public function destroy(Request $request, $id)
-{
-    $authCheck = $this->checkGestor($request);
-    if ($authCheck) return $authCheck;
-
-    // Buscar el parking a eliminar
-    $parking = Parking::where('id_usuario', auth()->user()->id_usuario)->findOrFail($id);
-
-    // Buscar otro parking del mismo lugar (distinto del actual)
-    $parkingAlternativo = Parking::where('id_lugar', $parking->id_lugar)
-                                ->where('id', '!=', $parking->id)
-                                ->first();
-
-    if (!$parkingAlternativo) {
-        return redirect()->route('gestor.parking.index')->with('error', 'No se puede eliminar el parking porque no existe otro parking en el mismo lugar para reasignar los vehículos.');
+        return redirect()->route('gestor.parking.index')->with('success', 'Parking actualizado correctamente.');
     }
 
-    DB::beginTransaction();
+    public function destroy(Request $request, $id)
+    {
+        $authCheck = $this->checkGestor($request);
+        if ($authCheck) return $authCheck;
 
-    try {
-        // Reasignar vehículos al parking alternativo
-        Vehiculo::where('parking_id', $parking->id)
-            ->update(['parking_id' => $parkingAlternativo->id]);
+        // Buscar el parking a eliminar
+        $parking = Parking::where('id_usuario', auth()->user()->id_usuario)->findOrFail($id);
 
-        // Eliminar el parking
-        $parking->delete();
+        // Buscar otro parking del mismo lugar (distinto del actual)
+        $parkingAlternativo = Parking::where('id_lugar', $parking->id_lugar)
+                                    ->where('id', '!=', $parking->id)
+                                    ->first();
 
-        DB::commit();
+        if (!$parkingAlternativo) {
+            return redirect()->route('gestor.parking.index')->with('error', 'No se puede eliminar el parking porque no existe otro parking en el mismo lugar para reasignar los vehículos.');
+        }
 
-        return redirect()->route('gestor.parking.index')->with('success', 'Parking eliminado correctamente y vehículos reasignados.');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->route('gestor.parking.index')->with('error', 'Error al eliminar el parking: ' . $e->getMessage());
+        DB::beginTransaction();
+
+        try {
+            // Reasignar vehículos al parking alternativo
+            Vehiculo::where('parking_id', $parking->id)
+                ->update(['parking_id' => $parkingAlternativo->id]);
+
+            // Eliminar el parking
+            $parking->delete();
+
+            DB::commit();
+
+            return redirect()->route('gestor.parking.index')->with('success', 'Parking eliminado correctamente y vehículos reasignados.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('gestor.parking.index')->with('error', 'Error al eliminar el parking: ' . $e->getMessage());
+        }
     }
-}
 
-    
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'plazas' => 'required|integer|min:1',
+            'latitud' => 'required|numeric',
+            'longitud' => 'required|numeric',
+        ]);
+
+        $user = auth()->user();
+        $parking = new \App\Models\Parking();
+        $parking->nombre = $request->nombre;
+        $parking->plazas = $request->plazas;
+        $parking->latitud = $request->latitud;
+        $parking->longitud = $request->longitud;
+        $parking->id_usuario = $user->id_usuario;
+
+        // Buscar id_lugar del gestor
+        $id_lugar = null;
+        $primerParking = Parking::where('id_usuario', $user->id_usuario)->first();
+        if ($primerParking) {
+            $id_lugar = $primerParking->id_lugar;
+        } else {
+            // Deducir por nombre (como en el seeder)
+            if (stripos($user->nombre, 'Barcelona') !== false) {
+                $id_lugar = 2;
+            } elseif (stripos($user->nombre, 'Madrid') !== false) {
+                $id_lugar = 1;
+            } elseif (stripos($user->nombre, 'Valencia') !== false) {
+                $id_lugar = 3;
+            }
+        }
+        if (!$id_lugar) {
+            return redirect()->route('gestor.parking.index')->with('error', 'No se pudo determinar el lugar del gestor.');
+        }
+        $parking->id_lugar = $id_lugar;
+        $parking->save();
+
+        return redirect()->route('gestor.parking.index')->with('success', 'Parking creado correctamente.');
+    }
+
+    public function create()
+    {
+        // Redirige a index con un flag en la sesión
+        return redirect()->route('gestor.parking.index')->with('openCreatePanel', true);
+    }
 }

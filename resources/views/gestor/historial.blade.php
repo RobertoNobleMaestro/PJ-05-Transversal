@@ -10,7 +10,9 @@
 <div class="admin-container">
     <!-- Overlay para menú móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div> 
-    
+    <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
     <div class="admin-sidebar" id="sidebar">
         <div style="position: fixed;width: 220px;">
             <div class="sidebar-title">CARFLOW</div>
@@ -18,12 +20,15 @@
                     <li><a href="{{ route('gestor.vehiculos') }}"
                             class="{{ request()->routeIs('gestor.vehiculos*') ? 'active' : '' }}"><i class="fas fa-car"></i>
                             Vehículos</a></li>
-                    <li><a href="{{ route('gestor.chat.listar') }}"
-                    class="{{ request()->routeIs('gestor.chat.listar*') ? 'active' : '' }}"><i
-                        class="fas fa-comments"></i> Chats</a></li>
-                        <li><a href="{{ route('gestor.historial') }}"
+                    <li><a href="{{ route('gestor.historial') }}"
                     class="{{ request()->routeIs('gestor.historial') ? 'active' : '' }}"><i
                         class="fas fa-history"></i>Historial</a></li>
+                                            <li><a href="{{ route('gestor.parking.index') }}"
+                    class="{{ request()->routeIs('gestor.parking.index') ? 'active' : '' }}"><i
+                        class="fas fa-parking"></i>Parking</a></li>
+                        <li><a href="{{ route('gestor.user.index') }}"
+                    class="{{ request()->routeIs('gestor.user.index') ? 'active' : '' }}"><i
+                        class="fas fa-user"></i>Usuarios</a></li>
                 </ul>
             </div>            
         </div>
@@ -114,21 +119,38 @@
             <p>Cargando historial de reservas...</p>
         </div>
         <div id="historial-table-container" style="display: none;" data-url="{{ route('gestor.historial.data') }}">
-            <table class="crud-table" id="historial-table">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Fecha</th>
-                        <th>Lugar</th>
-                        <th>Estado</th>
-                        <th>Total</th>
-                        <th>Vehículos</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los datos se cargarán aquí mediante AJAX -->
-                </tbody>
-            </table>
+            <div class="crud-table-container">
+                <table class="crud-table" id="historial-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Lugar</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                            <th>Vehículos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán aquí mediante AJAX -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Paginación -->
+            <div class="pagination-container mt-4" id="pagination-controls">
+                <div class="pagination-info">
+                    <span id="pagination-summary">Mostrando 0 de 0 reservas</span>
+                </div>
+                <div class="pagination-buttons">
+                    <button id="prev-page" class="btn btn-sm btn-outline-primary" >
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span id="page-indicator" class="mx-2">Página 1 de 1</span>
+                    <button id="next-page" class="btn btn-sm btn-outline-primary" >
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
