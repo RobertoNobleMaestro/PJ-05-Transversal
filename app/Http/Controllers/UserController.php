@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Role; // Import Role model
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -220,8 +221,74 @@ class UserController extends Controller
         }
         
         try {
-            $user = User::findOrFail($id_usuario);
-            $user->delete();
+            DB::beginTransaction();
+
+            // 1. Eliminar valoraciones hechas por el usuario (como autor)
+            DB::table('valoraciones')->where('id_usuario', $id_usuario)->delete();
+
+            // 2. Eliminar solicitudes_chofer donde el usuario es el solicitante
+            DB::table('solicitudes_chofer')->where('id_usuario', $id_usuario)->delete();
+
+            // 3. Eliminar solicitudes donde el usuario es cliente
+            $solicitudesIds = \App\Models\Solicitud::where('id_cliente', $id_usuario)->pluck('id');
+            if ($solicitudesIds->count() > 0) {
+                // 3.1 Eliminar pagos_choferes de esas solicitudes
+                DB::table('pagos_choferes')->whereIn('solicitud_id', $solicitudesIds)->delete();
+                // 3.2 Eliminar las solicitudes
+                \App\Models\Solicitud::whereIn('id', $solicitudesIds)->delete();
+            }
+
+            // 4. Eliminar reservas y todas sus dependencias (como ya tienes implementado)
+            $reservasIds = \App\Models\Reserva::where('id_usuario', $id_usuario)->pluck('id_reservas');
+            if ($reservasIds->count() > 0) {
+                DB::table('valoraciones')->whereIn('id_reservas', $reservasIds)->delete();
+                DB::table('vehiculos_reservas')->whereIn('id_reservas', $reservasIds)->delete();
+                $pagosReservasIds = \App\Models\Pago::whereIn('id_reservas', $reservasIds)->pluck('id_pago');
+                if ($pagosReservasIds->count() > 0) {
+                    DB::table('metodos_de_pago')->whereIn('id_pago', $pagosReservasIds)->delete();
+                }
+                \App\Models\Pago::whereIn('id_reservas', $reservasIds)->delete();
+                \App\Models\Reserva::where('id_usuario', $id_usuario)->delete();
+            }
+
+            // 5. Eliminar métodos de pago y pagos del usuario
+            $pagosIds = \App\Models\Pago::where('id_usuario', $id_usuario)->pluck('id_pago');
+            if ($pagosIds->count() > 0) {
+                DB::table('metodos_de_pago')->whereIn('id_pago', $pagosIds)->delete();
+            }
+            \App\Models\Pago::where('id_usuario', $id_usuario)->delete();
+
+            // 6. Eliminar grupo_usuario
+            DB::table('grupo_usuario')->where('id_usuario', $id_usuario)->delete();
+
+            // 7. Eliminar asalariado
+            \App\Models\Asalariado::where('id_usuario', $id_usuario)->delete();
+
+            // 8. Eliminar parkings y dependencias (si es gestor)
+            $parkingsIds = \App\Models\Parking::where('id_usuario', $id_usuario)->pluck('id');
+            if ($parkingsIds->count() > 0) {
+                $vehiculosIds = \App\Models\Vehiculo::whereIn('parking_id', $parkingsIds)->pluck('id_vehiculos');
+                if ($vehiculosIds->count() > 0) {
+                    DB::table('caracteristicas')->whereIn('id_vehiculos', $vehiculosIds)->delete();
+                    DB::table('imagen_vehiculo')->whereIn('id_vehiculo', $vehiculosIds)->delete();
+                    DB::table('vehiculos_reservas')->whereIn('id_vehiculos', $vehiculosIds)->delete();
+                    DB::table('pedido_piezas')->whereIn('vehiculo_id', $vehiculosIds)->delete();
+                    DB::table('mantenimientos')->whereIn('vehiculo_id', $vehiculosIds)->delete();
+                    \App\Models\Vehiculo::whereIn('id_vehiculos', $vehiculosIds)->delete();
+                }
+                \App\Models\Parking::where('id_usuario', $id_usuario)->delete();
+            }
+
+            // 9. Eliminar choferes (si el usuario es chofer)
+            \App\Models\Chofer::where('id_usuario', $id_usuario)->delete();
+
+            // 10. Eliminar mensajes donde el usuario es remitente o gestor
+            DB::table('messages')->where('user_id', $id_usuario)->orWhere('gestor_id', $id_usuario)->delete();
+
+            // 11. Eliminar usuario
+            \App\Models\User::findOrFail($id_usuario)->delete();
+
+            DB::commit();
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -232,14 +299,14 @@ class UserController extends Controller
 
             return redirect()->route('admin.users')->with('success', 'Usuario eliminado correctamente');
         } catch (\Exception $e) {
+            DB::rollBack();
             if ($request->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Error al eliminar el usuario: ' . $e->getMessage()
                 ], 500);
             }
-            
-            return redirect()->route('admin.users')->with('error', 'Error al eliminar el usuario');
+            return redirect()->route('admin.users')->with('error', 'Error al eliminar el usuario: ' . $e->getMessage());
         }
     }
 }

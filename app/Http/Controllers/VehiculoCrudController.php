@@ -570,26 +570,21 @@ class VehiculoCrudController extends Controller
             return $authCheck;
         }
 
-        DB::beginTransaction(); // Iniciar la transacción
+        DB::beginTransaction();
 
         try {
-            $vehiculo = Vehiculo::findOrFail($id_vehiculos);
-
-            // Eliminar las características asociadas al vehículo
+            // Eliminar características, imágenes, reservas, pedidos de piezas, mantenimientos, etc.
             DB::table('caracteristicas')->where('id_vehiculos', $id_vehiculos)->delete();
-
-            // Eliminar las imágenes asociadas al vehículo
             DB::table('imagen_vehiculo')->where('id_vehiculo', $id_vehiculos)->delete();
-
-            // Eliminar las reservas asociadas al vehículo
             DB::table('vehiculos_reservas')->where('id_vehiculos', $id_vehiculos)->delete();
+            DB::table('pedido_piezas')->where('vehiculo_id', $id_vehiculos)->delete();
+            DB::table('mantenimientos')->where('vehiculo_id', $id_vehiculos)->delete();
 
-            // Finalmente, eliminar el vehículo
-            $vehiculo->delete();
+            // Eliminar el vehículo
+            Vehiculo::findOrFail($id_vehiculos)->delete();
 
-            DB::commit(); // Confirmar la transacción
+            DB::commit();
 
-            // Si la petición espera JSON (AJAX), devolver respuesta JSON
             if ($request->expectsJson()) {
                 return response()->json([
                     'status' => 'success',
@@ -597,12 +592,10 @@ class VehiculoCrudController extends Controller
                 ], 200);
             }
 
-            // Si es una petición tradicional, redireccionar
             return redirect()->route('gestor.vehiculos')->with('success', 'Vehículo eliminado correctamente');
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Revertir la transacción en caso de error
-
+            DB::rollBack();
             if ($request->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
@@ -610,7 +603,6 @@ class VehiculoCrudController extends Controller
                     'errors' => $e->getMessage()
                 ], 500);
             }
-
             return redirect()->back()->with('error', 'Error al eliminar el vehículo: ' . $e->getMessage());
         }
     }

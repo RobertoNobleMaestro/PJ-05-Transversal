@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\Pago;
 use Illuminate\Support\Facades\DB;
 use App\Models\Asalariado;
+use App\Models\Vehiculo;
 
 class GestorUserController extends Controller
 {
@@ -233,14 +234,17 @@ class GestorUserController extends Controller
             return $role;
         });
 
-        // Parkings del lugar del gestor
         $gestor = auth()->user();
-        $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
-        $parkings = [];
-        if ($asalariadoGestor && $asalariadoGestor->parking_id) {
-            $parkingGestor = \App\Models\Parking::find($asalariadoGestor->parking_id);
-            if ($parkingGestor) {
-                $parkings = \App\Models\Parking::where('id_lugar', $parkingGestor->id_lugar)->get();
+        if ($gestor->id_roles == 1) {
+            $parkings = \App\Models\Parking::all();
+        } else {
+            $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
+            $parkings = [];
+            if ($asalariadoGestor && $asalariadoGestor->parking_id) {
+                $parkingGestor = \App\Models\Parking::find($asalariadoGestor->parking_id);
+                if ($parkingGestor) {
+                    $parkings = \App\Models\Parking::where('id_lugar', $parkingGestor->id_lugar)->get();
+                }
             }
         }
 
@@ -335,14 +339,17 @@ class GestorUserController extends Controller
             return $role;
         });
 
-        // Parkings del lugar del gestor
         $gestor = auth()->user();
-        $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
-        $parkings = [];
-        if ($asalariadoGestor && $asalariadoGestor->parking_id) {
-            $parkingGestor = \App\Models\Parking::find($asalariadoGestor->parking_id);
-            if ($parkingGestor) {
-                $parkings = \App\Models\Parking::where('id_lugar', $parkingGestor->id_lugar)->get();
+        if ($gestor->id_roles == 1) {
+            $parkings = \App\Models\Parking::all();
+        } else {
+            $asalariadoGestor = Asalariado::where('id_usuario', $gestor->id_usuario)->first();
+            $parkings = [];
+            if ($asalariadoGestor && $asalariadoGestor->parking_id) {
+                $parkingGestor = \App\Models\Parking::find($asalariadoGestor->parking_id);
+                if ($parkingGestor) {
+                    $parkings = \App\Models\Parking::where('id_lugar', $parkingGestor->id_lugar)->get();
+                }
             }
         }
 
@@ -438,8 +445,41 @@ class GestorUserController extends Controller
         
         try {
             DB::beginTransaction();
-            Pago::where('id_usuario', $id_usuario)->delete();
-            User::findOrFail($id_usuario)->delete();
+            DB::table('valoraciones')->where('id_usuario', $id_usuario)->delete();
+            $reservasIds = \App\Models\Reserva::where('id_usuario', $id_usuario)->pluck('id_reservas');
+            if ($reservasIds->count() > 0) {
+                DB::table('valoraciones')->whereIn('id_reservas', $reservasIds)->delete();
+                DB::table('vehiculos_reservas')->whereIn('id_reservas', $reservasIds)->delete();
+                $pagosReservasIds = \App\Models\Pago::whereIn('id_reservas', $reservasIds)->pluck('id_pago');
+                if ($pagosReservasIds->count() > 0) {
+                    DB::table('metodos_de_pago')->whereIn('id_pago', $pagosReservasIds)->delete();
+                }
+                \App\Models\Pago::whereIn('id_reservas', $reservasIds)->delete();
+                \App\Models\Reserva::where('id_usuario', $id_usuario)->delete();
+            }
+            $pagosIds = \App\Models\Pago::where('id_usuario', $id_usuario)->pluck('id_pago');
+            if ($pagosIds->count() > 0) {
+                DB::table('metodos_de_pago')->whereIn('id_pago', $pagosIds)->delete();
+            }
+            \App\Models\Pago::where('id_usuario', $id_usuario)->delete();
+            DB::table('grupo_usuario')->where('id_usuario', $id_usuario)->delete();
+            \App\Models\Asalariado::where('id_usuario', $id_usuario)->delete();
+            $parkingsIds = \App\Models\Parking::where('id_usuario', $id_usuario)->pluck('id');
+            if ($parkingsIds->count() > 0) {
+                $vehiculosIds = \App\Models\Vehiculo::whereIn('parking_id', $parkingsIds)->pluck('id_vehiculos');
+                if ($vehiculosIds->count() > 0) {
+                    DB::table('caracteristicas')->whereIn('id_vehiculos', $vehiculosIds)->delete();
+                    DB::table('imagen_vehiculo')->whereIn('id_vehiculo', $vehiculosIds)->delete();
+                    DB::table('vehiculos_reservas')->whereIn('id_vehiculos', $vehiculosIds)->delete();
+                    DB::table('pedido_piezas')->whereIn('vehiculo_id', $vehiculosIds)->delete();
+                    DB::table('mantenimientos')->whereIn('vehiculo_id', $vehiculosIds)->delete();
+                    // Eliminar los vehículos
+                    \App\Models\Vehiculo::whereIn('id_vehiculos', $vehiculosIds)->delete();
+                }
+                \App\Models\Parking::where('id_usuario', $id_usuario)->delete();
+            }
+            \App\Models\User::findOrFail($id_usuario)->delete();
+
             DB::commit();
 
             if ($request->expectsJson()) {
@@ -458,7 +498,7 @@ class GestorUserController extends Controller
                     'message' => 'Error al eliminar el usuario: ' . $e->getMessage()
                 ], 500);
             }
-            return redirect()->route('gestor.user.index')->with('error', 'Error al eliminar el usuario');
+            return redirect()->route('gestor.user.index')->with('error', 'Error al eliminar el usuario: ' . $e->getMessage());
         }
     }
 }
