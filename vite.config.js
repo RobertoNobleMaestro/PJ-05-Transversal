@@ -10,4 +10,10 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    define: {
+        'process.env': {
+            MIX_PUSHER_APP_KEY: JSON.stringify(process.env.PUSHER_APP_KEY),
+            MIX_PUSHER_APP_CLUSTER: JSON.stringify(process.env.PUSHER_APP_CLUSTER),
+        }
+    }
 });

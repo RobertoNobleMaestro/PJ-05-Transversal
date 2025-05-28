@@ -5,6 +5,28 @@ document.addEventListener('DOMContentLoaded', function () {
     let intervalActualizacion = null;
     const contenidoGrupo = document.getElementById('contenidoGrupo');
     
+    // Función para mostrar mensaje en pantalla
+    function mostrarMensajeEnPantalla(data) {
+        console.log('Recibido mensaje:', data);
+        const contenedorMensajes = document.getElementById('mensajes');
+        const claseAlineacion = data.is_own ? 'align-self-end bg-purple text-white' : 'align-self-start bg-light';
+        
+        contenedorMensajes.innerHTML += `
+            <div class="mensaje ${claseAlineacion} p-2 rounded mb-2 mw-75" style="max-width: 75%">
+                <div class="d-flex align-items-center mb-1">
+                    <small class="fw-bold">${data.sender_name}</small>
+                </div>
+                <div>${data.message}</div>
+                <div class="text-end">
+                    <small class="${data.is_own ? 'text-white' : 'text-muted'}">${data.created_at}</small>
+                </div>
+            </div>
+        `;
+        
+        // Hacer scroll hasta el último mensaje
+        contenedorMensajes.scrollTop = contenedorMensajes.scrollHeight;
+    }
+
     // Función para cargar los grupos del usuario vía AJAX
     function cargarGrupos() {
         console.log('Cargando grupos del usuario...');
@@ -36,22 +58,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => {
                 console.log('Respuesta recibida para grupos con estado:', response.status);
                 
-                // En caso de error 500, intentar obtener más información
-                if (response.status === 500) {
-                    // Intentar leer el cuerpo del error
-                    return response.json()
-                        .then(errorData => {
-                            console.error('Detalles del error 500:', errorData);
-                            throw new Error('Error del servidor (500): ' + 
-                                (errorData.error ? errorData.error : 'Error interno del servidor'));
-                        })
-                        .catch(err => {
-                            // Si no se puede leer el JSON, usar el error genérico
-                            console.error('No se pudo leer detalles del error 500');
-                            throw new Error('Error interno del servidor (500)');
-                        });
-                }
-                
                 if (!response.ok) {
                     throw new Error('Error en la respuesta del servidor: ' + response.status);
                 }
@@ -77,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Añadir cada grupo a la lista
                 data.grupos.forEach(grupo => {
                     console.log('Procesando grupo:', grupo.id, grupo.nombre, 'con', grupo.usuarios_count, 'miembros');
-                    console.log('Debug info:', grupo.debug_info);
                     
                     // Extraer nombres de usuario para mostrar en el modal de info
                     let usuarios = [];
@@ -165,7 +170,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.log('Miembros del grupo:', miembros);
                 } catch (error) {
                     console.error('Error al parsear miembros:', error, 'Valor original:', this.dataset.miembros);
-                    // Si hay error al parsear, usar un array vacío
                     miembros = [];
                 }
                 
@@ -179,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Cargar mensajes del grupo
                 cargarMensajes();
                 
-                // Configurar intervalo para actualizar mensajes cada 5 segundos
+                // Configurar intervalo para actualizar mensajes
                 intervalActualizacion = setInterval(cargarMensajes, 5000);
             });
         });
@@ -358,135 +362,43 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Función para enviar un mensaje
     function enviarMensaje() {
-        if (!grupoActivo) {
-            console.log('No hay grupo activo, no se puede enviar mensaje');
-            return;
-        }
-        
-        const input = document.getElementById('mensaje-input');
-        const mensaje = input.value.trim();
-        
-        if (!mensaje) {
-            console.log('Mensaje vacío, no se envía');
-            return;
-        }
-        
-        console.log('Preparando para enviar mensaje al grupo:', grupoActivo);
-        
-        // Obtener el token CSRF
-        let csrfToken;
-        try {
-            const metaTag = document.querySelector('meta[name="csrf-token"]');
-            if (!metaTag) {
-                console.error('No se encontró el meta tag de CSRF');
-                csrfToken = '';
-            } else {
-                csrfToken = metaTag.getAttribute('content');
-                console.log('CSRF token obtenido correctamente para envío:', csrfToken.substring(0, 5) + '...');
-            }
-        } catch (e) {
-            console.error('Error al obtener el token CSRF:', e);
-            csrfToken = '';
-        }
-        
-        const formData = new FormData();
-        formData.append('grupo_id', grupoActivo);
-        formData.append('message', mensaje);
-        
-        console.log('Datos del mensaje:', {
-            grupo_id: grupoActivo,
-            mensaje: mensaje.substring(0, 20) + (mensaje.length > 20 ? '...' : '')
-        });
-        
-        // Deshabilitar el botón y el input mientras se envía
-        const botonEnviar = document.getElementById('enviar-mensaje');
-        botonEnviar.disabled = true;
-        input.disabled = true;
-        
-        console.log('Enviando mensaje...');
-        
-        fetch('/api/chofers/mensajes/enviar', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            console.log('Respuesta recibida con estado:', response.status);
-            
-            // Habilitar el botón y el input de nuevo
-            botonEnviar.disabled = false;
-            input.disabled = false;
-            
-            // En caso de error 500, intentar obtener más información
-            if (response.status === 500) {
-                // Intentar leer el cuerpo del error
-                return response.json()
-                    .then(errorData => {
-                        console.error('Detalles del error 500:', errorData);
-                        if (errorData.error) {
-                            throw new Error('Error del servidor: ' + errorData.error);
-                        } else {
-                            throw new Error('Error interno del servidor');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('No se pudo leer detalles del error 500');
-                        throw new Error('Error interno del servidor (500)');
-                    });
-            }
-            
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor: ' + response.status);
-            }
-            
-            return response.json();
-        })
-        .then(data => {
-            console.log('Datos del mensaje enviado:', data);
-            if (data.success) {
-                // Limpiar input
-                input.value = '';
-                
-                // Añadir mensaje a la conversación
-                const contenedorMensajes = document.getElementById('mensajes');
-                const mensaje = data.message;
-                
-                // Si es el primer mensaje, limpiar el mensaje de "no hay mensajes"
-                if (contenedorMensajes.querySelector('.text-center.text-muted')) {
-                    contenedorMensajes.innerHTML = '';
+        const mensajeInput = document.getElementById('mensaje-input');
+        const mensaje = mensajeInput.value.trim();
+        const grupoId = document.getElementById('grupo_id').value;
+
+        if (mensaje && grupoId) {
+            // Mostrar el mensaje propio inmediatamente
+            mostrarMensajeEnPantalla({
+                message: mensaje,
+                sender_name: 'Tú',
+                created_at: new Date().toISOString(),
+                is_own: true
+            });
+
+            // Enviar el mensaje al servidor
+            fetch('/api/chofers/mensajes/enviar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    grupo_id: grupoId,
+                    message: mensaje
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mensajeInput.value = '';
+                } else {
+                    console.error('Error al enviar mensaje:', data.message);
                 }
-                
-                contenedorMensajes.innerHTML += `
-                    <div class="mensaje align-self-end bg-purple text-white p-2 rounded mb-2" style="max-width: 75%">
-                        <div class="d-flex align-items-center mb-1">
-                            <small class="fw-bold">${mensaje.sender_name}</small>
-                        </div>
-                        <div>${mensaje.message}</div>
-                        <div class="text-end">
-                            <small class="text-white">${mensaje.created_at}</small>
-                        </div>
-                    </div>
-                `;
-                
-                // Actualizar el último ID de mensaje
-                ultimoMensajeId = mensaje.id;
-                
-                // Hacer scroll hasta el último mensaje
-                contenedorMensajes.scrollTop = contenedorMensajes.scrollHeight;
-            }
-        })
-        .catch(error => {
-            console.error('Error al enviar mensaje:', error);
-            // Habilitar el botón y el input si hubo un error
-            const botonEnviar = document.getElementById('enviar-mensaje');
-            botonEnviar.disabled = false;
-            input.disabled = false;
-            alert('Error al enviar el mensaje: ' + error.message);
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
     }
     
     // Actualizar el form action para crear grupo

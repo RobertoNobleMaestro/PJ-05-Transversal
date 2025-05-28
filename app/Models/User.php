@@ -65,9 +65,9 @@ class User extends Authenticatable
         return $this->role && $this->role->nombre_rol === $roleName;
     }
 
-    public function grupos(): BelongsToMany
+    public function grupos()
     {
-        return $this->belongsToMany(Grupo::class, 'grupo_usuario', 'id_usuario', 'grupo_id')
+        return $this->belongsToMany(Grupo::class, 'grupo_usuario', 'user_id', 'grupo_id')
             ->withTimestamps();
     }
     

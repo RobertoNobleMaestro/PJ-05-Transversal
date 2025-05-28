@@ -1,177 +1,75 @@
-@extends('layouts.admin')
-
-@section('title', 'Espacio Privado Chofers')
+@extends('layouts.app')
 
 @section('content')
-   
-    <!-- Archivos de estilos -->
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/chofers/styles.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/chofers/chat.css') }}">
-    
-    <!-- Meta tag para token CSRF para las peticiones AJAX -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Chat</div>
 
-    <!-- Overlay para cerrar menú al hacer clic fuera -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+                <div class="card-body">
+                    <input type="hidden" id="grupo_id" value="{{ $grupo->id }}">
+                    
+                    <div id="chat-messages" class="chat-messages" style="height: 400px; overflow-y: auto;">
+                        <!-- Los mensajes se cargarán aquí -->
+                    </div>
 
-    <div class="admin-container">
-        <!-- Barra lateral lila -->
-        <div class="admin-sidebar" id="sidebar">
-            <div class="sidebar-title">CARFLOW</div>
-            <ul class="sidebar-menu">
-                <!-- Opción Volver solo visible en móvil -->
-                <li class="sidebar-volver-mobile">
-                    <a href="{{ route('chofers.dashboard') }}">
-                        <i class="fa-solid fa-arrow-left"></i> Volver
-                    </a>
-                </li>
-                <li><a href="{{ route('chofers.solicitudes') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-car"></i> Solicitudes
-                </a></li>
-            </ul>
-        </div>
-
-        <!-- Contenido principal -->
-        <div class="admin-main">
-            <div class="admin-header">
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1 class="admin-title">Chats de: {{ auth()->user()->nombre }}</h1>
-                <div class="admin-welcome volver-desktop">
-                    <a href="{{ route('chofers.dashboard') }}" class="btn btn-outline-danger">
-                        <i class="fa-solid fa-backward"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="container">
-                <!-- div lateral para los grupos del usuario -->
-                <div class="izq_grupos">
-                    <h3>Chats:
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#crearGrupoModal">
-                            <i class="fa-solid fa-plus"></i>
-                        </a>
-                    </h3>
-
-                    <ul class="list-group">
-                        @forelse ($grupos as $grupo)
-                            <li class="list-group-item">
-                                <a href="#"
-                                    class="text-decoration-none text-dark grupo-link d-flex align-items-center justify-content-between"
-                                    data-nombre="{{ $grupo->nombre }}" 
-                                    data-participantes="{{ $grupo->usuarios->count() }}"
-                                    data-miembros='@json($grupo->usuarios->pluck("nombre"))'>
-                                    <div class="d-flex align-items-center">
-                                        @if($grupo->imagen_grupo)
-                                            <img src="{{ asset('img/' . $grupo->imagen_grupo) }}" 
-                                                alt="Imagen Grupo" 
-                                                class="me-2 rounded-circle">
-                                        @else
-                                            <i class="fa-solid fa-users me-2"></i>
-                                        @endif
-                                        <span>{{ $grupo->nombre }}</span>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-right text-muted"></i>
-                                </a>
-                            </li>
-                        @empty
-                            <li class="list-group-item">No perteneces a ningún grupo aún.</li>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <!-- div central donde conversar -->
-                <div class="central-convers">
-                    <div id="contenidoGrupo"></div>
+                    <div class="input-group mt-3">
+                        <input type="text" id="mensaje" class="form-control" placeholder="Escribe tu mensaje...">
+                        <button class="btn btn-primary" onclick="enviarMensaje()">Enviar</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal para crear grupo -->
-    <div class="modal fade" id="crearGrupoModal" tabindex="-1" aria-labelledby="crearGrupoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('chofers.grupos.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="crearGrupoModalLabel">Crear nuevo grupo</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre del grupo</label>
-                            <input type="text" name="nombre" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Seleccionar usuarios del grupo</label>
-                            <div class="form-check">
-                                @foreach ($choferesCompaneros as $chofer)
-                                    <div>
-                                        <input class="form-check-input" type="checkbox" name="usuarios[]"
-                                            value="{{ $chofer->id_usuario }}" id="chofer{{ $chofer->id_usuario }}">
-                                        <label class="form-check-label" for="chofer{{ $chofer->id_usuario }}">
-                                            {{ $chofer->nombre }} ({{ $chofer->email }})
-                                        </label>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+@push('scripts')
+<script src="{{ asset('js/chofers-chat.js') }}"></script>
+@endpush
 
-                        <div class="mb-3">
-                            <label for="imagen_grupo" class="form-label">Imagen del grupo (opcional)</label>
-                            <input type="file" name="imagen_grupo" class="form-control">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" style="background-color: #8c4ae2">Crear grupo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+@push('styles')
+<style>
+.chat-messages {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.25rem;
+}
 
-    <!-- Modal Información del Grupo -->
-    <div class="modal fade" id="infoGrupoModal" tabindex="-1" aria-labelledby="infoGrupoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 12px;">
-                <div class="modal-header" style="background-color: #8c4ae2; color: white;">
-                    <h5 class="modal-title" id="infoGrupoModalLabel">Información del Grupo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <p><strong>Nombre:</strong> <span id="modalNombreGrupo" style="font-weight: bold;"></span></p>
-                    <p><strong>Miembros:</strong></p>
-                    <ul id="modalMiembrosGrupo" class="ps-3"></ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+.mensaje {
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    max-width: 75%;
+}
 
-    @section('scripts')
-        <script src="{{asset('js/chofers-chat.js')}}"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const menuToggle = document.getElementById('menuToggle');
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('sidebarOverlay');
+.mensaje-propio {
+    background-color: #007bff;
+    color: white;
+    margin-left: auto;
+}
 
-                menuToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                });
+.mensaje-otro {
+    background-color: #e9ecef;
+    color: #212529;
+    margin-right: auto;
+}
 
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
-            });
-        </script>
-    @endsection
+.mensaje .nombre {
+    font-weight: bold;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
 
+.mensaje .texto {
+    margin-bottom: 0.25rem;
+}
+
+.mensaje .hora {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    text-align: right;
+}
+</style>
+@endpush
 @endsection

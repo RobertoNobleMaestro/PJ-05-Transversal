@@ -11,5 +11,10 @@ window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    forceTLS: true
+    forceTLS: true,
+    enabledTransports: ['ws', 'wss'],
+    wsHost: 'g06.daw2j23.es',
+    wsPort: 443,
+    wssPort: 443,
+    disableStats: true
 });
