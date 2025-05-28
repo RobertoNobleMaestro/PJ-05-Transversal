@@ -112,6 +112,8 @@ class UserController extends Controller
                 'direccion' => 'required|string|min:5|max:255',
                 'licencia_conducir' => 'nullable|string|max:5',
                 'id_roles' => 'required|integer',
+            ], [
+                'email.unique' => 'El correo electrónico ya está registrado en el sistema.',
             ]);
 
             $validatedData['password'] = Hash::make($validatedData['password']);
