@@ -173,7 +173,9 @@ class HistorialGestorController extends Controller
                 'pendientes' => (clone $baseStatsQuery)->where('estado', 'pendiente')->count(),
                 'canceladas' => (clone $baseStatsQuery)->where('estado', 'cancelada')->count(),
                 'confirmadas' => (clone $baseStatsQuery)->where('estado', 'confirmada')->count(),
-                'ingresos' => (clone $baseStatsQuery)->where('estado', 'completada')->sum('total_precio') ?? 0
+                'ingresos' => (clone $baseStatsQuery)
+                    ->whereIn('estado', ['completada', 'confirmada', 'pagado'])
+                    ->sum('total_precio') ?? 0
             ];
 
             return response()->json([

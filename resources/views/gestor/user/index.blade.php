@@ -66,7 +66,7 @@
                         <input type="text" id="searchEmail" class="form-control" placeholder="Buscar por email">
                     </div>
                     <div class="col-md-2">
-                        <button id="clearFilters" class="btn btn-secondary">Limpiar Filtros</button>
+                        <button id="clearFilters" class="btn-purple">Limpiar Filtros</button>
                     </div>
                 </div>
 

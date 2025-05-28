@@ -167,7 +167,7 @@ function updateUser(userId) {
     });
     
     // Obtener URL y datos de redirección
-    const url = form.dataset.url || `/admin/users/${userId}`;
+    const url = form.dataset.url || `/gestor/users/${userId}`;
     const redirectUrl = document.querySelector('meta[name="users-index"]').content;
     
     // Realizar petición AJAX al servidor con método POST y datos JSON
