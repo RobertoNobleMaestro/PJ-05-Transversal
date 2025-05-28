@@ -154,10 +154,12 @@ class AuthController extends Controller
             $user->password = Hash::make($request->password);
 
             if ($request->hasFile('imagen')) {
-                $ruta = $request->file('imagen')->store('perfiles', 'public');
-                $user->foto_perfil = $ruta;
+                $foto = $request->file('imagen');
+                $nombreFoto = uniqid('foto_', true) . '.' . $foto->getClientOriginalExtension();
+                $foto->move(public_path('img'), $nombreFoto);
+                $user->foto_perfil = $nombreFoto;
             } else {
-                $user->foto_perfil = '/default.png';
+                $user->foto_perfil = 'default.png';
             }
 
             $user->save();
