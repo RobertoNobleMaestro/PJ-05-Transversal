@@ -12,7 +12,7 @@ class Role extends Model
     protected $primaryKey = 'id_roles';
     
     protected $fillable = [
-        'nombre_rol',
+        'nombre',
     ];
 
     public function usuarios()
@@ -27,12 +27,13 @@ class Role extends Model
      */
     public function getFormattedNameAttribute()
     {
-        if ($this->nombre_rol === 'admin_financiero') {
+        // Special formatting for 'admin_financiero'
+        if ($this->nombre === 'admin_financiero') {
             return 'Admin Financiero';
         }
         
         // First letter capitalized for other roles
-        return ucfirst($this->nombre_rol);
+        return ucfirst($this->nombre);
     }
 }
 

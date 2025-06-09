@@ -11,6 +11,8 @@ use App\Models\Parking;
 use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use PDF;
 
@@ -31,7 +33,7 @@ class AsalariadosController extends Controller
         $lugares = Lugar::all();
         
         // Obtener todos los roles para el filtro
-        $roles = Role::all()->pluck('nombre_rol');
+        $roles = Role::all()->pluck('nombre');
         
         // Obtener todos los parkings para el filtro
         $parkings = Parking::all();
@@ -529,20 +531,12 @@ class AsalariadosController extends Controller
             return redirect()->back()->with('error', 'No tienes permisos para esta acción');
         }
         
-        // Obtener todos los usuarios que no son asalariados
-        $usuarios = User::whereDoesntHave('asalariado')->get();
-        
-        // Obtener todos los lugares
         $lugares = Lugar::all();
-        
-        // Obtener todos los parkings
         $parkings = Parking::all();
-        
-        // Obtener todos los roles
-        $roles = Role::all();
+        // Obtener todos los roles excepto 'cliente'
+        $roles = Role::where('nombre', '!=', 'cliente')->get(); 
         
         return view('admin_financiero.asalariados.create', [
-            'usuarios' => $usuarios,
             'lugares' => $lugares,
             'parkings' => $parkings,
             'roles' => $roles
@@ -558,115 +552,64 @@ class AsalariadosController extends Controller
         if (!Auth::check() || !Auth::user()->hasRole('admin_financiero')) {
             return redirect()->back()->with('error', 'No tienes permisos para esta acción');
         }
-        
-        // Validar campos comunes para todos los casos
-        $validacionComun = [
+
+        // Validaciones para la creación de un nuevo usuario y asalariado
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed', // Se requiere confirmación de contraseña
+            'id_roles' => 'required|exists:roles,id_roles',
+            'dni' => 'nullable|string|max:20|unique:users,dni', // DNI debe ser único en la tabla users
+            'telefono' => 'nullable|string|max:20',
+            'fecha_nacimiento' => 'required|date|before_or_equal:today',
+            'direccion' => 'required|string|max:500',
+            'licencia_conducir' => 'nullable|string|max:10', // Adjusted max length, user should check DB schema
             'salario' => 'required|numeric|min:0',
             'id_lugar' => 'required|exists:lugares,id_lugar',
             'parking_id' => 'required|exists:parking,id',
-            'tipo_usuario' => 'required|in:existente,nuevo'
-        ];
-        
-        // Añadir validaciones específicas según el tipo de usuario
-        if ($request->tipo_usuario === 'existente') {
-            $validacionComun['id_usuario'] = 'required|exists:users,id_usuario';
-        } else {
-            $validacionComun['nombre'] = 'required|string|max:255';
-            $validacionComun['email'] = 'required|string|email|max:255|unique:users';
-            $validacionComun['password'] = 'required|string|min:8';
-            $validacionComun['id_roles'] = 'required|exists:roles,id_roles';
-            $validacionComun['dni'] = 'nullable|string|max:20';
-            $validacionComun['telefono'] = 'nullable|string|max:20';
+            // 'hiredate' se establece automáticamente a now(), no se necesita en el form si es siempre hoy
+        ]);
+
+        // Verificar que el rol seleccionado no sea 'Cliente'
+        $rolSeleccionado = Role::find($validatedData['id_roles']);
+        if ($rolSeleccionado && $rolSeleccionado->nombre === 'cliente') {
+            return back()->withErrors(['id_roles' => 'No se puede asignar el rol de Cliente a un asalariado.'])->withInput();
         }
-        
-        $request->validate($validacionComun);
-        
+
+        DB::beginTransaction();
         try {
-            // Iniciar una transacción para garantizar la integridad
-            DB::beginTransaction();
-            
-            // ID del usuario a asociar con el asalariado
-            $idUsuario = null;
-            $usuario = null;
-            
-            // Si es un usuario nuevo, crearlo primero
-            if ($request->tipo_usuario === 'nuevo') {
-                // Verificar que el rol no sea de cliente
-                $rol = Role::findOrFail($request->id_roles);
-                if ($rol->nombre_rol === 'cliente') {
-                    return redirect()->back()->with('error', 'No se puede crear un asalariado con rol de cliente')->withInput();
-                }
-                
-                // Crear el nuevo usuario
-                $usuario = new User();
-                $usuario->nombre = $request->nombre;
-                $usuario->email = $request->email;
-                $usuario->password = Hash::make($request->password);
-                $usuario->id_roles = $request->id_roles;
-                
-                // Campos opcionales
-                if ($request->has('dni')) $usuario->dni = $request->dni;
-                if ($request->has('telefono')) $usuario->telefono = $request->telefono;
-                
-                $usuario->save();
-                $idUsuario = $usuario->id_usuario;
-                
-                \Log::info('Nuevo usuario creado con ID: ' . $idUsuario);
-            } else {
-                // Usuario existente
-                $idUsuario = $request->id_usuario;
-                
-                // Verificar que el usuario no sea un cliente
-                $usuario = User::findOrFail($idUsuario);
-                if ($usuario->role && $usuario->role->nombre_rol === 'cliente') {
-                    return redirect()->back()->with('error', 'No se puede convertir a un cliente en asalariado')->withInput();
-                }
-            }
-            
-            // Verificar que el usuario no esté ya asignado como asalariado activo
-            $asalariadoActivo = Asalariado::where('id_usuario', $idUsuario)
-                ->where('estado', 'alta')
-                ->first();
-                
-            if ($asalariadoActivo) {
-                DB::rollBack();
-                return redirect()->back()->with('error', 'Este usuario ya está registrado como asalariado activo.')->withInput();
-            }
-            
-            // Verificar si el usuario estuvo dado de baja previamente
-            $asalariadoInactivo = Asalariado::where('id_usuario', $idUsuario)
-                ->where('estado', 'baja')
-                ->first();
-                
-            if ($asalariadoInactivo) {
-                DB::rollBack();
-                return redirect()->back()->with('error', 'Este usuario ya fue asalariado y está dado de baja. Puede reactivarlo desde la sección de asalariados inactivos.')->withInput();
-            }
-            
+            // Crear el nuevo usuario
+            $usuario = new User();
+            $usuario->nombre = $validatedData['nombre'];
+            $usuario->email = $validatedData['email'];
+            $usuario->password = Hash::make($validatedData['password']);
+            $usuario->id_roles = $validatedData['id_roles'];
+            $usuario->dni = $validatedData['dni'] ?? null;
+            $usuario->telefono = $validatedData['telefono'] ?? null;
+            $usuario->fecha_nacimiento = $validatedData['fecha_nacimiento'];
+            $usuario->direccion = $validatedData['direccion'];
+            $usuario->licencia_conducir = $validatedData['licencia_conducir'] ?? null;
+            $usuario->save();
+
             // Crear el nuevo asalariado
             $asalariado = new Asalariado();
-            $asalariado->id_usuario = $idUsuario;
-            $asalariado->salario = $request->salario;
-            $asalariado->hiredate = now(); // Fecha de contratación = hoy
-            $asalariado->estado = 'alta'; // Estado inicial = alta
-            $asalariado->id_lugar = $request->id_lugar;
-            $asalariado->parking_id = $request->parking_id;
+            $asalariado->id_usuario = $usuario->id_usuario;
+            $asalariado->salario = $validatedData['salario'];
+            $asalariado->hiredate = now(); // Fecha de contratación es hoy
+            $asalariado->estado = 'alta';
+            $asalariado->id_lugar = $validatedData['id_lugar'];
+            $asalariado->parking_id = $validatedData['parking_id'];
             $asalariado->save();
 
-            // Guardar el registro
             DB::commit();
 
-            // Mensaje dependiendo de si se creó un usuario nuevo o se usó uno existente
-            $mensaje = $request->tipo_usuario === 'nuevo'
-                ? 'Asalariado creado correctamente con un nuevo usuario.'
-                : 'Asalariado creado correctamente usando un usuario existente.';
-
-            return redirect()->route('admin.asalariados.index')->with('success', $mensaje);
+            return redirect()->route('admin.asalariados.index')->with('success', 'Asalariado creado correctamente con un nuevo usuario.');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error al crear asalariado y usuario: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al crear el asalariado: ' . $e->getMessage())->withInput();
-        } // Closes store method's catch block
+        }
     } // Closes store method
 
     /**

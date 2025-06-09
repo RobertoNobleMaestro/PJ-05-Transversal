@@ -29,40 +29,12 @@
             <form method="POST" action="{{ route('admin.asalariados.store') }}" class="p-3">
                 @csrf
 
-                <div class="mb-4">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="tipo_usuario" id="usuario_existente" value="existente" checked>
-                        <label class="form-check-label" for="usuario_existente">Seleccionar usuario existente</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="tipo_usuario" id="usuario_nuevo" value="nuevo">
-                        <label class="form-check-label" for="usuario_nuevo">Crear nuevo usuario</label>
-                    </div>
-                </div>
+                <!-- Selección de tipo de usuario eliminada: Solo se permite crear nuevos usuarios/asalariados -->
 
-                <!-- Sección para seleccionar usuario existente -->
-                <div id="seccion_usuario_existente" class="row mb-3">
-                    <label for="id_usuario" class="col-md-4 col-form-label">Usuario Existente</label>
-                    <div class="col-md-8">
-                        <select id="id_usuario" class="form-select @error('id_usuario') is-invalid @enderror" name="id_usuario">
-                            <option value="">Seleccione un usuario</option>
-                            @foreach ($usuarios as $usuario)
-                                <option value="{{ $usuario->id_usuario }}" {{ old('id_usuario') == $usuario->id_usuario ? 'selected' : '' }}>
-                                    {{ $usuario->nombre }} ({{ $usuario->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="form-text text-muted">Seleccione el usuario que será asalariado</small>
-                        @error('id_usuario')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-                </div>
+                <!-- Sección para seleccionar usuario existente eliminada -->
 
                 <!-- Sección para crear nuevo usuario -->
-                <div id="seccion_usuario_nuevo" class="d-none">
+                <div id="seccion_usuario_nuevo">
                     <div class="row mb-3">
                         <label for="nombre" class="col-md-4 col-form-label">Nombre</label>
                         <div class="col-md-8">
@@ -112,6 +84,42 @@
                     </div>
 
                     <div class="row mb-3">
+                        <label for="fecha_nacimiento" class="col-md-4 col-form-label">Fecha de Nacimiento</label>
+                        <div class="col-md-8">
+                            <input id="fecha_nacimiento" type="date" class="form-control @error('fecha_nacimiento') is-invalid @enderror" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}" required>
+                            @error('fecha_nacimiento')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="direccion" class="col-md-4 col-form-label">Dirección</label>
+                        <div class="col-md-8">
+                            <textarea id="direccion" class="form-control @error('direccion') is-invalid @enderror" name="direccion" rows="3" required>{{ old('direccion') }}</textarea>
+                            @error('direccion')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="licencia_conducir" class="col-md-4 col-form-label">Licencia de Conducir</label>
+                        <div class="col-md-8">
+                            <input id="licencia_conducir" type="text" class="form-control @error('licencia_conducir') is-invalid @enderror" name="licencia_conducir" value="{{ old('licencia_conducir') }}">
+                            @error('licencia_conducir')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <label for="password" class="col-md-4 col-form-label">Contraseña</label>
                         <div class="col-md-8">
                             <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password">
@@ -124,16 +132,21 @@
                     </div>
 
                     <div class="row mb-3">
+                        <label for="password-confirm" class="col-md-4 col-form-label">Confirmar Contraseña</label>
+                        <div class="col-md-8">
+                            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <label for="id_roles" class="col-md-4 col-form-label">Rol</label>
                         <div class="col-md-8">
                             <select id="id_roles" class="form-select @error('id_roles') is-invalid @enderror" name="id_roles">
                                 <option value="">Seleccione un rol</option>
                                 @foreach ($roles as $rol)
-                                    @if($rol->nombre_rol != 'cliente')
-                                        <option value="{{ $rol->id_roles }}" {{ old('id_roles') == $rol->id_roles ? 'selected' : '' }}>
-                                            {{ $rol->nombre_rol }}
-                                        </option>
-                                    @endif
+                                    <option value="{{ $rol->id_roles }}" {{ old('id_roles') == $rol->id_roles ? 'selected' : '' }}>
+                                        {{ $rol->formatted_name }} {{-- formatted_name should correctly display the role name --}}
+                                    </option>
                                 @endforeach
                             </select>
                             <small class="form-text text-muted">Seleccione el rol para el nuevo usuario (no puede ser cliente)</small>
@@ -224,52 +237,7 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Manejo de tipo de usuario (existente o nuevo)
-        const radioUsuarioExistente = document.getElementById('usuario_existente');
-        const radioUsuarioNuevo = document.getElementById('usuario_nuevo');
-        const seccionUsuarioExistente = document.getElementById('seccion_usuario_existente');
-        const seccionUsuarioNuevo = document.getElementById('seccion_usuario_nuevo');
-        const selectUsuarioExistente = document.getElementById('id_usuario');
-        const nombreInput = document.getElementById('nombre');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const rolSelect = document.getElementById('id_roles');
-        
-        // Función para alternar entre secciones
-        function toggleUsuarioForm() {
-            if (radioUsuarioExistente.checked) {
-                seccionUsuarioExistente.classList.remove('d-none');
-                seccionUsuarioNuevo.classList.add('d-none');
-                
-                // Hacer requerido el select de usuario existente
-                selectUsuarioExistente.setAttribute('required', 'required');
-                
-                // Quitar required de campos de nuevo usuario
-                nombreInput.removeAttribute('required');
-                emailInput.removeAttribute('required');
-                passwordInput.removeAttribute('required');
-                rolSelect.removeAttribute('required');
-            } else {
-                seccionUsuarioExistente.classList.add('d-none');
-                seccionUsuarioNuevo.classList.remove('d-none');
-                
-                // Quitar required del select de usuario existente
-                selectUsuarioExistente.removeAttribute('required');
-                
-                // Hacer requeridos los campos de nuevo usuario
-                nombreInput.setAttribute('required', 'required');
-                emailInput.setAttribute('required', 'required');
-                passwordInput.setAttribute('required', 'required');
-                rolSelect.setAttribute('required', 'required');
-            }
-        }
-        
-        // Configurar eventos
-        radioUsuarioExistente.addEventListener('change', toggleUsuarioForm);
-        radioUsuarioNuevo.addEventListener('change', toggleUsuarioForm);
-        
-        // Inicializar
-        toggleUsuarioForm();
+        // Lógica de JS para alternar tipo de usuario eliminada, solo se permite creación.
         
         // Vinculación de lugar con parkings (AJAX)
         const lugarSelect = document.getElementById('id_lugar');
