@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\ProcessScheduledTerminations::class,
         \App\Console\Commands\UpdateWorkdaysFromHiredate::class,
+        \App\Console\Commands\UpdateWorkedDaysCommand::class,
     ];
 
     /**

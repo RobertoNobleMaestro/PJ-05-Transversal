@@ -199,74 +199,112 @@ class AsalariadosController extends Controller
     {
         // Verificar que el usuario tiene permisos para administrar asalariados
         if (!Auth::check() || !Auth::user()->hasRole('admin_financiero')) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'No tienes permisos para esta acción.'], 403);
+            }
             return redirect()->back()->with('error', 'No tienes permisos para esta acción');
         }
         
-        $request->validate([
-            'salario' => 'required|numeric|min:0',
-            'id_lugar' => 'required|exists:lugares,id_lugar',
-            'parking_id' => 'required|exists:parking,id'
-        ]);
+        // Validar la solicitud
+        try {
+            $validatedData = $request->validate([
+                'salario' => 'required|numeric|min:0',
+                'id_lugar' => 'required|exists:lugares,id_lugar',
+                'parking_id' => 'required|exists:parking,id',
+                'hiredate' => 'required|date_format:Y-m-d'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        }
         
         try {
-            // Iniciar una transacción para garantizar la integridad
             DB::beginTransaction();
             
-            // Obtener el asalariado a actualizar
             $asalariado = Asalariado::with('usuario.role')->findOrFail($id);
             
-            // Actualizar el asalariado específico
-            $asalariado->update([
-                'id_lugar' => $request->id_lugar,
-                'parking_id' => $request->parking_id
-            ]);
+            $asalariado->id_lugar = $validatedData['id_lugar'];
+            $asalariado->parking_id = $validatedData['parking_id'];
+            $asalariado->salario = $validatedData['salario'];
+
+            $newHireDate = \Carbon\Carbon::parse($validatedData['hiredate'])->startOfDay();
+            $currentHireDate = \Carbon\Carbon::parse($asalariado->hiredate)->startOfDay();
+
+            if (!$newHireDate->eq($currentHireDate)) {
+                $asalariado->hiredate = $newHireDate->format('Y-m-d');
+                $today = \Carbon\Carbon::today();
+                if ($newHireDate->gt($today)) {
+                    $asalariado->dias_trabajados = 0;
+                } else {
+                    $calendarDaysSinceNewHire = $newHireDate->diffInDays($today) + 1;
+                    $fullWeeks = floor($calendarDaysSinceNewHire / 7);
+                    $remainingDays = $calendarDaysSinceNewHire % 7;
+                    $asalariado->dias_trabajados = ($fullWeeks * 6) + min($remainingDays, 6);
+                }
+            }
+
+            $asalariado->save();
             
-            // Si el asalariado tiene un usuario y rol asociado, actualizar salario de todos con el mismo rol
+            $mensaje = 'Información del asalariado actualizada correctamente.';
+
             if ($asalariado->usuario && $asalariado->usuario->role) {
                 $rolId = $asalariado->usuario->role->id;
-                
-                // Obtener todos los asalariados con el mismo rol
                 $asalariadosMismoRol = Asalariado::whereHas('usuario', function($query) use ($rolId) {
                     $query->where('id_roles', $rolId);
-                })->get();
+                })->where('id', '!=', $asalariado->id) // No actualizar el mismo empleado dos veces
+                  ->get();
                 
-                // Actualizar el salario de todos los asalariados con el mismo rol
                 foreach ($asalariadosMismoRol as $asalariadoRol) {
-                    $asalariadoRol->salario = $request->salario;
+                    $asalariadoRol->salario = $validatedData['salario'];
                     $asalariadoRol->save();
                 }
-                
-                $mensaje = 'Información y salario actualizados para todos los asalariados con el mismo rol.';
-            } else {
-                // Si no tiene rol, solo actualizar su salario
-                $asalariado->salario = $request->salario;
-                $asalariado->save();
-                $mensaje = 'Información del asalariado actualizada correctamente.';
+                $mensaje = 'Información y salario actualizados para el empleado y todos los demás con el mismo rol.';
             }
             
             DB::commit();
+
+            // No syntax error here
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => $mensaje, 'asalariado_id' => $asalariado->id]);
+            }
             return redirect()->route('admin.asalariados.index')->with('success', $mensaje);
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Error al actualizar: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Error al actualizar el asalariado: ' . $e->getMessage()], 500);
+            }
+            return redirect()->back()->with('error', 'Error al actualizar el asalariado: ' . $e->getMessage());
         }
     }
-    
     /**
-     * Muestra el detalle de un asalariado
+     * Muestra el detalle de un asalariado.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function show($id)
     {
         $asalariado = Asalariado::with(['usuario', 'usuario.role', 'sede', 'parking'])->findOrFail($id);
         
+        // Calcular días trabajados en el mes actual
+        $calculoMesActual = $asalariado->calcularSalarioProporcional(); // Assumes $fecha = null for current month
+        $diasTrabajadosMesActual = $calculoMesActual['diasTrabajados'];
+
         return view('admin_financiero.asalariados.show', [
-            'asalariado' => $asalariado
+            'asalariado' => $asalariado,
+            'diasTrabajadosMesActual' => $diasTrabajadosMesActual
         ]);
     }
     
     /**
-     * Genera la nómina en PDF para un asalariado
+     * Genera la nómina para un asalariado y la ofrece para descarga en PDF.
+     * También registra el gasto de la nómina si es el día 1 del mes y no existe ya.
+     *
+     * @param int $id El ID del asalariado.
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function generarNomina($id)
     {
@@ -308,9 +346,9 @@ class AsalariadosController extends Controller
         }
         
         // Extraer los datos del salario
-        $salarioBruto = $datosSalario['salario'];
+        $salarioBruto = isset($datosSalario['salarioProporcional']) ? $datosSalario['salarioProporcional'] : $datosSalario['salario'];
         $diasTrabajados = $datosSalario['diasTrabajados'];
-        $diasEnMes = $datosSalario['diasEnMes'];
+        $diasEnMes = isset($datosSalario['diasLaborablesPotencialesEnMes']) ? $datosSalario['diasLaborablesPotencialesEnMes'] : $datosSalario['diasEnMes'];
         $porcentajeSalario = $datosSalario['porcentaje'];
         $salarioBase = $asalariado->salario; // Salario base completo
         
@@ -628,6 +666,27 @@ class AsalariadosController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al crear el asalariado: ' . $e->getMessage())->withInput();
+        } // Closes store method's catch block
+    } // Closes store method
+
+    /**
+     * Obtiene los parkings filtrados por sede para AJAX.
+     */
+    public function getParkingsBySede(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->hasRole('admin_financiero')) {
+            return response()->json(['error' => 'No autorizado'], 403);
         }
-    }
-}
+
+        $request->validate(['id_lugar' => 'required|exists:lugares,id_lugar']);
+        $idLugar = $request->id_lugar;
+
+        try {
+            $parkings = \App\Models\Parking::where('id_lugar', $idLugar)->orderBy('nombre')->get(['id', 'nombre']);
+            return response()->json($parkings);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al obtener parkings: ' . $e->getMessage()], 500);
+        }
+    } // Closes getParkingsBySede method
+
+} // Closes AsalariadosController class

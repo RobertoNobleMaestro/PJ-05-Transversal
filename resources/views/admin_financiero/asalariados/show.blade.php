@@ -30,7 +30,7 @@
 
     <div class="row">
         <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header text-white" style="background-color: #9F17BD;">
                     <h5 class="mb-0">Perfil del Empleado</h5>
                 </div>
@@ -69,11 +69,12 @@
                         @endif
                     </div>
                 </div>
-                <div class="card-footer bg-light">
-                </div>
+                <!-- El card-footer vacío ha sido eliminado -->
             </div>
+        </div>
 
-            <div class="card shadow-sm mt-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
                 <div class="card-header text-white" style="background-color: #9F17BD;">
                     <h5 class="mb-0">Estado Laboral</h5>
                 </div>
@@ -105,54 +106,21 @@
                     </div>
                     
                     <div class="row text-center">
-                        <div class="col-12">
-                            <div class="border rounded p-3">
-                                <h6 class="mb-1">Días trabajados</h6>
-                                <h4 class="mb-0">{{ isset($asalariado) && isset($asalariado->dias_trabajados) ? $asalariado->dias_trabajados : 0 }}</h4>
-                                <small class="text-muted">en el mes actual</small>
+                        <div class="col-6">
+                            <div class="border rounded p-3 mb-3">
+                                <h6 class="mb-1">Días mes actual</h6>
+                                <h4 class="mb-0">{{ $diasTrabajadosMesActual ?? 0 }}</h4>
+                                <small class="text-muted">Calculados para {{ \Carbon\Carbon::now()->monthName }}</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 mb-3">
+                                <h6 class="mb-1">Total días trabajados</h6>
+                                <h4 class="mb-0">{{ $asalariado->dias_trabajados ?? 0 }}</h4>
+                                <small class="text-muted">Acumulados</small>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-
-        </div>
-
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">Estado Laboral</h6>
-                                </div>
-                                <div class="card-body">
-                                    <h4 class="text-success">EMPLEADO ACTIVO</h4>
-                                    <p class="text-muted">Este empleado está actualmente en alta y recibe su salario normalmente.</p>
-                                    
-                                    <div class="row mt-4">
-                                        <div class="col-md-6">
-                                            <div class="border rounded p-3 text-center mb-3">
-                                                <h5 class="text-primary">Activo al 100%</h5>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="border rounded p-3 text-center">
-                                                <h3>{{ min(\Carbon\Carbon::now()->day, 22) }}</h3>
-                                                <p class="mb-0">Días trabajados</p>
-                                                <small class="text-muted">en el mes actual</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
                 </div>
             </div>
         </div>

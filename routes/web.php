@@ -244,6 +244,7 @@ Route::middleware(['auth', 'role:admin_financiero'])->group(function () {
         Route::post('/{id}/baja', [AsalariadosController::class, 'darDeBaja'])->name('admin.asalariados.baja');
         Route::get('/bajas', [AsalariadosController::class, 'bajas'])->name('admin.asalariados.bajas');
         Route::post('/{id}/alta', [AsalariadosController::class, 'darDeAlta'])->name('admin.asalariados.alta');
+        Route::get('/get-parkings-by-sede', [AsalariadosController::class, 'getParkingsBySede'])->name('admin.asalariados.getParkingsBySede'); // New route for AJAX
     });
     
     // Nuevas rutas para las vistas financieras

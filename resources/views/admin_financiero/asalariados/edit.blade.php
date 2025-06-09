@@ -185,142 +185,156 @@
         // Vinculación de lugar con parkings
         const lugarSelect = document.getElementById('id_lugar');
         const parkingSelect = document.getElementById('parking_id');
-        
-        // Almacenar los parkings originales agrupados por lugar
-        const parkingsPorLugar = {};
-        
-        @if(isset($lugares) && count($lugares) > 0)
-            @foreach ($lugares as $lugar)
-                parkingsPorLugar[{{ $lugar->id_lugar }}] = [
-                    @if(isset($parkings))
-                        @foreach ($parkings->where('id_lugar', $lugar->id_lugar) as $parking)
-                            {id: {{ $parking->id }}, nombre: '{{ $parking->nombre }}'},
-                        @endforeach
-                    @endif
-                ];
-            @endforeach
-        @endif
-        
-        // Función para actualizar los parkings según el lugar seleccionado
-        function actualizarParkings() {
-            const lugarId = lugarSelect.value;
-            const parkingsDisponibles = parkingsPorLugar[lugarId] || [];
-            
-            // Limpiar opciones actuales
-            parkingSelect.innerHTML = '';
-            
-            // Añadir nuevas opciones
-            parkingsDisponibles.forEach(parking => {
-                const option = document.createElement('option');
-                option.value = parking.id;
-                option.textContent = parking.nombre;
-                parkingSelect.appendChild(option);
-            });
-            
-            // Si no hay parkings disponibles
-            if (parkingsDisponibles.length === 0) {
-                const option = document.createElement('option');
-                option.textContent = 'No hay parkings disponibles';
-                parkingSelect.appendChild(option);
+        const initialParkingId = '{{ $asalariado->parking_id ?? '' }}'; // Store initial parking for re-selection
+
+        function actualizarParkings(lugarId, selectedParkingId = null) {
+            if (!lugarId) {
+                parkingSelect.innerHTML = '<option value="">Seleccione primero un lugar</option>';
+                parkingSelect.disabled = true;
+                return;
             }
-        }
-        
-        // Actualizar parkings al cambiar el lugar
-        lugarSelect.addEventListener('change', actualizarParkings);
-        
-        // Inicializar parkings
-        actualizarParkings();
-            
-            // Obtener datos del formulario
-            const asalariadoId = form.querySelector('input[name="asalariado_id"]').value;
-            const formData = new FormData(form);
-            
-            // Realizar petición AJAX
-            fetch(`/asalariados/${asalariadoId}/update-ajax`, {
-                method: 'POST',
-                body: formData,
+
+            // Add a loading state to parking select
+            parkingSelect.innerHTML = '<option value="">Cargando parkings...</option>';
+            parkingSelect.disabled = true;
+
+            fetch(`{{ route('admin.asalariados.getParkingsBySede') }}?id_lugar=${lugarId}`, {
+                method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al cargar los parkings. Estado: ' + response.status);
+                }
+                return response.json();
+            })
             .then(data => {
-                // Eliminar estado de carga
-                saveBtn.classList.remove('is-loading');
-                btnText.textContent = 'Guardar cambios';
-                
-                // Limpiar mensajes previos
-                responseMessages.innerHTML = '';
-                
-                if (data.success) {
-                    // Mostrar mensaje de éxito
-                    const successAlert = document.createElement('div');
-                    successAlert.className = 'alert alert-success alert-dismissible fade show';
-                    successAlert.innerHTML = `
-                        ${data.message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    responseMessages.appendChild(successAlert);
-                    
-                    // Actualizar datos en la vista sin recargar
-                    // Podríamos actualizar elementos visuales si fuera necesario
+                parkingSelect.innerHTML = ''; // Clear loading/previous options
+                let defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = data.length > 0 ? 'Seleccione un parking' : 'No hay parkings para este lugar';
+                parkingSelect.appendChild(defaultOption);
+
+                if (data.length > 0) {
+                    data.forEach(parking => {
+                        let option = document.createElement('option');
+                        option.value = parking.id;
+                        option.textContent = parking.nombre;
+                        if (selectedParkingId && parking.id == selectedParkingId) {
+                            option.selected = true;
+                        }
+                        parkingSelect.appendChild(option);
+                    });
+                    parkingSelect.disabled = false;
                 } else {
-                    // Mostrar mensaje de error
-                    const errorAlert = document.createElement('div');
-                    errorAlert.className = 'alert alert-danger alert-dismissible fade show';
-                    errorAlert.innerHTML = `
-                        ${data.message || 'Ha ocurrido un error'}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    responseMessages.appendChild(errorAlert);
-                    
-                    // Si hay errores de validación, mostrarlos
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(field => {
-                            const input = form.querySelector(`[name="${field}"]`);
-                            if (input) {
-                                input.classList.add('is-invalid');
-                                
-                                // Buscar o crear el elemento de feedback
-                                let feedback = input.parentNode.querySelector('.invalid-feedback');
-                                if (!feedback) {
-                                    feedback = document.createElement('div');
-                                    feedback.className = 'invalid-feedback';
-                                    input.parentNode.appendChild(feedback);
-                                }
-                                
-                                feedback.innerHTML = `<strong>${data.errors[field][0]}</strong>`;
-                            }
-                        });
-                    }
+                    parkingSelect.disabled = true;
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                saveBtn.classList.remove('is-loading');
-                btnText.textContent = 'Guardar cambios';
-                
-                // Mostrar mensaje de error genérico
-                responseMessages.innerHTML = `
-                    <div class="alert alert-danger alert-dismissible fade show">
-                        Ha ocurrido un error al procesar la solicitud
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                `;
+                console.error('Error fetching parkings:', error);
+                parkingSelect.innerHTML = '<option value="">Error al cargar parkings</option>';
+                parkingSelect.disabled = true;
             });
+        }
+
+        lugarSelect.addEventListener('change', function() {
+            actualizarParkings(this.value);
         });
-        
+
+        // Initial load of parkings for the currently selected Sede/Lugar
+        if (lugarSelect.value) {
+            actualizarParkings(lugarSelect.value, initialParkingId);
+        }
+
+        // Manejo del envío del formulario de edición
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                saveBtn.disabled = true;
+                btnText.textContent = 'Guardando...';
+                responseMessages.innerHTML = ''; // Limpiar mensajes previos
+
+                // Obtener el ID del asalariado del atributo data-* del formulario o de un campo oculto
+                // Asumiendo que el ID está en la action del form: /admin-financiero/asalariados/{id}/update
+                const actionUrl = form.getAttribute('action');
+                // O si tienes un input específico para el ID:
+                // const asalariadoId = form.querySelector('input[name="asalariado_id"]').value; 
+
+                const formData = new FormData(form);
+                // formData.append('_method', 'POST'); // Laravel a veces necesita esto si la ruta es PUT/PATCH pero se usa POST
+
+                fetch(actionUrl, { // Usa la URL de la action del formulario
+                    method: 'POST', // La ruta está definida como POST para update
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json' // Asegurar que el servidor sepa que esperamos JSON
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw { status: response.status, data: errData };
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        responseMessages.innerHTML = `<div class="alert alert-success">${data.message || 'Actualizado con éxito.'}</div>`;
+                        // Opcional: redirigir o actualizar UI
+                        // window.location.href = "{{ route('admin.asalariados.index') }}";
+                    } else {
+                        let errorMsg = data.message || 'Ocurrió un error.';
+                        if (data.errors) {
+                            errorMsg += '<ul>';
+                            for (const field in data.errors) {
+                                errorMsg += `<li>${data.errors[field].join(', ')}</li>`;
+                            }
+                            errorMsg += '</ul>';
+                        }
+                        responseMessages.innerHTML = `<div class="alert alert-danger">${errorMsg}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en el fetch:', error);
+                    let errorText = 'Error al actualizar el asalariado.';
+                    if (error.status && error.data && error.data.message) {
+                        errorText = error.data.message;
+                        if (error.data.errors) {
+                             errorText += '<ul>';
+                            for (const field in error.data.errors) {
+                                errorText += `<li>${error.data.errors[field].join(', ')}</li>`;
+                            }
+                            errorText += '</ul>';
+                        }
+                    } else if (error.message) {
+                        errorText = error.message;
+                    }
+                    responseMessages.innerHTML = `<div class="alert alert-danger">${errorText}</div>`;
+                })
+                .finally(() => {
+                    saveBtn.disabled = false;
+                    btnText.textContent = 'Guardar Cambios';
+                });
+            });
+        }
         // Limpiar errores al cambiar inputs
-        form.querySelectorAll('input, select').forEach(element => {
-            element.addEventListener('input', function() {
-                this.classList.remove('is-invalid');
-                const feedback = this.parentNode.querySelector('.invalid-feedback');
-                if (feedback) {
-                    feedback.innerHTML = '';
-                }
+        if (form) { // Ensure form is available
+            form.querySelectorAll('input, select').forEach(element => {
+                element.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                    const feedback = this.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.innerHTML = '';
+                    }
+                });
             });
-        });
-    });
+        }
+    }); // Cierre del DOMContentLoaded
 </script>
 @endsection

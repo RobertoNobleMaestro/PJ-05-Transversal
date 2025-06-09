@@ -271,59 +271,72 @@
         // Inicializar
         toggleUsuarioForm();
         
-        // Vinculación de lugar con parkings
+        // Vinculación de lugar con parkings (AJAX)
         const lugarSelect = document.getElementById('id_lugar');
         const parkingSelect = document.getElementById('parking_id');
-        
-        // Almacenar los parkings originales agrupados por lugar
-        const parkingsPorLugar = {};
-        
-        @foreach ($lugares as $lugar)
-            parkingsPorLugar[{{ $lugar->id_lugar }}] = [
-                @foreach ($parkings->where('id_lugar', $lugar->id_lugar) as $parking)
-                    {id: {{ $parking->id }}, nombre: '{{ $parking->nombre }}'},
-                @endforeach
-            ];
-        @endforeach
-        
-        // Función para actualizar los parkings según el lugar seleccionado
-        function actualizarParkings() {
-            const lugarId = lugarSelect.value;
-            const parkingsDisponibles = parkingsPorLugar[lugarId] || [];
-            
-            // Limpiar opciones actuales
-            parkingSelect.innerHTML = '';
-            
-            if (lugarId === '') {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Primero seleccione un lugar';
-                parkingSelect.appendChild(option);
+
+        function actualizarParkings(lugarId) {
+            if (!lugarId) {
+                parkingSelect.innerHTML = '<option value="">Primero seleccione un lugar</option>';
+                parkingSelect.disabled = true;
                 return;
             }
-            
-            // Añadir nuevas opciones
-            parkingsDisponibles.forEach(parking => {
-                const option = document.createElement('option');
-                option.value = parking.id;
-                option.textContent = parking.nombre;
-                parkingSelect.appendChild(option);
+
+            parkingSelect.innerHTML = '<option value="">Cargando parkings...</option>';
+            parkingSelect.disabled = true;
+
+            fetch(`{{ route('admin.asalariados.getParkingsBySede') }}?id_lugar=${lugarId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al cargar los parkings. Estado: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                parkingSelect.innerHTML = ''; // Clear loading/previous options
+                let defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = data.length > 0 ? 'Seleccione un parking' : 'No hay parkings para este lugar';
+                parkingSelect.appendChild(defaultOption);
+
+                if (data.length > 0) {
+                    data.forEach(parking => {
+                        let option = document.createElement('option');
+                        option.value = parking.id;
+                        option.textContent = parking.nombre;
+                        // For create form, no need to check for old('parking_id') to re-select,
+                        // as validation errors would repopulate the whole form or parking_id would be empty.
+                        // If old('parking_id') is present and matches, it will be selected by Blade's old() helper in the option itself if we were to build them with Blade.
+                        // However, since we are building dynamically, we'd need to pass old('parking_id') here if we wanted to re-select it.
+                        // For simplicity in create, we just load based on Sede.
+                        parkingSelect.appendChild(option);
+                    });
+                    parkingSelect.disabled = false;
+                } else {
+                    parkingSelect.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching parkings:', error);
+                parkingSelect.innerHTML = '<option value="">Error al cargar parkings</option>';
+                parkingSelect.disabled = true;
             });
-            
-            // Si no hay parkings disponibles
-            if (parkingsDisponibles.length === 0) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'No hay parkings disponibles para este lugar';
-                parkingSelect.appendChild(option);
-            }
         }
-        
-        // Actualizar parkings al cambiar el lugar
-        lugarSelect.addEventListener('change', actualizarParkings);
-        
-        // Inicializar parkings
-        actualizarParkings();
+
+        lugarSelect.addEventListener('change', function() {
+            actualizarParkings(this.value);
+        });
+
+        // Initial load of parkings if a Sede/Lugar is already selected (e.g., from old input)
+        if (lugarSelect.value) {
+            actualizarParkings(lugarSelect.value);
+        }
     });
 </script>
 @endsection
