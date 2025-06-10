@@ -75,6 +75,9 @@ class AsalariadoSeeder extends Seeder
             // Fecha de contratación aleatoria entre 30 y 365 días atrás
             $hiredate = now()->subDays(rand(30, 365));
             
+            // Calcular días trabajados desde hiredate hasta hoy
+            $diasTrabajados = $hiredate->diffInDays(now());
+
             // Insertar el registro
             DB::table('asalariados')->insert([
                 'id_usuario' => $usuario->id_usuario,
@@ -82,7 +85,8 @@ class AsalariadoSeeder extends Seeder
                 'hiredate' => $hiredate,
                 'parking_id' => $parkingAsignado,
                 'estado' => 'alta',
-                'dias_trabajados' => min(rand(15, 22), now()->day),
+                'dias_trabajados' => $diasTrabajados,
+
                 'id_lugar' => $parkings->random()->id_lugar,
                 'created_at' => now(),
                 'updated_at' => now()
