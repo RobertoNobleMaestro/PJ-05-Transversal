@@ -583,8 +583,9 @@ class ChoferController extends Controller
             ], 404);
         }
 
-        $solicitudes = Solicitud::with(['cliente', 'chofer'])
-            ->where('id_chofer', $chofer->id)
+        // Usar la relación para obtener las solicitudes, haciendo el código más limpio y seguro
+        $solicitudes = $chofer->solicitudes()
+            ->with('cliente') // El chofer ya está implícito en la relación
             ->where('estado', 'pendiente')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -603,8 +604,9 @@ class ChoferController extends Controller
             return redirect()->back()->with('error', 'Chofer no encontrado');
         }
 
-        $solicitud = Solicitud::with(['cliente', 'chofer'])
-            ->where('id_chofer', $chofer->id)
+        // Usar la relación asegura que un chofer solo pueda ver sus propias solicitudes
+        $solicitud = $chofer->solicitudes()
+            ->with('cliente')
             ->findOrFail($id);
 
         return view('chofers.detalles-solicitud', [

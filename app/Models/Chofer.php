@@ -10,6 +10,7 @@ class Chofer extends Model
     use HasFactory;
 
     protected $table = 'choferes';
+    protected $primaryKey = 'id_chofer';
 
     protected $fillable = [
         'id_usuario',

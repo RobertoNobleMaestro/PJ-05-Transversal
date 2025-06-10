@@ -113,8 +113,20 @@ class AsalariadosController extends Controller
                                 ->take($perPage)
                                 ->get();
             
-            // Cargamos la información de roles manualmente para evitar problemas
+            // Cargamos la información de roles y calculamos los días trabajados
             foreach ($asalariados as $asalariado) {
+                // Calcular días trabajados
+                if ($asalariado->hiredate) {
+                    try {
+                        $asalariado->dias_trabajados = (int) Carbon::parse($asalariado->hiredate)->diffInDays(Carbon::now());
+                    } catch (\Exception $e) {
+                        \Log::warning('Error al parsear hiredate para asalariado ID ' . $asalariado->id . ': ' . $e->getMessage());
+                        $asalariado->dias_trabajados = 'N/A';
+                    }
+                } else {
+                    $asalariado->dias_trabajados = 'N/A';
+                }
+
                 if ($asalariado->usuario) {
                     // Si el usuario tiene un id_roles, cargamos el rol desde la base de datos
                     if ($asalariado->usuario->id_roles) {
